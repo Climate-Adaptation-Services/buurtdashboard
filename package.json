@@ -1,0 +1,36 @@
+{
+	"name": "sveltekitapp",
+	"version": "0.0.1",
+	"private": true,
+	"scripts": {
+		"dev": "vite dev",
+		"build": "vite build",
+		"preview": "vite preview",
+		"check": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json",
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json --watch"
+	},
+	"devDependencies": {
+		"@sveltejs/adapter-auto": "^2.0.0",
+		"@sveltejs/kit": "^1.20.4",
+		"leaflet": "^1.9.4",
+		"svelte": "^4.0.5",
+		"svelte-check": "^3.4.3",
+		"svelte-fuzzy": "^2.1.0",
+		"svelte-leafletjs": "^0.10.0",
+		"typescript": "^5.0.0",
+		"vite": "^4.4.2"
+	},
+	"type": "module",
+	"dependencies": {
+		"@turf/center": "^6.5.0",
+		"@turf/centroid": "^6.5.0",
+		"@turf/flip": "^6.5.0",
+		"d3": "^7.8.5",
+		"lodash": "^4.17.21",
+		"svelte-search": "^2.0.1",
+		"svelte-select": "^5.7.0",
+		"topojson-client": "^3.1.0",
+		"topojson-simplify": "^3.0.3",
+		"vite-plugin-iso-import": "^1.0.0"
+	}
+}

@@ -1,0 +1,39 @@
+<script>
+  import { hoveredRegion } from "$lib/stores";
+
+
+</script>
+
+{#if $hoveredRegion !== null}
+  <div class='tooltip' style='left:{$hoveredRegion.center[0]}px;top:{$hoveredRegion.center[1]}px'>
+    <div class='tooltip-title'>
+      {$hoveredRegion.region}
+    </div>
+    <div class='tooltip-description'>
+      <strong>{$hoveredRegion.name}</strong>
+    </div>
+  </div>
+{/if}
+
+
+
+<style>
+  .tooltip{
+    position:fixed;
+    display: flex;
+    background-color: white;
+    flex-direction: column;
+    transform: translate(-50%, -150%);
+    z-index: 10000;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    box-shadow: rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px;
+    border-radius: 10px;
+    padding-left:30px;
+    padding-right:30px;
+    padding-top:15px;
+    padding-bottom:15px
+  }
+
+</style>
