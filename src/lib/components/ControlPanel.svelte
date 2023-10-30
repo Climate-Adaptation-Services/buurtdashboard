@@ -16,7 +16,6 @@
   }
 
   function handleGemeenteChange(e){
-    console.log(e)
     gemeenteSelection.set(e.detail.value)
   }
 

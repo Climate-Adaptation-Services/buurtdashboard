@@ -30,7 +30,7 @@
 
   function mouseOver(feature){
     select('.' + toValidClassName(feature.properties[classNameVariable]))
-      .attr('fill', 'gold')
+      .attr('fill', 'steelblue')
 
     let elem = document.getElementsByClassName("map")[0];
     let rectmap = elem.getBoundingClientRect();
@@ -46,12 +46,13 @@
 
   function mouseOut(feature){
     select('.' + toValidClassName(feature.properties[classNameVariable]))
-      .attr('fill', 'steelblue')
+      .attr('fill', 'whitesmoke')
     
     hoveredRegion.set(null)
   }
 
   function click(feature){
+    mouseOut(feature)
     const newSelection = toValidClassName(feature.properties[classNameVariable])
     if($currentView === 'Nederland'){
       gemeenteSelection.set(newSelection)
@@ -72,8 +73,8 @@
     <path
       d={path(feature)}
       class={toValidClassName(feature.properties[classNameVariable])}
-      fill={'steelblue'}
-      stroke="#FFFFFF"
+      fill={'whitesmoke'}
+      stroke="grey"
       stroke-width={1}
       cursor='pointer'
       on:mouseover={() => mouseOver(feature)}

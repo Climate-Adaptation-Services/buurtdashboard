@@ -3,6 +3,7 @@
   import Indicator from '$lib/components/Indicator.svelte';
   import Map from '$lib/components/Map.svelte';
   import Tooltip from '$lib/components/Tooltip.svelte';
+    import { buurtData } from '$lib/stores';
 
   let screenSize = 1000
   let wMap;
@@ -38,9 +39,11 @@
   </div>
   
   <div class='indicators' bind:clientWidth={wIndicator} bind:clientHeight={hIndicator} style='margin-left:{screenSize > 800 ? 400 : 0}px'>
-    {#each [1,2,3,4,5,6,7] as ind}
-      <div class='indicator' w={wIndicator} h={hIndicator}><Indicator /></div>
-    {/each}
+    {#if $buurtData && wIndicator !== undefined && hIndicator !== undefined}
+      {#each [1,2,3,4,5,6,7] as ind}
+        <div class='indicator' w={wIndicator} h={hIndicator}><Indicator /></div>
+      {/each}
+    {/if}
   </div>
 
   <Tooltip />
@@ -90,7 +93,7 @@
   .indicator{
     flex-grow:1;
     margin: 10px;
-    height:480px;
+    height:700px;
     min-width:370px;
     max-width:450px;
     background-color: white;

@@ -1,31 +1,22 @@
 <script>
-  import * as _ from 'lodash';
   import { buurtData, gemeenteSelection, buurtSelection } from '$lib/stores';
 
   export let w;
   export let h;
 
   export let regio;
-  export let variable;
-
-  let meanValue = 0;
-  if(regio === 'Nederland'){
-    // alle buurten
-    meanValue = Math.round(_.meanBy($buurtData.features, buurt => buurt.properties[variable])*100)/100
-  }else if(regio === 'Gemeente'){
-    // buurten binnen gemeente
-    const gemeenteFilter = $buurtData.features.filter(buurt => buurt.properties['GM_CODE'] === $gemeenteSelection)
-    meanValue = Math.round(_.meanBy(gemeenteFilter, buurt => buurt.properties[variable])*100)/100
-  }else if(regio === 'Buurt'){
-    // deze filter is 1 buurt
-    const buurtFilter = $buurtData.features.filter(buurt => buurt.properties['BU_CODE'] === $buurtSelection)
-    meanValue = buurtFilter[0].properties[variable]
-  }
+  export let xScale;
+  export let meanValue;
 
 </script>
 
 <svg>
-  <text x={w/2} y={h/2} text-anchor='middle'>{meanValue}</text>
+  <g transform='translate(0,{h/2})'>
+    <text dx={w*0.25} dy='0.32em' text-anchor='end'>{regio}</text>
+    <rect x={xScale(0)} y='-0.5em' width={xScale(meanValue)} height={h*0.5}></rect>
+    <text dx={w*0.75} dy='0.32em'>{meanValue}</text>  
+  </g>
+
 </svg>
 
 
