@@ -3,13 +3,13 @@
   import Indicator from '$lib/components/Indicator.svelte';
   import Map from '$lib/components/Map.svelte';
   import Tooltip from '$lib/components/Tooltip.svelte';
-    import { buurtData } from '$lib/stores';
+  import { buurtData } from '$lib/stores';
 
   let screenSize = 1000
   let wMap;
   let hMap;
-  let wIndicator;
-  let hIndicator;
+  // let wIndicator;
+  // let hIndicator;
   
   const getData = (async () => {
 		const response = await Promise.all([
@@ -18,6 +18,8 @@
     ])
     return [await response[0].json(), await response[1].json()]//, await response[2].json(), await response[3].json(), await response[4].json(), await response[5].json(), await response[6].json(), await response[7].json(), await response[8].json()]
 	})()
+
+  const indicatorHeight = 650
 
 </script>
 
@@ -31,17 +33,17 @@
       {#await getData}
         <pre>Loading...</pre>
       {:then res}
-        <Map datajson={res} w={wMap} h={hMap}/>
+        <Map datajson={res} w={wMap} h={hMap} mainMapFlag={true}/>
       {:catch error}
         <p>An error occurred!</p>
       {/await}
     </div>
   </div>
   
-  <div class='indicators' bind:clientWidth={wIndicator} bind:clientHeight={hIndicator} style='margin-left:{screenSize > 800 ? 400 : 0}px'>
-    {#if $buurtData && wIndicator !== undefined && hIndicator !== undefined}
+  <div class='indicators' style='margin-left:{screenSize > 800 ? 400 : 0}px'>
+    {#if $buurtData !== null}
       {#each [1,2,3,4,5,6,7] as ind}
-        <div class='indicator' w={wIndicator} h={hIndicator}><Indicator /></div>
+        <div class='indicator' style='height:{indicatorHeight}px'><Indicator h={indicatorHeight}/></div>
       {/each}
     {/if}
   </div>
@@ -93,7 +95,6 @@
   .indicator{
     flex-grow:1;
     margin: 10px;
-    height:700px;
     min-width:370px;
     max-width:450px;
     background-color: white;

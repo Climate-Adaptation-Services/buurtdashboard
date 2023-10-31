@@ -1,38 +1,41 @@
 <script>
-  import * as topojsonsimplify from "topojson-simplify";
-  import * as topojson from "topojson-client";
   import center from '@turf/center'
-  import { currentData, gemeenteSelection, currentView, gemeenteData, buurtData, buurtSelection, hoveredRegion } from "$lib/stores";
+  import { currentData, gemeenteSelection, currentView, gemeenteData, buurtData, buurtSelection, hoveredRegion, hoveredValue } from "$lib/stores";
   import { geoMercator, geoPath, select } from 'd3';
+  import { loadMapData } from "$lib/noncomponents/loadMapData.js";
 
   export let datajson
   export let w
   export let h
+  export let mainMapFlag
+  export let color
+  export let variable
 
-  let gemeenteTopojson = topojsonsimplify.presimplify(datajson[0])
-  gemeenteTopojson = topojson.feature(gemeenteTopojson, gemeenteTopojson.objects.GemeenteDatasetTest20231011)
-  gemeenteData.set(gemeenteTopojson)
-
-  let buurtTopojson = topojsonsimplify.presimplify(datajson[1])
-  buurtTopojson = topojson.feature(buurtTopojson, buurtTopojson.objects.BuurtenTestDataset_20231016)
-  buurtData.set(buurtTopojson)
+  if(mainMapFlag){loadMapData(datajson)}
   
-  $: console.log($gemeenteData, $buurtData)
-  $: console.log($currentData)
+  // $: console.log($gemeenteData, $buurtData)
+  // $: console.log($currentData)
 
   $: classNameVariable = ($currentView === 'Nederland') ? 'GM_CODE' : 'BU_CODE'
   $: regionVariable = ($currentView === 'Nederland') ? 'GM_Naam' : 'BU_NAAM'
   
   $: projection = geoMercator()
-    .fitExtent([[20,10],[w-10,h-30]], $currentData) 
-
+    .fitExtent([[10,10],[w-10,h-20]], $currentData)
+  
   $: path = geoPath(projection);
 
   function mouseOver(feature){
-    select('.' + toValidClassName(feature.properties[classNameVariable]))
+    if(mainMapFlag){
+      select('.' + getClassName(feature))
       .attr('fill', 'steelblue')
+    }else{
+      select('.' + getClassName(feature))
+      .attr('stroke-width', 4)
 
-    let elem = document.getElementsByClassName("map")[0];
+      hoveredValue.set([variable, feature.properties[variable], color(feature.properties[variable])])
+    }
+
+    let elem = (mainMapFlag) ? document.getElementsByClassName("main-map")[0] : document.getElementsByClassName("indicator-map-" + variable)[0]
     let rectmap = elem.getBoundingClientRect();
     let featureCenter = projection(center(feature).geometry.coordinates)
     let tooltipCenter = [featureCenter[0] + rectmap.left, featureCenter[1] + rectmap.top]
@@ -45,15 +48,21 @@
   }
 
   function mouseOut(feature){
-    select('.' + toValidClassName(feature.properties[classNameVariable]))
+    if(mainMapFlag){
+      select('.' + getClassName(feature))
       .attr('fill', 'whitesmoke')
+    }else{
+      select('.' + getClassName(feature))
+      .attr('stroke-width', 0.5)
+      hoveredValue.set(null)
+    }
     
     hoveredRegion.set(null)
   }
 
   function click(feature){
     mouseOut(feature)
-    const newSelection = toValidClassName(feature.properties[classNameVariable])
+    const newSelection = feature.properties[classNameVariable].replaceAll(' ','').replaceAll('(','').replaceAll(')','')
     if($currentView === 'Nederland'){
       gemeenteSelection.set(newSelection)
     }else if($currentView === 'Gemeente'){
@@ -61,21 +70,29 @@
     }
   }
 
-  function toValidClassName(name){
-    return name.replaceAll(' ','').replaceAll('(','').replaceAll(')','')
+  function getClassName(feature){
+    let className = feature.properties[classNameVariable];
+    if(!mainMapFlag){
+      className += '_' + variable
+    }
+    return className.replaceAll(' ','').replaceAll('(','').replaceAll(')','')
   }
 
 </script>
 
-<svg class='svgmap'>
+<svg class={(mainMapFlag) ? 'main-map' : 'indicator-map-' + variable}>
   <rect width={w} height={h} fill='white' on:click={() => {gemeenteSelection.set(null);buurtSelection.set(null)}}></rect>
+  <!-- svelte-ignore a11y-mouse-events-have-key-events -->
+  <!-- svelte-ignore a11y-no-static-element-interactions -->
   {#each $currentData.features as feature}
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <!-- svelte-ignore a11y-mouse-events-have-key-events -->
     <path
       d={path(feature)}
-      class={toValidClassName(feature.properties[classNameVariable])}
-      fill={'whitesmoke'}
-      stroke="grey"
-      stroke-width={1}
+      class={getClassName(feature)}
+      fill={(mainMapFlag) ? 'whitesmoke' : color(feature.properties[variable])}
+      stroke={(mainMapFlag) ? "grey" : 'white'}
+      stroke-width={(mainMapFlag) ? "1" : '0.5'}
       cursor='pointer'
       on:mouseover={() => mouseOver(feature)}
       on:mouseout={() => mouseOut(feature)}

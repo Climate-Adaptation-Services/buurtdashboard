@@ -1,17 +1,25 @@
 <script>
   import { hoveredRegion } from "$lib/stores";
+  import { hoveredValue } from "$lib/stores";
 
 
 </script>
 
 {#if $hoveredRegion !== null}
   <div class='tooltip' style='left:{$hoveredRegion.center[0]}px;top:{$hoveredRegion.center[1]}px'>
-    <div class='tooltip-title'>
-      {$hoveredRegion.region}
-    </div>
+    {#if $hoveredValue === null}
+      <div class='tooltip-title'>
+        {$hoveredRegion.region}
+      </div>
+    {/if}
     <div class='tooltip-description'>
       <strong>{$hoveredRegion.name}</strong>
     </div>
+    {#if $hoveredValue !== null}
+      <div class='tooltip-value'>
+        <p>{$hoveredValue[0] + ': '}<span style='color:{$hoveredValue[2]}'>{$hoveredValue[1]}</span></p>
+      </div>
+    {/if}
   </div>
 {/if}
 
@@ -34,6 +42,10 @@
     padding-right:30px;
     padding-top:15px;
     padding-bottom:15px
+  }
+
+  p{
+    margin:5px;
   }
 
 </style>

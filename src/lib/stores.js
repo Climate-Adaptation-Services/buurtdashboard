@@ -5,6 +5,7 @@ export const buurtSelection = writable(null);
 export const gemeenteData = writable(null)
 export const buurtData = writable(null)
 export const hoveredRegion = writable(null)
+export const hoveredValue = writable(null)
 
 // derive the current level of view in text. Mostly for understanding whats happening
 export const currentView = derived(
