@@ -30,7 +30,11 @@
       .attr('fill', 'steelblue')
     }else{
       select('.' + getClassName(feature))
-      .attr('stroke-width', 4)
+        .attr('stroke-width', 4)
+      select('.' + getClassName(feature).replace('path', 'node'))
+        .attr('stroke', 'white')
+        .attr('r', 8)
+        .raise()
 
       hoveredValue.set([variable, feature.properties[variable], color(feature.properties[variable])])
     }
@@ -53,7 +57,11 @@
       .attr('fill', 'whitesmoke')
     }else{
       select('.' + getClassName(feature))
-      .attr('stroke-width', 0.5)
+        .attr('stroke-width', 0.5)
+      select('.' + getClassName(feature).replace('path', 'node'))
+        .attr('stroke', 'none')
+        .attr('r', 5)
+        
       hoveredValue.set(null)
     }
     
@@ -71,7 +79,7 @@
   }
 
   function getClassName(feature){
-    let className = feature.properties[classNameVariable];
+    let className = feature.properties[classNameVariable] + "_path"
     if(!mainMapFlag){
       className += '_' + variable
     }
@@ -81,7 +89,7 @@
 </script>
 
 <svg class={(mainMapFlag) ? 'main-map' : 'indicator-map-' + variable}>
-  <rect width={w} height={h} fill='white' on:click={() => {gemeenteSelection.set(null);buurtSelection.set(null)}}></rect>
+  <!-- <rect width={w} height={h} fill='white' on:click={() => {gemeenteSelection.set(null);buurtSelection.set(null)}}></rect> -->
   <!-- svelte-ignore a11y-mouse-events-have-key-events -->
   <!-- svelte-ignore a11y-no-static-element-interactions -->
   {#each $currentData.features as feature}

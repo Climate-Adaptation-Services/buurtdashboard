@@ -98,11 +98,11 @@
   }
 
   .indicator-graph{
-    background-color: blanchedalmond;    
+    background-color: rgb(255, 240, 192);    
   }
 
   .indicator-map{
-    background-color: mistyrose;    
+    background-color: lightgrey;    
   }
 
   h2{

@@ -1,10 +1,9 @@
 <script>
 
-  import { currentData } from "$lib/stores";
-  import { extent, scaleLinear } from "d3";
+  import { currentData, hoveredValue, currentView, gemeenteSelection, buurtSelection, hoveredRegion } from "$lib/stores";
+  import { extent, scaleLinear, select } from "d3";
   import XAxis from '$lib/components/XAxis.svelte';
   import { forceSimulation, forceY, forceX, forceCollide } from "d3-force";
-
 
   export let w;
   export let h;
@@ -18,11 +17,10 @@
     .range([0, w-margin.left-margin.right])
     .nice()
 
-
   let simulation = forceSimulation($currentData.features)
 
   let nodes = []; // Create an empty array to be populated when simulation ticks
-  
+
   simulation.on("tick", () => {
       nodes = simulation.nodes(); // Repopulate and update
   });
@@ -37,17 +35,73 @@
       .alphaDecay(0.0005) // [0, 1] The rate at which the simulation alpha approaches 0. you should decrease this if your bubbles are not completing their transitions between simulation states.
       .restart(); // Restart the simulation
   }
-  
 
+  $: classNameVariable = ($currentView === 'Nederland') ? 'GM_CODE' : 'BU_CODE'
+  $: regionVariable = ($currentView === 'Nederland') ? 'GM_Naam' : 'BU_NAAM'
+
+  function mouseOver(feature){
+    select('.' + getClassName(feature))
+      .attr('stroke', 'white')
+      .attr('r', 8)
+      .raise()
+    
+    select('.' + getClassName(feature).replace('node', 'path'))
+      .attr('stroke-width', 4)
+
+    hoveredValue.set([variable, feature.properties[variable], color(feature.properties[variable])])
+
+    let elem = document.getElementsByClassName('svgchart_' + variable)[0]
+    let rectmap = elem.getBoundingClientRect();
+    let tooltipCenter = [xScale(feature.properties[variable]) + rectmap.left + margin.left, rectmap.top + margin.top]
+    
+    hoveredRegion.set({
+      'region': ($gemeenteSelection === null) ? 'Gemeente' : 'Buurt',
+      'center': tooltipCenter,
+      'name': feature.properties[regionVariable]
+    })
+  }
+
+  function mouseOut(feature){
+    select('.' + getClassName(feature))
+      .attr('stroke', 'none')
+      .attr('r', 5)
+
+    select('.' + getClassName(feature).replace('node', 'path'))
+      .attr('stroke-width', 0.5)
+
+    hoveredValue.set(null)
+    
+    hoveredRegion.set(null)
+  }
+
+  function click(feature){
+    mouseOut(feature)
+    const newSelection = feature.properties[classNameVariable].replaceAll(' ','').replaceAll('(','').replaceAll(')','')
+    if($currentView === 'Nederland'){
+      gemeenteSelection.set(newSelection)
+    }else if($currentView === 'Gemeente'){
+      buurtSelection.set(newSelection)
+    }
+  }
+
+  function getClassName(feature){
+    let className = feature.properties[classNameVariable] + "_node_" + variable
+    return className.replaceAll(' ','').replaceAll('(','').replaceAll(')','')
+  }
 
 </script>
 
-<svg>
+<svg class={'svgchart_' + variable}>
   <XAxis {xScale} height={h} {margin}/>
 
   <g class="inner-chart" transform="translate({margin.left}, {margin.top})">
-    {#each nodes as node}
-      <circle cx={node.x} cy={node.y} r={5} fill={color(node.properties[variable])} />
+    {#each nodes as node, i}
+      <circle class={getClassName(node)}
+      cx={node.x} cy={node.y} r={5} fill={color(node.properties[variable])} stroke-width='4'
+      on:mouseover={() => mouseOver(node)}
+      on:mouseout={() => mouseOut(node)}
+      on:click={() => click(node)}
+      />
     {/each}
   </g>
 </svg>
