@@ -1,5 +1,5 @@
 <script>
-  import { buurtData, buurtSelection, gemeenteSelection } from "$lib/stores";
+  import { buurtData, buurtSelection, gemeenteSelection, buurtenInGemeente } from "$lib/stores";
   import BeeswarmPlot from "./BeeswarmPlot.svelte";
   import Stats from "./Stats.svelte";
   import { meanBy } from 'lodash';
@@ -47,9 +47,13 @@
     .domain([0, max([meanValuesDict['meanValueNederland'], meanValuesDict['meanValueGemeente'], meanValuesDict['meanValueBuurt']])])
     .range([0, wStats-190])
 
-  $: color = scaleLinear()
-    .domain(extent($buurtData.features.filter(buurt => buurt.properties['GM_CODE'] === $gemeenteSelection), d => d.properties[variable]))
+  let color = scaleLinear()
+  $: if($gemeenteSelection !== null){
+    color = scaleLinear()
+    .domain(extent($buurtenInGemeente.features, d => d.properties[variable]))
     .range(["#E15759", "green"]);
+  }
+
   
   const titleHeight = h*0.1
   const bodyHeight = h*0.9

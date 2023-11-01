@@ -9,7 +9,7 @@
 
   // call axis generators on the scale and pin the SVG pins.
   $: if (pinXAxis) {
-    select(pinXAxis).call(axisBottom(xScale).tickSize(-height+margin.top+margin.bottom));
+    select(pinXAxis).call(axisBottom(xScale).ticks(6).tickSize(-height+margin.top+margin.bottom));
     selectAll(".domain, .tick line")
       .style('stroke', 'lightgrey')
   }

@@ -1,6 +1,6 @@
 <script>
 
-  import { currentData, hoveredValue, currentView, gemeenteSelection, buurtSelection, hoveredRegion } from "$lib/stores";
+  import { currentData, hoveredValue, currentView, gemeenteSelection, buurtSelection, hoveredRegion, buurtenInGemeente } from "$lib/stores";
   import { extent, scaleLinear, select } from "d3";
   import XAxis from '$lib/components/XAxis.svelte';
   import { forceSimulation, forceY, forceX, forceCollide } from "d3-force";
@@ -13,7 +13,7 @@
   const margin = {bottom:30, top:30, left:30, right:30}
 
   $: xScale = scaleLinear()
-    .domain(extent($currentData.features, d => d.properties[variable]))
+    .domain(extent($buurtenInGemeente.features, d => d.properties[variable]))
     .range([0, w-margin.left-margin.right])
     .nice()
 
@@ -28,11 +28,11 @@
   // Run the simulation whenever any of the variables inside of it change
   $: {
     simulation = forceSimulation($currentData.features)
-      .force("x", forceX().x(d => xScale(d.properties[variable])).strength(0.2))
-      .force("y", forceY().y(100).strength(0.1))
+      .force("x", forceX().x(d => xScale(d.properties[variable])).strength(0.1))
+      .force("y", forceY().y(100).strength(0.05))
       .force("collide", forceCollide().radius(5.1))
       .alpha(0.3) // [0, 1] The rate at which the simulation finishes. You should increase this if you want a faster simulation, or decrease it if you want more "movement" in the simulation.
-      .alphaDecay(0.0005) // [0, 1] The rate at which the simulation alpha approaches 0. you should decrease this if your bubbles are not completing their transitions between simulation states.
+      .alphaDecay(0.0003) // [0, 1] The rate at which the simulation alpha approaches 0. you should decrease this if your bubbles are not completing their transitions between simulation states.
       .restart(); // Restart the simulation
   }
 

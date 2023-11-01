@@ -34,3 +34,15 @@ export const currentData = derived(
     }
   }
 )
+
+export const buurtenInGemeente = derived(
+  [gemeenteSelection, buurtData],
+  ([$gemeenteSelection, $buurtData]) => {
+    if($gemeenteSelection !== null){
+      const newFeatures = $buurtData.features.filter(buurt => buurt.properties['GM_CODE'] === $gemeenteSelection)
+      return {type: 'FeatureCollection', features: newFeatures}
+    }else{
+      return null
+    }
+  }
+)
