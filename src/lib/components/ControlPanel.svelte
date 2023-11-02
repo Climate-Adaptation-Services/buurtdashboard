@@ -1,5 +1,5 @@
 <script>
-  import { gemeenteData, buurtData, buurtSelection, gemeenteSelection } from '$lib/stores';
+  import { gemeenteData, buurtData, buurtSelection, gemeenteSelection, buurtSelectionData } from '$lib/stores';
   import Select from 'svelte-select'
   import { orderBy } from 'lodash'
 
@@ -30,8 +30,8 @@
   function handleBuurtClear(e){
     buurtSelection.set(null)
   }
-
-
+  $: console.log($buurtSelectionData)
+ 
 </script>
 
 
@@ -42,6 +42,9 @@
     <Select items={gemeenteList} placeholder="Zoek gemeente..." value={$gemeenteSelection} on:change={handleGemeenteChange} on:clear={handleGemeenteClear}/>
     {#if $gemeenteSelection !== null}
       <Select items={buurtList} placeholder="Zoek buurt..." value={$buurtSelection} on:change={handleBuurtChange} on:clear={handleBuurtClear}/>
+    {/if}
+    {#if $buurtSelection !== null}
+        <p>Wijktype: <strong>{$buurtSelectionData.properties['Wijktype']}</strong></p>
     {/if}
     </div>
 </div>

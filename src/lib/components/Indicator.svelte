@@ -102,15 +102,16 @@
   }
 
   .indicator-graph{
-    background-color: rgb(255, 240, 192);    
+    background-color: rgb(255, 249, 227);    
   }
 
   .indicator-map{
-    background-color: lightgrey;    
+    background-color: #f5fdff;    
   }
 
   h2{
     margin:15px;
+    color: #645F5E;
   }
 
 </style>

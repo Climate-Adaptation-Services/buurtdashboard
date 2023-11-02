@@ -23,9 +23,9 @@
 
 <svg>
   <g transform='translate(0,{h/2})'>
-    <text dx={110} dy='0.48em' text-anchor='end'>{name}</text>
-    <rect x={110+5} y='-0.5em' fill={color(meanValue)} width={xScale(meanValue)} height={h*0.5}></rect>
-    <text dx={110 + 10 + xScale(meanValue)} dy='0.48em'>{meanValue}</text>  
+    <text dx={110} dy='0.32em' text-anchor='end' font-size='13'>{name}</text>
+    <rect x={110+5} y='-0.4em' fill={color(meanValue)} width={xScale(meanValue)} height={h*0.45} rx="4"></rect>
+    <text dx={110 + 10 + xScale(meanValue)} dy='0.34em' font-size='11'>{meanValue}</text>  
   </g>
 </svg>
 
@@ -36,8 +36,13 @@
     height:100%;
   }
 
+  rect{
+    transition: all 2s;
+  }
+
   text{
-    font-size: 13px;
+    fill:#645F5E;
+    transition: all 2s;
   }
   
 </style>

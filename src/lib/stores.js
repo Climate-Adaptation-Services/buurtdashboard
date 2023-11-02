@@ -7,6 +7,17 @@ export const buurtData = writable(null)
 export const hoveredRegion = writable(null)
 export const hoveredValue = writable(null)
 
+export const buurtSelectionData = derived(
+  [buurtData, buurtSelection],
+  ([$buurtData, $buurtSelection]) => {
+    if($buurtData !== null){
+      return $buurtData.features.filter(buurt => buurt.properties['BU_CODE'] === $buurtSelection)[0]
+    }else{
+      return null
+    }
+  }
+);
+
 // derive the current level of view in text. Mostly for understanding whats happening
 export const currentView = derived(
   [gemeenteSelection, buurtSelection],

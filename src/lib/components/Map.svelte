@@ -1,6 +1,6 @@
 <script>
   import center from '@turf/center'
-  import { currentData, gemeenteSelection, currentView, gemeenteData, buurtData, buurtSelection, hoveredRegion, hoveredValue } from "$lib/stores";
+  import { currentData, gemeenteSelection, currentView, buurtSelection, hoveredRegion, hoveredValue, buurtSelectionData } from "$lib/stores";
   import { geoMercator, geoPath, select } from 'd3';
   import { loadMapData } from "$lib/noncomponents/loadMapData.js";
 
@@ -89,7 +89,9 @@
 </script>
 
 <svg class={(mainMapFlag) ? 'main-map' : 'indicator-map-' + variable}>
-  <!-- <rect width={w} height={h} fill='white' on:click={() => {gemeenteSelection.set(null);buurtSelection.set(null)}}></rect> -->
+  {#if mainMapFlag}
+    <rect width={w} height={h} fill='white' on:click={() => {gemeenteSelection.set(null);buurtSelection.set(null)}}></rect>
+  {/if}
   <!-- svelte-ignore a11y-mouse-events-have-key-events -->
   <!-- svelte-ignore a11y-no-static-element-interactions -->
   {#each $currentData.features as feature}
