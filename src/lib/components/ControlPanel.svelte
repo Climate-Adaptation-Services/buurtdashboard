@@ -1,18 +1,18 @@
 <script>
   import { gemeenteData, buurtData, buurtSelection, gemeenteSelection, buurtSelectionData } from '$lib/stores';
   import Select from 'svelte-select'
-  import { orderBy } from 'lodash'
+  import * as _ from 'lodash'
 
   let gemeenteList;
   let buurtList;
   $: if($gemeenteData !== null){
     gemeenteList = $gemeenteData.features.map(gemeente => {return {'value':gemeente.properties['GM_CODE'], 'label':gemeente.properties['GM_Naam']}})
-    gemeenteList = orderBy(gemeenteList, [gemeente => gemeente.label], ['asc']);
+    gemeenteList = _.orderBy(gemeenteList, [gemeente => gemeente.label], ['asc']);
   }
   $: if($gemeenteSelection !== null){
     const buurtenFeatures = $buurtData.features.filter(buurt => buurt.properties['GM_CODE'] === $gemeenteSelection)
     buurtList = buurtenFeatures.map(buurt => {return {'value':buurt.properties['BU_CODE'], 'label':buurt.properties['BU_NAAM']}})
-    buurtList = orderBy(buurtList, [buurt => buurt.label], ['asc']);
+    buurtList = _.orderBy(buurtList, [buurt => buurt.label], ['asc']);
   }
 
   function handleGemeenteChange(e){

@@ -2,7 +2,7 @@
   import { buurtData, buurtSelection, gemeenteSelection, buurtenInGemeente } from "$lib/stores";
   import BeeswarmPlot from "./BeeswarmPlot.svelte";
   import Stats from "./Stats.svelte";
-  import { meanBy } from 'lodash';
+  import * as _ from 'lodash';
   import { scaleLinear, max, extent } from 'd3';
   import Map from "./Map.svelte";
 
@@ -17,7 +17,7 @@
   console.log($buurtData)
 
   let meanValuesDict = {
-    'meanValueNederland':Math.round(meanBy($buurtData.features, buurt => buurt.properties[variable])*100)/100,
+    'meanValueNederland':Math.round(_.meanBy($buurtData.features, buurt => buurt.properties[variable])*100)/100,
     'meanValueGemeente':0,
     'meanValueBuurt':0
   };
@@ -29,7 +29,7 @@
   $: if($gemeenteSelection !== null){
     // buurten binnen gemeente
     const gemeenteFilter = $buurtData.features.filter(buurt => buurt.properties['GM_CODE'] === $gemeenteSelection)
-    meanValuesDict['meanValueGemeente'] = Math.round(meanBy(gemeenteFilter, buurt => buurt.properties[variable])*100)/100
+    meanValuesDict['meanValueGemeente'] = Math.round(_.meanBy(gemeenteFilter, buurt => buurt.properties[variable])*100)/100
     // meanValues.push(meanValueGemeente)
   }else{
     meanValuesDict['meanValueGemeente'] = 0
