@@ -57,3 +57,14 @@ export const buurtenInGemeente = derived(
     }
   }
 )
+
+export const wijkTypeData = derived(
+  [buurtSelection, buurtData, buurtSelectionData],
+  ([$buurtSelection, $buurtData, $buurtSelectionData]) => {
+    if($buurtSelection !== null){
+      return {type: 'FeatureCollection', features: $buurtData.features.filter(buurt => buurt.properties['Wijktype'] === $buurtSelectionData.properties['Wijktype'])}
+    }else{
+      return null
+    }
+  }
+)

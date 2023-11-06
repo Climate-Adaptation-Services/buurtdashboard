@@ -89,9 +89,9 @@
 </script>
 
 <svg class={(mainMapFlag) ? 'main-map' : 'indicator-map-' + variable}>
-  {#if mainMapFlag}
-    <rect width={w} height={h} fill='white' on:click={() => {gemeenteSelection.set(null);buurtSelection.set(null)}}></rect>
-  {/if}
+  <!-- {#if mainMapFlag}
+    <rect width={w} height={h} fill='#fefffa' on:click={() => {gemeenteSelection.set(null);buurtSelection.set(null)}}></rect>
+  {/if} -->
   <!-- svelte-ignore a11y-mouse-events-have-key-events -->
   <!-- svelte-ignore a11y-no-static-element-interactions -->
   {#each $currentData.features as feature}

@@ -63,7 +63,6 @@
     flex-direction: column;
     min-width:400px;
     height: 100vh;
-    background-color: white;
   }
 
   .indicators{
@@ -72,7 +71,6 @@
     flex-wrap:wrap;
     align-items: center;
     justify-content: center;
-    background-color: white;
     min-width:370px;
   }
 
@@ -86,7 +84,6 @@
   }
   .control-panel{
     flex:3;
-    background-color: white;
   }
   .map{
     flex:6;

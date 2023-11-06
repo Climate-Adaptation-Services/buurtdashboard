@@ -1,48 +1,61 @@
 <script>
-  import { gemeenteSelection, buurtSelection, gemeenteData, buurtData } from "$lib/stores";
 
-  export let w;
-  export let h;
+  import { buurtData, wijkTypeData, gemeenteSelection, buurtSelection } from "$lib/stores";
+  import Stat from "./Stat.svelte";
+  import * as _ from 'lodash';
+  import { scaleLinear, max } from 'd3';
 
-  export let regio;
-  export let xScale;
-  export let meanValue;
-  export let color;
+  export let bodyHeight
+  export let variable
+  export let color
 
-  $: name = (regio === 'Nederland')
-    ? regio
-    : (regio === 'Gemeente')
-      ? $gemeenteData.features.filter(gemeente => gemeente.properties['GM_CODE'] === $gemeenteSelection)[0].properties['GM_Naam']
-      : $buurtData.features.filter(buurt => buurt.properties['BU_CODE'] === $buurtSelection)[0].properties['BU_NAAM']
-  
-  $: if(name.length > 15){
-    name = name.slice(0, 13) + '...'
+  let wStats;
+
+  let meanValuesDict = {
+    'meanValueNederland':Math.round(_.meanBy($buurtData.features, buurt => buurt.properties[variable])*100)/100,
+    'meanValueGemeente':0,
+    'meanValueBuurt':0,
+    'meanValueWijktype':0
+  };
+
+  $: if($gemeenteSelection !== null){
+    // buurten binnen gemeente
+    const gemeenteFilter = $buurtData.features.filter(buurt => buurt.properties['GM_CODE'] === $gemeenteSelection)
+    meanValuesDict['meanValueGemeente'] = Math.round(_.meanBy(gemeenteFilter, buurt => buurt.properties[variable])*100)/100
+  }else{
+    meanValuesDict['meanValueGemeente'] = 0
   }
+  $: if($buurtSelection !== null){
+    // deze filter is 1 buurt
+    const buurtFilter = $buurtData.features.filter(buurt => buurt.properties['BU_CODE'] === $buurtSelection)
+    meanValuesDict['meanValueBuurt'] = Math.round(buurtFilter[0].properties[variable]*100)/100
+
+    meanValuesDict['meanValueWijktype'] = Math.round(_.meanBy($wijkTypeData.features, buurt => buurt.properties[variable])*100)/100
+
+  }else{
+    meanValuesDict['meanValueBuurt'] = 0
+    meanValuesDict['meanValueWijktype'] = 0
+  }
+
+  $: xScaleStats = scaleLinear()
+    .domain([0, max([meanValuesDict['meanValueNederland'], meanValuesDict['meanValueGemeente'], meanValuesDict['meanValueBuurt'], meanValuesDict['meanValueWijktype']])])
+    .range([0, wStats-190])
 
 </script>
 
-<svg>
-  <g transform='translate(0,{h/2})'>
-    <text dx={110} dy='0.32em' text-anchor='end' font-size='13'>{name}</text>
-    <rect x={110+5} y='-0.4em' fill={color(meanValue)} width={xScale(meanValue)} height={h*0.45} rx="4"></rect>
-    <text dx={110 + 10 + xScale(meanValue)} dy='0.34em' font-size='11'>{meanValue}</text>  
-  </g>
-</svg>
+<div class='indicator-stats' style='height: {bodyHeight*0.2*0.25}px' bind:clientWidth={wStats}><Stat {color} w={wStats} h={bodyHeight*0.2*0.25} regio='Nederland' meanValue={meanValuesDict['meanValueNederland']} {xScaleStats}/></div>
+{#if $gemeenteSelection !== null}
+  <div class='indicator-stats' style='height: {bodyHeight*0.2*0.25}px'><Stat {color} w={wStats} h={bodyHeight*0.2*0.25} regio='Gemeente' meanValue={meanValuesDict['meanValueGemeente']} {xScaleStats}/></div>
+{/if}
+{#if $buurtSelection !== null}
+  <div class='indicator-stats' style='height: {bodyHeight*0.2*0.25}px'><Stat {color} w={wStats} h={bodyHeight*0.2*0.25} regio='Wijktype' meanValue={meanValuesDict['meanValueWijktype']} {xScaleStats}/></div>
+  <div class='indicator-stats' style='height: {bodyHeight*0.2*0.25}px'><Stat {color} w={wStats} h={bodyHeight*0.2*0.25} regio='Buurt' meanValue={meanValuesDict['meanValueBuurt']} {xScaleStats}/></div>
+{/if}
+
+
 
 
 <style>
-  svg{
-    width:100%;
-    height:100%;
-  }
 
-  rect{
-    transition: all 2s;
-  }
-
-  text{
-    fill:#645F5E;
-    transition: all 2s;
-  }
   
 </style>
