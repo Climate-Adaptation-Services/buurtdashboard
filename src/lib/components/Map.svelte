@@ -30,7 +30,8 @@
       .attr('fill', 'steelblue')
     }else{
       select('.' + getClassName(feature))
-        .attr('stroke-width', 4)
+        .attr('stroke-width', 2)
+        .style('filter', 'drop-shadow(0 0 5px steelblue)')
       select('.' + getClassName(feature).replace('path', 'node'))
         .attr('stroke', 'white')
         .attr('r', 8)
@@ -58,6 +59,7 @@
     }else{
       select('.' + getClassName(feature))
         .attr('stroke-width', 0.5)
+        .style('filter', 'none')
       select('.' + getClassName(feature).replace('path', 'node'))
         .attr('stroke', 'none')
         .attr('r', 5)
