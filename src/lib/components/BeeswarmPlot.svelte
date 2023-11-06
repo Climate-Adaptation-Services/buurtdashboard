@@ -50,10 +50,10 @@
 
     hoveredValue.set([variable, feature.properties[variable], color(feature.properties[variable])])
 
-    let elem = document.getElementsByClassName('svgchart_' + variable)[0]
+    let elem = document.getElementsByClassName('beeswarm_' + variable)[0]
     let rectmap = elem.getBoundingClientRect();
-    let tooltipCenter = [xScale(feature.properties[variable]) + rectmap.left + margin.left, rectmap.top + margin.top]
-    
+    let tooltipCenter = [feature.x + rectmap.left + margin.left, rectmap.top + margin.top + feature.y]
+ 
     hoveredRegion.set({
       'region': ($gemeenteSelection === null) ? 'Gemeente' : 'Buurt',
       'center': tooltipCenter,
@@ -91,7 +91,7 @@
 
 </script>
 
-<svg class={'svgchart_' + variable}>
+<svg class={'beeswarm_' + variable}>
   <XAxis {xScale} height={h} {margin}/>
 
   <g class="inner-chart" transform="translate({margin.left}, {margin.top})">
