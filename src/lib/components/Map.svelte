@@ -35,6 +35,7 @@
       select('.' + getClassName(feature).replace('path', 'node'))
         .attr('stroke', 'white')
         .attr('r', 8)
+        .style('filter', 'drop-shadow(0 0 5px steelblue)')
         .raise()
 
       hoveredValue.set([variable, feature.properties[variable], color(feature.properties[variable])])
@@ -63,6 +64,7 @@
       select('.' + getClassName(feature).replace('path', 'node'))
         .attr('stroke', 'none')
         .attr('r', 5)
+        .style('filter', 'none')
         
       hoveredValue.set(null)
     }

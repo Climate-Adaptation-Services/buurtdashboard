@@ -43,6 +43,7 @@
     select('.' + getClassName(feature))
       .attr('stroke', 'white')
       .attr('r', 8)
+      .style('filter', 'drop-shadow(0 0 5px steelblue)')
       .raise()
     
     select('.' + getClassName(feature).replace('node', 'path'))
@@ -66,6 +67,7 @@
     select('.' + getClassName(feature))
       .attr('stroke', 'none')
       .attr('r', 5)
+      .style('filter', 'none')
 
     select('.' + getClassName(feature).replace('node', 'path'))
       .attr('stroke-width', 0.5)
@@ -99,7 +101,7 @@
   <g class="inner-chart" transform="translate({margin.left}, {margin.top})">
     {#each nodes as node, i}
       <circle class={getClassName(node)}
-      cx={node.x} cy={node.y} r={5} fill={color(node.properties[variable])} stroke-width='4'
+      cx={node.x} cy={node.y} r={5} fill={color(node.properties[variable])} stroke-width='3'
       on:mouseover={() => mouseOver(node)}
       on:mouseout={() => mouseOut(node)}
       on:click={() => click(node)}
