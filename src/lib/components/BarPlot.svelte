@@ -80,6 +80,8 @@
     .range([0, (h - margin.top - margin.bottom) * (barData.length/4) ])
     .paddingInner([padding])
   
+  $: console.log(stackedData)
+  
 
 </script>
 
@@ -90,6 +92,9 @@
       <g class='stack' fill={color(stacked.key)}>
         {#each stacked as st}
           <rect x={xScale(st[0])} y={yScale(st.data.group)} width={xScale(st[1]) - xScale(st[0])} height={yScale.bandwidth()}></rect>
+          {#if xScale(st[1]) - xScale(st[0]) > 40}
+            <text text-anchor='middle' x={xScale(st[0]) + (xScale(st[1]) - xScale(st[0]))/2} y={yScale(st.data.group)} fill='white' dy='1.2em' font-size='14px'>{Math.round(st.data[stacked.key]*10)/10}%</text>
+          {/if}
         {/each}
       </g>
     {/each}
