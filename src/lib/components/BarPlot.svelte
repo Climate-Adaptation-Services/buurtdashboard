@@ -1,5 +1,5 @@
 <script>
-  import { wijkTypeData, buurtData, gemeenteSelection, buurtenInGemeente, buurtSelection, currentData } from "$lib/stores";
+  import { wijkTypeData, buurtData, gemeenteSelection, buurtenInGemeente, buurtSelection, currentData, gemeenteData, buurtSelectionData } from "$lib/stores";
   import { scaleLinear, select, scaleBand, stack, scaleOrdinal, axisLeft } from "d3";
   import * as _ from 'lodash';
   import { onMount } from "svelte";
@@ -77,6 +77,15 @@
   
   $: console.log(stackedData)
   
+  function getName(group){
+    return (group === 'Nederland')
+    ? group
+    : (group === 'Gemeente')
+      ? 'Gemeente ' + $gemeenteData.features.filter(gemeente => gemeente.properties['GM_CODE'] === $gemeenteSelection)[0].properties['GM_Naam']
+      : (group === 'Buurt')
+        ? $buurtSelectionData.properties['BU_NAAM']
+        : 'Wijktype ' + $buurtSelectionData.properties['Wijktype']
+  }
 
 </script>
 
@@ -88,13 +97,13 @@
         {#each stacked as st}
           <rect x={xScale(st[0])} y={yScale(st.data.group)} width={xScale(st[1]) - xScale(st[0])} height={yScale.bandwidth()}></rect>
           {#if xScale(st[1]) - xScale(st[0]) > 40}
-            <text text-anchor='middle' x={xScale(st[0]) + (xScale(st[1]) - xScale(st[0]))/2} y={yScale(st.data.group)} fill='white' dy='1.2em' font-size='14px'>{Math.round(st.data[stacked.key]*10)/10}%</text>
+            <text text-anchor='middle' x={xScale(st[0]) + (xScale(st[1]) - xScale(st[0]))/2} y={yScale(st.data.group)} fill='white' dy='1.17em' font-size='14px'>{Math.round(st.data[stacked.key]*10)/10}%</text>
           {/if}
         {/each}
       </g>
     {/each}
     {#each groups as group,i}
-      <text x={w/2} text-anchor='middle' y={i*((yScale.bandwidth()/40)*100)-5}>{group}</text>
+      <text x={w/2} text-anchor='middle' y={i*((yScale.bandwidth()/40)*100)-5}>{getName(group)}</text>
     {/each}
   </g>
 </svg>

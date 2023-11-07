@@ -47,6 +47,10 @@
       <!-- {#each [1,2,3,4,5,6,7] as ind} -->
       <div class='indicator' style='height:{indicatorHeight}px'><Indicator h={indicatorHeight} variable='Paalrot2050Hoog' numerical={false}/></div>
       <div class='indicator' style='height:{indicatorHeight}px'><Indicator h={indicatorHeight} variable='a65oo' numerical={true}/></div>
+      <div class='indicator' style='height:{indicatorHeight}px'><Indicator h={indicatorHeight} variable='Paalrot2050Hoog' numerical={false}/></div>
+      <div class='indicator' style='height:{indicatorHeight}px'><Indicator h={indicatorHeight} variable='a65oo' numerical={true}/></div>
+      <div class='indicator' style='height:{indicatorHeight}px'><Indicator h={indicatorHeight} variable='Paalrot2050Hoog' numerical={false}/></div>
+      <div class='indicator' style='height:{indicatorHeight}px'><Indicator h={indicatorHeight} variable='a65oo' numerical={true}/></div>
       <!-- {/each} -->
     {/if}
   </div>
@@ -74,7 +78,7 @@
     flex-wrap:wrap;
     align-items: center;
     justify-content: center;
-    min-width:370px;
+    min-width:350px;
   }
 
   .title{
@@ -95,7 +99,7 @@
   .indicator{
     flex-grow:1;
     margin: 10px;
-    min-width:370px;
+    min-width:350px;
     max-width:450px;
     background-color: white;
   }
