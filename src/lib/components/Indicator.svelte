@@ -17,6 +17,14 @@
   let color = scaleLinear()
   let rangeExtent = [0,1]
 
+  function getClass(value){
+    if(value < 0.8){return 'Zeer laag'}
+    else if(value < 3){return 'Laag'}
+    else if(value < 6){return 'Midden'}
+    else if(value < 15){return 'Hoog'}
+    else{return 'Zeer hoog'}
+  }
+
   $: {
     if(numerical){
       if($gemeenteSelection !== null){
@@ -24,13 +32,11 @@
         color = scaleLinear()
           .domain([rangeExtent[0], (rangeExtent[0]+rangeExtent[1])/2, rangeExtent[1]])
           .range(["#E15759", "#e5e4b5", "green"]);
-        console.log('numcolor')
       }
     }else{
       color = scaleOrdinal()
         .domain(['Zeer laag', 'Laag', 'Midden', 'Hoog', 'Zeer hoog'])
         .range(['#004c6d', '#346888', '#5886a5', '#7aa6c2', '#9dc6e0'].reverse())
-      console.log('catcolor')
 
     }
   }
@@ -54,13 +60,13 @@
       </div>
     {:else}
       <div class='indicator-graph' style='height:{bodyHeight*0.6}px' bind:clientWidth={wGraph}>
-        <BarPlot w={wGraph} h={bodyHeight*0.4} {variable} {color} />
-        <BarPlotLegend w={wGraph} style='height:{bodyHeight*0.2}px' {color} />
+        <BarPlot w={wGraph} h={bodyHeight*0.4} {variable} {color} {getClass} />
+        <BarPlotLegend w={wGraph} style='height:{bodyHeight*0.2}px' {color}/>
       </div>
     {/if}
     <div class='indicator-map' style='height:{bodyHeight*0.4}px' bind:clientWidth={wMap}>
       {#if $gemeenteSelection !== null}
-        <Map w={wMap} h={bodyHeight*0.4} mainMapFlag={false} {color} {variable} />
+        <Map w={wMap} h={bodyHeight*0.4} mainMapFlag={false} {color} {variable} {getClass} {numerical}/>
       {/if}
     </div>
   </div>

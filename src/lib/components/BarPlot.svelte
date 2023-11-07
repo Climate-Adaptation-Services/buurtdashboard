@@ -8,18 +8,13 @@
   export let h;
   export let variable;
   export let color;
+  export let getClass
 
   const margin = {bottom:30, top:30, left:30, right:30}
 
   const klasseNamen = ['Zeer laag', 'Laag', 'Midden', 'Hoog', 'Zeer hoog']
   
-  function getClass(value){
-    if(value < 0.8){return 'Zeer laag'}
-    else if(value < 3){return 'Laag'}
-    else if(value < 6){return 'Midden'}
-    else if(value < 15){return 'Hoog'}
-    else{return 'Zeer hoog'}
-  }
+
 
   function getPercentages(data, regio){
     let totalAmount = 0

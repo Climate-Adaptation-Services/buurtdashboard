@@ -10,6 +10,8 @@
   export let mainMapFlag
   export let color
   export let variable
+  export let getClass
+  export let numerical
 
   if(mainMapFlag){loadMapData(datajson)}
   
@@ -104,7 +106,7 @@
     <path
       d={path(feature)}
       class={getClassName(feature)}
-      fill={(mainMapFlag) ? 'whitesmoke' : color(feature.properties[variable])}
+      fill={(mainMapFlag) ? 'whitesmoke' : (numerical) ? color(feature.properties[variable]) : color(getClass(feature.properties[variable]))}
       stroke={(mainMapFlag) ? "grey" : 'white'}
       stroke-width={(mainMapFlag) ? "1" : '0.5'}
       cursor='pointer'
