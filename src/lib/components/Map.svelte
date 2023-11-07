@@ -27,15 +27,15 @@
   function mouseOver(feature){
     if(mainMapFlag){
       select('.' + getClassName(feature))
-      .attr('fill', 'steelblue')
+      .attr('fill', '#36575A')
     }else{
       select('.' + getClassName(feature))
         .attr('stroke-width', 2)
-        .style('filter', 'drop-shadow(0 0 5px steelblue)')
+        .style('filter', 'drop-shadow(0 0 5px #36575A)')
       select('.' + getClassName(feature).replace('path', 'node'))
         .attr('stroke', 'white')
         .attr('r', 8)
-        .style('filter', 'drop-shadow(0 0 5px steelblue)')
+        .style('filter', 'drop-shadow(0 0 5px #36575A)')
         .raise()
 
       hoveredValue.set([variable, feature.properties[variable], color(feature.properties[variable])])

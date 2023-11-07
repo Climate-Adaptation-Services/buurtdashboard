@@ -2,25 +2,37 @@
   import { buurtData, buurtSelection, gemeenteSelection, buurtenInGemeente, wijkTypeData } from "$lib/stores";
   import BeeswarmPlot from "./BeeswarmPlot.svelte";
   import Stats from "./Stats.svelte";
-  import { scaleLinear, extent } from 'd3';
+  import { scaleLinear, extent, scaleOrdinal } from 'd3';
   import Map from "./Map.svelte";
   import BarPlot from "./BarPlot.svelte";
+  import BarPlotLegend from "./BarPlotLegend.svelte";
 
   export let h
+  export let variable
+  export let numerical
 
   let wGraph;
   let wMap;
 
-  let variable = 'a65oo'
-  let numerical = true
-
   let color = scaleLinear()
   let rangeExtent = [0,1]
-  $: if($gemeenteSelection !== null){
-    rangeExtent = extent($buurtenInGemeente.features, d => d.properties[variable])
-    color = scaleLinear()
-    .domain([rangeExtent[0], (rangeExtent[0]+rangeExtent[1])/2, rangeExtent[1]])
-    .range(["#E15759", "#e5e4b5", "green"]);
+
+  $: {
+    if(numerical){
+      if($gemeenteSelection !== null){
+        rangeExtent = extent($buurtenInGemeente.features, d => d.properties[variable])
+        color = scaleLinear()
+          .domain([rangeExtent[0], (rangeExtent[0]+rangeExtent[1])/2, rangeExtent[1]])
+          .range(["#E15759", "#e5e4b5", "green"]);
+        console.log('numcolor')
+      }
+    }else{
+      color = scaleOrdinal()
+        .domain(['Zeer laag', 'Laag', 'Midden', 'Hoog', 'Zeer hoog'])
+        .range(['#004c6d', '#346888', '#5886a5', '#7aa6c2', '#9dc6e0'].reverse())
+      console.log('catcolor')
+
+    }
   }
 
   const titleHeight = h*0.1
@@ -29,9 +41,9 @@
 </script>
 
 <div class='indicator-div'>
-  <div class='indicator-title' style='height: {titleHeight}px'><h2>Populatie 65+</h2></div>
+  <div class='indicator-title' style='height: {titleHeight}px'><h2>{variable}</h2></div>
   <div class='indicator-body' style='height: {bodyHeight}px'>
-    {#if numerical}
+    {#if numerical === true}
       <div class='indicator-overview' style='height: {bodyHeight*0.2}px'>
         <Stats {bodyHeight} {variable} {color}/>
       </div>
@@ -42,7 +54,8 @@
       </div>
     {:else}
       <div class='indicator-graph' style='height:{bodyHeight*0.6}px' bind:clientWidth={wGraph}>
-        <BarPlot w={wGraph} h={bodyHeight*0.6} {variable} {color} />
+        <BarPlot w={wGraph} h={bodyHeight*0.4} {variable} {color} />
+        <BarPlotLegend w={wGraph} style='height:{bodyHeight*0.2}px' {color} />
       </div>
     {/if}
     <div class='indicator-map' style='height:{bodyHeight*0.4}px' bind:clientWidth={wMap}>

@@ -10,6 +10,8 @@
   let hMap;
   // let wIndicator;
   // let hIndicator;
+
+  $: console.log($buurtData)
   
   const getData = (async () => {
 		const response = await Promise.all([
@@ -42,9 +44,10 @@
   
   <div class='indicators' style='margin-left:{screenSize > 800 ? 400 : 0}px'>
     {#if $buurtData !== null}
-      {#each [1,2,3,4,5,6,7] as ind}
-        <div class='indicator' style='height:{indicatorHeight}px'><Indicator h={indicatorHeight}/></div>
-      {/each}
+      <!-- {#each [1,2,3,4,5,6,7] as ind} -->
+      <div class='indicator' style='height:{indicatorHeight}px'><Indicator h={indicatorHeight} variable='Paalrot2050Hoog' numerical={false}/></div>
+      <div class='indicator' style='height:{indicatorHeight}px'><Indicator h={indicatorHeight} variable='a65oo' numerical={true}/></div>
+      <!-- {/each} -->
     {/if}
   </div>
 
