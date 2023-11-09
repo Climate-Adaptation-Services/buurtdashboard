@@ -1,5 +1,5 @@
 <script>
-  import { gemeenteSelection, gemeenteData, buurtSelectionData } from "$lib/stores";
+  import { gemeenteSelection, gemeenteData, buurtSelectionData, buurtNaam } from "$lib/stores";
 
   export let w;
   export let h;
@@ -14,10 +14,10 @@
     : (regio === 'Gemeente')
       ? $gemeenteData.features.filter(gemeente => gemeente.properties['GM_CODE'] === $gemeenteSelection)[0].properties['GM_Naam']
       : (regio === 'Buurt')
-        ? $buurtSelectionData.properties['BU_NAAM']
-        : $buurtSelectionData.properties['Wijktype']
+        ? $buurtSelectionData.properties[$buurtNaam]
+        : $buurtSelectionData.properties['def_wijkty']
   
-  $: if(name.length > 15){
+  $: if(name && name.length > 15){
     name = name.slice(0, 13) + '...'
   }
 

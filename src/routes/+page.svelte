@@ -16,9 +16,12 @@
   const getData = (async () => {
 		const response = await Promise.all([
       fetch('https://raw.githubusercontent.com/Climate-Adaptation-Services/buurtdashboard-data/main/GemeenteDatasetTest20231011%20(1).json'),
-      fetch('https://raw.githubusercontent.com/Climate-Adaptation-Services/buurtdashboard-data/main/BuurtenTestDataset_20231016.json')
+      fetch('https://raw.githubusercontent.com/Climate-Adaptation-Services/buurtdashboard-data/main/BuurtenTestDataset_20231016.json'),
+      fetch('https://raw.githubusercontent.com/Climate-Adaptation-Services/buurtdashboard-data/main/BuurtenDataset20231106_xaaaa.json'),
+      fetch('https://raw.githubusercontent.com/Climate-Adaptation-Services/buurtdashboard-data/main/BuurtenDataset20231106_xaaab.json')
+    
     ])
-    return [await response[0].json(), await response[1].json()]//, await response[2].json(), await response[3].json(), await response[4].json(), await response[5].json(), await response[6].json(), await response[7].json(), await response[8].json()]
+    return [await response[0].json(), await response[1].json(), await response[2].json(), await response[3].json()]//, await response[4].json(), await response[5].json(), await response[6].json(), await response[7].json(), await response[8].json()]
 	})()
 
   const indicatorHeight = 650
@@ -45,12 +48,12 @@
   <div class='indicators' style='margin-left:{screenSize > 800 ? 400 : 0}px'>
     {#if $buurtData !== null}
       <!-- {#each [1,2,3,4,5,6,7] as ind} -->
-      <div class='indicator' style='height:{indicatorHeight}px'><Indicator h={indicatorHeight} variable='Paalrot2050Hoog' numerical={false}/></div>
-      <div class='indicator' style='height:{indicatorHeight}px'><Indicator h={indicatorHeight} variable='a65oo' numerical={true}/></div>
-      <div class='indicator' style='height:{indicatorHeight}px'><Indicator h={indicatorHeight} variable='Paalrot2050Hoog' numerical={false}/></div>
-      <div class='indicator' style='height:{indicatorHeight}px'><Indicator h={indicatorHeight} variable='a65oo' numerical={true}/></div>
-      <div class='indicator' style='height:{indicatorHeight}px'><Indicator h={indicatorHeight} variable='Paalrot2050Hoog' numerical={false}/></div>
-      <div class='indicator' style='height:{indicatorHeight}px'><Indicator h={indicatorHeight} variable='a65oo' numerical={true}/></div>
+      <div class='indicator' style='height:{indicatorHeight}px'><Indicator h={indicatorHeight} variable='Paal2050H' numerical={false}/></div>
+      <div class='indicator' style='height:{indicatorHeight}px'><Indicator h={indicatorHeight} variable='MoeiteMetR' numerical={true}/></div>
+      <div class='indicator' style='height:{indicatorHeight}px'><Indicator h={indicatorHeight} variable='Paal2050H' numerical={false}/></div>
+      <div class='indicator' style='height:{indicatorHeight}px'><Indicator h={indicatorHeight} variable='MoeiteMetR' numerical={true}/></div>
+      <div class='indicator' style='height:{indicatorHeight}px'><Indicator h={indicatorHeight} variable='Paal2050H' numerical={false}/></div>
+      <div class='indicator' style='height:{indicatorHeight}px'><Indicator h={indicatorHeight} variable='MoeiteMetR' numerical={true}/></div>
       <!-- {/each} -->
     {/if}
   </div>

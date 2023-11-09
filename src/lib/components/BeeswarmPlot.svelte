@@ -36,8 +36,8 @@
       .restart(); // Restart the simulation
   }
 
-  $: classNameVariable = ($currentView === 'Nederland') ? 'GM_CODE' : 'BU_CODE'
-  $: regionVariable = ($currentView === 'Nederland') ? 'GM_Naam' : 'BU_NAAM'
+  $: classNameVariable = ($currentView === 'Nederland') ? 'GM_CODE' : 'bu_code'
+  $: regionVariable = ($currentView === 'Nederland') ? 'GM_Naam' : 'bu_naam'
 
   function mouseOver(feature){
     select('.' + getClassName(feature))
@@ -54,7 +54,7 @@
 
     let elem = document.getElementsByClassName('beeswarm_' + variable)[0]
     let rectmap = elem.getBoundingClientRect();
-    let tooltipCenter = [feature.x + rectmap.left + margin.left, rectmap.top + margin.top + feature.y]
+    let tooltipCenter = [feature.x + rectmap.left + margin.left, rectmap.top + margin.top + feature.y + 10]
  
     hoveredRegion.set({
       'region': ($gemeenteSelection === null) ? 'Gemeente' : 'Buurt',

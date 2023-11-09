@@ -17,7 +17,7 @@
     </div>
     {#if $hoveredValue !== null}
       <div class='tooltip-value'>
-        <p>{$hoveredValue[0] + ': '}<span style='color:{$hoveredValue[2]}'>{$hoveredValue[1]}</span></p>
+        <p>{$hoveredValue[0] + ': '}<span style='color:{$hoveredValue[2]}'>{Math.round($hoveredValue[1]*100)/100}</span></p>
       </div>
     {/if}
   </div>

@@ -83,8 +83,8 @@
     : (group === 'Gemeente')
       ? 'Gemeente ' + $gemeenteData.features.filter(gemeente => gemeente.properties['GM_CODE'] === $gemeenteSelection)[0].properties['GM_Naam']
       : (group === 'Buurt')
-        ? $buurtSelectionData.properties['BU_NAAM']
-        : 'Wijktype ' + $buurtSelectionData.properties['Wijktype']
+        ? $buurtSelectionData.properties['bu_naam']
+        : 'Wijktype ' + $buurtSelectionData.properties['def_wijkty']
   }
 
 </script>

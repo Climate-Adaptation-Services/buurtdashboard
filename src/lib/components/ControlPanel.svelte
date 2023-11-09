@@ -10,8 +10,8 @@
     gemeenteList = _.orderBy(gemeenteList, [gemeente => gemeente.label], ['asc']);
   }
   $: if($gemeenteSelection !== null){
-    const buurtenFeatures = $buurtData.features.filter(buurt => buurt.properties['GM_CODE'] === $gemeenteSelection)
-    buurtList = buurtenFeatures.map(buurt => {return {'value':buurt.properties['BU_CODE'], 'label':buurt.properties['BU_NAAM']}})
+    const buurtenFeatures = $buurtData.features.filter(buurt => buurt.properties['gm_code'] === $gemeenteSelection)
+    buurtList = buurtenFeatures.map(buurt => {return {'value':buurt.properties['bu_code'], 'label':buurt.properties['bu_naam']}})
     buurtList = _.orderBy(buurtList, [buurt => buurt.label], ['asc']);
   }
 
@@ -31,6 +31,10 @@
     buurtSelection.set(null)
   }
   $: console.log($buurtSelectionData)
+
+  $: wijktype = ($buurtSelection !== null && $buurtSelectionData.properties['def_wijkty']) 
+    ? $buurtSelectionData.properties['def_wijkty']
+    : 'Geen wijktype'
  
 </script>
 
@@ -44,7 +48,7 @@
       <Select items={buurtList} placeholder="Zoek buurt..." value={$buurtSelection} on:change={handleBuurtChange} on:clear={handleBuurtClear}/>
     {/if}
     {#if $buurtSelection !== null}
-        <p>Wijktype: <strong>{$buurtSelectionData.properties['Wijktype']}</strong></p>
+        <p>Wijktype: <strong>{wijktype}</strong></p>
     {/if}
     </div>
 </div>

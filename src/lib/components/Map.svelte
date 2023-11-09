@@ -18,8 +18,8 @@
   // $: console.log($gemeenteData, $buurtData)
   // $: console.log($currentData)
 
-  $: classNameVariable = ($currentView === 'Nederland') ? 'GM_CODE' : 'BU_CODE'
-  $: regionVariable = ($currentView === 'Nederland') ? 'GM_Naam' : 'BU_NAAM'
+  $: classNameVariable = ($currentView === 'Nederland') ? 'GM_CODE' : 'bu_code'
+  $: regionVariable = ($currentView === 'Nederland') ? 'GM_Naam' : 'bu_naam'
   
   $: projection = geoMercator()
     .fitExtent([[10,10],[w-10,h-20]], $currentData)
