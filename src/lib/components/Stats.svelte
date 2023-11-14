@@ -11,8 +11,17 @@
 
   let wStats;
 
+  const median = (array) => { 
+    array.sort((a, b) => b - a); 
+    const length = array.length; 
+    if (length % 2 == 0) { 
+      return (array[length / 2] + array[(length / 2) - 1]) / 2; 
+    } else { 
+      return array[Math.floor(length / 2)]; 
+    } }
+
   let meanValuesDict = {
-    'meanValueNederland':Math.round(_.meanBy($buurtData.features, buurt => buurt.properties[variable])*100)/100,
+    'meanValueNederland':median($buurtData.features.map(buurt => buurt.properties[variable])),
     'meanValueGemeente':0,
     'meanValueBuurt':0,
     'meanValueWijktype':0
@@ -21,7 +30,7 @@
   $: if($gemeenteSelection !== null){
     // buurten binnen gemeente
     const gemeenteFilter = $buurtData.features.filter(buurt => buurt.properties[$gemeenteCode] === $gemeenteSelection)
-    meanValuesDict['meanValueGemeente'] = Math.round(_.meanBy(gemeenteFilter, buurt => buurt.properties[variable])*100)/100
+    meanValuesDict['meanValueGemeente'] = median(gemeenteFilter.map(buurt => buurt.properties[variable]))
   }else{
     meanValuesDict['meanValueGemeente'] = 0
   }
@@ -30,7 +39,7 @@
     const buurtFilter = $buurtData.features.filter(buurt => buurt.properties[$buurtCode] === $buurtSelection)
     meanValuesDict['meanValueBuurt'] = Math.round(buurtFilter[0].properties[variable]*100)/100
 
-    meanValuesDict['meanValueWijktype'] = Math.round(_.meanBy($wijkTypeData.features, buurt => buurt.properties[variable])*100)/100
+    meanValuesDict['meanValueWijktype'] = median($wijkTypeData.features.map(buurt => buurt.properties[variable]))
 
   }else{
     meanValuesDict['meanValueBuurt'] = 0

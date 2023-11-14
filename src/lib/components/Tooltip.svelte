@@ -31,7 +31,7 @@
     display: flex;
     background-color: white;
     flex-direction: column;
-    transform: translate(-50%, -150%);
+    transform: translate(5%, 20%);
     z-index: 10000;
     align-items: center;
     justify-content: center;
