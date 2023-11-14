@@ -102,7 +102,7 @@
       'name': (st.data.group === 'Nederland') 
         ? 'Nederland'
         : (st.data.group === 'Gemeente') 
-          ? 'Gemeente ' + $gemeenteSelection
+          ? 'Gemeente ' + $gemeenteData.features.filter(gem => gem.properties['GM_CODE'] === $gemeenteSelection)[0].properties['GM_Naam']
           : (st.data.group === 'Wijktype') 
             ? 'Wijktype ' + $buurtSelectionData.properties['def_wijkty']
             : $buurtSelectionData.properties[$buurtNaam]
