@@ -1,6 +1,6 @@
 <script>
   import center from '@turf/center'
-  import { currentData, gemeenteSelection, currentView, buurtSelection, hoveredRegion, hoveredValue, buurtSelectionData } from "$lib/stores";
+  import { currentData, gemeenteSelection, currentView, buurtSelection, hoveredRegion, hoveredValue, buurtCode } from "$lib/stores";
   import { geoMercator, geoPath, select } from 'd3';
   import { loadMapData } from "$lib/noncomponents/loadMapData.js";
 
@@ -27,20 +27,24 @@
   $: path = geoPath(projection);
 
   function mouseOver(feature){
-    if(mainMapFlag){
-      select('.' + getClassName(feature))
-      .attr('fill', '#36575A')
-    }else{
-      select('.' + getClassName(feature))
-        .attr('stroke-width', 2)
-        .style('filter', 'drop-shadow(0 0 5px #36575A)')
-      select('.' + getClassName(feature).replace('path', 'node'))
-        .attr('stroke', 'white')
-        .attr('r', 8)
-        .style('filter', 'drop-shadow(0 0 5px #36575A)')
-        .raise()
+    if(feature.properties[classNameVariable] !== $buurtSelection){
 
-      hoveredValue.set([variable, feature.properties[variable], color(feature.properties[variable])])
+      if(mainMapFlag){
+        select('.' + getClassName(feature))
+        .attr('fill', '#36575A')
+      }else{
+        select('.' + getClassName(feature))
+          .attr('stroke-width', 3)
+          .style('filter', 'drop-shadow(0 0 15px black)')
+          .raise()
+        select('.' + getClassName(feature).replace('path', 'node'))
+          .attr('stroke', 'white')
+          .attr('r', 8)
+          .style('filter', 'drop-shadow(0 0 5px black)')
+          .raise()
+
+        hoveredValue.set([variable, feature.properties[variable], color(feature.properties[variable])])
+      }
     }
 
     let elem = (mainMapFlag) ? document.getElementsByClassName("main-map")[0] : document.getElementsByClassName("indicator-map-" + variable)[0]
@@ -53,22 +57,26 @@
       'center': tooltipCenter,
       'name': feature.properties[regionVariable]
     })
+    
   }
 
   function mouseOut(feature){
-    if(mainMapFlag){
-      select('.' + getClassName(feature))
-      .attr('fill', 'whitesmoke')
-    }else{
-      select('.' + getClassName(feature))
-        .attr('stroke-width', 0.5)
-        .style('filter', 'none')
-      select('.' + getClassName(feature).replace('path', 'node'))
-        .attr('stroke', 'none')
-        .attr('r', 5)
-        .style('filter', 'none')
-        
-      hoveredValue.set(null)
+    if(feature.properties[classNameVariable] !== $buurtSelection){
+
+      if(mainMapFlag){
+        select('.' + getClassName(feature))
+        .attr('fill', 'whitesmoke')
+      }else{
+        select('.' + getClassName(feature))
+          .attr('stroke-width', 0.5)
+          .style('filter', 'none')
+        select('.' + getClassName(feature).replace('path', 'node'))
+          .attr('stroke', 'none')
+          .attr('r', 5)
+          .style('filter', 'none')
+          
+        hoveredValue.set(null)
+      }
     }
     
     hoveredRegion.set(null)
@@ -79,7 +87,7 @@
     const newSelection = feature.properties[classNameVariable].replaceAll(' ','').replaceAll('(','').replaceAll(')','')
     if($currentView === 'Nederland'){
       gemeenteSelection.set(newSelection)
-    }else if($currentView === 'Gemeente'){
+    }else{
       buurtSelection.set(newSelection)
     }
   }
@@ -106,8 +114,19 @@
     <path
       d={path(feature)}
       class={getClassName(feature)}
-      fill={(mainMapFlag) ? 'whitesmoke' : (numerical) ? color(feature.properties[variable]) : color(getClass(feature.properties[variable]))}
-      stroke={(mainMapFlag) ? "grey" : 'white'}
+      fill={
+        (mainMapFlag) 
+        ? (feature.properties[$buurtCode] === $buurtSelection)
+          ? '#E1575A'
+          : 'whitesmoke' 
+        : (numerical) 
+          ? color(feature.properties[variable]) 
+          : color(getClass(feature.properties[variable]))
+      }
+      stroke={(mainMapFlag) 
+        ? "grey" 
+        : 'white'
+      }
       stroke-width={(mainMapFlag) ? "1" : '0.5'}
       cursor='pointer'
       on:mouseover={() => mouseOver(feature)}

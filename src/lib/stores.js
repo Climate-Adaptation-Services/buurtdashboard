@@ -44,8 +44,10 @@ export const currentData = derived(
       const newFeatures = $buurtData.features.filter(buurt => buurt.properties['gm_code'] === $gemeenteSelection)
       return {type: 'FeatureCollection', features: newFeatures}
     }else{
-      const newFeatures = $buurtData.features.filter(buurt => buurt.properties['bu_code'] === $buurtSelection)
+      const newFeatures = $buurtData.features.filter(buurt => buurt.properties['gm_code'] === $gemeenteSelection)
       return {type: 'FeatureCollection', features: newFeatures}
+      // const newFeatures = $buurtData.features.filter(buurt => buurt.properties['bu_code'] === $buurtSelection)
+      // return {type: 'FeatureCollection', features: newFeatures}
     }
   }
 )

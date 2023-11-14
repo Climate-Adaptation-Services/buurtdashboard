@@ -28,11 +28,11 @@
   // Run the simulation whenever any of the variables inside of it change
   $: {
     simulation = forceSimulation($buurtenInGemeente.features)
-      .force("x", forceX().x(d => xScale(d.properties[variable])-5.1).strength(0.05))
-      .force("y", forceY().y(100).strength(0.02))
-      .force("collide", forceCollide().radius(5.1))
-      .alpha(0.5) // [0, 1] The rate at which the simulation finishes. You should increase this if you want a faster simulation, or decrease it if you want more "movement" in the simulation.
-      .alphaDecay(0.00001) // [0, 1] The rate at which the simulation alpha approaches 0. you should decrease this if your bubbles are not completing their transitions between simulation states.
+      .force("x", forceX().x(d => xScale(d.properties[variable])-5.1).strength(0.2))
+      .force("y", forceY().y(100).strength(0.1))
+      .force("collide", forceCollide().radius(5.4))
+      .alpha(0.05) // [0, 1] The rate at which the simulation finishes. You should increase this if you want a faster simulation, or decrease it if you want more "movement" in the simulation.
+      .alphaDecay(0.0000001) // [0, 1] The rate at which the simulation alpha approaches 0. you should decrease this if your bubbles are not completing their transitions between simulation states.
       .restart(); // Restart the simulation
   }
 
