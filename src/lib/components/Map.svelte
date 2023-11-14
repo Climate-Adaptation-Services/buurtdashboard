@@ -43,7 +43,7 @@
           .style('filter', 'drop-shadow(0 0 5px black)')
           .raise()
 
-        hoveredValue.set([variable, feature.properties[variable], color(feature.properties[variable])])
+        hoveredValue.set([variable, Math.round(feature.properties[variable]*100)/100, color(feature.properties[variable])])
       }
     }
 

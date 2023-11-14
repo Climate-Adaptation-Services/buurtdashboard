@@ -14,7 +14,7 @@
   let wGraph;
   let wMap;
 
-  let color = scaleLinear()
+  let color = null
   let rangeExtent = [0,1]
 
   function getClass(value){
@@ -56,6 +56,8 @@
       <div class='indicator-graph' style='height:{bodyHeight*0.4}px' bind:clientWidth={wGraph}>
         {#if $gemeenteSelection !== null}
           <BeeswarmPlot w={wGraph} h={bodyHeight*0.4} {variable} {color} />
+        {:else}
+          <p style='text-align:center; padding-top:50px; font-size:18px'><em>Selecteer gemeente...</em></p>
         {/if}
       </div>
     {:else}

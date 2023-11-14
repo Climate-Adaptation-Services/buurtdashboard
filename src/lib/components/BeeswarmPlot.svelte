@@ -50,7 +50,7 @@
       .attr('stroke-width', 2)
       .style('filter', 'drop-shadow(0 0 5px #36575A)')
 
-    hoveredValue.set([variable, feature.properties[variable], color(feature.properties[variable])])
+    hoveredValue.set([variable, Math.round(feature.properties[variable]*100)/100, color(feature.properties[variable])])
 
     let elem = document.getElementsByClassName('beeswarm_' + variable)[0]
     let rectmap = elem.getBoundingClientRect();
