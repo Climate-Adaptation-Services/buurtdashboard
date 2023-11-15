@@ -14,9 +14,6 @@
   export let numerical
 
   if(mainMapFlag){loadMapData(datajson)}
-  
-  // $: console.log($gemeenteData, $buurtData)
-  // $: console.log($currentData)
 
   $: classNameVariable = ($currentView === 'Nederland') ? 'GM_CODE' : 'bu_code'
   $: regionVariable = ($currentView === 'Nederland') ? 'GM_Naam' : 'bu_naam'

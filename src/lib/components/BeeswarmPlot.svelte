@@ -1,7 +1,7 @@
 <script>
 
   import { currentData, hoveredValue, currentView, gemeenteSelection, buurtSelection, hoveredRegion, buurtenInGemeente, buurtCode } from "$lib/stores";
-  import { extent, scaleLinear, select } from "d3";
+  import { extent, scaleLinear, select, selectAll } from "d3";
   import XAxis from '$lib/components/XAxis.svelte';
   import { forceSimulation, forceY, forceX, forceCollide } from "d3-force";
 
@@ -86,10 +86,9 @@
 
   function click(feature){
     mouseOut(feature)
-    select('.' + getClassName(feature))
+    selectAll('.svgelements_' + feature.properties[$buurtCode])
       .raise()
-    select('.' + getClassName(feature).replace('node', 'path'))
-      .raise()
+
     const newSelection = feature.properties[classNameVariable].replaceAll(' ','').replaceAll('(','').replaceAll(')','')
     if($currentView === 'Nederland'){
       gemeenteSelection.set(newSelection)
