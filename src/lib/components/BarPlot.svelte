@@ -10,7 +10,7 @@
   export let color;
   export let getClass
 
-  const margin = {bottom:30, top:30, left:30, right:30}
+  const margin = {bottom:0, top:30, left:30, right:30}
 
   const klasseNamen = ['Zeer laag', 'Laag', 'Midden', 'Hoog', 'Zeer hoog']
 
@@ -48,8 +48,13 @@
 
   $: {
     if($buurtSelection !== null){
-      barData = [getPercentages($buurtData, 'Nederland'), getPercentages($buurtenInGemeente, 'Gemeente'), getPercentages($wijkTypeData, 'Wijktype'), getPercentages({type: 'FeatureCollection', features: [$buurtSelectionData]}, 'Buurt')]
-      groups = ['Nederland', 'Gemeente', 'Wijktype', 'Buurt']
+      if($buurtSelectionData.properties['def_wijkty']){
+        barData = [getPercentages($buurtData, 'Nederland'), getPercentages($buurtenInGemeente, 'Gemeente'), getPercentages($wijkTypeData, 'Wijktype'), getPercentages({type: 'FeatureCollection', features: [$buurtSelectionData]}, 'Buurt')]
+        groups = ['Nederland', 'Gemeente', 'Wijktype', 'Buurt']
+      }else{
+        barData = [getPercentages($buurtData, 'Nederland'), getPercentages($buurtenInGemeente, 'Gemeente'), getPercentages({type: 'FeatureCollection', features: [$buurtSelectionData]}, 'Buurt')]
+        groups = ['Nederland', 'Gemeente', 'Buurt']
+      }
     }else if($gemeenteSelection !== null){
       barData = [getPercentages($buurtData, 'Nederland'), getPercentages($buurtenInGemeente, 'Gemeente')]
       groups = ['Nederland', 'Gemeente']
@@ -71,7 +76,7 @@
   $: yScale = scaleBand()
     .domain(groups)
     .range([0, (h - margin.top - margin.bottom) * (barData.length/4) ])
-    .paddingInner([padding])
+    // .padding([padding])
     
   function getName(group){
     return (group === 'Nederland')
@@ -84,11 +89,10 @@
   }
 
   function mouseOver(st, stacked){
-    console.log(st, stacked)
+    // console.log(st, stacked)
 
-    select('.' + 'barplot_rect' + variable + stacked.key.replace(' ', '')  + st.data.group)
-      .attr('stroke', 'white')
-      // .raise()
+    // select('.' + 'barplot_rect' + variable + stacked.key.replace(' ', '')  + st.data.group)
+    //   .style('filter', "url(#highlightFilter)")
 
     hoveredValue.set([stacked.key, Math.round((st[1]-st[0])*100)/100 + '%', color(stacked.key)])
 
@@ -123,21 +127,22 @@
 
 
 <svg class={'barplot_' + variable} style='height:{h}'>
+
   <g class="inner-chart-bar" transform="translate(0, {margin.top})">
     {#each stackedData as stacked, i}
       <g class='stack' fill={color(stacked.key)}>
         {#each stacked as st}
           <rect on:mouseover={() => mouseOver(st, stacked)} on:mouseout={mouseOut(st, stacked)} class={'barplot_rect' + variable + stacked.key.replace(' ', '') + st.data.group}
-            x={xScale(st[0])} y={yScale(st.data.group)} width={xScale(st[1]) - xScale(st[0])} height={yScale.bandwidth()} stroke-width='4'>
+            x={xScale(st[0])} y={yScale(st.data.group)} width={xScale(st[1]) - xScale(st[0])} height={yScale.bandwidth()/2} stroke-width='4'>
           </rect>
           {#if xScale(st[1]) - xScale(st[0]) > 40}
-            <text text-anchor='middle' x={xScale(st[0]) + (xScale(st[1]) - xScale(st[0]))/2} y={yScale(st.data.group)} fill='white' dy='1.17em' font-size='14px' pointer-events='none'>{Math.round(st.data[stacked.key]*10)/10}%</text>
+            <text text-anchor='middle' x={xScale(st[0]) + (xScale(st[1]) - xScale(st[0]))/2} y={yScale(st.data.group)} fill='white' dy='1.25em' font-size='14px' pointer-events='none'>{Math.round(st.data[stacked.key]*10)/10}%</text>
           {/if}
         {/each}
       </g>
     {/each}
     {#each groups as group,i}
-      <text x={w/2} text-anchor='middle' y={i*((yScale.bandwidth()/40)*100)-5}>{getName(group)}</text>
+      <text x={w/2} text-anchor='middle' y={i*yScale.bandwidth()-5}>{getName(group)}</text>
     {/each}
   </g>
 </svg>
