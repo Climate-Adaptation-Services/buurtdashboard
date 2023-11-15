@@ -70,6 +70,7 @@
         select('.' + getClassName(feature))
           .attr('stroke-width', 0.5)
           .style('filter', 'none')
+          .lower()
         select('.' + getClassName(feature).replace('path', 'node'))
           .attr('stroke', 'none')
           .attr('r', 5)
@@ -83,7 +84,10 @@
   }
 
   function click(feature){
+
     mouseOut(feature)
+    select('.' + getClassName(feature))
+      .raise()
     const newSelection = feature.properties[classNameVariable].replaceAll(' ','').replaceAll('(','').replaceAll(')','')
     if($currentView === 'Nederland'){
       gemeenteSelection.set(newSelection)
@@ -102,7 +106,8 @@
 
 </script>
 
-<svg class={(mainMapFlag) ? 'main-map' : 'indicator-map-' + variable}>
+<svg class={(mainMapFlag) ? 'main-map' : 'indicator-map-' + variable} style='filter:drop-shadow(0 0 15px rgb(160, 160, 160))'
+>
   <!-- {#if mainMapFlag}
     <rect width={w} height={h} fill='#fefffa' on:click={() => {gemeenteSelection.set(null);buurtSelection.set(null)}}></rect>
   {/if} -->
@@ -125,9 +130,10 @@
       }
       stroke={(mainMapFlag) 
         ? "grey" 
-        : 'white'
+        : (feature.properties[$buurtCode] === $buurtSelection) ? '#E1575A' : 'white'
       }
-      stroke-width={(mainMapFlag) ? "1" : '0.5'}
+      style='filter:{(feature.properties[$buurtCode] === $buurtSelection) ? 'drop-shadow(0 0 15px black)' : 'none'}'
+      stroke-width={(mainMapFlag) ? "1" : (feature.properties[$buurtCode] === $buurtSelection) ? '3' : '0.5'}
       cursor='pointer'
       on:mouseover={() => mouseOver(feature)}
       on:mouseout={() => mouseOut(feature)}

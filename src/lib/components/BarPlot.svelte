@@ -75,7 +75,7 @@
   const padding = 0.6
   $: yScale = scaleBand()
     .domain(groups)
-    .range([0, (h - margin.top - margin.bottom) * (barData.length/4) ])
+    .range([0, (h - margin.top - margin.bottom) * (barData.length/3.5) ])
     // .padding([padding])
     
   function getName(group){
@@ -136,7 +136,7 @@
             x={xScale(st[0])} y={yScale(st.data.group)} width={xScale(st[1]) - xScale(st[0])} height={yScale.bandwidth()/2} stroke-width='4'>
           </rect>
           {#if xScale(st[1]) - xScale(st[0]) > 40}
-            <text text-anchor='middle' x={xScale(st[0]) + (xScale(st[1]) - xScale(st[0]))/2} y={yScale(st.data.group)} fill='white' dy='1.25em' font-size='14px' pointer-events='none'>{Math.round(st.data[stacked.key]*10)/10}%</text>
+            <text text-anchor='middle' x={xScale(st[0]) + (xScale(st[1]) - xScale(st[0]))/2} y={yScale(st.data.group)} fill='white' dy='1.40em' font-size='14px' pointer-events='none'>{Math.round(st.data[stacked.key]*10)/10}%</text>
           {/if}
         {/each}
       </g>
