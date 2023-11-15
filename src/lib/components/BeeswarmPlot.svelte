@@ -1,6 +1,6 @@
 <script>
 
-  import { currentData, hoveredValue, currentView, gemeenteSelection, buurtSelection, hoveredRegion, buurtenInGemeente } from "$lib/stores";
+  import { currentData, hoveredValue, currentView, gemeenteSelection, buurtSelection, hoveredRegion, buurtenInGemeente, buurtCode } from "$lib/stores";
   import { extent, scaleLinear, select } from "d3";
   import XAxis from '$lib/components/XAxis.svelte';
   import { forceSimulation, forceY, forceX, forceCollide } from "d3-force";
@@ -40,15 +40,18 @@
   $: regionVariable = ($currentView === 'Nederland') ? 'GM_Naam' : 'bu_naam'
 
   function mouseOver(feature){
-    select('.' + getClassName(feature))
-      .attr('stroke', 'white')
-      .attr('r', 8)
-      .style('filter', 'drop-shadow(0 0 5px #36575A)')
-      .raise()
-    
-    select('.' + getClassName(feature).replace('node', 'path'))
-      .attr('stroke-width', 2)
-      .style('filter', 'drop-shadow(0 0 5px #36575A)')
+    if(feature.properties[$buurtCode] !== $buurtSelection){
+
+      select('.' + getClassName(feature))
+        .attr('stroke', 'white')
+        .attr('r', 8)
+        .style('filter', 'drop-shadow(0 0 5px #36575A)')
+        .raise()
+      
+      select('.' + getClassName(feature).replace('node', 'path'))
+        .attr('stroke-width', 2)
+        .style('filter', 'drop-shadow(0 0 5px #36575A)')
+    }
 
     hoveredValue.set([variable, Math.round(feature.properties[variable]*100)/100, color(feature.properties[variable])])
 
@@ -64,14 +67,17 @@
   }
 
   function mouseOut(feature){
-    select('.' + getClassName(feature))
-      .attr('stroke', 'none')
-      .attr('r', 5)
-      .style('filter', 'none')
+    if(feature.properties[$buurtCode] !== $buurtSelection){
 
-    select('.' + getClassName(feature).replace('node', 'path'))
-      .attr('stroke-width', 0.5)
-      .style('filter', 'none')
+      select('.' + getClassName(feature))
+        .attr('stroke', 'none')
+        .attr('r', 5)
+        .style('filter', 'none')
+
+      select('.' + getClassName(feature).replace('node', 'path'))
+        .attr('stroke-width', 0.5)
+        .style('filter', 'none')
+    }
 
     hoveredValue.set(null)
     
@@ -80,6 +86,10 @@
 
   function click(feature){
     mouseOut(feature)
+    select('.' + getClassName(feature))
+      .raise()
+    select('.' + getClassName(feature).replace('node', 'path'))
+      .raise()
     const newSelection = feature.properties[classNameVariable].replaceAll(' ','').replaceAll('(','').replaceAll(')','')
     if($currentView === 'Nederland'){
       gemeenteSelection.set(newSelection)
@@ -100,8 +110,10 @@
 
   <g class="inner-chart" transform="translate({margin.left}, {margin.top})">
     {#each nodes as node, i}
-      <circle class={getClassName(node)}
-      cx={node.x} cy={node.y} r={5} fill={color(node.properties[variable])} stroke-width='3'
+      <circle class={getClassName(node) + ' ' + 'svgelements_' + node.properties[$buurtCode]}
+      stroke={(node.properties[$buurtCode] === $buurtSelection) ? '#E1575A' : 'none'}
+      style='filter: {(node.properties[$buurtCode] === $buurtSelection) ? 'drop-shadow(0 0 5px #36575A)' : 'none'}'
+      cx={node.x} cy={node.y} r={(node.properties[$buurtCode] === $buurtSelection) ? '8' : '5'} fill={color(node.properties[variable])} stroke-width='3'
       on:mouseover={() => mouseOver(node)}
       on:mouseout={() => mouseOut(node)}
       on:click={() => click(node)}

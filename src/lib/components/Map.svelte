@@ -1,7 +1,7 @@
 <script>
   import center from '@turf/center'
   import { currentData, gemeenteSelection, currentView, buurtSelection, hoveredRegion, hoveredValue, buurtCode } from "$lib/stores";
-  import { geoMercator, geoPath, select } from 'd3';
+  import { geoMercator, geoPath, select, selectAll } from 'd3';
   import { loadMapData } from "$lib/noncomponents/loadMapData.js";
 
   export let datajson
@@ -86,8 +86,9 @@
   function click(feature){
 
     mouseOut(feature)
-    select('.' + getClassName(feature))
+    selectAll('.svgelements_' + feature.properties[$buurtCode])
       .raise()
+
     const newSelection = feature.properties[classNameVariable].replaceAll(' ','').replaceAll('(','').replaceAll(')','')
     if($currentView === 'Nederland'){
       gemeenteSelection.set(newSelection)
@@ -118,7 +119,7 @@
     <!-- svelte-ignore a11y-mouse-events-have-key-events -->
     <path
       d={path(feature)}
-      class={getClassName(feature)}
+      class={getClassName(feature) + ' ' + 'svgelements_' + feature.properties[$buurtCode]}
       fill={
         (mainMapFlag) 
         ? (feature.properties[$buurtCode] === $buurtSelection)
