@@ -63,7 +63,7 @@
     {:else}
       <div class='indicator-graph' style='height:{bodyHeight*0.6}px' bind:clientWidth={wGraph}>
         <BarPlot w={wGraph} h={bodyHeight*0.4} {variable} {color} {getClass} />
-        <BarPlotLegend w={wGraph} style='height:{bodyHeight*0.2}px' {color}/>
+        <!-- <BarPlotLegend w={wGraph} style='height:{bodyHeight*0.2}px' {color}/> -->
       </div>
     {/if}
     <div class='indicator-map' style='height:{bodyHeight*0.4}px' bind:clientWidth={wMap}>

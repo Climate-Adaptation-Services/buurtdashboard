@@ -81,7 +81,7 @@
     flex-wrap:wrap;
     align-items: center;
     justify-content: center;
-    min-width:350px;
+    min-width:320;
   }
 
   .title{
@@ -102,7 +102,7 @@
   .indicator{
     flex-grow:1;
     margin: 10px;
-    min-width:350px;
+    min-width:320;
     max-width:450px;
     background-color: white;
   }

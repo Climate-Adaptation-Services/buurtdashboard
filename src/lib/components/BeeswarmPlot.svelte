@@ -73,6 +73,7 @@
         .attr('stroke', 'none')
         .attr('r', 5)
         .style('filter', 'none')
+        .lower()
 
       select('.' + getClassName(feature).replace('node', 'path'))
         .attr('stroke-width', 0.5)
