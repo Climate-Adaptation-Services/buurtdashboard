@@ -2,11 +2,11 @@ body{
   width:99vw;
   height:97vh;
   margin:0;
-  font-family: Sofia;
+  font-family: Roboto;
   background-color: #fefffa;
 }
 
 @font-face {
-  font-family: 'Sofia';
-  src: url(https://fonts.googleapis.com/css?family=Sofia);
+  font-family: 'Roboto';
+  src: url(https://fonts.googleapis.com/css?family=Roboto);
 }
