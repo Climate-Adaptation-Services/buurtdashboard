@@ -30,6 +30,8 @@
 
 <svelte:window bind:innerWidth={screenSize} />
 
+<svelte:head><link href="https://fonts.googleapis.com/css?family=Sofia" rel="stylesheet"></svelte:head>
+
 <div class='container' style='justify-content:{screenSize < 800 ? 'center' : 'left'}'>
   <div class='sidebar' style='position:{screenSize > 800 ? "fixed" : "relative"}'>
     <div class='title'><h1>Buurtdashboard</h1></div>

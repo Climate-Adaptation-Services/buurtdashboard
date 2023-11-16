@@ -155,5 +155,9 @@
     width:100%;
   }
 
+  rect{
+    transition: all 2s;
+  }
+
 
 </style>

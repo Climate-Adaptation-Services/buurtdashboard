@@ -44,7 +44,6 @@
 
   text{
     fill:#645F5E;
-    transition: all 2s;
   }
   
 </style>
