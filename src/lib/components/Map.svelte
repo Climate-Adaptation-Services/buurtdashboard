@@ -72,6 +72,7 @@
           .attr('stroke', 'none')
           .attr('r', 5)
           .style('filter', 'none')
+          .lower()
           
         hoveredValue.set(null)
       }
