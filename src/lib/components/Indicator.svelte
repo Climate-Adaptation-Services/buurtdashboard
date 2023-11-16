@@ -31,7 +31,7 @@
         rangeExtent = extent($buurtenInGemeente.features, d => d.properties[variable])
         color = scaleLinear()
           .domain([rangeExtent[0], (rangeExtent[0]+rangeExtent[1])/2, rangeExtent[1]])
-          .range(["#E15759", "#e5e4b5", "green"]);
+          .range(["green", "#e5e4b5", "purple"]);
       }
     }else{
       color = scaleOrdinal()
