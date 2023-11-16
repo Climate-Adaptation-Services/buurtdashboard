@@ -126,7 +126,7 @@
 </script>
 
 
-<svg class={'barplot_' + variable} style='height:{h}'>
+<svg class={'barplot_' + variable} style='height:66.66%'>
 
   <g class="inner-chart-bar" transform="translate(0, {margin.top})">
     {#each stackedData as stacked, i}
@@ -153,7 +153,6 @@
 
   svg{
     width:100%;
-    height: 100%;
   }
 
 
