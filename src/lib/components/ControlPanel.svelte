@@ -6,12 +6,12 @@
   let gemeenteList;
   let buurtList;
   $: if($gemeenteData !== null){
-    gemeenteList = $gemeenteData.features.map(gemeente => {return {'value':gemeente.properties['GM_CODE'], 'label':gemeente.properties['GM_NAAM']}})
+    gemeenteList = $gemeenteData.features.map(gemeente => {return {'value':gemeente.properties['GM_CODE'], 'label':capSelectLabelLen(gemeente.properties['GM_NAAM'])}})
     gemeenteList = _.orderBy(gemeenteList, [gemeente => gemeente.label], ['asc']);
   }
   $: if($gemeenteSelection !== null){
     const buurtenFeatures = $buurtData.features.filter(buurt => buurt.properties['gm_code'] === $gemeenteSelection)
-    buurtList = buurtenFeatures.map(buurt => {return {'value':buurt.properties['bu_code'], 'label':buurt.properties['bu_naam']}})
+    buurtList = buurtenFeatures.map(buurt => {return {'value':buurt.properties['bu_code'], 'label':capSelectLabelLen(buurt.properties['bu_naam'])}})
     buurtList = _.orderBy(buurtList, [buurt => buurt.label], ['asc']);
   }
 
@@ -34,6 +34,14 @@
   $: wijktype = ($buurtSelection !== null && $buurtSelectionData.properties['def_wijkty']) 
     ? $buurtSelectionData.properties['def_wijkty']
     : 'Geen wijktype'
+
+  function capSelectLabelLen(label){
+    if(label.length > 31){
+      return label.slice(0,29) + '...'
+    }else{
+      return label
+    }
+  }
  
 </script>
 

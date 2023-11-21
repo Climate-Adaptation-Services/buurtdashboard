@@ -142,7 +142,7 @@
       </g>
     {/each}
     {#each groups as group,i}
-      <text x={w/2} text-anchor='middle' y={i*yScale.bandwidth()-5}>{getName(group)}</text>
+      <text style='fill:#645F5E' x={w/2} text-anchor='middle' y={i*yScale.bandwidth()-5}>{getName(group)}</text>
     {/each}
   </g>
 </svg>
@@ -158,6 +158,5 @@
   rect{
     transition: all 2s;
   }
-
 
 </style>

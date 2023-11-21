@@ -48,7 +48,7 @@
 <div class='indicator-div'>
   <div class='indicator-title' style='height: {titleHeight}px'>
     <h2>{indicator.titel}</h2>
-    <h5 style='margin-top:0px; font-weight:normal;'>{indicator.subtitel}</h5>
+    <h5 style='margin-top:0px; font-weight:normal; color:#7e7975'>{indicator.subtitel}</h5>
   </div>
   <div class='indicator-body' style='height: {bodyHeight}px'>
     {#if indicator.numerical === true}
@@ -103,6 +103,7 @@
   h2{
     margin:15px;
     color: #645F5E;
+    /* color: #7e7975; */
   }
 
 </style>
