@@ -9,14 +9,13 @@
   export let h
   export let mainMapFlag
   export let color
-  export let variable
+  export let indicator
   export let getClass
-  export let numerical
 
   if(mainMapFlag){loadMapData(datajson)}
 
   $: classNameVariable = ($currentView === 'Nederland') ? 'GM_CODE' : 'bu_code'
-  $: regionVariable = ($currentView === 'Nederland') ? 'GM_Naam' : 'bu_naam'
+  $: regionVariable = ($currentView === 'Nederland') ? 'GM_NAAM' : 'bu_naam'
   
   $: projection = geoMercator()
     .fitExtent([[10,10],[w-10,h-20]], $currentData)
@@ -40,11 +39,11 @@
           .style('filter', 'drop-shadow(0 0 5px black)')
           .raise()
 
-        hoveredValue.set([variable, Math.round(feature.properties[variable]*100)/100, color(feature.properties[variable])])
+        hoveredValue.set([indicator.attribute, Math.round(feature.properties[indicator.attribute]*100)/100, color(feature.properties[indicator.attribute])])
       }
     }
 
-    let elem = (mainMapFlag) ? document.getElementsByClassName("main-map")[0] : document.getElementsByClassName("indicator-map-" + variable)[0]
+    let elem = (mainMapFlag) ? document.getElementsByClassName("main-map")[0] : document.getElementsByClassName("indicator-map-" + indicator.attribute)[0]
     let rectmap = elem.getBoundingClientRect();
     let featureCenter = projection(center(feature).geometry.coordinates)
     let tooltipCenter = [featureCenter[0] + rectmap.left, featureCenter[1] + rectmap.top]
@@ -98,14 +97,14 @@
   function getClassName(feature){
     let className = feature.properties[classNameVariable] + "_path"
     if(!mainMapFlag){
-      className += '_' + variable
+      className += '_' + indicator.attribute
     }
     return className.replaceAll(' ','').replaceAll('(','').replaceAll(')','')
   }
 
 </script>
 
-<svg class={(mainMapFlag) ? 'main-map' : 'indicator-map-' + variable} style='filter:drop-shadow(0 0 15px rgb(160, 160, 160))'
+<svg class={(mainMapFlag) ? 'main-map' : 'indicator-map-' + indicator.attribute} style='filter:drop-shadow(0 0 15px rgb(160, 160, 160))'
 >
   <!-- {#if mainMapFlag}
     <rect width={w} height={h} fill='#fefffa' on:click={() => {gemeenteSelection.set(null);buurtSelection.set(null)}}></rect>
@@ -123,9 +122,9 @@
         ? (feature.properties[$buurtCode] === $buurtSelection)
           ? '#E1575A'
           : 'whitesmoke' 
-        : (numerical) 
-          ? color(feature.properties[variable]) 
-          : color(getClass(feature.properties[variable]))
+        : (indicator.numerical) 
+          ? color(feature.properties[indicator.attribute]) 
+          : color(getClass(feature.properties[indicator.attribute]))
       }
       stroke={(mainMapFlag) 
         ? "grey" 

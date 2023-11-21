@@ -5,8 +5,9 @@ import * as topojson from "topojson-client";
 export function loadMapData(datajson){
   console.log(datajson)
   let gemeenteTopojson = topojsonsimplify.presimplify(datajson[0])
-  gemeenteTopojson = topojson.feature(gemeenteTopojson, gemeenteTopojson.objects.GemeenteDatasetTest20231011)
+  gemeenteTopojson = topojson.feature(gemeenteTopojson, gemeenteTopojson.objects.GemeenteGrenzen2023)
   gemeenteData.set(gemeenteTopojson)
+  console.log(gemeenteTopojson)
 
   // let buurtTopojson = topojsonsimplify.presimplify(datajson[1])
   // buurtTopojson = topojson.feature(buurtTopojson, buurtTopojson.objects.BuurtenTestDataset_20231016)

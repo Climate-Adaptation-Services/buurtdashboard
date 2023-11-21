@@ -12,7 +12,7 @@
   $: name = (regio === 'Nederland')
     ? regio
     : (regio === 'Gemeente')
-      ? $gemeenteData.features.filter(gemeente => gemeente.properties['GM_CODE'] === $gemeenteSelection)[0].properties['GM_Naam']
+      ? $gemeenteData.features.filter(gemeente => gemeente.properties['GM_CODE'] === $gemeenteSelection)[0].properties['GM_NAAM']
       : (regio === 'Buurt')
         ? $buurtSelectionData.properties[$buurtNaam]
         : $buurtSelectionData.properties['def_wijkty']

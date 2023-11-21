@@ -6,7 +6,7 @@
   let gemeenteList;
   let buurtList;
   $: if($gemeenteData !== null){
-    gemeenteList = $gemeenteData.features.map(gemeente => {return {'value':gemeente.properties['GM_CODE'], 'label':gemeente.properties['GM_Naam']}})
+    gemeenteList = $gemeenteData.features.map(gemeente => {return {'value':gemeente.properties['GM_CODE'], 'label':gemeente.properties['GM_NAAM']}})
     gemeenteList = _.orderBy(gemeenteList, [gemeente => gemeente.label], ['asc']);
   }
   $: if($gemeenteSelection !== null){
@@ -30,7 +30,6 @@
   function handleBuurtClear(e){
     buurtSelection.set(null)
   }
-  $: console.log($buurtSelectionData)
 
   $: wijktype = ($buurtSelection !== null && $buurtSelectionData.properties['def_wijkty']) 
     ? $buurtSelectionData.properties['def_wijkty']

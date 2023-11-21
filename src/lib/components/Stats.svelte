@@ -6,7 +6,7 @@
   import { scaleLinear, max } from 'd3';
 
   export let bodyHeight
-  export let variable
+  export let indicator
   export let color
 
   let wStats;
@@ -21,7 +21,7 @@
     } }
 
   let meanValuesDict = {
-    'meanValueNederland':median($buurtData.features.map(buurt => buurt.properties[variable])),
+    'meanValueNederland':median($buurtData.features.map(buurt => buurt.properties[indicator.attribute])),
     'meanValueGemeente':0,
     'meanValueBuurt':0,
     'meanValueWijktype':0
@@ -30,16 +30,16 @@
   $: if($gemeenteSelection !== null){
     // buurten binnen gemeente
     const gemeenteFilter = $buurtData.features.filter(buurt => buurt.properties[$gemeenteCode] === $gemeenteSelection)
-    meanValuesDict['meanValueGemeente'] = median(gemeenteFilter.map(buurt => buurt.properties[variable]))
+    meanValuesDict['meanValueGemeente'] = median(gemeenteFilter.map(buurt => buurt.properties[indicator.attribute]))
   }else{
     meanValuesDict['meanValueGemeente'] = 0
   }
   $: if($buurtSelection !== null){
     // deze filter is 1 buurt
     const buurtFilter = $buurtData.features.filter(buurt => buurt.properties[$buurtCode] === $buurtSelection)
-    meanValuesDict['meanValueBuurt'] = Math.round(buurtFilter[0].properties[variable]*100)/100
+    meanValuesDict['meanValueBuurt'] = Math.round(buurtFilter[0].properties[indicator.attribute]*100)/100
 
-    meanValuesDict['meanValueWijktype'] = median($wijkTypeData.features.map(buurt => buurt.properties[variable]))
+    meanValuesDict['meanValueWijktype'] = median($wijkTypeData.features.map(buurt => buurt.properties[indicator.attribute]))
 
   }else{
     meanValuesDict['meanValueBuurt'] = 0

@@ -6,7 +6,7 @@
 
   export let w;
   export let h;
-  export let variable;
+  export let indicator;
   export let color;
   export let getClass
 
@@ -24,7 +24,7 @@
       {klasse: 'Zeer hoog', waarde:0},
     ]
     data.features.forEach(buurtOfGemeente => {
-      klassen.filter(kl => kl.klasse === getClass(buurtOfGemeente.properties[variable]))[0].waarde += 1
+      klassen.filter(kl => kl.klasse === getClass(buurtOfGemeente.properties[indicator.attribute]))[0].waarde += 1
       totalAmount += 1
     });
 
@@ -82,7 +82,7 @@
     return (group === 'Nederland')
     ? group
     : (group === 'Gemeente')
-      ? 'Gemeente ' + $gemeenteData.features.filter(gemeente => gemeente.properties['GM_CODE'] === $gemeenteSelection)[0].properties['GM_Naam']
+      ? 'Gemeente ' + $gemeenteData.features.filter(gemeente => gemeente.properties['GM_CODE'] === $gemeenteSelection)[0].properties['GM_NAAM']
       : (group === 'Buurt')
         ? $buurtSelectionData.properties['bu_naam']
         : 'Wijktype ' + $buurtSelectionData.properties['def_wijkty']
@@ -91,12 +91,12 @@
   function mouseOver(st, stacked){
     // console.log(st, stacked)
 
-    // select('.' + 'barplot_rect' + variable + stacked.key.replace(' ', '')  + st.data.group)
+    // select('.' + 'barplot_rect' + indicator.attribute + stacked.key.replace(' ', '')  + st.data.group)
     //   .style('filter', "url(#highlightFilter)")
 
     hoveredValue.set([stacked.key, Math.round((st[1]-st[0])*100)/100 + '%', color(stacked.key)])
 
-    let elem = document.getElementsByClassName('barplot_rect' + variable + stacked.key.replace(' ', '')  + st.data.group)[0]
+    let elem = document.getElementsByClassName('barplot_rect' + indicator.attribute + stacked.key.replace(' ', '')  + st.data.group)[0]
     let rectmap = elem.getBoundingClientRect();
     let tooltipCenter = [rectmap.left, rectmap.top]
     
@@ -106,7 +106,7 @@
       'name': (st.data.group === 'Nederland') 
         ? 'Nederland'
         : (st.data.group === 'Gemeente') 
-          ? 'Gemeente ' + $gemeenteData.features.filter(gem => gem.properties['GM_CODE'] === $gemeenteSelection)[0].properties['GM_Naam']
+          ? 'Gemeente ' + $gemeenteData.features.filter(gem => gem.properties['GM_CODE'] === $gemeenteSelection)[0].properties['GM_NAAM']
           : (st.data.group === 'Wijktype') 
             ? 'Wijktype ' + $buurtSelectionData.properties['def_wijkty']
             : $buurtSelectionData.properties[$buurtNaam]
@@ -115,7 +115,7 @@
   }
 
   function mouseOut(st, stacked){
-    select('.' + 'barplot_rect' + variable + stacked.key.replace(' ', '')  + st.data.group)
+    select('.' + 'barplot_rect' + indicator.attribute + stacked.key.replace(' ', '')  + st.data.group)
       .attr('stroke', 'none')
           
     hoveredValue.set(null)
@@ -126,13 +126,13 @@
 </script>
 
 
-<svg class={'barplot_' + variable} style='height:66.66%'>
+<svg class={'barplot_' + indicator.attribute} style='height:66.66%'>
 
   <g class="inner-chart-bar" transform="translate(0, {margin.top})">
     {#each stackedData as stacked, i}
       <g class='stack' fill={color(stacked.key)}>
         {#each stacked as st}
-          <rect on:mouseover={() => mouseOver(st, stacked)} on:mouseout={mouseOut(st, stacked)} class={'barplot_rect' + variable + stacked.key.replace(' ', '') + st.data.group}
+          <rect on:mouseover={() => mouseOver(st, stacked)} on:mouseout={mouseOut(st, stacked)} class={'barplot_rect' + indicator.attribute + stacked.key.replace(' ', '') + st.data.group}
             x={xScale(st[0])} y={yScale(st.data.group)} width={xScale(st[1]) - xScale(st[0])} height={yScale.bandwidth()/2} stroke-width='4'>
           </rect>
           {#if xScale(st[1]) - xScale(st[0]) > 40}

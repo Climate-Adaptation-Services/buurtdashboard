@@ -7,17 +7,18 @@
 
   export let w;
   export let h;
-  export let variable;
+  export let indicator;
   export let color;
+  export let nodesData
 
   const margin = {bottom:30, top:30, left:30, right:30}
 
   $: xScale = scaleLinear()
-    .domain(extent($buurtenInGemeente.features, d => d.properties[variable]))
+    .domain(extent($buurtenInGemeente.features, d => d.properties[indicator.attribute]))
     .range([0, w-margin.left-margin.right])
     .nice()
 
-  let simulation = forceSimulation($currentData.features)
+  let simulation = forceSimulation(nodesData)
 
   let nodes = []; // Create an empty array to be populated when simulation ticks
 
@@ -27,8 +28,8 @@
 
   // Run the simulation whenever any of the variables inside of it change
   $: {
-    simulation = forceSimulation($buurtenInGemeente.features)
-      .force("x", forceX().x(d => xScale(d.properties[variable])-5.1).strength(0.1))
+    simulation = forceSimulation(nodesData)
+      .force("x", forceX().x(d => xScale(d.properties[indicator.attribute])-5.1).strength(0.1))
       .force("y", forceY().y(100).strength(0.05))
       .force("collide", forceCollide().radius(5.7))
       .alpha(0.5) // [0, 1] The rate at which the simulation finishes. You should increase this if you want a faster simulation, or decrease it if you want more "movement" in the simulation.
@@ -37,7 +38,7 @@
   }
 
   $: classNameVariable = ($currentView === 'Nederland') ? 'GM_CODE' : 'bu_code'
-  $: regionVariable = ($currentView === 'Nederland') ? 'GM_Naam' : 'bu_naam'
+  $: regionVariable = ($currentView === 'Nederland') ? 'GM_NAAM' : 'bu_naam'
 
   function mouseOver(feature){
     if(feature.properties[$buurtCode] !== $buurtSelection){
@@ -53,9 +54,9 @@
         .style('filter', 'drop-shadow(0 0 5px #36575A)')
     }
 
-    hoveredValue.set([variable, Math.round(feature.properties[variable]*100)/100, color(feature.properties[variable])])
+    hoveredValue.set([indicator.attribute, Math.round(feature.properties[indicator.attribute]*100)/100, color(feature.properties[indicator.attribute])])
 
-    let elem = document.getElementsByClassName('beeswarm_' + variable)[0]
+    let elem = document.getElementsByClassName('beeswarm_' + indicator.attribute)[0]
     let rectmap = elem.getBoundingClientRect();
     let tooltipCenter = [feature.x + rectmap.left + margin.left, rectmap.top + margin.top + feature.y + 10]
  
@@ -81,7 +82,6 @@
     }
 
     hoveredValue.set(null)
-    
     hoveredRegion.set(null)
   }
 
@@ -99,21 +99,21 @@
   }
 
   function getClassName(feature){
-    let className = feature.properties[classNameVariable] + "_node_" + variable
+    let className = feature.properties[classNameVariable] + "_node_" + indicator.attribute
     return className.replaceAll(' ','').replaceAll('(','').replaceAll(')','')
   }
 
 </script>
 
-<svg class={'beeswarm_' + variable}>
+<svg class={'beeswarm_' + indicator.attribute}>
   <XAxis {xScale} height={h} {margin}/>
 
   <g class="inner-chart" transform="translate({margin.left}, {margin.top})">
-    {#each nodes as node, i}
+    {#each nodes as node (node.id + indicator.attribute)}
       <circle class={getClassName(node) + ' ' + 'svgelements_' + node.properties[$buurtCode]}
       stroke={(node.properties[$buurtCode] === $buurtSelection) ? '#E1575A' : 'none'}
       style='filter: {(node.properties[$buurtCode] === $buurtSelection) ? 'drop-shadow(0 0 5px #36575A)' : 'none'}'
-      cx={node.x} cy={node.y} r={(node.properties[$buurtCode] === $buurtSelection) ? '8' : '5'} fill={color(node.properties[variable])} stroke-width='3'
+      cx={node.x} cy={node.y} r={(node.properties[$buurtCode] === $buurtSelection) ? '8' : '5'} fill={color(node.properties[indicator.attribute])} stroke-width='3'
       on:mouseover={() => mouseOver(node)}
       on:mouseout={() => mouseOut(node)}
       on:click={() => click(node)}

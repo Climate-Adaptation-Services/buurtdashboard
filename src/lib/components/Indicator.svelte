@@ -8,8 +8,7 @@
   import BarPlotLegend from "./BarPlotLegend.svelte";
 
   export let h
-  export let variable
-  export let numerical
+  export let indicator
 
   let wGraph;
   let wMap;
@@ -26,9 +25,9 @@
   }
 
   $: {
-    if(numerical){
+    if(indicator.numerical){
       if($gemeenteSelection !== null){
-        rangeExtent = extent($buurtenInGemeente.features, d => d.properties[variable])
+        rangeExtent = extent($buurtenInGemeente.features, d => d.properties[indicator.attribute])
         color = scaleLinear()
           .domain([rangeExtent[0], (rangeExtent[0]+rangeExtent[1])/2, rangeExtent[1]])
           .range(["green", "#e5e4b5", "purple"]);
@@ -41,34 +40,37 @@
     }
   }
 
-  const titleHeight = h*0.1
-  const bodyHeight = h*0.9
+  const titleHeight = h*0.15
+  const bodyHeight = h*0.85
 
 </script>
 
 <div class='indicator-div'>
-  <div class='indicator-title' style='height: {titleHeight}px'><h2>{variable}</h2></div>
+  <div class='indicator-title' style='height: {titleHeight}px'>
+    <h2>{indicator.titel}</h2>
+    <h5 style='margin-top:0px; font-weight:normal;'>{indicator.subtitel}</h5>
+  </div>
   <div class='indicator-body' style='height: {bodyHeight}px'>
-    {#if numerical === true}
+    {#if indicator.numerical === true}
       <div class='indicator-overview' style='height: {bodyHeight*0.2}px'>
-        <Stats {bodyHeight} {variable} {color}/>
+        <Stats {bodyHeight} {indicator} {color}/>
       </div>
       <div class='indicator-graph' style='height:{bodyHeight*0.4}px' bind:clientWidth={wGraph}>
         {#if $gemeenteSelection !== null}
-          <BeeswarmPlot w={wGraph} h={bodyHeight*0.4} {variable} {color} />
+          <BeeswarmPlot w={wGraph} h={bodyHeight*0.4} {indicator} {color} nodesData={structuredClone($buurtenInGemeente.features)}/>
         {:else}
           <p style='text-align:center; padding-top:50px; font-size:18px'><em>Selecteer gemeente...</em></p>
         {/if}
       </div>
     {:else}
       <div class='indicator-graph' style='height:{bodyHeight*0.6}px' bind:clientWidth={wGraph}>
-        <BarPlot w={wGraph} h={bodyHeight*0.4} {variable} {color} {getClass} />
+        <BarPlot w={wGraph} h={bodyHeight*0.4} {indicator} {color} {getClass} />
         <BarPlotLegend w={wGraph} style='height:{bodyHeight*0.2}px' {color}/>
       </div>
     {/if}
     <div class='indicator-map' style='height:{bodyHeight*0.4}px' bind:clientWidth={wMap}>
       {#if $gemeenteSelection !== null}
-        <Map w={wMap} h={bodyHeight*0.4} mainMapFlag={false} {color} {variable} {getClass} {numerical}/>
+        <Map w={wMap} h={bodyHeight*0.4} mainMapFlag={false} {color} {indicator} {getClass} />
       {/if}
     </div>
   </div>
@@ -84,6 +86,7 @@
   }
   .indicator-title{
     display: flex;
+    flex-direction: column;
     background-color: whitesmoke;
     align-items: center;
     justify-content: center;

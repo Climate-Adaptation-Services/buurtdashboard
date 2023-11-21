@@ -15,7 +15,7 @@
   
   const getData = (async () => {
 		const response = await Promise.all([
-      fetch('https://raw.githubusercontent.com/Climate-Adaptation-Services/buurtdashboard-data/main/GemeenteDatasetTest20231011%20(1).json'),
+      fetch('https://raw.githubusercontent.com/Climate-Adaptation-Services/buurtdashboard-data/main/GemeenteGrenzen2023.json'),
       // fetch('https://raw.githubusercontent.com/Climate-Adaptation-Services/buurtdashboard-data/main/BuurtenTestDataset_20231016.json'),
       fetch('https://raw.githubusercontent.com/Climate-Adaptation-Services/buurtdashboard-data/main/BuurtenDataset20231106_xaaaa.json'),
       fetch('https://raw.githubusercontent.com/Climate-Adaptation-Services/buurtdashboard-data/main/BuurtenDataset20231106_xaaab.json')
@@ -25,6 +25,14 @@
 	})()
 
   const indicatorHeight = 650
+
+  const indicatorenSelectie = [
+    {titel:'Risico paalrot', attribute:'Paal2050H', subtitel:'Risico Paalrot 2050 bij sterke klimaatverandering -> sterke_c_2', categorieen:'', kleur:'', numerical:false},
+    {titel:'Koele plekken', attribute:'ATK_KPperc', subtitel:'Percentage koele plekken vanuit de Afstand tot Koelte Kaart', categorieen:'', kleur:'', numerical:true},
+    {titel:'Groen', attribute:'allGroen', subtitel:'Totaal percentage groen per buurt (groen + boom, exclusief agrarisch)', categorieen:'', kleur:'', numerical:true}
+  ]
+
+  
 
 </script>
 
@@ -49,14 +57,11 @@
   
   <div class='indicators' style='margin-left:{screenSize > 800 ? 400 : 0}px'>
     {#if $buurtData !== null}
-      <!-- {#each [1,2,3,4,5,6,7] as ind} -->
-      <div class='indicator' style='height:{indicatorHeight}px'><Indicator h={indicatorHeight} variable='Paal2050H' numerical={false}/></div>
-      <div class='indicator' style='height:{indicatorHeight}px'><Indicator h={indicatorHeight} variable='MoeiteMetR' numerical={true}/></div>
-      <div class='indicator' style='height:{indicatorHeight}px'><Indicator h={indicatorHeight} variable='Paal2050H' numerical={false}/></div>
-      <div class='indicator' style='height:{indicatorHeight}px'><Indicator h={indicatorHeight} variable='MoeiteMetR' numerical={true}/></div>
-      <div class='indicator' style='height:{indicatorHeight}px'><Indicator h={indicatorHeight} variable='Paal2050H' numerical={false}/></div>
-      <div class='indicator' style='height:{indicatorHeight}px'><Indicator h={indicatorHeight} variable='MoeiteMetR' numerical={true}/></div>
-      <!-- {/each} -->
+      {#each indicatorenSelectie as indicator}
+        <div class='indicator' style='height:{indicatorHeight}px'>
+          <Indicator h={indicatorHeight} {indicator}/>
+        </div>
+      {/each}
     {/if}
   </div>
 
