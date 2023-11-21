@@ -2,7 +2,6 @@
   import { hoveredRegion } from "$lib/stores";
   import { hoveredValue } from "$lib/stores";
 
-
 </script>
 
 {#if $hoveredRegion !== null}

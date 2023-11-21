@@ -15,11 +15,10 @@
   
   const getData = (async () => {
 		const response = await Promise.all([
-      fetch('https://raw.githubusercontent.com/Climate-Adaptation-Services/buurtdashboard-data/main/GemeenteGrenzen2023.json'),
-      // fetch('https://raw.githubusercontent.com/Climate-Adaptation-Services/buurtdashboard-data/main/BuurtenTestDataset_20231016.json'),
+      // fetch('https://raw.githubusercontent.com/Climate-Adaptation-Services/buurtdashboard-data/main/GemeenteGrenzen2023.json'),
+      fetch('https://raw.githubusercontent.com/Climate-Adaptation-Services/buurtdashboard-data/main/GemeenteGrenzen2023-small.json'),
       fetch('https://raw.githubusercontent.com/Climate-Adaptation-Services/buurtdashboard-data/main/BuurtenDataset20231106_xaaaa.json'),
       fetch('https://raw.githubusercontent.com/Climate-Adaptation-Services/buurtdashboard-data/main/BuurtenDataset20231106_xaaab.json')
-    
     ])
     return [await response[0].json(), await response[1].json(), await response[2].json()]//, await response[4].json(), await response[5].json(), await response[6].json(), await response[7].json(), await response[8].json()]
 	})()
@@ -27,12 +26,10 @@
   const indicatorHeight = 650
 
   const indicatorenSelectie = [
-    {titel:'Risico paalrot', attribute:'Paal2050H', subtitel:'Risico Paalrot 2050 bij sterke klimaatverandering -> sterke_c_2', categorieen:'', kleur:'', numerical:false},
-    {titel:'Koele plekken', attribute:'ATK_KPperc', subtitel:'Percentage koele plekken vanuit de Afstand tot Koelte Kaart', categorieen:'', kleur:'', numerical:true},
-    {titel:'Groen', attribute:'allGroen', subtitel:'Totaal percentage groen per buurt (groen + boom, exclusief agrarisch)', categorieen:'', kleur:'', numerical:true}
+    {titel:'Risico paalrot', attribute:'Paal2050H', subtitel:'Risico Paalrot 2050 bij sterke klimaatverandering', categorieen:'', color:'', numerical:false},
+    {titel:'Koele plekken', attribute:'ATK_KPperc', subtitel:'Percentage koele plekken vanuit de Afstand tot Koelte Kaart', categorieen:'', color:["green", "#e5e4b5", "purple"], numerical:true},
+    {titel:'Groen', attribute:'allGroen', subtitel:'Totaal percentage groen per buurt (groen + boom, exclusief agrarisch)', categorieen:'', color:["purple", "#e5e4b5", "green"], numerical:true}
   ]
-
-  
 
 </script>
 
