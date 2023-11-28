@@ -39,16 +39,17 @@
     }
   }
 
-  const titleHeight = h*0.15
-  const bodyHeight = h*0.85
+  const titleHeight = h*0.2
+  const bodyHeight = h*0.8
 
 </script>
 
 <div class='indicator-div'>
   <div class='indicator-title' style='height: {titleHeight}px'>
     <h4 style='margin:0px; color:#BB9012'>Categorie: Impact en Kwetsbaarheid</h4>
-    <h2 style='margin:0px; padding:5px 15px 5px 15px; margin:3px; background-color:#36575B; border-radius:15px; color:white'>{indicator.titel}</h2>
-    <h5 style='margin:0px; font-weight:normal; color:#7e7975'>{indicator.subtitel}</h5>
+    <h2 style='margin:0px; padding:5px 15px 5px 15px; margin:5px 0px 10px 0px; background-color:#36575B; border-radius:15px; color:white'>{indicator.titel}</h2>
+    <span style='display:flex; justify-content:space-between; width:50%; margin-bottom:10px'><h5 style='margin:0px 0px 0px 0px; color:black'><strong>Bron: RIVM, 2023</strong></h5><h5 style='margin:0px 0px 0px 0px'><a href="https://www.w3schools.com">Meer info</a></h5></span>
+    <h4 style='margin:0px; padding:0px 10px 0px 10px; font-weight:normal; color:#7e7975; align-text:center'>{indicator.subtitel}</h4>
   </div>
   <div class='indicator-body' style='height: {bodyHeight}px'>
     {#if indicator.numerical === true}
