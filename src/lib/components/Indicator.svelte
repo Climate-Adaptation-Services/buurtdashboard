@@ -34,9 +34,8 @@
       }
     }else{
       color = scaleOrdinal()
-        .domain(['Zeer laag', 'Laag', 'Midden', 'Hoog', 'Zeer hoog'])
-        .range(['#004c6d', '#346888', '#5886a5', '#7aa6c2', '#9dc6e0'].reverse())
-
+        .domain(indicator.color.domain)
+        .range(indicator.color.range)
     }
   }
 

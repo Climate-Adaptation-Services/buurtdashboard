@@ -2,6 +2,7 @@
   import { gemeenteData, buurtData, buurtSelection, gemeenteSelection, buurtSelectionData } from '$lib/stores';
   import Select from 'svelte-select'
   import * as _ from 'lodash'
+  import { selectAll } from 'd3';
 
   let gemeenteList;
   let buurtList;
@@ -21,6 +22,8 @@
 
   function handleBuurtChange(e){
     buurtSelection.set(e.detail.value)
+    selectAll('.svgelements_' + e.detail.value)
+      .raise()
   }
 
   function handleGemeenteClear(e){

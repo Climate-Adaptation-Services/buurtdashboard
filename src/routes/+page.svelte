@@ -26,9 +26,9 @@
   const indicatorHeight = 650
 
   const indicatorenSelectie = [
-    {titel:'Risico paalrot', attribute:'Paal2050H', subtitel:'Risico Paalrot 2050 bij sterke klimaatverandering', categorieen:'', color:'', numerical:false},
-    {titel:'Koele plekken', attribute:'ATK_KPperc', subtitel:'Percentage koele plekken vanuit de Afstand tot Koelte Kaart', categorieen:'', color:["green", "#e5e4b5", "purple"], numerical:true},
-    {titel:'Groen', attribute:'allGroen', subtitel:'Totaal percentage groen per buurt (groen + boom, exclusief agrarisch)', categorieen:'', color:["purple", "#e5e4b5", "green"], numerical:true}
+    {titel:'Risico paalrot', attribute:'Paal2050H', subtitel:'Risico Paalrot 2050 bij sterke klimaatverandering', categorieen:'', color:{domain:['Zeer laag', 'Laag', 'Midden', 'Hoog', 'Zeer hoog'], range:['#CCCCCC','#FEFEBB','#D0B867','#A26B29','#742600']}, numerical:false},
+    {titel:'Koele plekken', attribute:'ATK_KPperc', subtitel:'Percentage koele plekken vanuit de Afstand tot Koelte Kaart', categorieen:'', color:["#FBDC6C", "#9BF09C", "#00E612"], numerical:true},
+    {titel:'Groen', attribute:'allGroen', subtitel:'Totaal percentage groen per buurt (groen + boom, exclusief agrarisch)', categorieen:'', color:["#CBCBCB", "#9DC182", "#63995C"], numerical:true}
   ]
 
 </script>
