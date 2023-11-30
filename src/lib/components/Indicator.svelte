@@ -47,8 +47,7 @@
 <div class='indicator-div'>
   <div class='indicator-title' style='height: {titleHeight}px'>
     <h4 style='margin:0px; color:#BB9012'>Categorie: Impact en Kwetsbaarheid</h4>
-    <h2 style='margin:0px; padding:5px 15px 5px 15px; margin:5px 0px 10px 0px; background-color:#36575B; border-radius:15px; color:white'>{indicator.titel}</h2>
-    <span style='display:flex; justify-content:space-between; width:50%; margin-bottom:10px'><h5 style='margin:0px 0px 0px 0px; color:black'><strong>Bron: RIVM, 2023</strong></h5><h5 style='margin:0px 0px 0px 0px'><a href="https://www.w3schools.com">Meer info</a></h5></span>
+    <h2 style='margin:0px; padding:5px 15px 5px 15px; margin:15px 0px 15px 0px; background-color:#36575B; border-radius:15px; color:white'>{indicator.titel}</h2>
     <h4 style='margin:0px; padding:0px 10px 0px 10px; font-weight:normal; color:#7e7975; align-text:center'>{indicator.subtitel}</h4>
   </div>
   <div class='indicator-body' style='height: {bodyHeight}px'>
@@ -73,6 +72,7 @@
       {#if $gemeenteSelection !== null}
         <Map w={wMap} h={bodyHeight*0.4} mainMapFlag={false} {color} {indicator} {getClass} />
       {/if}
+      <span style='width:100%; position:absolute; bottom:0px; display:flex; justify-content:space-between'><h5><strong>Bron: RIVM, 2023</strong></h5><h5><a href="https://www.w3schools.com">Meer info</a></h5></span>
     </div>
   </div>
 </div>
@@ -84,6 +84,7 @@
     display: flex;
     flex-direction: column;
     box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+    position:relative;
   }
   .indicator-title{
     display: flex;
@@ -99,6 +100,14 @@
 
   .indicator-map{
     /* background-color: #f5fdff;     */
+  }
+
+  h5{
+    padding:10px;
+    margin:0px;
+  }
+  a{
+    color:black;
   }
 
 </style>
