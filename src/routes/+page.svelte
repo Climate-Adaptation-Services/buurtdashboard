@@ -4,6 +4,7 @@
   import Map from '$lib/components/Map.svelte';
   import Tooltip from '$lib/components/Tooltip.svelte';
   import { buurtData } from '$lib/stores';
+  import { indicatorenSelectie } from '$lib/noncomponents/indicatorenSelectie.js'
 
   let screenSize = 1000
   let wMap;
@@ -24,12 +25,6 @@
 	})()
 
   const indicatorHeight = 650
-
-  const indicatorenSelectie = [
-    {titel:'Risico paalrot', attribute:'Paal2050H', subtitel:'Risico Paalrot 2050 bij sterke klimaatverandering', categorieen:'', color:{domain:['Zeer laag', 'Laag', 'Midden', 'Hoog', 'Zeer hoog'], range:['#CCCCCC','#FEFEBB','#D0B867','#A26B29','#742600']}, numerical:false},
-    {titel:'Koele plekken', attribute:'ATK_KPperc', subtitel:'Percentage koele plekken vanuit de Afstand tot Koelte Kaart', categorieen:'', color:["#FBDC6C", "#9BF09C", "#00E612"], numerical:true},
-    {titel:'Groen', attribute:'allGroen', subtitel:'Totaal percentage groen per buurt (groen + boom, exclusief agrarisch)', categorieen:'', color:["#CBCBCB", "#9DC182", "#63995C"], numerical:true}
-  ]
 
 </script>
 

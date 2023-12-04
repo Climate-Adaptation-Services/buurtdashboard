@@ -1,31 +1,38 @@
 <script>
+    import { checkContrast } from "$lib/noncomponents/checkContrast";
   import { wijkTypeData, buurtData, gemeenteSelection, buurtenInGemeente, buurtSelection, currentData, gemeenteData, buurtSelectionData, hoveredRegion, hoveredValue, buurtNaam } from "$lib/stores";
   import { scaleLinear, select, scaleBand, stack } from "d3";
   import * as _ from 'lodash';
   import { onMount } from "svelte";
-  import { checkContrast } from "$lib/noncomponents/checkContrast";
 
   export let w;
   export let h;
   export let indicator;
   export let color;
-  export let getClass
 
   const margin = {bottom:0, top:30, left:30, right:30}
 
   function getPercentages(data, regio){
-    let totalAmount = 0
+    let totalOpp = 0
     let klassenTotal = []
     for(let i=0;i<Object.keys(indicator.klassen).length;i++){
       klassenTotal.push({klasseNaam: Object.keys(indicator.klassen)[i], waarde:0})
     }
-    data.features.forEach(buurtOfGemeente => {
-      klassenTotal.filter(kl => kl.klasseNaam === getClass(buurtOfGemeente.properties[indicator.attribute]))[0].waarde += 1
-      totalAmount += 1
+    data.features.forEach(buurt => {
+      let buurtOpp = buurt.properties['OppZodnAg']
+      totalOpp += buurtOpp
+      // zorg ervoor dat groen/grijs openbaar optelt tot 100%
+      if(indicator.titel === 'Groen en grijs openbare ruimte'){
+        totalOpp -= buurtOpp * ((100 - buurt.properties['Openbaar'])/100)
+      }
+      Object.keys(indicator.klassen).forEach(kl => {
+        klassenTotal.filter(kl2 => kl2.klasseNaam === kl)[0].waarde += buurtOpp * (buurt.properties[indicator.klassen[kl]])
+      });
     });
 
     klassenTotal.forEach(kl => {
-      kl.waarde = (kl.waarde/totalAmount) * 100
+      kl.waarde = (kl.waarde/totalOpp)
+      if(indicator.titel === 'Gevoelstemperatuur'){kl.waarde *= 100}
     })
 
     let result = {'group':regio}
@@ -42,17 +49,17 @@
   $: {
     if($buurtSelection !== null){
       if($buurtSelectionData.properties['def_wijkty']){
-        barData = [getPercentages($buurtData, 'Nederland'), getPercentages($buurtenInGemeente, 'Gemeente'), getPercentages($wijkTypeData, 'Wijktype'), getPercentages({type: 'FeatureCollection', features: [$buurtSelectionData]}, 'Buurt')]
+        barData = [nederlandValues, getPercentages($buurtenInGemeente, 'Gemeente'), getPercentages($wijkTypeData, 'Wijktype'), getPercentages({type: 'FeatureCollection', features: [$buurtSelectionData]}, 'Buurt')]
         groups = ['Nederland', 'Gemeente', 'Wijktype', 'Buurt']
       }else{
-        barData = [getPercentages($buurtData, 'Nederland'), getPercentages($buurtenInGemeente, 'Gemeente'), getPercentages({type: 'FeatureCollection', features: [$buurtSelectionData]}, 'Buurt')]
+        barData = [nederlandValues, getPercentages($buurtenInGemeente, 'Gemeente'), getPercentages({type: 'FeatureCollection', features: [$buurtSelectionData]}, 'Buurt')]
         groups = ['Nederland', 'Gemeente', 'Buurt']
       }
     }else if($gemeenteSelection !== null){
-      barData = [getPercentages($buurtData, 'Nederland'), getPercentages($buurtenInGemeente, 'Gemeente')]
+      barData = [nederlandValues, getPercentages($buurtenInGemeente, 'Gemeente')]
       groups = ['Nederland', 'Gemeente']
     }else{
-      barData = [getPercentages($buurtData, 'Nederland')]
+      barData = [nederlandValues]
       groups = ['Nederland']
     }
   }

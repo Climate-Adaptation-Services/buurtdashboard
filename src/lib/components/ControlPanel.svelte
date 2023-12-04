@@ -58,7 +58,7 @@
       <Select items={buurtList} placeholder="Zoek buurt..." value={$buurtSelection} on:change={handleBuurtChange} on:clear={handleBuurtClear}/>
     {/if}
     {#if $buurtSelection !== null}
-        <p>Wijktype: <strong>{wijktype}</strong></p>
+        <p style='color:white'>Wijktype: <strong>{wijktype}</strong></p>
     {/if}
     </div>
 </div>

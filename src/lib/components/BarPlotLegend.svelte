@@ -2,6 +2,7 @@
 
   export let color
   export let w;
+  export let indicator
 
   // const padding3 = 90
   // const padding2 = 120
@@ -11,7 +12,7 @@
   const margin = {top:30, bottom:30, left:30, right:30}
   $: legendElementWidth = (w-margin.left-margin.right) / 3
 
-  const klasseNamen = ['Zeer laag', 'Laag', 'Midden', 'Hoog', 'Zeer hoog']
+  const klasseNamen = Object.keys(indicator.klassen)
 
 </script>
 
