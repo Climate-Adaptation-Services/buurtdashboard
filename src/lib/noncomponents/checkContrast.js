@@ -34,8 +34,8 @@ function hexToRgb(hex) {
 export function checkContrast(color){
   const hex = hexToRgb(color)
   if(contrast([hex.r, hex.g, hex.b], [255, 255, 255]) > 2){
-    return 'white'
+    return true
   }else{
-    return 'black'
+    return false
   }
 }
