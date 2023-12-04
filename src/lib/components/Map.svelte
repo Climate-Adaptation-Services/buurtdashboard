@@ -39,7 +39,16 @@
           .style('filter', 'drop-shadow(0 0 5px black)')
           .raise()
 
-        hoveredValue.set([indicator.titel, Math.round(feature.properties[indicator.attribute]*100)/100, color(feature.properties[indicator.attribute])])
+        const hoverColor = (indicator.numerical) 
+          ? color(feature.properties[indicator.attribute]) 
+          : (indicator.multiline)
+            ? color(mostCommonClass(feature))
+            : color(getClass(feature.properties[indicator.attribute]))
+        
+        const hoverValue = (indicator.multiline)
+          ? feature.properties[indicator.klassen[mostCommonClass(feature)]]
+          : Math.round(feature.properties[indicator.attribute]*100)/100
+        hoveredValue.set([indicator.titel, hoverValue, hoverColor])
       }
     }
 
@@ -48,6 +57,7 @@
     let featureCenter = projection(center(feature).geometry.coordinates)
     let tooltipCenter = [featureCenter[0] + rectmap.left, featureCenter[1] + rectmap.top]
     
+    // @ts-ignore
     hoveredRegion.set({
       'region': ($gemeenteSelection === null) ? 'Gemeente' : 'Buurt',
       'center': tooltipCenter,
@@ -102,6 +112,18 @@
     return className.replaceAll(' ','').replaceAll('(','').replaceAll(')','')
   }
 
+  function mostCommonClass(feature){
+    let mostCommon = ''
+    let highestValue = 0
+    Object.keys(indicator.klassen).forEach(key => {
+      if(feature.properties[indicator.klassen[key]] > highestValue){
+        highestValue = feature.properties[indicator.klassen[key]]
+        mostCommon = key
+      }
+    });
+    return mostCommon
+  }
+
 </script>
 
 <svg class={(mainMapFlag) ? 'main-map' : 'indicator-map-' + indicator.attribute} style='filter:drop-shadow(0 0 15px rgb(160, 160, 160))'
@@ -124,7 +146,9 @@
           : 'whitesmoke' 
         : (indicator.numerical) 
           ? color(feature.properties[indicator.attribute]) 
-          : color(getClass(feature.properties[indicator.attribute]))
+          : (indicator.multiline) 
+            ? color(mostCommonClass(feature))
+            : color(getClass(feature.properties[indicator.attribute]))
       }
       stroke={(mainMapFlag) 
         ? "grey" 

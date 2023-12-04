@@ -22,8 +22,6 @@
   </div>
 {/if}
 
-
-
 <style>
   .tooltip{
     position:fixed;

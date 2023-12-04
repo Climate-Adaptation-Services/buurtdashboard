@@ -42,10 +42,10 @@ export const indicatorenSelectie = [
     subtitel:'Percentage openbare ruimte boom/groen/grijs van de buurt zonder agrarisch', 
     categorie:'Impact en Kwetsbaarheid', 
     color:{
-      domain:['Boom', 'Laag Groen', 'Niet Groen'], 
+      domain:['Boom', 'Laag Groen', 'Grijs'], 
       range:["#63995C", "#9DC182", "#CBCBCB"]
     }, 
-    klassen:{'Boom':'openbBoom', 'Laag Groen':'openbGroen', 'Niet Groen':'openbGrijs'},
+    klassen:{'Boom':'openbBoom', 'Laag Groen':'openbGroen', 'Grijs':'openbGrijs'},
     numerical:false, 
     link:'https://www.klimaateffectatlas.nl/nl/basiskaart-groen-en-grijs',
     multiline:true,
