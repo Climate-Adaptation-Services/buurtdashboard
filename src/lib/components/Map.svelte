@@ -45,9 +45,11 @@
             ? color(mostCommonClass(feature))
             : color(getClass(feature.properties[indicator.attribute]))
         
-        const hoverValue = (indicator.multiline)
-          ? feature.properties[indicator.klassen[mostCommonClass(feature)]]
-          : Math.round(feature.properties[indicator.attribute]*100)/100
+        const hoverValue = (indicator.numerical)
+          ? Math.round(feature.properties[indicator.attribute]*100)/100
+          : (indicator.multiline)
+            ? mostCommonClass(feature)
+            : getClass(feature.properties[indicator.attribute])
         hoveredValue.set([indicator.titel, hoverValue, hoverColor])
       }
     }
