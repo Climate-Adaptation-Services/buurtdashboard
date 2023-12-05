@@ -32,8 +32,19 @@ function hexToRgb(hex) {
 }
 
 export function checkContrast(color){
-  const hex = hexToRgb(color)
-  if(contrast([hex.r, hex.g, hex.b], [255, 255, 255]) > 2){
+  let colorcode = ''
+  if(color[0] === '#'){
+    colorcode = hexToRgb(color)
+  }else if(color[0] === 'r'){
+    const split = color.split(',')
+    colorcode = {
+      r: split[0].split('(')[1],
+      g: split[1].replace(' ', ''),
+      b: split[2].split(')')[0].replace(' ', '')
+    }
+  }
+  // const hex = hexToRgb(color)
+  if(contrast([colorcode.r, colorcode.g, colorcode.b], [255, 255, 255]) > 2){
     return true
   }else{
     return false

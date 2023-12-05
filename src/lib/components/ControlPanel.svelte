@@ -27,8 +27,8 @@
   }
 
   function handleGemeenteClear(e){
-    buurtSelection.set(null)
     gemeenteSelection.set(null)
+    buurtSelection.set(null)
   }
   function handleBuurtClear(e){
     buurtSelection.set(null)

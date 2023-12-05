@@ -62,7 +62,7 @@
         {#if $gemeenteSelection !== null}
           <BeeswarmPlot w={wGraph} h={bodyHeight*0.4} {indicator} {color} nodesData={structuredClone($buurtenInGemeente.features)}/>
         {:else}
-          <p style='text-align:center; padding-top:50px; font-size:18px'><em>Selecteer gemeente...</em></p>
+          <p style='text-align:center; padding-top:50px; font-size:18px; position:absolute; left:{wGraph/2}px'><em>Selecteer gemeente...</em></p>
         {/if}
       </div>
     {:else}

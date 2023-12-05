@@ -17,7 +17,7 @@
     </div>
     {#if $hoveredValue !== null}
       <div class='tooltip-value'>
-        <p>{$hoveredValue[0] + ': '}<span style='color:{$hoveredValue[2]}; background-color:{(checkContrast($hoveredValue[2])) ? '#FDF9EA' : '#5e5e5f'}; padding:4px; border-radius:3px'>{$hoveredValue[1]}</span></p>
+        <p>{$hoveredValue[0] + ': '}<span style='color:{$hoveredValue[2]}; background-color:{(checkContrast($hoveredValue[2])) ? 'white' : '#5e5e5f'}; padding:4px; border-radius:3px'>{$hoveredValue[1]}</span></p>
       </div>
     {/if}
   </div>
