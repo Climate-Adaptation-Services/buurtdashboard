@@ -23,40 +23,37 @@
   $: path = geoPath(projection);
 
   function mouseOver(feature){
-    if(feature.properties[classNameVariable] !== $buurtSelection){
+    if(mainMapFlag){
+      select('.' + getClassName(feature))
+      .attr('fill', '#36575A')
+    }else{
+      select('.' + getClassName(feature))
+        .attr('stroke-width', 3)
+        .style('filter', 'drop-shadow(0 0 15px black)')
+        .raise()
+      select('.' + getClassName(feature).replace('path', 'node'))
+        .attr('stroke', 'white')
+        .attr('r', 8)
+        .style('filter', 'drop-shadow(0 0 5px black)')
+        .raise()
 
-      if(mainMapFlag){
-        select('.' + getClassName(feature))
-        .attr('fill', '#36575A')
-      }else{
-        select('.' + getClassName(feature))
-          .attr('stroke-width', 3)
-          .style('filter', 'drop-shadow(0 0 15px black)')
-          .raise()
-        select('.' + getClassName(feature).replace('path', 'node'))
-          .attr('stroke', 'white')
-          .attr('r', 8)
-          .style('filter', 'drop-shadow(0 0 5px black)')
-          .raise()
-
-        const hoverColor = (indicator.numerical) 
-          ? color(feature.properties[indicator.attribute]) 
-          : (indicator.multiline)
-            ? color(mostCommonClass(feature))
-            : color(getClass(feature.properties[indicator.attribute]))
-        
-        const hoverValue = (indicator.numerical)
-          ? Math.round(feature.properties[indicator.attribute]*100)/100
-          : (indicator.multiline)
-            ? mostCommonClass(feature)
-            : getClass(feature.properties[indicator.attribute])
-        
-        hoveredValue.set({
-          indicator: indicator.titel, 
-          value: hoverValue, 
-          color: hoverColor
-        })
-      }
+      const hoverColor = (indicator.numerical) 
+        ? color(feature.properties[indicator.attribute]) 
+        : (indicator.multiline)
+          ? color(mostCommonClass(feature))
+          : color(getClass(feature.properties[indicator.attribute]))
+      
+      const hoverValue = (indicator.numerical)
+        ? Math.round(feature.properties[indicator.attribute]*100)/100
+        : (indicator.multiline)
+          ? mostCommonClass(feature)
+          : getClass(feature.properties[indicator.attribute])
+      
+      hoveredValue.set({
+        indicator: indicator.titel, 
+        value: hoverValue, 
+        color: hoverColor
+      })
     }
 
     let elem = (mainMapFlag) ? document.getElementsByClassName("main-map")[0] : document.getElementsByClassName("indicator-map-" + indicator.attribute)[0]

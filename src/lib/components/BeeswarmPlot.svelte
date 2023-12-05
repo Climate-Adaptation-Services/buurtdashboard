@@ -30,8 +30,8 @@
   $: {
     simulation = forceSimulation(nodesData)
       .force("x", forceX().x(d => xScale(d.properties[indicator.attribute])-5.1).strength(0.1))
-      .force("y", forceY().y(100).strength(0.05))
-      .force("collide", forceCollide().radius(5.7))
+      .force("y", forceY().y(100).strength(0.04))
+      .force("collide", forceCollide().radius(6))
       .alpha(0.5) // [0, 1] The rate at which the simulation finishes. You should increase this if you want a faster simulation, or decrease it if you want more "movement" in the simulation.
       .alphaDecay(0.000000000001) // [0, 1] The rate at which the simulation alpha approaches 0. you should decrease this if your bubbles are not completing their transitions between simulation states.
       .restart(); // Restart the simulation

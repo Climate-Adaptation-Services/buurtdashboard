@@ -47,10 +47,10 @@ export const indicatorenSelectie = [
     subtitel:'Percentage hittestress', 
     categorie:'Impact en Kwetsbaarheid', 
     color:{
-      domain:['23-28°C', '29-34°C', '35-40°C', '41-49°C'], 
+      domain:['23 - 28°C', '29 - 34°C', '35 - 40°C', '41 - 49°C'], 
       range:["#954A86", "#87E3F0", "#FFF469", "#DA2600"]
     }, 
-    klassen:{'23-28°C':'F23_28perc', '29-34°C':'F29_34perc', '35-40°C':'F35_40perc', '41-49°C':'F41_49perc'},
+    klassen:{'23 - 28°C':'F23_28perc', '29 - 34°C':'F29_34perc', '35 - 40°C':'F35_40perc', '41 - 49°C':'F41_49perc'},
     numerical:false, 
     link:'https://www.klimaateffectatlas.nl/nl/hittekaart-gevoelstemperatuur',
     multiline:true,
