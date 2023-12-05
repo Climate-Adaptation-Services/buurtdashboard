@@ -18,6 +18,7 @@ export const indicatorenSelectie = [
     titel:'Groen', 
     attribute:'allGroen', 
     subtitel:'Totaal % groen per buurt (groen + boom, exclusief agrarisch)', 
+    plottitel:'% groen',
     categorie:'Impact en Kwetsbaarheid', 
     color:["#CBCBCB", "#9DC182", "#63995C"], 
     numerical:true, 
@@ -59,7 +60,8 @@ export const indicatorenSelectie = [
   {
     titel:'Koele plekken', 
     attribute:'ATK_KPperc', 
-    subtitel:'Percentage koele plekken vanuit de Afstand tot Koelte Kaart', 
+    subtitel:'% koele plekken vanuit de Afstand tot Koelte Kaart',
+    plottitel:'% koele plekken', 
     categorie:'Impact en Kwetsbaarheid', 
     color:["#FBDC6C", "#9BF09C", "#00E612"], 
     numerical:true, 

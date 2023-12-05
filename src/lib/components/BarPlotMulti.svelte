@@ -85,7 +85,7 @@
     : (group === 'Gemeente')
       ? 'Gemeente ' + $gemeenteData.features.filter(gemeente => gemeente.properties['GM_CODE'] === $gemeenteSelection)[0].properties['GM_NAAM']
       : (group === 'Buurt')
-        ? $buurtSelectionData.properties['bu_naam']
+        ? 'De buurt ' + $buurtSelectionData.properties['bu_naam']
         : 'Wijktype ' + $buurtSelectionData.properties['def_wijkty']
   }
 
@@ -114,7 +114,7 @@
           ? 'Gemeente ' + $gemeenteData.features.filter(gem => gem.properties['GM_CODE'] === $gemeenteSelection)[0].properties['GM_NAAM']
           : (st.data.group === 'Wijktype') 
             ? 'Wijktype ' + $buurtSelectionData.properties['def_wijkty']
-            : $buurtSelectionData.properties[$buurtNaam]
+            : 'De buurt ' + $buurtSelectionData.properties[$buurtNaam]
     })
     
   }

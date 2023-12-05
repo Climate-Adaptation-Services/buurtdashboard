@@ -1,6 +1,6 @@
 <script>
 
-  import { currentData, hoveredValue, currentView, gemeenteSelection, buurtSelection, hoveredRegion, buurtenInGemeente, buurtCode } from "$lib/stores";
+  import { gemeenteData, hoveredValue, currentView, gemeenteSelection, buurtSelection, hoveredRegion, buurtenInGemeente, buurtCode } from "$lib/stores";
   import { extent, scaleLinear, select, selectAll } from "d3";
   import XAxis from '$lib/components/XAxis.svelte';
   import { forceSimulation, forceY, forceX, forceCollide } from "d3-force";
@@ -11,7 +11,7 @@
   export let color;
   export let nodesData
 
-  const margin = {bottom:30, top:30, left:30, right:30}
+  const margin = {bottom:50, top:20, left:30, right:30}
 
   $: xScale = scaleLinear()
     .domain(extent($buurtenInGemeente.features, d => d.properties[indicator.attribute]))
@@ -30,7 +30,7 @@
   $: {
     simulation = forceSimulation(nodesData)
       .force("x", forceX().x(d => xScale(d.properties[indicator.attribute])-5.1).strength(0.1))
-      .force("y", forceY().y(100).strength(0.04))
+      .force("y", forceY().y(80).strength(0.04))
       .force("collide", forceCollide().radius(6))
       .alpha(0.5) // [0, 1] The rate at which the simulation finishes. You should increase this if you want a faster simulation, or decrease it if you want more "movement" in the simulation.
       .alphaDecay(0.000000000001) // [0, 1] The rate at which the simulation alpha approaches 0. you should decrease this if your bubbles are not completing their transitions between simulation states.
@@ -55,7 +55,7 @@
     }
 
     hoveredValue.set({
-      indicator: indicator.attribute, 
+      indicator: indicator.titel, 
       value: Math.round(feature.properties[indicator.attribute]*100)/100, 
       color: color(feature.properties[indicator.attribute])
     })
@@ -124,6 +124,7 @@
       />
     {/each}
   </g>
+  <text x={w/2} y={h-18} fill='#645F5E' text-anchor='middle' font-size='14'>{indicator.plottitel} per buurt in gemeente {$gemeenteData.features.filter(gemeente => gemeente.properties['GM_CODE'] === $gemeenteSelection)[0].properties['GM_NAAM']}</text>
 </svg>
 
 
