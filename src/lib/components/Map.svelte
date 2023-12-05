@@ -1,6 +1,6 @@
 <script>
   import center from '@turf/center'
-  import { currentData, gemeenteSelection, currentView, buurtSelection, hoveredRegion, hoveredValue, buurtCode } from "$lib/stores";
+  import { currentData, gemeenteSelection, currentView, buurtSelection, hoveredRegion, hoveredValue, buurtCode, mousePosition } from "$lib/stores";
   import { geoMercator, geoPath, select, selectAll } from 'd3';
   import { loadMapData } from "$lib/noncomponents/loadMapData.js";
 
@@ -22,10 +22,11 @@
   
   $: path = geoPath(projection);
 
-  function mouseOver(feature){
+  function mouseOver(e, feature){
     if(mainMapFlag){
       select('.' + getClassName(feature))
-      .attr('fill', '#36575A')
+        .attr('fill', '#36575A')      
+      mousePosition.set(window.innerHeight - e.screenY)
     }else{
       select('.' + getClassName(feature))
         .attr('stroke-width', 3)
@@ -75,7 +76,8 @@
 
       if(mainMapFlag){
         select('.' + getClassName(feature))
-        .attr('fill', 'whitesmoke')
+          .attr('fill', 'whitesmoke')
+        mousePosition.set(null)
       }else{
         select('.' + getClassName(feature))
           .attr('stroke-width', 0.5)
@@ -161,7 +163,7 @@
       style='filter:{(feature.properties[$buurtCode] === $buurtSelection) ? 'drop-shadow(0 0 15px black)' : 'none'}'
       stroke-width={(mainMapFlag) ? "1" : (feature.properties[$buurtCode] === $buurtSelection) ? '3' : '0.5'}
       cursor='pointer'
-      on:mouseover={() => mouseOver(feature)}
+      on:mouseover={(e) => mouseOver(e, feature)}
       on:mouseout={() => mouseOut(feature)}
       on:click={() => click(feature)}
       />

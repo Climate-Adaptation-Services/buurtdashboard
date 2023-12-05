@@ -6,6 +6,7 @@ export const gemeenteData = writable(null)
 export const buurtData = writable(null)
 export const hoveredRegion = writable(null)
 export const hoveredValue = writable(null)
+export const mousePosition = writable(null)
 
 export const buurtCode = readable('bu_code')
 export const gemeenteCode = readable('gm_code')

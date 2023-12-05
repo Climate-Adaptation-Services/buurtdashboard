@@ -1,12 +1,18 @@
 <script>
-  import { hoveredRegion } from "$lib/stores";
+  import { hoveredRegion, mousePosition } from "$lib/stores";
   import { hoveredValue } from "$lib/stores";
   import { checkContrast } from "$lib/noncomponents/checkContrast";
+
+  function getTooltipTop(){
+    return ($mousePosition && $mousePosition < 100)
+      ? $hoveredRegion.center[1] - 100
+      : $hoveredRegion.center[1]
+  }
   
 </script>
 
 {#if $hoveredRegion !== null}
-  <div class='tooltip' style='left:{$hoveredRegion.center[0]}px;top:{$hoveredRegion.center[1]}px'>
+  <div class='tooltip' style='left:{$hoveredRegion.center[0]}px;top:{getTooltipTop()}px'>
     {#if $hoveredValue === null}
       <div class='tooltip-title'>
         {$hoveredRegion.region}
