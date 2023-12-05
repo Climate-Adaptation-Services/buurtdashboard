@@ -54,7 +54,11 @@
         .style('filter', 'drop-shadow(0 0 5px #36575A)')
     }
 
-    hoveredValue.set([indicator.attribute, Math.round(feature.properties[indicator.attribute]*100)/100, color(feature.properties[indicator.attribute])])
+    hoveredValue.set({
+      indicator: indicator.attribute, 
+      value: Math.round(feature.properties[indicator.attribute]*100)/100, 
+      color: color(feature.properties[indicator.attribute])
+    })
 
     let elem = document.getElementsByClassName('beeswarm_' + indicator.attribute)[0]
     let rectmap = elem.getBoundingClientRect();

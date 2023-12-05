@@ -50,7 +50,12 @@
           : (indicator.multiline)
             ? mostCommonClass(feature)
             : getClass(feature.properties[indicator.attribute])
-        hoveredValue.set([indicator.titel, hoverValue, hoverColor])
+        
+        hoveredValue.set({
+          indicator: indicator.titel, 
+          value: hoverValue, 
+          color: hoverColor
+        })
       }
     }
 

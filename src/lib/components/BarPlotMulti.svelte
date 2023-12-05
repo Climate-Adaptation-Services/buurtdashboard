@@ -95,7 +95,11 @@
     // select('.' + 'barplot_rect' + indicator.attribute + stacked.key.replace(' ', '')  + st.data.group)
     //   .style('filter', "url(#highlightFilter)")
 
-    hoveredValue.set([stacked.key, Math.round((st[1]-st[0])*100)/100 + '%', color(stacked.key)])
+    hoveredValue.set({
+      indicator: stacked.key, 
+      value: Math.round((st[1]-st[0])*100)/100 + '%', 
+      color: color(stacked.key)
+    })
 
     let elem = document.getElementsByClassName('barplot_rect' + indicator.attribute + stacked.key.replace(' ', '')  + st.data.group)[0]
     let rectmap = elem.getBoundingClientRect();
