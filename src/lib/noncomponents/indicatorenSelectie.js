@@ -3,7 +3,7 @@ export const indicatorenSelectie = [
     titel:'Functionele gebieden', 
     attribute:'Bebouwing', 
     subtitel:'Percentages indeling openbare ruimte', 
-    categorie:'Impact en Kwetsbaarheid', 
+    categorie:'Ruimtelijke context', 
     color:{
       domain:['Bebouwing', 'Openbaar', 'Overig', 'Privé', 'In transitie', 'Water'], 
       range:["#FF7F7E", "#D2B87F", "#E8BEFF","#B6FFF1", "#FFD37F", "#B4DAFF"]
@@ -19,7 +19,7 @@ export const indicatorenSelectie = [
     attribute:'allGroen', 
     subtitel:'Totaal % groen per buurt (groen + boom, exclusief agrarisch)', 
     plottitel:'% groen',
-    categorie:'Impact en Kwetsbaarheid', 
+    categorie:'Ruimtelijke context', 
     color:["#CBCBCB", "#9DC182", "#63995C"], 
     numerical:true, 
     link:'https://www.klimaateffectatlas.nl/nl/basiskaart-groen-en-grijs',
@@ -30,7 +30,7 @@ export const indicatorenSelectie = [
     titel:'Groen en grijs openbare ruimte', 
     attribute:'openbGroen', 
     subtitel:'% groen openbare ruimte van de buurt zonder agrarisch', 
-    categorie:'Impact en Kwetsbaarheid', 
+    categorie:'Ruimtelijke context', 
     color:{
       domain:['Boom', 'Laag Groen', 'Grijs'], 
       range:["#63995C", "#9DC182", "#CBCBCB"]
@@ -46,7 +46,7 @@ export const indicatorenSelectie = [
     titel:'Gevoelstemperatuur', 
     attribute:'F29_34perc', 
     subtitel:'Percentage hittestress', 
-    categorie:'Impact en Kwetsbaarheid', 
+    categorie:'Klimaateffecten', 
     color:{
       domain:['23 - 28°C', '29 - 34°C', '35 - 40°C', '41 - 49°C'], 
       range:["#954A86", "#87E3F0", "#FFF469", "#DA2600"]
