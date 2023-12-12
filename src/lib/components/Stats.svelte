@@ -34,7 +34,6 @@
       // console.log(buurt.properties, indicator.attribute)
       return buurt.properties[indicator.attribute]
     }))
-    // console.log(meanValuesDict['meanValueGemeente'])
   }else{
     meanValuesDict['meanValueGemeente'] = 0
   }
