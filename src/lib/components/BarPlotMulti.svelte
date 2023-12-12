@@ -50,8 +50,8 @@
   $: {
     if($buurtSelection !== null){
       if($buurtSelectionData.properties['def_wijkty']){
-        barData = [nederlandValues, getPercentages($buurtenInGemeente, 'Gemeente'), getPercentages($wijkTypeData, 'Wijktype'), getPercentages({type: 'FeatureCollection', features: [$buurtSelectionData]}, 'Buurt')]
-        groups = ['Nederland', 'Gemeente', 'Wijktype', 'Buurt']
+        barData = [nederlandValues, getPercentages($buurtenInGemeente, 'Gemeente'), getPercentages({type: 'FeatureCollection', features: [$buurtSelectionData]}, 'Buurt'), getPercentages($wijkTypeData, 'Wijktype')]
+        groups = ['Nederland', 'Gemeente', 'Buurt', 'Wijktype']
       }else{
         barData = [nederlandValues, getPercentages($buurtenInGemeente, 'Gemeente'), getPercentages({type: 'FeatureCollection', features: [$buurtSelectionData]}, 'Buurt')]
         groups = ['Nederland', 'Gemeente', 'Buurt']
