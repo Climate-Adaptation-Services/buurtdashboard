@@ -180,13 +180,13 @@
       />
   {/each}
   {#if indicator && indicator.multiline === true}
-    <image href='info.png' width='20' y='5' x={w-25} on:mouseover={() => multiInfo()} on:mouseout={() => multiInfoOut()}/>
+    <image href='info.png' opacity='0.7' width='20' y='5' x={w-25} on:mouseover={() => multiInfo()} on:mouseout={() => multiInfoOut()}/>
   {/if}
 </svg>
 
 {#if indicator && indicator.multiline === true}
   <div class={'tooltip-multi tooltip-multi' + indicator.attribute}>
-    <p>De kleur van de buurten in deze gemeente is de kleur van de klasse met het hoogste percentage in die buurt</p>
+    <p>De kleuren in deze kaart geven aan welke klasse in die buurt het meest voorkomt</p>
   </div>
 {/if}
 
