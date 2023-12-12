@@ -9,7 +9,7 @@
   // $: innerwidth3 = (w - 2*padding3) / 3
   // $: innerwidth2 = (w - 2*padding2) / 2
 
-  const margin = {top:30, bottom:30, left:30, right:30}
+  const margin = {top:30, bottom:30, left:30, right:0}
   $: legendElementWidth = (w-margin.left-margin.right) / 3
 
   const klasseNamen = Object.keys(indicator.klassen)
