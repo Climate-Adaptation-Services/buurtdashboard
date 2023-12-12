@@ -50,7 +50,7 @@
 <div class='indicator-div'>
   <div class='indicator-title' style='height: {titleHeight}px'>
     <h4 style='margin:0px; color:#BB9012'>Categorie: {indicator.categorie}</h4>
-    <h2 style='margin:0px; padding:5px 15px 5px 15px; margin:15px 0px 15px 0px; background-color:#36575B; border-radius:15px; color:white'>{indicator.titel}</h2>
+    <h2 style='padding:5px 15px 5px 15px; margin:10px 0px 7px 0px; background-color:#36575B; border-radius:15px; color:white'>{indicator.titel}</h2>
     <h4 style='margin:0px; padding:0px 10px 0px 10px; font-weight:normal; color:#7e7975; text-align: center;'>{indicator.subtitel}</h4>
   </div>
   <div class='indicator-body' style='height: {bodyHeight}px'>
