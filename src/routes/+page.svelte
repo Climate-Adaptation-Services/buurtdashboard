@@ -38,7 +38,7 @@
     <div class='control-panel'><ControlPanel /></div>
     <div class='map' bind:clientWidth={wMap} bind:clientHeight={hMap}>
       {#await getData}
-        <pre>Loading...</pre>
+        <pre style='color:white'>Loading...</pre>
       {:then res}
         <Map datajson={res} w={wMap} h={hMap} mainMapFlag={true}/>
       {:catch error}

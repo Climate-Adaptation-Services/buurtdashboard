@@ -133,6 +133,14 @@
     return mostCommon
   }
 
+  function multiInfo(){
+    select('.tooltip-multi' + indicator.attribute).style('visibility', 'visible')
+  }
+
+  function multiInfoOut(){
+    select('.tooltip-multi' + indicator.attribute).style('visibility', 'hidden')
+  }
+
 </script>
 
 <svg class={(mainMapFlag) ? 'main-map' : 'indicator-map-' + indicator.attribute} style='filter:drop-shadow(0 0 15px rgb(160, 160, 160))'
@@ -171,12 +179,33 @@
       on:click={() => click(feature)}
       />
   {/each}
+  {#if indicator && indicator.multiline === true}
+    <image href='info.png' width='20' y='5' x={w-25} on:mouseover={() => multiInfo()} on:mouseout={() => multiInfoOut()}/>
+  {/if}
 </svg>
+
+{#if indicator && indicator.multiline === true}
+  <div class={'tooltip-multi tooltip-multi' + indicator.attribute}>
+    <p>De kleur van de buurten in deze gemeente is de kleur van de klasse met het hoogste percentage in die buurt</p>
+  </div>
+{/if}
 
 
 <style>
   svg{
     width:100%;
     height:100%;
+  }
+
+  .tooltip-multi{
+    visibility:hidden;
+    position: absolute;
+    width:200px;
+    background-color: white;
+    right:40px;
+    top:0;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    border-radius: 20px;
+    padding:0px 10px 0px 10px;
   }
 </style>

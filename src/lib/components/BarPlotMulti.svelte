@@ -90,11 +90,6 @@
   }
 
   function mouseOver(st, stacked){
-    // console.log(st, stacked)
-
-    // select('.' + 'barplot_rect' + indicator.attribute + stacked.key.replace(' ', '')  + st.data.group)
-    //   .style('filter', "url(#highlightFilter)")
-
     hoveredValue.set({
       indicator: stacked.key, 
       value: Math.round((st[1]-st[0])*100)/100 + '%', 
