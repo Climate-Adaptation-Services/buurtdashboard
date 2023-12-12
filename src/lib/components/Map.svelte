@@ -24,9 +24,12 @@
 
   function mouseOver(e, feature){
     if(mainMapFlag){
-      select('.' + getClassName(feature))
-        .attr('fill', '#36575A')      
-      mousePosition.set(window.innerHeight - e.screenY)
+      if(feature.properties[classNameVariable] !== $buurtSelection){
+
+        select('.' + getClassName(feature))
+          .attr('fill', '#36575A')      
+        mousePosition.set(window.innerHeight - e.screenY)
+      }
     }else{
       select('.' + getClassName(feature))
         .attr('stroke-width', 3)
