@@ -53,8 +53,10 @@
 
 <div class='search'>
   <div>
+    <p class='select-title'>Gemeente:</p>
     <Select items={gemeenteList} placeholder="Zoek gemeente..." value={$gemeenteSelection} on:change={handleGemeenteChange} on:clear={handleGemeenteClear}/>
     {#if $gemeenteSelection !== null}
+      <p class='select-title'>Buurt:</p>
       <Select items={buurtList} placeholder="Zoek buurt..." value={$buurtSelection} on:change={handleBuurtChange} on:clear={handleBuurtClear}/>
     {/if}
     {#if $buurtSelection !== null}
@@ -65,6 +67,11 @@
 
 <style>
   .search{
-    padding:40px;
+    padding:10px 40px 40px 40px;
+  }
+
+  .select-title{
+    color:white;
+    margin-bottom:5px;
   }
 </style>

@@ -30,7 +30,11 @@
   $: if($gemeenteSelection !== null){
     // buurten binnen gemeente
     const gemeenteFilter = $buurtData.features.filter(buurt => buurt.properties[$gemeenteCode] === $gemeenteSelection)
-    meanValuesDict['meanValueGemeente'] = median(gemeenteFilter.map(buurt => buurt.properties[indicator.attribute]))
+    meanValuesDict['meanValueGemeente'] = median(gemeenteFilter.map(buurt => {
+      // console.log(buurt.properties, indicator.attribute)
+      return buurt.properties[indicator.attribute]
+    }))
+    // console.log(meanValuesDict['meanValueGemeente'])
   }else{
     meanValuesDict['meanValueGemeente'] = 0
   }

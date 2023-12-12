@@ -58,13 +58,13 @@
       <div class='indicator-overview' style='height: {bodyHeight*0.2}px'>
         <Stats {bodyHeight} {indicator} {color}/>
       </div>
-      <div class='indicator-graph' style='height:{bodyHeight*0.4}px' bind:clientWidth={wGraph}>
+      <!-- <div class='indicator-graph' style='height:{bodyHeight*0.4}px' bind:clientWidth={wGraph}>
         {#if $gemeenteSelection !== null}
           <BeeswarmPlot w={wGraph} h={bodyHeight*0.4} {indicator} {color} nodesData={structuredClone($buurtenInGemeente.features)}/>
         {:else}
           <p style='text-align:center; padding-top:50px; font-size:18px; position:absolute; left:{wGraph/3}px'><em>Selecteer gemeente...</em></p>
         {/if}
-      </div>
+      </div> -->
     {:else}
       <div class='indicator-graph' style='height:{bodyHeight*0.6}px' bind:clientWidth={wGraph}>
         {#if indicator.multiline}
