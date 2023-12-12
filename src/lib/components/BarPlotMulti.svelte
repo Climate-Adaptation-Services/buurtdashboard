@@ -96,7 +96,7 @@
       color: color(stacked.key)
     })
 
-    let elem = document.getElementsByClassName('barplot_rect' + indicator.attribute + stacked.key.replace(' ', '')  + st.data.group)[0]
+    let elem = document.getElementsByClassName('barplot_rect' + indicator.attribute + stacked.key.replaceAll(' ', '')  + st.data.group)[0]
     let rectmap = elem.getBoundingClientRect();
     let tooltipCenter = [rectmap.left, rectmap.top]
     
@@ -115,7 +115,7 @@
   }
 
   function mouseOut(st, stacked){
-    select('.' + 'barplot_rect' + indicator.attribute + stacked.key.replace(' ', '')  + st.data.group)
+    select('.' + 'barplot_rect' + indicator.attribute + stacked.key.replaceAll(' ', '')  + st.data.group)
       .attr('stroke', 'none')
           
     hoveredValue.set(null)
@@ -132,7 +132,7 @@
     {#each stackedData as stacked, i}
       <g class='stack' fill={color(stacked.key)}>
         {#each stacked as st}
-          <rect on:mouseover={() => mouseOver(st, stacked)} on:mouseout={mouseOut(st, stacked)} class={'barplot_rect' + indicator.attribute + stacked.key.replace(' ', '') + st.data.group}
+          <rect on:mouseover={() => mouseOver(st, stacked)} on:mouseout={mouseOut(st, stacked)} class={'barplot_rect' + indicator.attribute + stacked.key.replaceAll(' ', '') + st.data.group}
             x={xScale(st[0])} y={yScale(st.data.group)} width={xScale(st[1]) - xScale(st[0])} height={yScale.bandwidth()/2} stroke-width='4'>
           </rect>
           {#if xScale(st[1]) - xScale(st[0]) > 40}
