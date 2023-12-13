@@ -1,5 +1,5 @@
 <script>
-  import { gemeenteData, buurtData, buurtSelection, gemeenteSelection, buurtSelectionData } from '$lib/stores';
+  import { gemeenteData, buurtData, buurtSelection, gemeenteCode, gemeenteSelection, buurtSelectionData, buurtCode, buurtNaam } from '$lib/stores';
   import Select from 'svelte-select'
   import * as _ from 'lodash'
   import { selectAll } from 'd3';
@@ -11,8 +11,8 @@
     gemeenteList = _.orderBy(gemeenteList, [gemeente => gemeente.label], ['asc']);
   }
   $: if($gemeenteSelection !== null){
-    const buurtenFeatures = $buurtData.features.filter(buurt => buurt.properties['gm_code'] === $gemeenteSelection)
-    buurtList = buurtenFeatures.map(buurt => {return {'value':buurt.properties['bu_code'], 'label':capSelectLabelLen(buurt.properties['bu_naam'])}})
+    const buurtenFeatures = $buurtData.features.filter(buurt => buurt.properties[$gemeenteCode] === $gemeenteSelection)
+    buurtList = buurtenFeatures.map(buurt => {return {'value':buurt.properties[$buurtCode], 'label':capSelectLabelLen(buurt.properties[$buurtNaam])}})
     buurtList = _.orderBy(buurtList, [buurt => buurt.label], ['asc']);
   }
 

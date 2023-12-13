@@ -1,9 +1,9 @@
 <script>
 
-  import { gemeenteData, hoveredValue, currentView, gemeenteSelection, buurtSelection, hoveredRegion, buurtenInGemeente, buurtCode } from "$lib/stores";
+  import { gemeenteData, hoveredValue, currentView, gemeenteSelection, buurtSelection, hoveredRegion, buurtenInGemeente, buurtCode, buurtNaam } from "$lib/stores";
   import { extent, scaleLinear, select, selectAll } from "d3";
   import XAxis from '$lib/components/XAxis.svelte';
-  import { forceSimulation, forceY, forceX, forceCollide } from "d3-force";
+  import { forceSimulation, forceY, forceX, forceCollide, forceManyBody } from "d3-force";
 
   export let w;
   export let h;
@@ -26,26 +26,29 @@
       nodes = simulation.nodes(); // Repopulate and update
   });
 
+  $: RADIUS = (nodesData.length > 150) ? 3 : 5
+
   // Run the simulation whenever any of the variables inside of it change
   $: {
     simulation = forceSimulation(nodesData)
       .force("x", forceX().x(d => xScale(d.properties[indicator.attribute])-5.1).strength(0.1))
       .force("y", forceY().y(70).strength(0.04))
-      .force("collide", forceCollide().radius(6))
-      .alpha(0.5) // [0, 1] The rate at which the simulation finishes. You should increase this if you want a faster simulation, or decrease it if you want more "movement" in the simulation.
-      .alphaDecay(0.000000000001) // [0, 1] The rate at which the simulation alpha approaches 0. you should decrease this if your bubbles are not completing their transitions between simulation states.
+      .force('charge', forceManyBody().strength(-0.5))
+      .force("collide", forceCollide().radius(RADIUS*1.2))
+      .alpha(0.6) // [0, 1] The rate at which the simulation finishes. You should increase this if you want a faster simulation, or decrease it if you want more "movement" in the simulation.
+      .alphaDecay(0.001) // [0, 1] The rate at which the simulation alpha approaches 0. you should decrease this if your bubbles are not completing their transitions between simulation states.
       .restart(); // Restart the simulation
   }
 
-  $: classNameVariable = ($currentView === 'Nederland') ? 'GM_CODE' : 'bu_code'
-  $: regionVariable = ($currentView === 'Nederland') ? 'GM_NAAM' : 'bu_naam'
+  $: classNameVariable = ($currentView === 'Nederland') ? 'GM_CODE' : $buurtCode
+  $: regionVariable = ($currentView === 'Nederland') ? 'GM_NAAM' : $buurtNaam
 
   function mouseOver(feature){
     if(feature.properties[$buurtCode] !== $buurtSelection){
 
       select('.' + getClassName(feature))
         .attr('stroke', 'white')
-        .attr('r', 8)
+        .attr('r', RADIUS+3)
         .style('filter', 'drop-shadow(0 0 5px #36575A)')
         .raise()
       
@@ -76,7 +79,7 @@
 
       select('.' + getClassName(feature))
         .attr('stroke', 'none')
-        .attr('r', 5)
+        .attr('r', RADIUS)
         .style('filter', 'none')
         .lower()
 
@@ -117,7 +120,7 @@
       <circle class={getClassName(node) + ' ' + 'svgelements_' + node.properties[$buurtCode]}
       stroke={(node.properties[$buurtCode] === $buurtSelection) ? '#E1575A' : 'none'}
       style='filter: {(node.properties[$buurtCode] === $buurtSelection) ? 'drop-shadow(0 0 5px #36575A)' : 'none'}'
-      cx={node.x} cy={node.y} r={(node.properties[$buurtCode] === $buurtSelection) ? '8' : '5'} fill={color(node.properties[indicator.attribute])} stroke-width='3'
+      cx={node.x} cy={node.y} r={(node.properties[$buurtCode] === $buurtSelection) ? RADIUS+3 : RADIUS} fill={color(node.properties[indicator.attribute])} stroke-width='3'
       on:mouseover={() => mouseOver(node)}
       on:mouseout={() => mouseOut(node)}
       on:click={() => click(node)}

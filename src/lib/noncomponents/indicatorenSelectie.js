@@ -17,7 +17,7 @@ export const indicatorenSelectie = [
   {
     titel:'Groen', 
     attribute:'allGroen', 
-    subtitel:'Totaal % groen per buurt (groen + boom, exclusief agrarisch)', 
+    subtitel:'Totaal % groen per buurt (laag groen + boom, exclusief agrarisch)', 
     plottitel:'% groen',
     categorie:'Ruimtelijke context', 
     color:["#CBCBCB", "#9DC182", "#63995C"], 

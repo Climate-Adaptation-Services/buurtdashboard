@@ -8,15 +8,15 @@ export const hoveredRegion = writable(null)
 export const hoveredValue = writable(null)
 export const mousePosition = writable(null)
 
-export const buurtCode = readable('bu_code')
-export const gemeenteCode = readable('gm_code')
-export const buurtNaam = readable('bu_naam')
+export const buurtCode = readable('BU_CODE')
+export const gemeenteCode = readable('GM_CODE')
+export const buurtNaam = readable('BU_NAAM')
 
 export const buurtSelectionData = derived(
   [buurtData, buurtSelection],
   ([$buurtData, $buurtSelection]) => {
     if($buurtData !== null){
-      return $buurtData.features.filter(buurt => buurt.properties['bu_code'] === $buurtSelection)[0]
+      return $buurtData.features.filter(buurt => buurt.properties['BU_CODE'] === $buurtSelection)[0]
     }else{
       return null
     }
@@ -42,10 +42,10 @@ export const currentData = derived(
     if($currentView === 'Nederland'){
       return $gemeenteData
     }else if($currentView === 'Gemeente'){
-      const newFeatures = $buurtData.features.filter(buurt => buurt.properties['gm_code'] === $gemeenteSelection)
+      const newFeatures = $buurtData.features.filter(buurt => buurt.properties['GM_CODE'] === $gemeenteSelection)
       return {type: 'FeatureCollection', features: newFeatures}
     }else{
-      const newFeatures = $buurtData.features.filter(buurt => buurt.properties['gm_code'] === $gemeenteSelection)
+      const newFeatures = $buurtData.features.filter(buurt => buurt.properties['GM_CODE'] === $gemeenteSelection)
       return {type: 'FeatureCollection', features: newFeatures}
       // const newFeatures = $buurtData.features.filter(buurt => buurt.properties['bu_code'] === $buurtSelection)
       // return {type: 'FeatureCollection', features: newFeatures}
@@ -57,7 +57,7 @@ export const buurtenInGemeente = derived(
   [gemeenteSelection, buurtData],
   ([$gemeenteSelection, $buurtData]) => {
     if($gemeenteSelection !== null){
-      const newFeatures = $buurtData.features.filter(buurt => buurt.properties['gm_code'] === $gemeenteSelection)
+      const newFeatures = $buurtData.features.filter(buurt => buurt.properties['GM_CODE'] === $gemeenteSelection)
       return {type: 'FeatureCollection', features: newFeatures}
     }else{
       return null

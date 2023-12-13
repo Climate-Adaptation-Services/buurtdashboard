@@ -1,6 +1,6 @@
 <script>
   import center from '@turf/center'
-  import { currentData, gemeenteSelection, currentView, buurtSelection, hoveredRegion, hoveredValue, buurtCode, mousePosition } from "$lib/stores";
+  import { currentData, gemeenteSelection, currentView, buurtSelection, hoveredRegion, hoveredValue, buurtCode, mousePosition, buurtNaam } from "$lib/stores";
   import { geoMercator, geoPath, select, selectAll } from 'd3';
   import { loadMapData } from "$lib/noncomponents/loadMapData.js";
 
@@ -14,8 +14,8 @@
 
   if(mainMapFlag){loadMapData(datajson)}
 
-  $: classNameVariable = ($currentView === 'Nederland') ? 'GM_CODE' : 'bu_code'
-  $: regionVariable = ($currentView === 'Nederland') ? 'GM_NAAM' : 'bu_naam'
+  $: classNameVariable = ($currentView === 'Nederland') ? 'GM_CODE' : $buurtCode
+  $: regionVariable = ($currentView === 'Nederland') ? 'GM_NAAM' : $buurtNaam
   
   $: projection = geoMercator()
     .fitExtent([[10,10],[w-10,h-20]], $currentData)
