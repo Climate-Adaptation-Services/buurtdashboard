@@ -1,6 +1,6 @@
 <script>
   import center from '@turf/center'
-  import { currentData, gemeenteSelection, currentView, buurtSelection, hoveredRegion, hoveredValue, buurtCode, mousePosition, buurtNaam } from "$lib/stores";
+  import { currentData, gemeenteSelection, currentView, buurtSelection, hoveredRegion, hoveredValue, buurtCode, mousePosition, buurtNaam, buurtenInGemeente } from "$lib/stores";
   import { geoMercator, geoPath, select, selectAll } from 'd3';
   import { loadMapData } from "$lib/noncomponents/loadMapData.js";
 
@@ -35,11 +35,15 @@
         .attr('stroke-width', 3)
         .style('filter', 'drop-shadow(0 0 15px black)')
         .raise()
-      select('.' + getClassName(feature).replace('path', 'node'))
+      if(indicator.numerical === true){
+        const RADIUS = ($buurtenInGemeente.features.length > 150) ? 3 : 5
+
+        select('.' + getClassName(feature).replace('path', 'node'))
         .attr('stroke', 'white')
-        .attr('r', 8)
+        .attr('r', RADIUS + 3)
         .style('filter', 'drop-shadow(0 0 5px black)')
         .raise()
+      }
 
       const hoverColor = (indicator.numerical) 
         ? color(feature.properties[indicator.attribute]) 
@@ -86,11 +90,15 @@
           .attr('stroke-width', 0.5)
           .style('filter', 'none')
           .lower()
-        select('.' + getClassName(feature).replace('path', 'node'))
-          .attr('stroke', 'none')
-          .attr('r', 5)
-          .style('filter', 'none')
-          .lower()
+        if(indicator.numerical){
+          const RADIUS = ($buurtenInGemeente.features.length > 150) ? 3 : 5
+          select('.' + getClassName(feature).replace('path', 'node'))
+            .attr('stroke', 'none')
+            .attr('r', RADIUS)
+            .style('filter', 'none')
+            .lower()
+        }
+
           
         hoveredValue.set(null)
       }
