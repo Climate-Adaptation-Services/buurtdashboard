@@ -17,9 +17,11 @@
   }
 
   function handleGemeenteChange(e){
-    buurtSelection.set(null)
     gemeenteSelection.set(null)
-    gemeenteSelection.set(e.detail.value)
+    buurtSelection.set(null)
+    setTimeout(() => { gemeenteSelection.set(e.detail.value) }, 1);
+
+    
   }
 
   function handleBuurtChange(e){
