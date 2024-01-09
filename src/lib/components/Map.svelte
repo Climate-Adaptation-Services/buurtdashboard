@@ -27,7 +27,7 @@
       if(feature.properties[classNameVariable] !== $buurtSelection){
 
         select('.' + getClassName(feature))
-          .attr('fill', '#36575A')      
+          .attr('fill', '#36575A')
         mousePosition.set(window.innerHeight - e.screenY)
       }
     }else{
