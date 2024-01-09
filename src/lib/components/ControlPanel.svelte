@@ -18,6 +18,7 @@
 
   function handleGemeenteChange(e){
     buurtSelection.set(null)
+    gemeenteSelection.set(null)
     gemeenteSelection.set(e.detail.value)
   }
 
