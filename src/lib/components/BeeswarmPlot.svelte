@@ -31,8 +31,10 @@
   // Run the simulation whenever any of the variables inside of it change
   $: {
     simulation = forceSimulation(nodesData)
-      .force("x", forceX().x(d => xScale(d.properties[indicator.attribute])).strength(0.1))
-      .force("y", forceY().y(70).strength(0.04))
+      .force("x", forceX().x(d => xScale(d.properties[indicator.attribute]))
+        .strength(d => (xScale(d.properties[indicator.attribute]) > 0) ? 0.1 : 1))
+      .force("y", forceY().y(70)
+        .strength(d => (xScale(d.properties[indicator.attribute]) > 0) ? 0.04 : 0.01))
       .force('charge', forceManyBody().strength(-0.5))
       .force("collide", forceCollide().radius(RADIUS*1.2))
       .alpha(0.6) // [0, 1] The rate at which the simulation finishes. You should increase this if you want a faster simulation, or decrease it if you want more "movement" in the simulation.
