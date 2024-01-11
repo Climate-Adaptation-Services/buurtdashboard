@@ -10,7 +10,7 @@
   export let color;
 
   $: name = (regio === 'Nederland')
-    ? 'Mediaan van ' + regio
+    ? regio
     : (regio === 'Gemeente')
       ? 'Gemeente ' + $gemeenteData.features.filter(gemeente => gemeente.properties['GM_CODE'] === $gemeenteSelection)[0].properties['GM_NAAM']
       : (regio === 'Buurt')
