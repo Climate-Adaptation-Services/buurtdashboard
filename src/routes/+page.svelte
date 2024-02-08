@@ -92,6 +92,10 @@
     background-color: #35575A;
     color:white;
   }
+  h1{
+    margin-bottom:5px;
+  }
+  
   .control-panel{
     flex:3;
   }

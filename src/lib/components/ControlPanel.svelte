@@ -19,9 +19,7 @@
   function handleGemeenteChange(e){
     gemeenteSelection.set(null)
     buurtSelection.set(null)
-    setTimeout(() => { gemeenteSelection.set(e.detail.value) }, 1);
-
-    
+    setTimeout(() => { gemeenteSelection.set(e.detail.value) }, 1);    
   }
 
   function handleBuurtChange(e){
@@ -57,6 +55,16 @@
 
 <div class='search'>
   <div>
+    <div class='download-and-about'>
+      <div class='download'>
+        <img src='/download.png' width='30px'/>
+        <p class='download-and-about-text'>Download data</p>
+      </div>
+      <div class='about'>
+        <img src='/about.png' width='30px'/>
+        <p class='download-and-about-text'>Over dit dashboard</p>
+      </div>
+    </div>
     <p class='select-title'>Gemeente:</p>
     <Select items={gemeenteList} placeholder="Zoek gemeente..." value={$gemeenteSelection} on:change={handleGemeenteChange} on:clear={handleGemeenteClear}/>
     {#if $gemeenteSelection !== null}
@@ -77,5 +85,36 @@
   .select-title{
     color:white;
     margin-bottom:5px;
+  }
+
+  .download-and-about{
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    margin-top:0px;
+    margin-bottom:20px;
+    color:white;
+  }
+
+  .download, .about{
+    float:left;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    cursor:pointer;
+  }
+
+  .download-and-about-text{
+    visibility: hidden;
+    margin-top: 5px;
+    margin-bottom: 0px;
+  }
+
+  .download:hover .download-and-about-text{
+    visibility: visible; 
+  }
+  .about:hover .download-and-about-text{
+    visibility: visible; 
   }
 </style>
