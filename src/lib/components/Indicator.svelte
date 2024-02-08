@@ -128,8 +128,8 @@
     position: absolute;
     max-width:300px;
     background-color: white;
-    right:40px;
-    top:40px;
+    right:30px;
+    top:30px;
     z-index: 1000;
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
     border-radius: 20px;
