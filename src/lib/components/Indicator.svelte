@@ -20,7 +20,7 @@
   function getClass(value){
     let kl = ''
     Object.keys(indicator.klassen).reverse().forEach(klasse => {
-      if(value < indicator.klassen[klasse]){
+      if(value <= indicator.klassen[klasse]){
         kl = klasse;
       }
     });

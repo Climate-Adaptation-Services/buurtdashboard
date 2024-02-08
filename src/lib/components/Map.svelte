@@ -22,6 +22,7 @@
   
   $: path = geoPath(projection);
 
+
   function mouseOver(e, feature){
     if(mainMapFlag){
       if(feature.properties[classNameVariable] !== $buurtSelection){
@@ -97,9 +98,7 @@
             .attr('r', RADIUS)
             .style('filter', 'none')
             .lower()
-        }
-
-          
+        }   
         hoveredValue.set(null)
       }
     }
@@ -172,7 +171,7 @@
           : 'whitesmoke' 
         : (indicator.numerical) 
           ? color(feature.properties[indicator.attribute]) 
-          : (indicator.multiline) 
+          : (indicator.multiline)
             ? color(mostCommonClass(feature))
             : color(getClass(feature.properties[indicator.attribute]))
       }

@@ -57,28 +57,28 @@ export const indicatorenSelectie = [
     multiline:true,
     bron:'KEA/WB/CBS'
   },
-  {
-    titel:'Koele plekken', 
-    attribute:'ATK_KPperc', 
-    subtitel:'% koele plekken vanuit de Afstand tot Koelte Kaart',
-    plottitel:'% koele plekken', 
-    categorie:'Impact en Kwetsbaarheid', 
-    color:["#FBDC6C", "#9BF09C", "#00E612"], 
-    numerical:true, 
-    link:'https://www.klimaateffectatlas.nl/nl/afstand-tot-koeltekaart',
-    multiline:false,
-    bron:'KEA/TAUW/CBS'
-  },
+  // {
+  //   titel:'Koele plekken', 
+  //   attribute:'ATK_KPperc', 
+  //   subtitel:'% koele plekken vanuit de Afstand tot Koelte Kaart',
+  //   plottitel:'% koele plekken', 
+  //   categorie:'Impact en Kwetsbaarheid', 
+  //   color:["#FBDC6C", "#9BF09C", "#00E612"], 
+  //   numerical:true, 
+  //   link:'https://www.klimaateffectatlas.nl/nl/afstand-tot-koeltekaart',
+  //   multiline:false,
+  //   bron:'KEA/TAUW/CBS'
+  // },
   {
     titel:'Risico paalrot', 
     attribute:'Paal2050H', 
     subtitel:'Risico Paalrot 2050 bij sterke klimaatverandering', 
     categorie:'Impact en Kwetsbaarheid', 
     color:{
-      domain:['Zeer laag', 'Laag', 'Midden', 'Hoog', 'Zeer hoog'], 
-      range:['#CCCCCC','#FEFEBB','#D0B867','#A26B29','#742600']
+      domain:['Geen data', 'Zeer laag', 'Laag', 'Midden', 'Hoog', 'Zeer hoog'], 
+      range:['#333333','#CCCCCC','#FEFEBB','#D0B867','#A26B29','#742600']
     }, 
-    klassen:{'Zeer laag':0.8,'Laag':3, 'Midden':6, 'Hoog':15, 'Zeer hoog':10000},
+    klassen:{'Geen data':0, 'Zeer laag':0.8,'Laag':3, 'Midden':6, 'Hoog':15, 'Zeer hoog':10000},
     numerical:false, 
     link:'https://www.klimaateffectatlas.nl/nl/risicokaarten-funderingen',
     multiline:false,
