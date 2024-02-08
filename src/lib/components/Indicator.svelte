@@ -48,6 +48,11 @@
 </script>
 
 <div class='indicator-div'>
+  <h3 class='question-mark' style='padding:3px 10px 3px 10px; margin:0; position:absolute; border-radius:50px; right:5px; top:5px; color:white;background-color:#36575B; cursor:default'>?</h3>
+  <div class={'indicator-info indicator-info-' + indicator.attribute}>
+    <p>De kleuren in deze kaart geven aan welke klasse in die buurt het meest voorkomt</p>
+  </div>
+
   <div class='indicator-title' style='height: {titleHeight}px'>
     <h4 style='margin:0px; color:#BB9012'>Categorie: {indicator.categorie}</h4>
     <h2 style='padding:5px 15px 5px 15px; margin:10px 0px 7px 0px; background-color:#36575B; border-radius:15px; color:white'>{indicator.titel}</h2>
@@ -116,5 +121,23 @@
   a{
     color:black;
   }
+
+  .indicator-info{
+    visibility:hidden;
+    position: absolute;
+    width:200px;
+    background-color: white;
+    right:40px;
+    top:10px;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    border-radius: 20px;
+    padding:0px 10px 0px 10px;
+  }
+
+  .question-mark:hover ~ .indicator-info{
+    visibility:visible;
+  }
+
+
 
 </style>
