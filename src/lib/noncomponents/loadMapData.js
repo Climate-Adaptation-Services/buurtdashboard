@@ -24,6 +24,20 @@ export function loadMapData(datajson){
   
   let combinedBuurt = [...buurtTopojson1.features, ...buurtTopojson2.features, ...buurtTopojson3.features]
 
+  // Geboorte totaal naar percentage
+  combinedBuurt = combinedBuurt.map(buurt => {
+    buurt.properties['Geboorte'] = (typeof parseFloat(buurt.properties['Geboorte']) === 'number')
+      ? (parseFloat(buurt.properties['Geboorte']) / buurt.properties['AANT_INW']) * 100
+      : null
+    return buurt
+  })
+
+  // Ernstig overgewicht van string naar num
+  combinedBuurt = combinedBuurt.map(buurt => {
+    buurt.properties['ErnsOverge'] = parseFloat(buurt.properties['ErnsOverge'])
+    return buurt
+  })
+
   // koele plekken naar percentage
   combinedBuurt = combinedBuurt.map(buurt => {
     buurt.properties['ATK_KPperc'] *= 100

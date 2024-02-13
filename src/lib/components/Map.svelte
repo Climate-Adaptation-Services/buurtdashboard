@@ -47,13 +47,17 @@
       }
 
       const hoverColor = (indicator.numerical) 
-        ? color(feature.properties[indicator.attribute]) 
+        ? (feature.properties[indicator.attribute])
+          ? color(feature.properties[indicator.attribute]) 
+          : '#000000'
         : (indicator.multiline)
           ? color(mostCommonClass(feature))
           : color(getClass(feature.properties[indicator.attribute]))
       
       const hoverValue = (indicator.numerical)
-        ? Math.round(feature.properties[indicator.attribute]*100)/100
+        ? (feature.properties[indicator.attribute])
+          ? Math.round(feature.properties[indicator.attribute]*100)/100
+          : 'Geen data'
         : (indicator.multiline)
           ? mostCommonClass(feature)
           : getClass(feature.properties[indicator.attribute])
@@ -170,7 +174,10 @@
           ? '#E1575A'
           : 'whitesmoke' 
         : (indicator.numerical) 
-          ? color(feature.properties[indicator.attribute]) 
+          // check if value not null 
+          ? (feature.properties[indicator.attribute] !== null)
+            ? color(feature.properties[indicator.attribute])
+            : '#000000'
           : (indicator.multiline)
             ? color(mostCommonClass(feature))
             : color(getClass(feature.properties[indicator.attribute]))

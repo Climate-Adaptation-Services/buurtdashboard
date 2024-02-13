@@ -84,4 +84,76 @@ export const indicatorenSelectie = [
     multiline:false,
     bron:'KEA/Deltares'
   },
+  {
+    titel:'Ernstige eenzaamheid', 
+    attribute:'ErnstigZee', 
+    subtitel:'% personen zeer eenzaam per buurt', 
+    plottitel:'% personen',
+    categorie:'Ruimtelijke context', 
+    color:["#CBCBCB", "#a0b7c7", "steelblue"], 
+    numerical:true, 
+    link:'',
+    multiline:false,
+    bron:'RIVM'
+  },
+  {
+    titel:'Moeite met rondkomen', 
+    attribute:'MoeiteMetR', 
+    subtitel:'% personen moeite met rondkomen per buurt', 
+    plottitel:'% personen',
+    categorie:'Ruimtelijke context', 
+    color:["#CBCBCB", "#a0b7c7", "steelblue"], 
+    numerical:true, 
+    link:'',
+    multiline:false,
+    bron:'RIVM'
+  },
+  {
+    titel:'Geboortes', 
+    attribute:'Geboorte', 
+    subtitel:'% Geboortes per buurt',
+    plottitel:'% geboortes',
+    categorie:'Ruimtelijke context', 
+    color:["#CBCBCB", "#a0b7c7", "steelblue"], 
+    numerical:true, 
+    link:'',
+    multiline:false,
+    bron:'CBS'
+  },
+  {
+    titel:'Huurwoningen', 
+    attribute:'HuurwTperc', 
+    subtitel:'% Huurwoningen per buurt', 
+    plottitel:'% woningen',
+    categorie:'Ruimtelijke context', 
+    color:["#CBCBCB", "#a0b7c7", "steelblue"], 
+    numerical:true, 
+    link:'',
+    multiline:false,
+    bron:'CBS'
+  },
+  {
+    titel:'Overgewicht', 
+    attribute:'ErnsOverge',
+    subtitel:'% Personen met ernstig overgewicht per buurt', 
+    plottitel:'% personen',
+    categorie:'Ruimtelijke context', 
+    color:["#CBCBCB", "#a0b7c7", "steelblue"], 
+    numerical:true, 
+    link:'',
+    multiline:false,
+    bron:'RIVM'
+  },
+  {
+    titel:'WOZ-waarde', 
+    attribute:'G_WOZ',
+    subtitel:'Gemiddelde WOZ-waarde van woningen x 1000 euro', 
+    plottitel:'Waarde x 1000 euro',
+    categorie:'Ruimtelijke context', 
+    color:["#CBCBCB", "#a0b7c7", "steelblue"], 
+    numerical:true, 
+    link:'',
+    multiline:false,
+    bron:'RIVM'
+  },
 ]

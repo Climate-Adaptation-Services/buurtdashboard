@@ -11,6 +11,10 @@
   export let color;
   export let nodesData
 
+  console.log(nodesData)
+  // filter out null values
+  nodesData = nodesData.filter(d => d.properties[indicator.attribute])
+
   const margin = {bottom:50, top:20, left:30, right:30}
 
   $: xScale = scaleLinear()
