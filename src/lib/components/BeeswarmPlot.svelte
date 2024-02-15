@@ -13,7 +13,7 @@
 
   console.log(nodesData)
   // filter out null values
-  nodesData = nodesData.filter(d => d.properties[indicator.attribute])
+  nodesData = nodesData.filter(d => typeof d.properties[indicator.attribute] === 'number')
 
   const margin = {bottom:50, top:20, left:30, right:30}
 

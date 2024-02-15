@@ -26,15 +26,19 @@ export function loadMapData(datajson){
 
   // Geboorte totaal naar percentage
   combinedBuurt = combinedBuurt.map(buurt => {
-    buurt.properties['Geboorte'] = (typeof parseFloat(buurt.properties['Geboorte']) === 'number')
-      ? (parseFloat(buurt.properties['Geboorte']) / buurt.properties['AANT_INW']) * 100
-      : null
+    buurt.properties['Geboorte'] = (isNaN(parseFloat(buurt.properties['Geboorte'])))
+      ? null
+      : (buurt.properties['AANT_INW'] > 0)
+        ? (parseFloat(buurt.properties['Geboorte']) / buurt.properties['AANT_INW']) * 100
+        : null
     return buurt
   })
 
   // Ernstig overgewicht van string naar num
   combinedBuurt = combinedBuurt.map(buurt => {
-    buurt.properties['ErnsOverge'] = parseFloat(buurt.properties['ErnsOverge'])
+    buurt.properties['ErnsOverge'] = (isNaN(parseFloat(buurt.properties['ErnsOverge'])))
+      ? null
+      : parseFloat(buurt.properties['ErnsOverge'])
     return buurt
   })
 
