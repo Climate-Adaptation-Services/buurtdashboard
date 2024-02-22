@@ -27,7 +27,7 @@ export const indicatorenSelectie = [
     bron:'KEA/Cobra'
   },
   {
-    titel:'Groen/Grijs openbare ruimte', 
+    titel:'Groen/Grijs openbaar', 
     attribute:'openbGroen', 
     subtitel:'% groen openbare ruimte van de buurt zonder agrarisch', 
     categorie:'Ruimtelijke context', 
@@ -42,7 +42,7 @@ export const indicatorenSelectie = [
     bron:'KEA/Cobra'
   },
   {
-    titel:'Groen/Grijs niet-openbare ruimte', 
+    titel:'Groen/Grijs niet-openbaar', 
     attribute:'PrivGroen', 
     subtitel:'% groen openbare ruimte van de buurt zonder agrarisch', 
     categorie:'Ruimtelijke context', 
@@ -65,7 +65,7 @@ export const indicatorenSelectie = [
       domain:['Agrarisch', 'Boom', 'Laag Groen', 'Grijs', 'Water'], 
       range:['#333333', "#63995C", "#9DC182", "#CBCBCB", '#5b93e1']
     }, 
-    klassen:{'Boom':'allBomen', 'Laag Groen':'allGroenLa', 'Grijs':'allGrijs', 'Water':'water2'},
+    klassen:{'Boom':'allBomen', 'Laag Groen':'allGroenLa', 'Grijs':'allGrijs', 'Water':'Water'},
     numerical:false, 
     link:'https://www.klimaateffectatlas.nl/nl/basiskaart-groen-en-grijs',
     multiline:true,

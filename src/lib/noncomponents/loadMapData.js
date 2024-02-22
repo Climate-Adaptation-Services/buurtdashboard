@@ -48,6 +48,12 @@ export function loadMapData(datajson){
     return buurt
   })
 
+  // groen/grijs/water naar percentage
+  combinedBuurt = combinedBuurt.map(buurt => {
+    buurt.properties['ATK_KPperc'] *= 100
+    return buurt
+  })
+
   console.log({type: 'FeatureCollection', features: combinedBuurt})
   buurtData.set({type: 'FeatureCollection', features: combinedBuurt})
 }
