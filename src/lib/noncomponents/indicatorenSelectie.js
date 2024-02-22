@@ -71,6 +71,21 @@ export const indicatorenSelectie = [
   // },
   {
     titel:'Risico paalrot', 
+    attribute:'PaalHuidig', 
+    subtitel:'Risico Paalrot in huidig klimaat', 
+    categorie:'Impact en Kwetsbaarheid', 
+    color:{
+      domain:['Geen data', 'Zeer laag', 'Laag', 'Midden', 'Hoog', 'Zeer hoog'], 
+      range:['#333333','#CCCCCC','#FEFEBB','#D0B867','#A26B29','#742600']
+    }, 
+    klassen:{'Geen data':0, 'Zeer laag':0.8,'Laag':3, 'Midden':6, 'Hoog':15, 'Zeer hoog':10000},
+    numerical:false, 
+    link:'https://www.klimaateffectatlas.nl/nl/risicokaarten-funderingen',
+    multiline:false,
+    bron:'KEA/Deltares'
+  },
+  {
+    titel:'Risico paalrot 2050', 
     attribute:'Paal2050H', 
     subtitel:'Risico Paalrot 2050 bij sterke klimaatverandering', 
     categorie:'Impact en Kwetsbaarheid', 
@@ -150,6 +165,18 @@ export const indicatorenSelectie = [
     subtitel:'Gemiddelde WOZ-waarde van woningen x 1000 euro', 
     plottitel:'Waarde x 1000 euro',
     categorie:'Ruimtelijke context', 
+    color:["#CBCBCB", "#a0b7c7", "steelblue"], 
+    numerical:true, 
+    link:'',
+    multiline:false,
+    bron:'RIVM'
+  },
+  {
+    titel:'Broze 65+ers', 
+    attribute:'BrozeGezon',
+    subtitel:'Sociale kwetsbaarheid hitte: broze 65+ers', 
+    plottitel:'% broze 65+ers',
+    categorie:'Impact en kwetsbaarheid', 
     color:["#CBCBCB", "#a0b7c7", "steelblue"], 
     numerical:true, 
     link:'',
