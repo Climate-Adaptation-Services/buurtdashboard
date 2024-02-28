@@ -3,8 +3,8 @@
   import Indicator from '$lib/components/Indicator.svelte';
   import Map from '$lib/components/Map.svelte';
   import Tooltip from '$lib/components/Tooltip.svelte';
-  import { buurtData } from '$lib/stores';
-  import { indicatorenSelectie } from '$lib/noncomponents/indicatorenSelectie.js'
+  import { buurtData, indicatorenSelectie } from '$lib/stores';
+  import { indicatorenLijst } from '$lib/noncomponents/indicatorenLijst.js'
 
   let screenSize = 1000
   let wMap;
@@ -27,6 +27,10 @@
 
   const indicatorHeight = 650
 
+  $: getoondeIndicatoren = ($indicatorenSelectie.length === 0) 
+    ? indicatorenLijst 
+    : indicatorenLijst.filter(d => $indicatorenSelectie.includes(d['titel']))
+
 </script>
 
 <svelte:window bind:innerWidth={screenSize} />
@@ -36,7 +40,7 @@
 <div class='container' style='justify-content:{screenSize < 800 ? 'center' : 'left'}'>
   <div class='sidebar' style='position:{screenSize > 800 ? "fixed" : "relative"}'>
     <div class='title'><h1>Buurtdashboard</h1></div>
-    <div class='control-panel'><ControlPanel /></div>
+    <div class='control-panel'><ControlPanel {indicatorenSelectie} /></div>
     <div class='map' bind:clientWidth={wMap} bind:clientHeight={hMap}>
       {#await getData}
         <pre style='color:white'>Loading...</pre>
@@ -50,7 +54,7 @@
   
   <div class='indicators' style='margin-left:{screenSize > 800 ? 400 : 0}px'>
     {#if $buurtData !== null}
-      {#each indicatorenSelectie as indicator}
+      {#each getoondeIndicatoren as indicator}
         <div class='indicator' style='height:{indicatorHeight}px'>
           <Indicator h={indicatorHeight} {indicator}/>
         </div>

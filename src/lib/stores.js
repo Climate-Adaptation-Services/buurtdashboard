@@ -12,6 +12,8 @@ export const buurtCode = readable('BU_CODE')
 export const gemeenteCode = readable('GM_CODE')
 export const buurtNaam = readable('BU_NAAM')
 
+export const indicatorenSelectie = writable([])
+
 export const buurtSelectionData = derived(
   [buurtData, buurtSelection],
   ([$buurtData, $buurtSelection]) => {

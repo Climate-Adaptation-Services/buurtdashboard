@@ -1,4 +1,4 @@
-export const indicatorenSelectie = [
+export const indicatorenLijst = [
   {
     titel:'Functionele gebieden', 
     attribute:'Bebouwing', 
@@ -116,7 +116,7 @@ export const indicatorenSelectie = [
   {
     titel:'Risico paalrot', 
     attribute:'PaalHuidig', 
-    subtitel:'Risico Paalrot in huidig klimaat', 
+    subtitel:'in huidig klimaat', 
     categorie:'Impact en Kwetsbaarheid', 
     color:{
       domain:['Geen data', 'Zeer laag', 'Laag', 'Midden', 'Hoog', 'Zeer hoog'], 
@@ -131,7 +131,7 @@ export const indicatorenSelectie = [
   {
     titel:'Risico paalrot 2050', 
     attribute:'Paal2050H', 
-    subtitel:'Risico Paalrot 2050 bij sterke klimaatverandering', 
+    subtitel:'bij sterke klimaatverandering', 
     categorie:'Impact en Kwetsbaarheid', 
     color:{
       domain:['Geen data', 'Zeer laag', 'Laag', 'Midden', 'Hoog', 'Zeer hoog'], 
@@ -146,7 +146,7 @@ export const indicatorenSelectie = [
   {
     titel:'Verschilzetting 2050', 
     attribute:'Vers2050H', 
-    subtitel:'Risico Paalrot 2050 bij sterke klimaatverandering', 
+    subtitel:'bij sterke klimaatverandering', 
     categorie:'Impact en Kwetsbaarheid', 
     color:{
       domain:['Geen data', 'Zeer laag', 'Laag', 'Matig', 'Hoog', 'Zeer hoog'], 
@@ -207,7 +207,7 @@ export const indicatorenSelectie = [
     bron:'CBS'
   },
   {
-    titel:'Overgewicht', 
+    titel:'Ernstig overgewicht', 
     attribute:'ErnsOverge',
     subtitel:'% Personen met ernstig overgewicht per buurt', 
     plottitel:'% personen',
@@ -219,7 +219,7 @@ export const indicatorenSelectie = [
     bron:'RIVM'
   },
   {
-    titel:'WOZ-waarde', 
+    titel:'Gemiddelde WOZ-waarde', 
     attribute:'G_WOZ',
     subtitel:'Gemiddelde WOZ-waarde van woningen x 1000 euro', 
     plottitel:'Waarde x 1000 euro',
@@ -233,7 +233,7 @@ export const indicatorenSelectie = [
   {
     titel:'Broze 65+ers', 
     attribute:'BrozeGezon',
-    subtitel:'Sociale kwetsbaarheid hitte: broze 65+ers', 
+    subtitel:'Sociale kwetsbaarheid hitte', 
     plottitel:'% broze 65+ers',
     categorie:'Impact en kwetsbaarheid', 
     color:["#CBCBCB", "#a0b7c7", "steelblue"], 

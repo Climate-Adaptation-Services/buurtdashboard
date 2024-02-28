@@ -3,6 +3,10 @@
   import Select from 'svelte-select'
   import * as _ from 'lodash'
   import { selectAll } from 'd3';
+  import MultiSelect from 'svelte-multiselect?client'
+  import { browser } from '$app/environment';
+  import { indicatorenLijst } from '$lib/noncomponents/indicatorenLijst';
+  import { indicatorenSelectie } from '$lib/stores';
 
   let gemeenteList;
   let buurtList;
@@ -47,6 +51,8 @@
       return label
     }
   }
+
+  const indicators = indicatorenLijst.map(d => d.titel)
  
 </script>
 
@@ -74,17 +80,29 @@
     {#if $buurtSelection !== null}
         <p style='color:white'>Wijktype: <strong>{wijktype}</strong></p>
     {/if}
+    {#if browser}
+      <div class='multiselectdiv'>
+        <p>Filter indicatoren:</p>
+        <MultiSelect bind:value={$indicatorenSelectie} options={indicators} />
+      </div>
+    {/if}
     </div>
 </div>
 
 <style>
   .search{
-    padding:10px 40px 40px 40px;
+    padding:10px 40px 10px 40px;
+  }
+
+  .multiselectdiv{
+    width:330px;
+    color:white;
+    font-size: 12px;
   }
 
   .select-title{
     color:white;
-    margin-bottom:5px;
+    margin:5px;
   }
 
   .download-and-about{
@@ -92,7 +110,7 @@
     justify-content: space-evenly;
     align-items: center;
     margin-top:0px;
-    margin-bottom:20px;
+    margin-bottom:0px;
     color:white;
   }
 
