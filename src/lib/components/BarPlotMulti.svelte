@@ -3,7 +3,6 @@
   import { wijkTypeData, buurtData, gemeenteSelection, buurtenInGemeente, buurtSelection, currentData, gemeenteData, buurtSelectionData, hoveredRegion, hoveredValue, buurtNaam } from "$lib/stores";
   import { scaleLinear, select, scaleBand, stack } from "d3";
   import * as _ from 'lodash';
-  import { onMount } from "svelte";
 
   export let w;
   export let h;

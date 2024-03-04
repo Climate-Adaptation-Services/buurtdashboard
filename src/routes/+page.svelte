@@ -28,7 +28,7 @@
   const indicatorHeight = 650
 
   $: getoondeIndicatoren = ($indicatorenSelectie.length === 0) 
-    ? indicatorenLijst 
+    ? indicatorenLijst
     : indicatorenLijst.filter(d => $indicatorenSelectie.includes(d['titel']))
 
 </script>
@@ -55,9 +55,11 @@
   <div class='indicators' style='margin-left:{screenSize > 800 ? 400 : 0}px'>
     {#if $buurtData !== null}
       {#each getoondeIndicatoren as indicator}
-        <div class='indicator' style='height:{indicatorHeight}px'>
-          <Indicator h={indicatorHeight} {indicator}/>
-        </div>
+        {#if indicator.attribute}
+          <div class='indicator' style='height:{indicatorHeight}px'>
+            <Indicator h={indicatorHeight} {indicator}/>
+          </div>
+        {/if}
       {/each}
     {/if}
   </div>

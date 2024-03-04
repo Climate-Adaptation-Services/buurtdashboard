@@ -2,11 +2,12 @@
   import { gemeenteData, buurtData, buurtSelection, gemeenteCode, gemeenteSelection, buurtSelectionData, buurtCode, buurtNaam } from '$lib/stores';
   import Select from 'svelte-select'
   import * as _ from 'lodash'
-  import { selectAll } from 'd3';
+  import { select, selectAll } from 'd3';
   import MultiSelect from 'svelte-multiselect?client'
   import { browser } from '$app/environment';
   import { indicatorenLijst } from '$lib/noncomponents/indicatorenLijst';
   import { indicatorenSelectie } from '$lib/stores';
+  import { afterUpdate, onMount } from 'svelte';
 
   let gemeenteList;
   let buurtList;
@@ -53,6 +54,21 @@
   }
 
   const indicators = indicatorenLijst.map(d => d.titel)
+
+  afterUpdate(() => {
+    selectAll('li')
+      .style('color', 'black')
+      .style('cursor', 'pointer')
+      .style('background-color', 'white')
+      .style('text-align', 'left')
+
+    selectAll('.disabled')
+      .style('color', 'steelblue')
+      .style('cursor', 'default')
+      .style('background-color', '#e5e3e3')
+      .style('text-align', 'center')
+  })
+
  
 </script>
 
@@ -82,7 +98,7 @@
     {/if}
     {#if browser}
       <div class='multiselectdiv'>
-        <p>Filter indicatoren:</p>
+        <p style='margin-bottom:5px'>Filter indicatoren:</p>
         <MultiSelect bind:value={$indicatorenSelectie} options={indicators} />
       </div>
     {/if}
