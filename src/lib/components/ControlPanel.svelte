@@ -59,15 +59,20 @@
     selectAll('li')
       .style('color', 'black')
       .style('cursor', 'pointer')
-      .style('background-color', 'white')
+      .attr('background-color', 'white')
       .style('text-align', 'left')
 
     selectAll('.disabled')
       .style('color', 'steelblue')
       .style('cursor', 'default')
-      .style('background-color', '#e5e3e3')
+      .attr('background-color', '#e5e3e3')
       .style('text-align', 'center')
+
+    selectAll('.selected li')
+      .style('background-color', 'white')
   })
+
+
 
  
 </script>
