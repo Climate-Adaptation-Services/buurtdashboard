@@ -3,8 +3,9 @@
   import Indicator from '$lib/components/Indicator.svelte';
   import Map from '$lib/components/Map.svelte';
   import Tooltip from '$lib/components/Tooltip.svelte';
-  import { buurtData, indicatorenSelectie } from '$lib/stores';
+  import { buurtData, buurtSelection, indicatorenSelectie, gemeenteSelection } from '$lib/stores';
   import { indicatorenLijst } from '$lib/noncomponents/indicatorenLijst.js'
+  import { afterUpdate } from 'svelte';
 
   let screenSize = 1000
   let wMap;
@@ -27,9 +28,28 @@
 
   const indicatorHeight = 650
 
-  $: getoondeIndicatoren = ($indicatorenSelectie.length === 0) 
-    ? indicatorenLijst
-    : indicatorenLijst.filter(d => $indicatorenSelectie.includes(d['titel']))
+  let getoondeIndicatoren = indicatorenLijst
+
+  $: onChange($indicatorenSelectie)
+
+  function onChange(indSel){
+    getoondeIndicatoren = []
+
+    const gemTemp = $gemeenteSelection
+    const buurtTemp = $buurtSelection
+    gemeenteSelection.set(null)
+    buurtSelection.set(null)
+
+    setTimeout(() => {
+      getoondeIndicatoren = ($indicatorenSelectie.length === 0) 
+        ? indicatorenLijst
+        : indicatorenLijst.filter(d => $indicatorenSelectie.includes(d['titel']))
+    }, 1)
+    setTimeout(() => {
+      gemeenteSelection.set(gemTemp)
+      buurtSelection.set(buurtTemp)
+    }, 1)
+  }
 
 </script>
 

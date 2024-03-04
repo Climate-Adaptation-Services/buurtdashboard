@@ -110,7 +110,6 @@
             ? 'Wijktype ' + $buurtSelectionData.properties['def_wijkty']
             : 'De buurt ' + $buurtSelectionData.properties[$buurtNaam]
     })
-    
   }
 
   function mouseOut(st, stacked){
