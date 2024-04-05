@@ -2,12 +2,13 @@
   import { gemeenteData, buurtData, buurtSelection, gemeenteCode, gemeenteSelection, buurtSelectionData, buurtCode, buurtNaam } from '$lib/stores';
   import Select from 'svelte-select'
   import * as _ from 'lodash'
-  import { select, selectAll } from 'd3';
+  import { select, selectAll, easeLinear } from 'd3';
   import MultiSelect from 'svelte-multiselect?client'
   import { browser } from '$app/environment';
   import { indicatorenLijst } from '$lib/noncomponents/indicatorenLijst';
   import { indicatorenSelectie } from '$lib/stores';
   import { afterUpdate, onMount } from 'svelte';
+  import AIimpression from './AIimpression.svelte';
 
   let gemeenteList;
   let buurtList;
@@ -71,9 +72,6 @@
     selectAll('.selected li')
       .style('background-color', 'white')
   })
-
-
-
  
 </script>
 
@@ -108,6 +106,9 @@
       </div>
     {/if}
     </div>
+    <!-- {#if $buurtSelection !== null}
+      <AIimpression />
+    {/if} -->
 </div>
 
 <style>

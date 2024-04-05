@@ -170,10 +170,10 @@ export const indicatorenLijst = [
     subtitel:'Waterdiepte bij kortdurende intense neerslag', 
     categorie:'Klimaateffecten', 
     color:{
-      domain:['No data', '5 - 10mm', '10 - 15mm', '15 - 20mm', '20 - 30mm', '>30mm'], 
-      range:["#333333", "#B6EEF0", "#74B4E9", "#2084E0", "#1D45B8", "#002674"]
+      domain:['No data', '<5mm', '5 - 10mm', '10 - 15mm', '15 - 20mm', '20 - 30mm', '>30mm'], 
+      range:["#333333", "#FFFFFF", "#B6EEF0", "#74B4E9", "#2084E0", "#1D45B8", "#002674"]
     }, 
-    klassen:{'No data':'percNODATA', '5 - 10mm':'perc5_10mm', '10 - 15mm':'perc10_15mm', '15 - 20mm':'perc15_20mm', '20 - 30mm':'perc20_30mm', '>30mm':'perc30mmME'},
+    klassen:{'No data':'percNODATA', '<5mm':'perc5mmMN', '5 - 10mm':'perc5_10mm', '10 - 15mm':'perc10_15mm', '15 - 20mm':'perc15_20mm', '20 - 30mm':'perc20_30mm', '>30mm':'perc30mmME'},
     numerical:false, 
     link:'https://www.klimaateffectatlas.nl/nl/hittekaart-gevoelstemperatuur',
     multiline:true,

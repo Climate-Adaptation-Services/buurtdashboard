@@ -13,15 +13,17 @@
   // let wIndicator;
   // let hIndicator;
 
+
+
   $: console.log($buurtData)
   
   const getData = (async () => {
 		const response = await Promise.all([
       // fetch('https://raw.githubusercontent.com/Climate-Adaptation-Services/buurtdashboard-data/main/GemeenteGrenzen2023.json'),
       fetch('https://raw.githubusercontent.com/Climate-Adaptation-Services/buurtdashboard-data/main/GemeenteGrenzen2023-small.json'),
-      fetch('https://raw.githubusercontent.com/Climate-Adaptation-Services/buurtdashboard-data/main/BuurtenDataset20231212_xaaaa.json'),
-      fetch('https://raw.githubusercontent.com/Climate-Adaptation-Services/buurtdashboard-data/main/BuurtenDataset20231212_xaaab.json'),
-      fetch('https://raw.githubusercontent.com/Climate-Adaptation-Services/buurtdashboard-data/main/BuurtenDataset20231212_xaaac.json')
+      fetch('https://raw.githubusercontent.com/Climate-Adaptation-Services/buurtdashboard-data/main/BuurtenDataset20240227_xaaaa.json'),
+      fetch('https://raw.githubusercontent.com/Climate-Adaptation-Services/buurtdashboard-data/main/BuurtenDataset20240227_xaaab.json'),
+      fetch('https://raw.githubusercontent.com/Climate-Adaptation-Services/buurtdashboard-data/main/BuurtenDataset20240227_xaaac.json')
     ])
     return [await response[0].json(), await response[1].json(), await response[2].json(), await response[3].json()]//, await response[5].json(), await response[6].json(), await response[7].json(), await response[8].json()]
 	})()
@@ -135,6 +137,7 @@
     min-width:360px;
     max-width:450px;
     background-color: white;
+    border-radius: 10px;
   }
 
 
