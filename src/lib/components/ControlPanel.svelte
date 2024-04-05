@@ -8,7 +8,6 @@
   import { indicatorenLijst } from '$lib/noncomponents/indicatorenLijst';
   import { indicatorenSelectie } from '$lib/stores';
   import { afterUpdate, onMount } from 'svelte';
-  import AIimpression from './AIimpression.svelte';
 
   let gemeenteList;
   let buurtList;
@@ -106,9 +105,6 @@
       </div>
     {/if}
     </div>
-    <!-- {#if $buurtSelection !== null}
-      <AIimpression />
-    {/if} -->
 </div>
 
 <style>
