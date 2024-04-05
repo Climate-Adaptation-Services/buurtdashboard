@@ -1,4 +1,4 @@
-<!-- <script>
+<script>
   import OpenAI from "openai";
   import { select, easeLinear } from "d3";
   import { buurtSelectionData } from "$lib/stores";
@@ -126,4 +126,4 @@
     visibility: visible; 
   }
 </style>
- -->
+
