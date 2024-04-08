@@ -179,6 +179,30 @@ export const indicatorenLijst = [
     multiline:true,
     bron:'KEA/WB/CBS'
   },
+  {
+    titel:'Grondwaterstand huidig', 
+    attribute:'GLGHuidigMean',
+    subtitel:'Gemiddelde Laagste Grondwaterstand huidig', 
+    plottitel:'',
+    categorie:'Klimaateffecten', 
+    color:["#CBCBCB", "#a0b7c7", "steelblue"], 
+    numerical:true, 
+    link:'',
+    multiline:false,
+    bron:''
+  },
+  {
+    titel:'Grondwaterstand 2050 hoog', 
+    attribute:'GLG2050HoogMean',
+    subtitel:'Gemiddelde Laagste Grondwaterstand 2050 hoog', 
+    plottitel:'',
+    categorie:'Klimaateffecten', 
+    color:["#CBCBCB", "#a0b7c7", "steelblue"], 
+    numerical:true, 
+    link:'',
+    multiline:false,
+    bron:''
+  },
   // {
   //   titel:'Koele plekken', 
   //   attribute:'ATK_KPperc', 
@@ -251,4 +275,16 @@ export const indicatorenLijst = [
     multiline:false,
     bron:'RIVM'
   },
+  // {
+  //   titel:'Sociaal minimum', 
+  //   attribute:'BrozeGezon',
+  //   subtitel:'% huishoudens onder sociaal minimum', 
+  //   plottitel:'% broze 65+ers',
+  //   categorie:'Impact en kwetsbaarheid', 
+  //   color:["#CBCBCB", "#a0b7c7", "steelblue"], 
+  //   numerical:true, 
+  //   link:'',
+  //   multiline:false,
+  //   bron:'RIVM'
+  // },
 ]
