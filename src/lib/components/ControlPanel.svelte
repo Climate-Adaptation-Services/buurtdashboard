@@ -1,5 +1,5 @@
 <script>
-  import { gemeenteData, buurtData, buurtSelection, gemeenteCode, gemeenteSelection, buurtSelectionData, buurtCode, buurtNaam } from '$lib/stores';
+  import { gemeenteData, buurtData, buurtSelection, gemeenteCode, gemeenteSelection, buurtSelectionData, buurtCode, buurtNaam, modal } from '$lib/stores';
   import Select from 'svelte-select'
   import * as _ from 'lodash'
   import { select, selectAll, easeLinear } from 'd3';
@@ -8,6 +8,8 @@
   import { indicatorenLijst } from '$lib/noncomponents/indicatorenLijst';
   import { indicatorenSelectie } from '$lib/stores';
   import { afterUpdate, onMount } from 'svelte';
+  import OverDitDashboard from '$lib/components/OverDitDashboard.svelte';
+  import { bind } from 'svelte-simple-modal';
 
   let gemeenteList;
   let buurtList;
@@ -71,6 +73,10 @@
     selectAll('.selected li')
       .style('background-color', 'white')
   })
+
+  const showModal = () => {
+    modal.set(bind(OverDitDashboard))
+  };
  
 </script>
 
@@ -84,9 +90,9 @@
         <img src='/download.png' width='30px'/>
         <p class='download-and-about-text'>Download data</p>
       </div>
-      <div class='about'>
+      <div class='about' on:click={() => showModal()}>
         <img src='/about.png' width='30px'/>
-        <p class='download-and-about-text'>Over dit dashboard</p>
+        <p class='download-and-about-text'>Uitleg grafieken</p>
       </div>
     </div>
     <p class='select-title'>Gemeente:</p>

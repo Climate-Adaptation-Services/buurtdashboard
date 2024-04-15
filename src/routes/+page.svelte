@@ -3,17 +3,16 @@
   import Indicator from '$lib/components/Indicator.svelte';
   import Map from '$lib/components/Map.svelte';
   import Tooltip from '$lib/components/Tooltip.svelte';
-  import { buurtData, buurtSelection, indicatorenSelectie, gemeenteSelection } from '$lib/stores';
+  import { buurtData, buurtSelection, indicatorenSelectie, gemeenteSelection, modal } from '$lib/stores';
   import { indicatorenLijst } from '$lib/noncomponents/indicatorenLijst.js'
   import { afterUpdate } from 'svelte';
+  import Modal from 'svelte-simple-modal';
 
   let screenSize = 1000
   let wMap;
   let hMap;
   // let wIndicator;
   // let hIndicator;
-
-
 
   $: console.log($buurtData)
   
@@ -87,6 +86,9 @@
   </div>
 
   <Tooltip />
+
+  <Modal show={$modal} style='position:absolute; left:0'></Modal>
+
 </div>
 
 <style>
