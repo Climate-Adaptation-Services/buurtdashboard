@@ -15,7 +15,8 @@ export const indicatorenLijst = [
     numerical:false, 
     link:'https://www.klimaateffectatlas.nl/nl/basiskaart-groen-en-grijs',
     multiline:true,
-    bron:'KEA/Cobra'
+    bron:'KEA/Cobra',
+    omschrijving:'De statistieken tonen de indeling in functionele gebieden zoals gebruikt in de Basiskaart Groen en Grijs. De verdeling in functionele gebieden is een belangrijke factor voor adaptatiemogelijkheden. In buurten met veel openbaar gebied liggen bijvoorbeeld andere maatregelen voor de hand dan in gebieden met veel tuinen. Ga naar het kaartverhaal voor meer informatie over de indeling in functionele gebieden.',
   },
   {
     titel:'Groen', 
@@ -27,7 +28,8 @@ export const indicatorenLijst = [
     numerical:true, 
     link:'https://www.klimaateffectatlas.nl/nl/basiskaart-groen-en-grijs',
     multiline:false,
-    bron:'KEA/Cobra'
+    bron:'KEA/Cobra',
+    omschrijving:'',
   },
   {
     titel:'Groen/Grijs openbaar', 
@@ -42,7 +44,8 @@ export const indicatorenLijst = [
     numerical:false, 
     link:'https://www.klimaateffectatlas.nl/nl/basiskaart-groen-en-grijs',
     multiline:true,
-    bron:'KEA/Cobra'
+    bron:'KEA/Cobra',
+    omschrijving:"De statistieken tonen het aandeel groen en grijs voor openbaar gebied op basis van de Basiskaart Groengrijs. Voor het onderscheid tussen groen en grijs (versteend) is gebruik gemaakt van luchtfoto's. Agrarisch gebied is niet meegenomen in de analyse. Ga naar het kaartverhaal voor de gehanteerde definitie van niet-openbaar gebied en een overzicht van de uitgangspunten bij de modellering.",
   },
   {
     titel:'Groen/Grijs niet-openbaar', 
@@ -57,7 +60,8 @@ export const indicatorenLijst = [
     numerical:false, 
     link:'https://www.klimaateffectatlas.nl/nl/basiskaart-groen-en-grijs',
     multiline:true,
-    bron:'KEA/Cobra'
+    bron:'KEA/Cobra',
+    omschrijving:"De statistieken tonen het aandeel per klasse op basis van de Basiskaart Groengrijs. Voor het onderscheid tussen groen en grijs (versteend) is gebruik gemaakt van luchtfoto's. Agrarisch gebied is niet meegenomen in de analyse. Ga naar het kaartverhaal voor een overzicht van de uitgangspunten bij de modellering.",
   },
   {
     titel:'Groen/Grijs/Blauw', 
@@ -72,7 +76,8 @@ export const indicatorenLijst = [
     numerical:false, 
     link:'https://www.klimaateffectatlas.nl/nl/basiskaart-groen-en-grijs',
     multiline:true,
-    bron:'KEA/Cobra'
+    bron:'KEA/Cobra',
+    omschrijving:"De statistieken tonen het aandeel per klasse op basis van de Basiskaart Groengrijs. Voor het onderscheid tussen groen en grijs (versteend) is gebruik gemaakt van luchtfoto's. Agrarisch gebied is niet meegenomen in de analyse. Ga naar het kaartverhaal voor een overzicht van de uitgangspunten bij de modellering.",
   },
   {
     titel:'Ernstige eenzaamheid', 
@@ -84,7 +89,8 @@ export const indicatorenLijst = [
     numerical:true, 
     link:'',
     multiline:false,
-    bron:'RIVM'
+    bron:'RIVM',
+    omschrijving:'',
   },
   {
     titel:'Moeite met rondkomen', 
@@ -96,7 +102,8 @@ export const indicatorenLijst = [
     numerical:true, 
     link:'',
     multiline:false,
-    bron:'RIVM'
+    bron:'RIVM',
+    omschrijving:'',
   },
   {
     titel:'Geboortes', 
@@ -108,7 +115,8 @@ export const indicatorenLijst = [
     numerical:true, 
     link:'',
     multiline:false,
-    bron:'CBS'
+    bron:'CBS',
+    omschrijving:'',
   },
   {
     titel:'Huurwoningen', 
@@ -120,7 +128,8 @@ export const indicatorenLijst = [
     numerical:true, 
     link:'',
     multiline:false,
-    bron:'CBS'
+    bron:'CBS',
+    omschrijving:'',
   },
   {
     titel:'Ernstig overgewicht', 
@@ -132,7 +141,8 @@ export const indicatorenLijst = [
     numerical:true, 
     link:'',
     multiline:false,
-    bron:'RIVM'
+    bron:'RIVM',
+    omschrijving:'',
   },
   {
     titel:'Gemiddelde WOZ-waarde', 
@@ -144,7 +154,21 @@ export const indicatorenLijst = [
     numerical:true, 
     link:'',
     multiline:false,
-    bron:'RIVM'
+    bron:'RIVM',
+    omschrijving:'',
+  },
+  {
+    titel:'Bevolkingsdichtheid', 
+    attribute:'BEV_DICHTH', 
+    subtitel:'', 
+    plottitel:'',
+    categorie:'Ruimtelijke context', 
+    color:["#CBCBCB", "#9DC182", "#63995C"], 
+    numerical:true, 
+    link:'https://www.klimaateffectatlas.nl/nl/basiskaart-groen-en-grijs',
+    multiline:false,
+    bron:'extern: CBS',
+    omschrijving:'',
   },
   {
     titel:{'label':'Klimaateffecten', 'disabled':true}
@@ -162,7 +186,8 @@ export const indicatorenLijst = [
     numerical:false, 
     link:'https://www.klimaateffectatlas.nl/nl/hittekaart-gevoelstemperatuur',
     multiline:true,
-    bron:'KEA/WB/CBS'
+    bron:'KEA/WB/CBS',
+    omschrijving:'',
   },
   {
     titel:'Waterdiepte neerslag', 
@@ -177,7 +202,8 @@ export const indicatorenLijst = [
     numerical:false, 
     link:'https://www.klimaateffectatlas.nl/nl/hittekaart-gevoelstemperatuur',
     multiline:true,
-    bron:'KEA/WB/CBS'
+    bron:'KEA/WB/CBS',
+    omschrijving:'De statistieken tonen de waterdiepten die optreden bij een intense zomerbui. Bebouwing en gebieden met minder dan 5 mm worden niet weergegeven. Belangrijke uitgangspunten bij de modellering zijn onder meer een uniforme rioolbergings- en afvoercapaciteit en het gebruik van de hoogtekaart van 2012: Voor gebieden die na 2012 zijn ontwikkeld of aangepast is deze informatie niet bruikbaar. Ga naar het kaartverhaal voor een overzicht van de uitgangspunten bij de modellering.',
   },
   {
     titel:'Grondwaterstand huidig', 
@@ -189,7 +215,8 @@ export const indicatorenLijst = [
     numerical:true, 
     link:'',
     multiline:false,
-    bron:''
+    bron:'',
+    omschrijving:'De statistieken tonen de Gemiddelde Laagste Grondwaterstand zoals gemodelleerd voor het huidige klimaat. De indicator is gemodelleerd met het Nationaal Water Model. De kaarten geven een grof beeld en dienen enkel ter indicatie.',
   },
   {
     titel:'Grondwaterstand 2050 hoog', 
@@ -201,7 +228,8 @@ export const indicatorenLijst = [
     numerical:true, 
     link:'',
     multiline:false,
-    bron:''
+    bron:'',
+    omschrijving:'',
   },
   // {
   //   titel:'Koele plekken', 
@@ -213,7 +241,8 @@ export const indicatorenLijst = [
   //   numerical:true, 
   //   link:'https://www.klimaateffectatlas.nl/nl/afstand-tot-koeltekaart',
   //   multiline:false,
-  //   bron:'KEA/TAUW/CBS'
+  //   bron:'KEA/TAUW/CBS',
+  // omschrijving:'',
   // },
   {
     titel:{'label':'Impact en kwetsbaarheid', 'disabled':true}
@@ -231,7 +260,8 @@ export const indicatorenLijst = [
     numerical:false, 
     link:'https://www.klimaateffectatlas.nl/nl/risicokaarten-funderingen',
     multiline:false,
-    bron:'KEA/Deltares'
+    bron:'KEA/Deltares',
+    omschrijving:"De statistieken tonen de risico's voor paalrot zoals gemodelleerd voor het huidige klimaat. Het risico wordt berekend door het percentage panden met houten palen te combineren met de gevoeligheid van de locatie voor paalrot. Ga naar het kaartverhaal voor  een overzicht van de uitgangspunten bij de modellering.",
   },
   {
     titel:'Risico paalrot 2050', 
@@ -246,7 +276,8 @@ export const indicatorenLijst = [
     numerical:false, 
     link:'https://www.klimaateffectatlas.nl/nl/risicokaarten-funderingen',
     multiline:false,
-    bron:'KEA/Deltares'
+    bron:'KEA/Deltares',
+    omschrijving:'',
   },
   {
     titel:'Verschilzetting 2050', 
@@ -261,7 +292,8 @@ export const indicatorenLijst = [
     numerical:false, 
     link:'https://www.klimaateffectatlas.nl/nl/risicokaarten-funderingen',
     multiline:false,
-    bron:'KEA/Deltares'
+    bron:'KEA/Deltares',
+    omschrijving:"De statistieken tonen de risico's voor verschilzetting zoals gemodelleerd voor 2050 bij sterke klimaatverandering. Het risico wordt berekend door het percentage panden op staal palen te combineren met de gevoeligheid van de locatie voor verschilzetting. Ga naar het kaartverhaal voor  een overzicht van de uitgangspunten bij de modellering.",
   },
   {
     titel:'Broze 65+ers', 
@@ -273,18 +305,20 @@ export const indicatorenLijst = [
     numerical:true, 
     link:'',
     multiline:false,
-    bron:'RIVM'
+    bron:'RIVM',
+    omschrijving:'De statistieken tonen het aandeel 65%-ers met een broze gezondheid. Deze groep is extra kwetsbaar voor hitte. Het begrip broosheid omvat fysieke gezondheid, mentale gezondheid en sociale gezondheid. Ga naar het kaartverhaal voor meer informatie over de indicator.',
   },
-  // {
-  //   titel:'Sociaal minimum', 
-  //   attribute:'BrozeGezon',
-  //   subtitel:'% huishoudens onder sociaal minimum', 
-  //   plottitel:'% broze 65+ers',
-  //   categorie:'Impact en kwetsbaarheid', 
-  //   color:["#CBCBCB", "#a0b7c7", "steelblue"], 
-  //   numerical:true, 
-  //   link:'',
-  //   multiline:false,
-  //   bron:'RIVM'
-  // },
+  {
+    titel:'Sociaal minimum', 
+    attribute:'P_H_SOCMIN',
+    subtitel:'Sociale kwetsbaarheid hitte: % huishoudens op of rond het sociaal minimum', 
+    plottitel:'% HH rond/onder sociaal minimum',
+    categorie:'Impact en kwetsbaarheid', 
+    color:["#CBCBCB", "#a0b7c7", "steelblue"], 
+    numerical:true, 
+    link:'',
+    multiline:false,
+    bron:'RIVM',
+    omschrijving:'De statistieken tonen het aandeel huishoudens dat leeft rond of onder het sociaal minimum. Deze groep is extra kwetsbaar voor hitte. Ga naar het kaartverhaal voor meer informatie over de indicator.',
+  },
 ]

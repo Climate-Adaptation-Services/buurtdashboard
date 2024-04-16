@@ -50,8 +50,9 @@
 <div class='indicator-div'>
   <h3 class='question-mark' style='padding:3px 10px 3px 10px; margin:0; position:absolute; border-radius:50px; right:5px; top:5px; color:white;background-color:#36575B; cursor:default'>?</h3>
   <div class={'indicator-info indicator-info-' + indicator.attribute}>
-    <p style='font-size:16px; font-style:bold'><strong>{indicator.titel}</strong></p>
-    <p>{indicator.subtitel}</p>
+    <p style='padding:3px 10px 3px 10px; border-radius:50px; color:white;background-color:#36575B; float:left'><strong>{indicator.titel}</strong></p>
+    <hr width='100%'>
+    <p>{indicator.omschrijving}</p>
   </div>
 
   <div class='indicator-title' style='height: {titleHeight}px'>
