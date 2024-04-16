@@ -74,8 +74,8 @@
       .style('background-color', 'white')
   })
 
-  const showModal = () => {
-    modal.set(bind(OverDitDashboard))
+  const showModal = (type) => {
+    modal.set(bind(OverDitDashboard, { type : type}))
   };
  
 </script>
@@ -90,8 +90,12 @@
         <img src='/download.png' width='30px'/>
         <p class='download-and-about-text'>Download data</p>
       </div>
-      <div class='about' on:click={() => showModal()}>
+      <div class='about' on:click={() => showModal('intro')}>
         <img src='/about.png' width='30px'/>
+        <p class='download-and-about-text'>Intro dashboard</p>
+      </div>
+      <div class='about' on:click={() => showModal('graphs')}>
+        <img src='/chart.png' width='30px'/>
         <p class='download-and-about-text'>Uitleg grafieken</p>
       </div>
     </div>
