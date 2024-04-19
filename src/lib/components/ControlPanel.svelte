@@ -5,11 +5,13 @@
   import { select, selectAll, easeLinear } from 'd3';
   import MultiSelect from 'svelte-multiselect?client'
   import { browser } from '$app/environment';
-  import { indicatorenLijst } from '$lib/noncomponents/indicatorenLijst';
   import { indicatorenSelectie } from '$lib/stores';
   import { afterUpdate, onMount } from 'svelte';
   import OverDitDashboard from '$lib/components/OverDitDashboard.svelte';
   import { bind } from 'svelte-simple-modal';
+
+  export let indicatorenLijst
+
 
   let gemeenteList;
   let buurtList;
@@ -86,10 +88,6 @@
 <div class='search'>
   <div>
     <div class='download-and-about'>
-      <div class='download'>
-        <img src='/download.png' width='30px'/>
-        <p class='download-and-about-text'>Download data</p>
-      </div>
       <div class='about' on:click={() => showModal('intro')}>
         <img src='/about.png' width='30px'/>
         <p class='download-and-about-text'>Intro dashboard</p>
@@ -97,6 +95,10 @@
       <div class='about' on:click={() => showModal('graphs')}>
         <img src='/chart.png' width='30px'/>
         <p class='download-and-about-text'>Uitleg grafieken</p>
+      </div>
+      <div class='download'>
+        <img src='/download.png' width='30px'/>
+        <p class='download-and-about-text'>Download data</p>
       </div>
     </div>
     <p class='select-title'>Gemeente:</p>

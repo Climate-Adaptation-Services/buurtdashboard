@@ -4,7 +4,7 @@
   import Map from '$lib/components/Map.svelte';
   import Tooltip from '$lib/components/Tooltip.svelte';
   import { buurtData, buurtSelection, indicatorenSelectie, gemeenteSelection, modal } from '$lib/stores';
-  import { indicatorenLijst } from '$lib/noncomponents/indicatorenLijst.js'
+  import { getIndicatorenLijst } from '$lib/noncomponents/indicatorenLijst.js'
   import { afterUpdate } from 'svelte';
   import Modal from 'svelte-simple-modal';
 
@@ -13,6 +13,10 @@
   let hMap;
   // let wIndicator;
   // let hIndicator;
+
+  export let data
+
+  const indicatorenLijst = getIndicatorenLijst(data.metadata)
 
   $: console.log($buurtData)
   
@@ -61,7 +65,7 @@
 <div class='container' style='justify-content:{screenSize < 800 ? 'center' : 'left'}'>
   <div class='sidebar' style='position:{screenSize > 800 ? "fixed" : "relative"}'>
     <div class='title'><h1>Buurtdashboard</h1></div>
-    <div class='control-panel'><ControlPanel {indicatorenSelectie} /></div>
+    <div class='control-panel'><ControlPanel {indicatorenSelectie} {indicatorenLijst} /></div>
     <div class='map' bind:clientWidth={wMap} bind:clientHeight={hMap}>
       {#await getData}
         <pre style='color:white'>Loading...</pre>
