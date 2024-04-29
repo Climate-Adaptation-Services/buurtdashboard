@@ -1,5 +1,3 @@
-
-
 export function getIndicatorenLijst(metadata){
   console.log(metadata)
 
@@ -16,6 +14,7 @@ export function getIndicatorenLijst(metadata){
 }
 
 function addIndicatorCategorie(indicatorenLijst, indicatoren){
+  // dit is voor de kopjes in de filter dropdown
   indicatorenLijst.push({titel:{'label':indicatoren[0].Categorie, 'disabled':true}})
 
   indicatoren.forEach(indicator => {
@@ -50,6 +49,9 @@ function addIndicatorCategorie(indicatorenLijst, indicatoren){
   })
   return indicatorenLijst
 }
+
+
+
 
 // [
 //   {

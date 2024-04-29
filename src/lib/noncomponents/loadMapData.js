@@ -49,6 +49,10 @@ export function loadMapData(datajson){
     buurt.properties['perc30mmME'] *= 100
     buurt.properties['perc5mmMN'] = 100 - buurt.properties['perc5_10mm'] - buurt.properties['perc10_15mm'] - buurt.properties['perc15_20mm'] - buurt.properties['perc20_30mm'] - buurt.properties['perc30mmME'];
 
+    if(buurt.properties['BEV_DICHTH'] < 0){
+      buurt.properties['BEV_DICHTH'] = null
+    } 
+
     return buurt
   })
 

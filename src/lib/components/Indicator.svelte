@@ -86,7 +86,7 @@
       {#if $gemeenteSelection !== null}
         <Map w={wMap} h={bodyHeight*0.4} mainMapFlag={false} {color} {indicator} {getClass} />
       {/if}
-      <span style='width:100%; position:absolute; bottom:0px; display:flex; justify-content:space-between'><h5><strong>Bron: {indicator.bron}</strong></h5><h5><a target='_blank' href={indicator.link}>Naar het kaartverhaal</a></h5></span>
+      <span style='width:100%; position:absolute; bottom:0px; display:flex; justify-content:space-between'><h5><strong>{(indicator['Link kaartverhaal'] === 'externe data') ? '' : 'Klimaateffectatlas: '} {indicator.bron}</strong></h5><h5><a target='_blank' href={indicator.link}>Meer informatie</a></h5></span>
     </div>
   </div>
 </div>

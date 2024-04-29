@@ -11,7 +11,6 @@
   export let color;
   export let nodesData
 
-  console.log(nodesData)
   // filter out null values
   nodesData = nodesData.filter(d => typeof d.properties[indicator.attribute] === 'number')
 
