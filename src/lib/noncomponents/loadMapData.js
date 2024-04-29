@@ -53,6 +53,10 @@ export function loadMapData(datajson){
       buurt.properties['BEV_DICHTH'] = null
     } 
 
+    if(!buurt.properties['PaalHuidig']){
+      console.log(buurt.properties['PaalHuidig'])
+    }
+
     return buurt
   })
 
