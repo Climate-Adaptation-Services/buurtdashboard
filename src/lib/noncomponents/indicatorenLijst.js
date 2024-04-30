@@ -4,8 +4,8 @@ export function getIndicatorenLijst(metadata){
   let indicatorenLijst = []
 
   // let indicatorenOpCategorie = [...metadata.filter(d => d.Categorie === 'Gebiedskenmerken'), ...metadata.filter(d => d.Categorie === 'Effecten'), ...metadata.filter(d => d.Categorie === 'Kwetsbaarheid')]
-  indicatorenLijst = addIndicatorCategorie(indicatorenLijst, metadata.filter(d => d.Categorie === 'Gebiedskenmerken'))
   indicatorenLijst = addIndicatorCategorie(indicatorenLijst, metadata.filter(d => d.Categorie === 'Effecten'))
+  indicatorenLijst = addIndicatorCategorie(indicatorenLijst, metadata.filter(d => d.Categorie === 'Gebiedskenmerken'))
   indicatorenLijst = addIndicatorCategorie(indicatorenLijst, metadata.filter(d => d.Categorie === 'Kwetsbaarheid'))
 
   console.log(indicatorenLijst)
