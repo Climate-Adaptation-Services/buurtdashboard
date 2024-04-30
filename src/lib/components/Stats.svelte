@@ -49,9 +49,13 @@
     meanValuesDict['meanValueWijktype'] = 0
   }
 
-  // grondwater hoog kan negatief zijn
+  // grondwater hoog kan negatief zijn, en de schaal moet wat opgerekt
+  let xScaleMin = min([0, meanValuesDict['meanValueNederland'], meanValuesDict['meanValueGemeente'], meanValuesDict['meanValueBuurt'], meanValuesDict['meanValueWijktype']])
+  if(xScaleMin < 0){
+    xScaleMin -= 0.5
+  }
   $: xScaleStats = scaleLinear()
-    .domain([min([0, meanValuesDict['meanValueNederland'], meanValuesDict['meanValueGemeente'], meanValuesDict['meanValueBuurt'], meanValuesDict['meanValueWijktype']]), max([meanValuesDict['meanValueNederland'], meanValuesDict['meanValueGemeente'], meanValuesDict['meanValueBuurt'], meanValuesDict['meanValueWijktype']])])
+    .domain([xScaleMin, max([meanValuesDict['meanValueNederland'], meanValuesDict['meanValueGemeente'], meanValuesDict['meanValueBuurt'], meanValuesDict['meanValueWijktype']])])
     .range([0, wStats-240])
 
 </script>
