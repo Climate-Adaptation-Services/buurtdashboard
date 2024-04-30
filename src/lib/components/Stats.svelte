@@ -3,7 +3,7 @@
   import { buurtData, wijkTypeData, gemeenteSelection, buurtSelection, buurtCode, gemeenteCode, buurtSelectionData } from "$lib/stores";
   import Stat from "./Stat.svelte";
   import * as _ from 'lodash';
-  import { scaleLinear, max } from 'd3';
+  import { scaleLinear, max, min } from 'd3';
 
   export let bodyHeight
   export let indicator
@@ -49,8 +49,9 @@
     meanValuesDict['meanValueWijktype'] = 0
   }
 
+  // grondwater hoog kan negatief zijn
   $: xScaleStats = scaleLinear()
-    .domain([0, max([meanValuesDict['meanValueNederland'], meanValuesDict['meanValueGemeente'], meanValuesDict['meanValueBuurt'], meanValuesDict['meanValueWijktype']])])
+    .domain([min([0, meanValuesDict['meanValueNederland'], meanValuesDict['meanValueGemeente'], meanValuesDict['meanValueBuurt'], meanValuesDict['meanValueWijktype']]), max([meanValuesDict['meanValueNederland'], meanValuesDict['meanValueGemeente'], meanValuesDict['meanValueBuurt'], meanValuesDict['meanValueWijktype']])])
     .range([0, wStats-240])
 
 </script>
