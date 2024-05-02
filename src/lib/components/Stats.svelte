@@ -40,7 +40,9 @@
   $: if($buurtSelection !== null){
     // deze filter is 1 buurt
     const buurtFilter = $buurtData.features.filter(buurt => buurt.properties[$buurtCode] === $buurtSelection)
-    meanValuesDict['meanValueBuurt'] = Math.round(buurtFilter[0].properties[indicator.attribute]*100)/100
+    meanValuesDict['meanValueBuurt'] = (buurtFilter[0].properties[indicator.attribute] !== null)
+      ? Math.round(buurtFilter[0].properties[indicator.attribute]*100)/100
+      : 'Geen data'
 
     meanValuesDict['meanValueWijktype'] = median($wijkTypeData.features.map(buurt => buurt.properties[indicator.attribute]))
 

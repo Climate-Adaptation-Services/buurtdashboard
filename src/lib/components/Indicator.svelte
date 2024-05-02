@@ -32,8 +32,10 @@
     if(indicator.numerical){
       if($gemeenteSelection !== null){
         rangeExtent = extent($buurtenInGemeente.features, d => d.properties[indicator.attribute])
+        // this can deal with any amount of colors in the scale
+        const step = (rangeExtent[1] - rangeExtent[0]) / (indicator.color.range.length-1)
         color = scaleLinear()
-          .domain([rangeExtent[0], (rangeExtent[0]+rangeExtent[1])/2, rangeExtent[1]])
+          .domain([...Array(indicator.color.range.length).keys()].map(i => rangeExtent[0] + i * step))
           .range(indicator.color.range);
       }
     }else{

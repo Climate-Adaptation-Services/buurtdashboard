@@ -1,7 +1,7 @@
 <script>
 
   import { gemeenteData, hoveredValue, currentView, gemeenteSelection, buurtSelection, hoveredRegion, buurtenInGemeente, buurtCode, buurtNaam } from "$lib/stores";
-  import { extent, scaleLinear, select, selectAll } from "d3";
+  import { extent, scaleLinear, scaleLog, select, selectAll } from "d3";
   import XAxis from '$lib/components/XAxis.svelte';
   import { forceSimulation, forceY, forceX, forceCollide, forceManyBody } from "d3-force";
 
@@ -16,10 +16,17 @@
 
   const margin = {bottom:50, top:20, left:30, right:30}
 
-  $: xScale = scaleLinear()
-    .domain(extent($buurtenInGemeente.features, d => d.properties[indicator.attribute]))
-    .range([0, w-margin.left-margin.right])
-    .nice()
+  $: xScale = (indicator.titel !== 'Groen per inwoner')
+    ? scaleLinear()
+        .domain(extent($buurtenInGemeente.features, d => d.properties[indicator.attribute]))
+        .range([0, w-margin.left-margin.right])
+        .nice()
+    : scaleLog()
+        .domain(extent($buurtenInGemeente.features, d => d.properties[indicator.attribute]))
+        .range([0, w-margin.left-margin.right])
+        .nice()
+
+
 
   let simulation = forceSimulation(nodesData)
 

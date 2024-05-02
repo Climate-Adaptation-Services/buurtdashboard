@@ -38,9 +38,6 @@ export function loadMapData(datajson){
       ? null
       : parseFloat(buurt.properties['ErnsOverge'])
 
-    // koele plekken naar percentage
-    // buurt.properties['ATK_KPperc'] *= 100
-
     // waterdiepte naar percentage
     buurt.properties['perc5_10mm'] *= 100
     buurt.properties['perc10_15mm'] *= 100
@@ -52,7 +49,16 @@ export function loadMapData(datajson){
     if(buurt.properties['BEV_DICHTH'] < 0){
       buurt.properties['BEV_DICHTH'] = null
     } 
-    
+
+    buurt.properties['allBomen'] *= buurt.properties['OppZodnAg']/buurt.properties['Shape_Area']
+    buurt.properties['allGroenLa'] *= buurt.properties['OppZodnAg']/buurt.properties['Shape_Area']
+    buurt.properties['allGrijs'] *= buurt.properties['OppZodnAg']/buurt.properties['Shape_Area']
+    buurt.properties['water2'] *= buurt.properties['OppZodnAg']/buurt.properties['Shape_Area']
+
+    // if(buurt.properties['m2GroenPI'] > 50){
+    //   buurt.properties['m2GroenPI'] = 50
+    // }
+
     return buurt
   })
 
