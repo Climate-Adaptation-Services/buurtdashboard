@@ -126,6 +126,9 @@
 
 <svg class={'beeswarm_' + indicator.attribute}>
   <XAxis {xScale} height={h} {margin}/>
+  {#if indicator.titel === 'Groen per inwoner'}
+    <text x={w/2} y={h - margin.bottom - 5} text-anchor='middle' font-size='13'>Let op: logaritmische schaal</text>
+  {/if}
 
   <g class="inner-chart" transform="translate({margin.left}, {margin.top})">
     {#each nodes as node (node.id + indicator.attribute)}
