@@ -7,6 +7,7 @@
   import BarPlot from "./BarPlot.svelte";
   import BarPlotMulti from "./BarPlotMulti.svelte";
   import BarPlotLegend from "./BarPlotLegend.svelte";
+    import { afterUpdate, onMount } from "svelte";
 
   export let h
   export let indicator
@@ -48,11 +49,20 @@
   const titleHeight = h*0.2
   const bodyHeight = h*0.8
 
+  let indicatorInfoPosition
+  afterUpdate(() => {
+    console.log(window.innerWidth - document.getElementsByClassName('indicator-info-'+indicator.attribute)[0].getBoundingClientRect().right)
+    indicatorInfoPosition = (window.innerWidth - document.getElementsByClassName('indicator-info-'+indicator.attribute)[0].getBoundingClientRect().right > 200)
+    ? wGraph
+    : 0
+  })
+
+
 </script>
 
 <div class='indicator-div'>
   <h3 class='question-mark' style='padding:3px 10px 3px 10px; margin:0; position:absolute; border-radius:50px; right:5px; top:5px; color:white;background-color:#36575B; cursor:default'>?</h3>
-  <div class={'indicator-info indicator-info-' + indicator.attribute}>
+  <div class={'indicator-info indicator-info-'+indicator.attribute} style='left:{indicatorInfoPosition}px'>
     <p style='padding:3px 10px 3px 10px; border-radius:50px; color:white;background-color:#36575B; float:left'><strong>{indicator.titel}</strong></p>
     <hr width='100%'>
     <p>{indicator.omschrijving}</p>
@@ -131,10 +141,9 @@
   .indicator-info{
     visibility:hidden;
     position: absolute;
-    max-width:300px;
+    width:300px;
     background-color: white;
-    right:30px;
-    top:30px;
+    top:0px;
     z-index: 1000;
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
     border-radius: 20px;
