@@ -12,7 +12,7 @@
   export let nodesData
 
   // filter out null values
-  nodesData = nodesData.filter(d => typeof d.properties[indicator.attribute] === 'number')
+  nodesData = nodesData.filter(d => d.properties[indicator.attribute] !== null)
 
   const margin = {bottom:50, top:20, left:30, right:30}
 
@@ -127,7 +127,7 @@
 <svg class={'beeswarm_' + indicator.attribute}>
   <XAxis {xScale} height={h} {margin}/>
   {#if indicator.titel === 'Groen per inwoner'}
-    <text x={w/2} y={h - margin.bottom - 5} text-anchor='middle' font-size='13'>Let op: logaritmische schaal</text>
+    <text x={w/2} y={h - margin.bottom - 5} text-anchor='middle' font-size='13'>Let op logaritmische schaal</text>
   {/if}
 
   <g class="inner-chart" transform="translate({margin.left}, {margin.top})">

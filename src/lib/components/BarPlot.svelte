@@ -32,6 +32,7 @@
     Object.keys(indicator.klassen).forEach(klasse => {
       result[klasse] = klassenTotal.filter(kl => kl.klasseNaam === klasse)[0].waarde
     });
+    
     return result
   }
 

@@ -14,13 +14,13 @@ export function loadMapData(datajson){
   // buurtData.set(buurtTopojson)
 
   let buurtTopojson1 = topojsonsimplify.presimplify(datajson[1])
-  buurtTopojson1 = topojson.feature(buurtTopojson1, buurtTopojson1.objects['BuurtenDataset20240417.geojson_xaaaa'])
+  buurtTopojson1 = topojson.feature(buurtTopojson1, buurtTopojson1.objects['BuurtenDataset20240506_xaaaa'])
 
   let buurtTopojson2 = topojsonsimplify.presimplify(datajson[2])
-  buurtTopojson2 = topojson.feature(buurtTopojson2, buurtTopojson2.objects['BuurtenDataset20240417.geojson_xaaab'])
+  buurtTopojson2 = topojson.feature(buurtTopojson2, buurtTopojson2.objects['BuurtenDataset20240506_xaaab'])
   
   let buurtTopojson3 = topojsonsimplify.presimplify(datajson[3])
-  buurtTopojson3 = topojson.feature(buurtTopojson3, buurtTopojson3.objects['BuurtenDataset20240417.geojson_xaaac'])
+  buurtTopojson3 = topojson.feature(buurtTopojson3, buurtTopojson3.objects['BuurtenDataset20240506_xaaac'])
   
   let combinedBuurt = [...buurtTopojson1.features, ...buurtTopojson2.features, ...buurtTopojson3.features]
 
@@ -34,9 +34,9 @@ export function loadMapData(datajson){
         : null
     
     // Ernstig overgewicht van string naar num
-    buurt.properties['ErnsOverge'] = (isNaN(parseFloat(buurt.properties['ErnsOverge'])))
+    buurt.properties['F18Overgewi'] = (isNaN(parseFloat(buurt.properties['F18Overgewi'])))
       ? null
-      : parseFloat(buurt.properties['ErnsOverge'])
+      : parseFloat(buurt.properties['F18Overgewi'])
 
     // waterdiepte naar percentage
     buurt.properties['perc5_10mm'] *= 100
@@ -50,10 +50,22 @@ export function loadMapData(datajson){
       buurt.properties['BEV_DICHTH'] = null
     } 
 
-    buurt.properties['allBomen'] *= buurt.properties['OppZodnAg']/buurt.properties['Shape_Area']
-    buurt.properties['allGroenLa'] *= buurt.properties['OppZodnAg']/buurt.properties['Shape_Area']
-    buurt.properties['allGrijs'] *= buurt.properties['OppZodnAg']/buurt.properties['Shape_Area']
-    buurt.properties['water2'] *= buurt.properties['OppZodnAg']/buurt.properties['Shape_Area']
+    buurt.properties['perc_groen_zonder_agr'] = buurt.properties['m2Groen_excl_agrarisch'] / buurt.properties['buurt_opp_zonderagr'] * 100
+
+
+    const totaalOppFunctioneleGebieden = buurt.properties['openbaar_oppervlakte'] + buurt.properties['boom_openbaar_oppervlakte'] + buurt.properties['niet_openbaar_oppervlakte'] + buurt.properties['boom_niet_openbaar_oppervlakte'] + buurt.properties['bebouwing_oppervlakte'] + buurt.properties['boom_bebouwing_oppervlakte'] + buurt.properties['water_oppervlakte'] + buurt.properties['boom_water_oppervlakte'] + buurt.properties['agrarisch_oppervlakte'] + buurt.properties['boom_agrarisch_oppervlakte'] + buurt.properties['transitie_oppervlakte'] + buurt.properties['boom_transitie_oppervlakte'] + buurt.properties['overig_oppervlakte'] + buurt.properties['boom_overig_oppervlakte']
+    buurt.properties['openbaar_opp'] = (buurt.properties['openbaar_oppervlakte'] + buurt.properties['boom_openbaar_oppervlakte']) / totaalOppFunctioneleGebieden * 100
+    buurt.properties['nietopenbaar_opp'] = (buurt.properties['niet_openbaar_oppervlakte'] + buurt.properties['boom_niet_openbaar_oppervlakte']) / totaalOppFunctioneleGebieden * 100
+    buurt.properties['bebouwing_opp'] = (buurt.properties['bebouwing_oppervlakte'] + buurt.properties['boom_bebouwing_oppervlakte']) / totaalOppFunctioneleGebieden * 100
+    buurt.properties['water_opp'] = (buurt.properties['water_oppervlakte'] + buurt.properties['boom_water_oppervlakte']) / totaalOppFunctioneleGebieden * 100
+    buurt.properties['agrarisch_opp'] = (buurt.properties['agrarisch_oppervlakte'] + buurt.properties['boom_agrarisch_oppervlakte']) / totaalOppFunctioneleGebieden * 100
+    buurt.properties['transitie_opp'] = (buurt.properties['transitie_oppervlakte'] + buurt.properties['boom_transitie_oppervlakte']) / totaalOppFunctioneleGebieden * 100
+    buurt.properties['overig_opp'] = (buurt.properties['overig_oppervlakte'] + buurt.properties['boom_overig_oppervlakte']) / totaalOppFunctioneleGebieden * 100
+
+    // buurt.properties['allBomen'] *= buurt.properties['buurt_opp_zonderagr']/buurt.properties['Shape_Area']
+    // buurt.properties['allGroenLa'] *= buurt.properties['buurt_opp_zonderagr']/buurt.properties['Shape_Area']
+    // buurt.properties['allGrijs'] *= buurt.properties['buurt_opp_zonderagr']/buurt.properties['Shape_Area']
+    // buurt.properties['water2'] *= buurt.properties['buurt_opp_zonderagr']/buurt.properties['Shape_Area']
 
     // if(buurt.properties['m2GroenPI'] > 50){
     //   buurt.properties['m2GroenPI'] = 50
