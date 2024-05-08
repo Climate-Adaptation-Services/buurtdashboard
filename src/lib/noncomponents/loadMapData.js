@@ -62,15 +62,15 @@ export function loadMapData(datajson){
     buurt.properties['transitie_opp'] = (buurt.properties['transitie_oppervlakte'] + buurt.properties['boom_transitie_oppervlakte']) / totaalOppFunctioneleGebieden * 100
     buurt.properties['overig_opp'] = (buurt.properties['overig_oppervlakte'] + buurt.properties['boom_overig_oppervlakte']) / totaalOppFunctioneleGebieden * 100
 
-    // buurt.properties['allBomen'] *= buurt.properties['buurt_opp_zonderagr']/buurt.properties['Shape_Area']
-    // buurt.properties['allGroenLa'] *= buurt.properties['buurt_opp_zonderagr']/buurt.properties['Shape_Area']
-    // buurt.properties['allGrijs'] *= buurt.properties['buurt_opp_zonderagr']/buurt.properties['Shape_Area']
-    // buurt.properties['water2'] *= buurt.properties['buurt_opp_zonderagr']/buurt.properties['Shape_Area']
+    const totaalOppOpenbaar = buurt.properties['boom_openbaar_oppervlakte'] + buurt.properties['openbaar_m2_groen'] + buurt.properties['openbaar_m2_nietgroen']
+    buurt.properties['boom_perc_openbaar'] = buurt.properties['boom_openbaar_oppervlakte'] / totaalOppOpenbaar * 100
+    buurt.properties['openbaar_perc_groen'] = buurt.properties['openbaar_m2_groen'] / totaalOppOpenbaar * 100
+    buurt.properties['openbaar_perc_nietgroen']  = buurt.properties['openbaar_m2_nietgroen'] / totaalOppOpenbaar * 100
 
-    // if(buurt.properties['m2GroenPI'] > 50){
-    //   buurt.properties['m2GroenPI'] = 50
-    // }
-
+    const totaalOppNietOpenbaar = buurt.properties['boom_niet_openbaar_oppervlakte'] + buurt.properties['niet_openbaar_m2_groen'] + buurt.properties['niet_openbaar_m2_nietgroen']
+    buurt.properties['boom_perc_niet_openbaar'] = buurt.properties['boom_niet_openbaar_oppervlakte'] / totaalOppNietOpenbaar * 100
+    buurt.properties['niet_openbaar_perc_groen'] = buurt.properties['niet_openbaar_m2_groen'] / totaalOppNietOpenbaar * 100
+    buurt.properties['niet_openbaar_perc_nietgroen'] = buurt.properties['niet_openbaar_m2_nietgroen'] / totaalOppNietOpenbaar * 100
     return buurt
   })
 
