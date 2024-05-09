@@ -18,15 +18,13 @@
 
   $: xScale = (indicator.titel !== 'Groen per inwoner')
     ? scaleLinear()
-        .domain(extent($buurtenInGemeente.features, d => d.properties[indicator.attribute]))
+        .domain(extent($buurtenInGemeente.features, d => +d.properties[indicator.attribute]))
         .range([0, w-margin.left-margin.right])
         .nice()
     : scaleLog()
-        .domain(extent($buurtenInGemeente.features, d => d.properties[indicator.attribute]))
+        .domain(extent($buurtenInGemeente.features, d => +d.properties[indicator.attribute]))
         .range([0, w-margin.left-margin.right])
         .nice()
-
-
 
   let simulation = forceSimulation(nodesData)
 
@@ -135,7 +133,7 @@
       <circle class={getClassName(node) + ' ' + 'svgelements_' + node.properties[$buurtCode]}
       stroke={(node.properties[$buurtCode] === $buurtSelection) ? '#E1575A' : 'none'}
       style='filter: {(node.properties[$buurtCode] === $buurtSelection) ? 'drop-shadow(0 0 5px #36575A)' : 'none'}'
-      cx={node.x} cy={node.y} r={(node.properties[$buurtCode] === $buurtSelection) ? RADIUS+3 : RADIUS} fill={color(node.properties[indicator.attribute])} stroke-width='3'
+      cx={node.x} cy={node.y} r={(node.properties[$buurtCode] === $buurtSelection) ? RADIUS+3 : RADIUS} fill={color(+node.properties[indicator.attribute])} stroke-width='3'
       on:mouseover={() => mouseOver(node)}
       on:mouseout={() => mouseOut(node)}
       on:click={() => click(node)}
