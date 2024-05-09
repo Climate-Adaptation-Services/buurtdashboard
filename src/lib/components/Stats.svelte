@@ -31,8 +31,10 @@
     // buurten binnen gemeente
     const gemeenteFilter = $buurtData.features.filter(buurt => buurt.properties[$gemeenteCode] === $gemeenteSelection)
     meanValuesDict['meanValueGemeente'] = median(gemeenteFilter.map(buurt => {
-      // console.log(buurt.properties, indicator.attribute)
-      return buurt.properties[indicator.attribute]
+      if(indicator.titel === 'Gemiddelde WOZ waarde'){
+        console.log(buurt.properties[indicator.attribute])
+      }
+      return +buurt.properties[indicator.attribute]
     }))
   }else{
     meanValuesDict['meanValueGemeente'] = 0

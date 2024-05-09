@@ -55,12 +55,12 @@
           : color(getClass(feature.properties[indicator.attribute]))
       
       const hoverValue = (indicator.numerical)
-        ? (typeof feature.properties[indicator.attribute] === 'number')
-          ? Math.round(feature.properties[indicator.attribute]*100)/100
+        ? (/\d/.test(feature.properties[indicator.attribute]))
+          ? Math.round(+feature.properties[indicator.attribute]*100)/100
           : 'Geen data'
         : (indicator.multiline)
           ? mostCommonClass(feature)
-          : getClass(feature.properties[indicator.attribute])
+          : getClass(+feature.properties[indicator.attribute])
       
       hoveredValue.set({
         indicator: indicator.titel, 
