@@ -12,12 +12,21 @@
   let wStats;
 
   const median = (array) => { 
-    array.sort((a, b) => b - a); 
-    const length = array.length; 
+
+    // is it a number
+    const OnlyNumbers = array.filter(d => /\d/.test(d)).map(d => +d)
+    if(indicator.titel === 'Sociaal minimum huishoudens'){
+      console.log(array)
+      console.log(OnlyNumbers)
+    }
+
+
+    OnlyNumbers.sort((a, b) => b - a); 
+    const length = OnlyNumbers.length; 
     if (length % 2 == 0) { 
-      return (array[length / 2] + array[(length / 2) - 1]) / 2; 
+      return (OnlyNumbers[length / 2] + OnlyNumbers[(length / 2) - 1]) / 2; 
     } else { 
-      return array[Math.floor(length / 2)]; 
+      return OnlyNumbers[Math.floor(length / 2)]; 
     } }
 
   let meanValuesDict = {
@@ -30,12 +39,7 @@
   $: if($gemeenteSelection !== null){
     // buurten binnen gemeente
     const gemeenteFilter = $buurtData.features.filter(buurt => buurt.properties[$gemeenteCode] === $gemeenteSelection)
-    meanValuesDict['meanValueGemeente'] = median(gemeenteFilter.map(buurt => {
-      if(indicator.titel === 'Gemiddelde WOZ waarde'){
-        console.log(buurt.properties[indicator.attribute])
-      }
-      return +buurt.properties[indicator.attribute]
-    }))
+    meanValuesDict['meanValueGemeente'] = median(gemeenteFilter.map(buurt => buurt.properties[indicator.attribute]))
   }else{
     meanValuesDict['meanValueGemeente'] = 0
   }
