@@ -14,7 +14,7 @@
       <img src='./carousel-1.png' alt='carousel1' />
       <img src='./carousel-2.png' alt='carousel2' />
     </Carousel>
-  {:else}
+  {:else if type === 'intro'}
     <div style='padding:15px'>
       <h1>Buurtdashboard Klimaateffectatlas</h1>
       <p>
@@ -29,6 +29,8 @@
         Het Buurtdashboard is ontwikkeld in samenwerking met de Hogeschool van Amsterdam en Deltares. De meeste statistieken zijn gebaseerd op informatie uit de Klimaateffectatlas. Een aantal statistieken komen van andere bronnen, zoals van het CBS en het RIVM.
       </p>
     </div>
+  {:else}
+    <p>Deze functie is binnenkort beschikbaar</p>
   {/if}
 </div>
 

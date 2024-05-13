@@ -71,11 +71,12 @@ export function loadMapData(datajson){
     buurt.properties['niet_openbaar_perc_groen'] = buurt.properties['niet_openbaar_m2_groen'] / totaalOppNietOpenbaar * 100
     buurt.properties['niet_openbaar_perc_nietgroen'] = buurt.properties['niet_openbaar_m2_nietgroen'] / totaalOppNietOpenbaar * 100
 
-    buurt.properties['perc_laaggroen'] = buurt.properties['m2LaagGroen_excl_agrarisch'] / buurt.properties['buurt_opp_incl_agrarisch'] * 100
-    buurt.properties['perc_boom'] = buurt.properties['m2Boom_excl_agrarisch'] / buurt.properties['buurt_opp_incl_agrarisch'] * 100
-    buurt.properties['perc_nietgroen'] = buurt.properties['m2Grijs_excl_agrarisch'] / buurt.properties['buurt_opp_incl_agrarisch'] * 100
-    buurt.properties['perc_water'] = buurt.properties['m2Water'] / buurt.properties['buurt_opp_incl_agrarisch'] * 100
-    buurt.properties['perc_agrarisch'] = (buurt.properties['buurt_opp_incl_agrarisch'] - buurt.properties['m2LaagGroen_excl_agrarisch'] - buurt.properties['m2Boom_excl_agrarisch'] - buurt.properties['m2Grijs_excl_agrarisch'] - buurt.properties['m2Water']) / buurt.properties['buurt_opp_incl_agrarisch'] * 100
+    // Groen/Grijs/Blauw
+    const totaalOppGroenGrijsBlauw = buurt.properties['m2LaagGroen_excl_agrarisch'] + buurt.properties['m2Boom_excl_agrarisch'] + buurt.properties['m2Grijs_excl_agrarisch'] + buurt.properties['m2Water']
+    buurt.properties['perc_laaggroen'] = buurt.properties['m2LaagGroen_excl_agrarisch'] / totaalOppGroenGrijsBlauw * 100
+    buurt.properties['perc_boom'] = buurt.properties['m2Boom_excl_agrarisch'] / totaalOppGroenGrijsBlauw * 100
+    buurt.properties['perc_nietgroen'] = buurt.properties['m2Grijs_excl_agrarisch'] / totaalOppGroenGrijsBlauw * 100
+    buurt.properties['perc_water'] = buurt.properties['m2Water'] / totaalOppGroenGrijsBlauw * 100
 
     return buurt
   })
