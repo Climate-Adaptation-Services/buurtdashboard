@@ -33,10 +33,13 @@ export function loadMapData(datajson){
         ? (parseFloat(buurt.properties['Geboorte']) / buurt.properties['AANT_INW']) * 100
         : null
     
-    // Ernstig overgewicht van string naar num
-    buurt.properties['F18Overgewi'] = (isNaN(parseFloat(buurt.properties['F18Overgewi'])))
-      ? null
-      : parseFloat(buurt.properties['F18Overgewi'])
+    // verschillende variabelen van string naar num
+    buurt.properties['F18Overgewi'] = (isNaN(parseFloat(buurt.properties['F18Overgewi']))) ? null : parseFloat(buurt.properties['F18Overgewi'])
+    buurt.properties['F18ErnstigZ'] = (isNaN(parseFloat(buurt.properties['F18ErnstigZ']))) ? null : parseFloat(buurt.properties['F18ErnstigZ'])
+    buurt.properties['BrozeGezon'] = (isNaN(parseFloat(buurt.properties['BrozeGezon']))) ? null : parseFloat(buurt.properties['BrozeGezon'])
+    buurt.properties['G_WOZ'] = (isNaN(parseFloat(buurt.properties['G_WOZ']))) ? null : parseFloat(buurt.properties['G_WOZ'])
+    buurt.properties['HuurwTperc'] = (isNaN(parseFloat(buurt.properties['HuurwTperc']))) ? null : parseFloat(buurt.properties['HuurwTperc'])
+    buurt.properties['Geboorte'] = (isNaN(parseFloat(buurt.properties['Geboorte']))) ? null : parseFloat(buurt.properties['Geboorte'])
 
     // waterdiepte naar percentage
     buurt.properties['perc5_10mm'] *= 100
