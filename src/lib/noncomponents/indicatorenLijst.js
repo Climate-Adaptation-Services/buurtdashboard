@@ -41,7 +41,7 @@ function addIndicatorCategorie(indicatorenLijst, indicatoren){
       }, 
       klassen:klassen,
       numerical:(indicator['kwantitatief / categoraal / multiline'] === 'Kwantitatief') ? true : false, 
-      link:'https://www.klimaateffectatlas.nl/nl/basiskaart-groen-en-grijs',
+      link:indicator['Link kaartverhaal'],
       multiline:(indicator['kwantitatief / categoraal / multiline'] === 'Multiline') ? true : false,
       bron:indicator.Bron,
       omschrijving:indicator['Tekst vraagteken'],

@@ -14,7 +14,7 @@
   function getPercentages(data, regio){
     let totalOpp = 0
     let klassenTotal = []
-    let openBaarOpp = 0
+
     for(let i=0;i<Object.keys(indicator.klassen).length;i++){
       klassenTotal.push({klasseNaam: Object.keys(indicator.klassen)[i], waarde:0})
     }
@@ -22,7 +22,7 @@
       let buurtOpp = (indicator.titel === 'Functionele gebieden')
         ? buurt.properties['buurt_opp_incl_agrarisch']
         : buurt.properties['buurt_opp_zonderagr']
-        
+
       totalOpp += buurtOpp
       // zorg ervoor dat groen/grijs openbaar optelt tot 100%, en niet maar tot % openbaar
       if(indicator.titel === 'Groen en grijs openbare ruimte'){totalOpp -= buurtOpp * ((100 - buurt.properties['Openbaar'])/100)}
@@ -32,9 +32,6 @@
       Object.keys(indicator.klassen).forEach(kl => {
         // is dit goed zo of moeten we anders met no data (NaN) omgaan
         if(buurt.properties[indicator.klassen[kl]]){
-          if(indicator.titel === 'Functionele gebieden'){
-            console.log(klassenTotal.filter(kl2 => kl2.klasseNaam === kl)[0].waarde, buurtOpp, buurt.properties[indicator.klassen[kl]])
-          }
           klassenTotal.filter(kl2 => kl2.klasseNaam === kl)[0].waarde += buurtOpp * +buurt.properties[indicator.klassen[kl]]
         }
       });
