@@ -64,7 +64,7 @@
 
 <div class='container' style='justify-content:{screenSize < 800 ? 'center' : 'left'}'>
   <div class='sidebar' style='position:{screenSize > 800 ? "fixed" : "relative"}'>
-    <div class='title'><h1>Buurtdashboard</h1></div>
+    <!-- <div class='title'><h1>Buurtdashboard</h1></div> -->
     <div class='control-panel'><ControlPanel {indicatorenSelectie} {indicatorenLijst} /></div>
     <div class='map' bind:clientWidth={wMap} bind:clientHeight={hMap}>
       {#await getData}
@@ -132,6 +132,7 @@
   
   .control-panel{
     flex:3;
+    margin-top:20px;
   }
   .map{
     flex:6;
