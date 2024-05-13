@@ -18,15 +18,23 @@
     <div style='padding:15px'>
       <h1>Buurtdashboard Klimaateffectatlas</h1>
       <p>
-        Het Buurtdashboard biedt per buurt inzicht in verschillende opgaven op het gebied van klimaatadaptatie. Gemeenten kunnen het dashboard bijvoorbeeld gebruiken om te bepalen welke opgaven in een buurt het meest urgent zijn of waar veel kansen liggen voor klimaatadaptatie.
+        Wil je voor één of meer buurten inzicht krijgen in hoe klimaatbestendig ze zijn? Daar kan dit buurtdashboard je bij helpen.  
       </p>
       <h3>Wat kun je met het Buurtdashboard?</h3>
       <p>
-        Je kunt het Buurtdashboard gebruiken om voor een buurt verschillende indicatoren te bekijken en deze te vergelijken met andere buurten. Je kunt bijvoorbeeld zien hoe groen een buurt is of welke gevoelstemperaturen er op een hete zomerdag veel voorkomen. Of je kunt voor een bepaalde buurt bekijken wat de grootste opgaven zijn op het gebied van klimaatadaptatie. Het buurtdashboard laat voor elke indicator zien wat de statistieken zijn op buurtniveau en gemeenteniveau. Je kunt bijvoorbeeld kijken of het percentage groen in een buurt sterk afwijkt van de andere buurten in die gemeente. Ook kun je bekijken of de statistieken ongeveer gelijk zijn aan andere buurten van hetzelfde wijktype.
+        Met het buurtdashboard krijg je snel inzicht in hoe klimaatbestendig buurten zijn. Je kunt er bijvoorbeeld vinden hoe groen een buurt is of hoe hoog de gevoelstemperatuur is op een warme zomerdag. De statistieken kun je vergelijken met buurten van hetzelfde wijktype of met de rest van de gemeente. Ook kan het buurtdashboard helpen om te bepalen welke opgaven het meest urgent zijn of waar de meeste kansen liggen voor klimaatadaptatie.
       </p>
-      <h3>Wie heeft het Buurtdashboard ontwikkeld?</h3>
+      <h3>Voor wie is het buurtdashboard een handige tool?</h3>
       <p>
-        Het Buurtdashboard is ontwikkeld in samenwerking met de Hogeschool van Amsterdam en Deltares. De meeste statistieken zijn gebaseerd op informatie uit de Klimaateffectatlas. Een aantal statistieken komen van andere bronnen, zoals van het CBS en het RIVM.
+        Het buurtdashboard is vooral handig voor gemeenten. Maar ook andere partijen die met klimaatadaptatie aan de slag willen, kunnen er gebruik van maken.
+      </p>
+      <h3>Is het dashboard alleen geschikt voor stedelijk gebied?</h3>
+      <p>
+        Het buurtdashboard biedt vooral inzicht in stedelijke buurten, al staan er ook landelijke buurten in.
+      </p>
+      <h3>Hoe is het buurtdashboard tot stand gekomen? </h3>
+      <p>
+        Veel informatie in het buurtdasboard komt direct uit de Klimaateffectatlas, maar sommige gegevens komen van andere bronnen, zoals van het CBS en RIVM. Het buurtdashboard is ontwikkeld in samenwerking met de Hogeschool van Amsterdam en Deltares. 
       </p>
     </div>
   {:else}
@@ -41,6 +49,14 @@
 
   h1, h3{
     color:#36575B
+  }
+
+  h3{
+    margin-bottom:0px;
+  }
+
+  p{
+    margin-top:8px;
   }
 
 </style>

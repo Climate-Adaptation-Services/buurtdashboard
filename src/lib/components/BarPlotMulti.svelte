@@ -43,10 +43,6 @@
       result[klasse] = klassenTotal.filter(kl => kl.klasseNaam === klasse)[0].waarde
     });
 
-    if(indicator.titel === 'Functionele gebieden'){
-      console.log(regio, result)
-    }
-
     return result
   }
 
