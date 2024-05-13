@@ -55,14 +55,14 @@ export function loadMapData(datajson){
 
     buurt.properties['perc_groen_zonder_agr'] = buurt.properties['m2Groen_excl_agrarisch'] / buurt.properties['buurt_opp_zonderagr'] * 100
 
-    const totaalOppFunctioneleGebieden = buurt.properties['openbaar_oppervlakte'] + buurt.properties['boom_openbaar_oppervlakte'] + buurt.properties['niet_openbaar_oppervlakte'] + buurt.properties['boom_niet_openbaar_oppervlakte'] + buurt.properties['bebouwing_oppervlakte'] + buurt.properties['boom_bebouwing_oppervlakte'] + buurt.properties['water_oppervlakte'] + buurt.properties['boom_water_oppervlakte'] + buurt.properties['agrarisch_oppervlakte'] + buurt.properties['boom_agrarisch_oppervlakte'] + buurt.properties['transitie_oppervlakte'] + buurt.properties['boom_transitie_oppervlakte'] + buurt.properties['overig_oppervlakte'] + buurt.properties['boom_overig_oppervlakte']
-    buurt.properties['openbaar_opp'] = (buurt.properties['openbaar_oppervlakte'] + buurt.properties['boom_openbaar_oppervlakte']) / totaalOppFunctioneleGebieden * 100
-    buurt.properties['nietopenbaar_opp'] = (buurt.properties['niet_openbaar_oppervlakte'] + buurt.properties['boom_niet_openbaar_oppervlakte']) / totaalOppFunctioneleGebieden * 100
-    buurt.properties['bebouwing_opp'] = (buurt.properties['bebouwing_oppervlakte'] + buurt.properties['boom_bebouwing_oppervlakte']) / totaalOppFunctioneleGebieden * 100
-    buurt.properties['water_opp'] = (buurt.properties['water_oppervlakte'] + buurt.properties['boom_water_oppervlakte']) / totaalOppFunctioneleGebieden * 100
-    buurt.properties['agrarisch_opp'] = (buurt.properties['agrarisch_oppervlakte'] + buurt.properties['boom_agrarisch_oppervlakte']) / totaalOppFunctioneleGebieden * 100
-    buurt.properties['transitie_opp'] = (buurt.properties['transitie_oppervlakte'] + buurt.properties['boom_transitie_oppervlakte']) / totaalOppFunctioneleGebieden * 100
-    buurt.properties['overig_opp'] = (buurt.properties['overig_oppervlakte'] + buurt.properties['boom_overig_oppervlakte']) / totaalOppFunctioneleGebieden * 100
+    const totaalOppBuurtInclAgrarisch = buurt.properties['buurt_opp_incl_agrarisch']
+    buurt.properties['openbaar_opp'] = (buurt.properties['openbaar_oppervlakte'] + buurt.properties['boom_openbaar_oppervlakte']) / totaalOppBuurtInclAgrarisch * 100
+    buurt.properties['nietopenbaar_opp'] = (buurt.properties['niet_openbaar_oppervlakte'] + buurt.properties['boom_niet_openbaar_oppervlakte']) / totaalOppBuurtInclAgrarisch * 100
+    buurt.properties['bebouwing_opp'] = (buurt.properties['bebouwing_oppervlakte'] + buurt.properties['boom_bebouwing_oppervlakte']) / totaalOppBuurtInclAgrarisch * 100
+    buurt.properties['water_opp'] = (buurt.properties['water_oppervlakte'] + buurt.properties['boom_water_oppervlakte']) / totaalOppBuurtInclAgrarisch * 100
+    buurt.properties['agrarisch_opp'] = (buurt.properties['agrarisch_oppervlakte'] + buurt.properties['boom_agrarisch_oppervlakte']) / totaalOppBuurtInclAgrarisch * 100
+    buurt.properties['transitie_opp'] = (buurt.properties['transitie_oppervlakte'] + buurt.properties['boom_transitie_oppervlakte']) / totaalOppBuurtInclAgrarisch * 100
+    buurt.properties['overig_opp'] = (buurt.properties['overig_oppervlakte'] + buurt.properties['boom_overig_oppervlakte']) / totaalOppBuurtInclAgrarisch * 100
 
     const totaalOppOpenbaar = buurt.properties['boom_openbaar_oppervlakte'] + buurt.properties['openbaar_m2_groen'] + buurt.properties['openbaar_m2_nietgroen']
     buurt.properties['boom_perc_openbaar'] = buurt.properties['boom_openbaar_oppervlakte'] / totaalOppOpenbaar * 100
