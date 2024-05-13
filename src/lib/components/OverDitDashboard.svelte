@@ -10,9 +10,15 @@
 
 <div>
   {#if browser && type === 'graphs'}
-    <Carousel bind:this={carousel} >
-      <img src='./carousel-1.png' alt='carousel1' />
-      <img src='./carousel-2.png' alt='carousel2' />
+    <Carousel bind:this={carousel}>
+      <div class='carousel-div'>
+        <h4>Indicator type 1: Enkelvoudige numerieke indicator</h4>
+        <img src='./carousel-2.png' alt='carousel2' />
+      </div>
+      <div class='carousel-div'>
+        <h4>Indicator type 2: Meervoudige categorische indicator</h4>
+        <img src='./carousel-1.png' alt='carousel1' />
+      </div>
     </Carousel>
   {:else if type === 'intro'}
     <div style='padding:15px'>
@@ -57,6 +63,17 @@
 
   p{
     margin-top:8px;
+  }
+
+  .carousel-div{
+    height:500px;
+  }
+  img{
+    height:80%;
+  }
+
+  h4{
+    text-align: center;
   }
 
 </style>
