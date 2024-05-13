@@ -13,14 +13,15 @@ export function loadMapData(datajson){
   // buurtTopojson = topojson.feature(buurtTopojson, buurtTopojson.objects.BuurtenTestDataset_20231016)
   // buurtData.set(buurtTopojson)
 
+
   let buurtTopojson1 = topojsonsimplify.presimplify(datajson[1])
-  buurtTopojson1 = topojson.feature(buurtTopojson1, buurtTopojson1.objects['BuurtenDataset20240506_xaaaa'])
+  buurtTopojson1 = topojson.feature(buurtTopojson1, buurtTopojson1.objects['BuurtenDataset20240513_xaaaa'])
 
   let buurtTopojson2 = topojsonsimplify.presimplify(datajson[2])
-  buurtTopojson2 = topojson.feature(buurtTopojson2, buurtTopojson2.objects['BuurtenDataset20240506_xaaab'])
+  buurtTopojson2 = topojson.feature(buurtTopojson2, buurtTopojson2.objects['BuurtenDataset20240513_xaaab'])
   
   let buurtTopojson3 = topojsonsimplify.presimplify(datajson[3])
-  buurtTopojson3 = topojson.feature(buurtTopojson3, buurtTopojson3.objects['BuurtenDataset20240506_xaaac'])
+  buurtTopojson3 = topojson.feature(buurtTopojson3, buurtTopojson3.objects['BuurtenDataset20240513_xaaac'])
   
   let combinedBuurt = [...buurtTopojson1.features, ...buurtTopojson2.features, ...buurtTopojson3.features]
 
