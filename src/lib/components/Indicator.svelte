@@ -51,7 +51,7 @@
 
   let indicatorInfoPosition
   afterUpdate(() => {
-    indicatorInfoPosition = (window.innerWidth - document.getElementsByClassName('indicator-info-'+indicator.attribute)[0].getBoundingClientRect().right > 200)
+    indicatorInfoPosition = (window.innerWidth - document.getElementsByClassName('indicator-info-'+indicator.attribute)[0].getBoundingClientRect().right > 180)
     ? wGraph
     : 0
   })
