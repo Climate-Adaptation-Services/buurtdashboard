@@ -13,6 +13,9 @@
 
   // filter out null values
   nodesData = nodesData.filter(d => d.properties[indicator.attribute] !== null)
+  if(indicator.titel === 'Groen per inwoner'){
+    nodesData = nodesData.filter(d => d.properties[indicator.attribute] > 0)
+  }
 
   const margin = {bottom:50, top:20, left:30, right:30}
 

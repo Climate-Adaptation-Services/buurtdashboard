@@ -7,7 +7,7 @@
   import BarPlot from "./BarPlot.svelte";
   import BarPlotMulti from "./BarPlotMulti.svelte";
   import BarPlotLegend from "./BarPlotLegend.svelte";
-    import { afterUpdate, onMount } from "svelte";
+  import { afterUpdate, onMount } from "svelte";
 
   export let h
   export let indicator
