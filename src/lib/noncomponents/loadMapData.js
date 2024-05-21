@@ -37,7 +37,7 @@ export function loadMapData(datajson){
     buurt.properties['m2GroenPI'] = (isNaN(parseFloat(buurt.properties['m2GroenPI']))) ? null : parseFloat(buurt.properties['m2GroenPI'])
     
     // verschillende variabelen van string naar num
-    buurt.properties['F18Overgewi'] = (isNaN(parseFloat(buurt.properties['F18Overgewi']))) ? null : parseFloat(buurt.properties['F18Overgewi'])
+    buurt.properties['F1865ErnsOv'] = (isNaN(parseFloat(buurt.properties['F18Overgewi']))) ? null : parseFloat(buurt.properties['F1865ErnsOv'])
     buurt.properties['F18ErnstigZ'] = (isNaN(parseFloat(buurt.properties['F18ErnstigZ']))) ? null : parseFloat(buurt.properties['F18ErnstigZ'])
     buurt.properties['BrozeGezon'] = (isNaN(parseFloat(buurt.properties['BrozeGezon']))) ? null : parseFloat(buurt.properties['BrozeGezon'])
     buurt.properties['G_WOZ'] = (isNaN(parseFloat(buurt.properties['G_WOZ']))) ? null : parseFloat(buurt.properties['G_WOZ'])
