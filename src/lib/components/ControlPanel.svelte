@@ -89,15 +89,15 @@
   <div>
     <div class='download-and-about'>
       <div class='about' on:click={() => showModal('intro')}>
-        <img src='/about.png' width='30px'/>
+        <img src='./about.png' width='30px'/>
         <p class='download-and-about-text'>Intro dashboard</p>
       </div>
       <div class='about' on:click={() => showModal('graphs')}>
-        <img src='/chart.png' width='30px'/>
+        <img src='./chart.png' width='30px'/>
         <p class='download-and-about-text'>Uitleg grafieken</p>
       </div>
       <div class='download' on:click={() => showModal('download')}>
-        <img src='/download.png' width='30px'/>
+        <img src='./download.png' width='30px'/>
         <p class='download-and-about-text'>Download data</p>
       </div>
     </div>
