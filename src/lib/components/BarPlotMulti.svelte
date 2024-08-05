@@ -32,11 +32,6 @@
       if(indicator.titel === 'Gevoelstemperatuur'){totalOpp -= buurtOpp * buurt.properties['NDPETperc']}
       
       Object.keys(indicator.klassen).forEach(kl => {
-
-        if(indicator.titel === 'Groen/Grijs/Blauw'){
-          console.log(+buurt.properties[indicator.klassen[kl]])
-        }
-
         // is dit goed zo of moeten we anders met no data (NaN) omgaan
         if(buurt.properties[indicator.klassen[kl]] && !isNaN(parseFloat(buurt.properties[indicator.klassen[kl]]))){
           klassenTotal.filter(kl2 => kl2.klasseNaam === kl)[0].waarde += buurtOpp * +buurt.properties[indicator.klassen[kl]]
