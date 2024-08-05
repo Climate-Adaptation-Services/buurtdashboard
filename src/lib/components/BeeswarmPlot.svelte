@@ -14,7 +14,13 @@
   // filter out null values
   nodesData = nodesData.filter(d => d.properties[indicator.attribute] !== null)
   if(indicator.titel === 'Groen per inwoner'){
-    nodesData = nodesData.filter(d => d.properties[indicator.attribute] > 0)
+    nodesData = nodesData.filter(d => +d.properties[indicator.attribute] > 0)
+
+    // console.log(nodesData)
+    // console.log(extent($buurtenInGemeente.features, d => {
+    //   console.log(+d.properties[indicator.attribute])
+    //   return +d.properties[indicator.attribute]
+    // }))
   }
 
   const margin = {bottom:50, top:20, left:30, right:30}
@@ -25,7 +31,7 @@
         .range([0, w-margin.left-margin.right])
         .nice()
     : scaleLog()
-        .domain(extent($buurtenInGemeente.features, d => +d.properties[indicator.attribute]))
+        .domain(extent(nodesData, d => +d.properties[indicator.attribute]))
         .range([0, w-margin.left-margin.right])
         .nice()
 
