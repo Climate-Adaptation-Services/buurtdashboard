@@ -24,6 +24,7 @@
         : buurt.properties['buurt_opp_zonderagr']
 
       totalOpp += buurtOpp
+
       // zorg ervoor dat groen/grijs openbaar optelt tot 100%, en niet maar tot % openbaar
       // if(indicator.titel === 'Groen en grijs openbare ruimte'){totalOpp -= buurtOpp * ((100 - buurt.properties['Openbaar'])/100)}
       
@@ -31,12 +32,20 @@
       if(indicator.titel === 'Gevoelstemperatuur'){totalOpp -= buurtOpp * buurt.properties['NDPETperc']}
       
       Object.keys(indicator.klassen).forEach(kl => {
+
+        if(indicator.titel === 'Groen/Grijs/Blauw'){
+          console.log(+buurt.properties[indicator.klassen[kl]])
+        }
+
         // is dit goed zo of moeten we anders met no data (NaN) omgaan
-        if(buurt.properties[indicator.klassen[kl]]){
+        if(buurt.properties[indicator.klassen[kl]] && !isNaN(parseFloat(buurt.properties[indicator.klassen[kl]]))){
           klassenTotal.filter(kl2 => kl2.klasseNaam === kl)[0].waarde += buurtOpp * +buurt.properties[indicator.klassen[kl]]
         }
       });
+
     });
+
+
 
     klassenTotal.forEach(kl => {
       kl.waarde = (kl.waarde/totalOpp)
@@ -46,7 +55,7 @@
     let result = {'group':regio}
     Object.keys(indicator.klassen).forEach(klasse => {
       result[klasse] = klassenTotal.filter(kl => kl.klasseNaam === klasse)[0].waarde
-    });
+    });  
 
     return result
   }
