@@ -28,11 +28,11 @@ export function loadMapData(datajson){
   combinedBuurt = combinedBuurt.map(buurt => {
 
     // Geboorte totaal naar percentage
-    buurt.properties['Geboorte'] = (isNaN(parseFloat(buurt.properties['Geboorte'])))
-      ? null
-      : (buurt.properties['AANT_INW'] > 0)
-        ? (parseFloat(buurt.properties['Geboorte']) / buurt.properties['AANT_INW']) * 100
-        : null
+    // buurt.properties['Geboorte'] = (isNaN(parseFloat(buurt.properties['Geboorte'])))
+    //   ? null
+    //   : (buurt.properties['AANT_INW'] > 0)
+    //     ? (parseFloat(buurt.properties['Geboorte']) / buurt.properties['AANT_INW']) * 100
+    //     : null
 
     buurt.properties['m2GroenPI'] = (isNaN(parseFloat(buurt.properties['m2GroenPI']))) ? null : parseFloat(buurt.properties['m2GroenPI'])
 
@@ -42,7 +42,8 @@ export function loadMapData(datajson){
     buurt.properties['BrozeGezon'] = (isNaN(parseFloat(buurt.properties['BrozeGezon']))) ? null : parseFloat(buurt.properties['BrozeGezon'])
     buurt.properties['G_WOZ'] = (isNaN(parseFloat(buurt.properties['G_WOZ']))) ? null : parseFloat(buurt.properties['G_WOZ'])
     buurt.properties['HuurwTperc'] = (isNaN(parseFloat(buurt.properties['HuurwTperc']))) ? null : parseFloat(buurt.properties['HuurwTperc'])
-    buurt.properties['Geboorte'] = (isNaN(parseFloat(buurt.properties['Geboorte']))) ? null : parseFloat(buurt.properties['Geboorte'])
+    // buurt.properties['Geboorte'] = (isNaN(parseFloat(buurt.properties['Geboorte']))) ? null : parseFloat(buurt.properties['Geboorte'])
+    buurt.properties['perc_groen_zonder_agr'] = (isNaN(parseFloat(buurt.properties['perc_groen_zonder_agr']))) ? null : parseFloat(buurt.properties['perc_groen_zonder_agr'])
 
     // waterdiepte naar percentage
     // buurt.properties['perc5_10mm'] *= 100
