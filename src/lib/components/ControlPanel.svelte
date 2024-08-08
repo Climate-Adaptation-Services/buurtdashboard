@@ -96,8 +96,8 @@
         <img src='./chart.png' width='30px'/>
         <p class='download-and-about-text'>Uitleg grafieken</p>
       </div>
-      <div class='download' on:click={() => showModal('download')}>
-        <img src='./download.png' width='30px'/>
+      <div class='download'>
+        <a href='https://github.com/Climate-Adaptation-Services/buurtdashboard-data/raw/main/BuurtdashboardDownload20240805.xlsx' download='BuurtdashboardDownload20240805'><img src='./download.png' width='30px'/></a>
         <p class='download-and-about-text'>Download data</p>
       </div>
     </div>
