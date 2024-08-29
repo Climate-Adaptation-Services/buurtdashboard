@@ -8,11 +8,18 @@
       ? $hoveredRegion.center[1] - 100
       : $hoveredRegion.center[1]
   }
+
+  function getTooltipLeft(){
+    return (window.innerWidth - $hoveredRegion.center[0] < 300)
+      ? $hoveredRegion.center[0] - 180
+      : $hoveredRegion.center[0]
+    
+  }
   
 </script>
 
 {#if $hoveredRegion !== null}
-  <div class='tooltip' style='left:{$hoveredRegion.center[0]}px;top:{getTooltipTop()}px'>
+  <div class='tooltip' style='left:{getTooltipLeft()}px;top:{getTooltipTop()}px'>
     {#if $hoveredValue === null}
       <div class='tooltip-title'>
         {$hoveredRegion.region}
