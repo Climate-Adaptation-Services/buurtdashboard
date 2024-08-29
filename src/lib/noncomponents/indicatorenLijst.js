@@ -4,9 +4,9 @@ export function getIndicatorenLijst(metadata){
   let indicatorenLijst = []
 
   // let indicatorenOpCategorie = [...metadata.filter(d => d.Categorie === 'Gebiedskenmerken'), ...metadata.filter(d => d.Categorie === 'Effecten'), ...metadata.filter(d => d.Categorie === 'Kwetsbaarheid')]
-  indicatorenLijst = addIndicatorCategorie(indicatorenLijst, metadata.filter(d => d.Categorie === 'Effecten'))
-  indicatorenLijst = addIndicatorCategorie(indicatorenLijst, metadata.filter(d => d.Categorie === 'Gebiedskenmerken'))
-  indicatorenLijst = addIndicatorCategorie(indicatorenLijst, metadata.filter(d => d.Categorie === 'Kwetsbaarheid'))
+  indicatorenLijst = addIndicatorCategorie(indicatorenLijst, metadata.filter(d => d.Categorie === 'Effects'))
+  indicatorenLijst = addIndicatorCategorie(indicatorenLijst, metadata.filter(d => d.Categorie === 'Area characteristics'))
+  indicatorenLijst = addIndicatorCategorie(indicatorenLijst, metadata.filter(d => d.Categorie === 'Vulnerability'))
 
   console.log(indicatorenLijst)
 
@@ -33,7 +33,7 @@ function addIndicatorCategorie(indicatorenLijst, indicatoren){
       titel:indicator.Titel, 
       attribute:indicator.Indicatornaamtabel.split(',')[0], 
       subtitel:indicator.Subtitel, 
-      plottitel:indicator['Plottitel (enkel bij kwantitatief)'],
+      plottitel:indicator['Plot titel (enkel bij kwantitatief)'],
       categorie:indicator.Categorie, 
       color:{
         domain:indicator.Domein.split(','), 

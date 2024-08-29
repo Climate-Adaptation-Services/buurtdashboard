@@ -19,7 +19,7 @@
       klassenTotal.push({klasseNaam: Object.keys(indicator.klassen)[i], waarde:0})
     }
     data.features.forEach(buurt => {
-      let buurtOpp = (indicator.titel === 'Functionele gebieden')
+      let buurtOpp = (indicator.titel === 'Functional areas')
         ? buurt.properties['buurt_opp_incl_agrarisch']
         : buurt.properties['buurt_opp_zonderagr']
 
@@ -29,7 +29,7 @@
       // if(indicator.titel === 'Groen en grijs openbare ruimte'){totalOpp -= buurtOpp * ((100 - buurt.properties['Openbaar'])/100)}
       
       // Geen data categorie eruit, rest tot 100%
-      if(indicator.titel === 'Gevoelstemperatuur'){totalOpp -= buurtOpp * buurt.properties['NDPETperc']}
+      if(indicator.titel === 'Perceived temperature'){totalOpp -= buurtOpp * buurt.properties['NDPETperc']}
       
       Object.keys(indicator.klassen).forEach(kl => {
         // is dit goed zo of moeten we anders met no data (NaN) omgaan
@@ -44,7 +44,7 @@
 
     klassenTotal.forEach(kl => {
       kl.waarde = (kl.waarde/totalOpp)
-      if(indicator.titel === 'Gevoelstemperatuur'){kl.waarde *= 100}
+      if(indicator.titel === 'Perceived temperature'){kl.waarde *= 100}
     })
 
     let result = {'group':regio}

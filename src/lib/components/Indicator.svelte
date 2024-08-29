@@ -19,7 +19,7 @@
   let rangeExtent = [0,1]
 
   function getClass(value){
-    if(value === null){return 'Geen data'}
+    if(value === null){return 'No data'}
     let kl = ''
     Object.keys(indicator.klassen).reverse().forEach(klasse => {
       if(value < indicator.klassen[klasse]){
