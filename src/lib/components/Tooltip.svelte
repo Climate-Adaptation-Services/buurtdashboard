@@ -13,7 +13,6 @@
     return (window.innerWidth - $hoveredRegion.center[0] < 300)
       ? $hoveredRegion.center[0] - 180
       : $hoveredRegion.center[0]
-    
   }
   
 </script>
