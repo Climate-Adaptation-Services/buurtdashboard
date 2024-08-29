@@ -143,7 +143,7 @@
       />
     {/each}
   </g>
-  <text x={w/2} y={h-18} fill='#645F5E' text-anchor='middle' font-size='14'>{indicator['Plot titel (enkel bij kwalitatief)']} per buurt in gemeente {$gemeenteData.features.filter(gemeente => gemeente.properties['GM_CODE'] === $gemeenteSelection)[0].properties['GM_NAAM']}</text>
+  <text x={w/2} y={h-18} fill='#645F5E' text-anchor='middle' font-size='14'>{indicator.plottitel} per buurt in gemeente {$gemeenteData.features.filter(gemeente => gemeente.properties['GM_CODE'] === $gemeenteSelection)[0].properties['GM_NAAM']}</text>
 </svg>
 
 
