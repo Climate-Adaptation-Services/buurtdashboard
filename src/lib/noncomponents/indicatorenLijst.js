@@ -33,7 +33,7 @@ function addIndicatorCategorie(indicatorenLijst, indicatoren){
       titel:indicator.Titel, 
       attribute:indicator.Indicatornaamtabel.split(',')[0], 
       subtitel:indicator.Subtitel, 
-      plottitel:indicator['Plot titel (enkel bij kwantitatief)'],
+      plottitel:indicator['Plot titel (enkel bij kwalitatief)'],
       categorie:indicator.Categorie, 
       color:{
         domain:indicator.Domein.split(','), 
