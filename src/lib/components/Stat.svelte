@@ -10,12 +10,12 @@
   export let color;
 
   $: name = (regio === 'Nederland')
-    ? regio
+    ? 'Netherlands'
     : (regio === 'Gemeente')
-      ? 'Gemeente ' + $gemeenteData.features.filter(gemeente => gemeente.properties['GM_CODE'] === $gemeenteSelection)[0].properties['GM_NAAM']
+      ? 'Municipality of ' + $gemeenteData.features.filter(gemeente => gemeente.properties['GM_CODE'] === $gemeenteSelection)[0].properties['GM_NAAM']
       : (regio === 'Buurt')
-        ? 'De buurt ' + $buurtSelectionData.properties[$buurtNaam]
-        : 'Wijktype ' + $buurtSelectionData.properties['def_wijkty']
+        ? 'Neighbourhood ' + $buurtSelectionData.properties[$buurtNaam]
+        : 'District type ' + $buurtSelectionData.properties['def_wijkty']
   
   $: if(name && name.length > 25){
     name = name.slice(0, 23) + '...'

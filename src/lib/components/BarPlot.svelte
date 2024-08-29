@@ -74,12 +74,12 @@
     
   function getName(group){
     return (group === 'Nederland')
-    ? group
+    ? 'Netherlands'
     : (group === 'Gemeente')
-      ? 'Gemeente ' + $gemeenteData.features.filter(gemeente => gemeente.properties['GM_CODE'] === $gemeenteSelection)[0].properties['GM_NAAM']
+      ? 'Municipality of ' + $gemeenteData.features.filter(gemeente => gemeente.properties['GM_CODE'] === $gemeenteSelection)[0].properties['GM_NAAM']
       : (group === 'Buurt')
-        ? 'De buurt ' + $buurtSelectionData.properties[$buurtNaam]
-        : 'Wijktype ' + $buurtSelectionData.properties['def_wijkty']
+        ? 'Neighbourhood ' + $buurtSelectionData.properties[$buurtNaam]
+        : 'District type ' + $buurtSelectionData.properties['def_wijkty']
   }
 
   function mouseOver(st, stacked){
