@@ -1,6 +1,6 @@
 <script>
 
-  import { gemeenteData, hoveredValue, currentView, gemeenteSelection, buurtSelection, hoveredRegion, buurtenInGemeente, buurtCode, buurtNaam } from "$lib/stores";
+  import { gemeenteData, hoveredValue, currentView, gemeenteSelection, buurtSelection, hoveredRegion, buurtenInGemeente, buurtCode, buurtNaam, buurtData } from "$lib/stores";
   import { extent, scaleLinear, scaleLog, select, selectAll } from "d3";
   import XAxis from '$lib/components/XAxis.svelte';
   import { forceSimulation, forceY, forceX, forceCollide, forceManyBody } from "d3-force";
@@ -15,6 +15,38 @@
   nodesData = nodesData.filter(d => d.properties[indicator.attribute] !== null)
   if(indicator.titel === 'Groen per inwoner'){
     nodesData = nodesData.filter(d => +d.properties[indicator.attribute] > 0)
+  }
+
+  function changeYear(){
+    // console.log(nodesData[0].properties['P_schaduw_fw'])
+    // alpha = 1
+    // alphaDecay = 0.00001
+    // velocityDecay = 0.1
+    // buurtData.set(
+    //   {type: 'FeatureCollection', features: $buurtData.features.map(buurt => {
+    //     buurt.properties['P_schaduw_fw'] *= (Math.random()+0.5)
+    //     return buurt
+    //   })}
+    // )
+    // nodesData = structuredClone($buurtenInGemeente.features)
+
+      alphaDecay = 0
+      alpha = 1
+
+      nodesData = nodesData.map(node => {
+        node.properties[indicator.attribute] = node.properties[indicator.attribute] * (Math.random()+0.5)
+        return node
+      })
+        
+    // })
+    // function push(i){
+      // setTimeout(() => {
+    //     // alpha = 0.1
+    //     nodesData = nodesData
+    //     if(i > 0){push(i-1)}
+    //   }, 1000)
+    // }
+    // push(1)
   }
 
   const margin = {bottom:50, top:20, left:30, right:30}
@@ -34,10 +66,14 @@
   let nodes = []; // Create an empty array to be populated when simulation ticks
 
   simulation.on("tick", () => {
+    setTimeout(() => {
       nodes = simulation.nodes(); // Repopulate and update
+    }, 50)
   });
 
   $: RADIUS = (nodesData.length > 150) ? 3 : 5
+  let alpha = 0.6
+  let alphaDecay = 0
 
   // Run the simulation whenever any of the variables inside of it change
   $: {
@@ -48,8 +84,8 @@
         .strength(d => (xScale(d.properties[indicator.attribute]) > 0) ? 0.04 : 0.01))
       .force('charge', forceManyBody().strength(-0.5))
       .force("collide", forceCollide().radius(RADIUS*1.2))
-      .alpha(0.6) // [0, 1] The rate at which the simulation finishes. You should increase this if you want a faster simulation, or decrease it if you want more "movement" in the simulation.
-      .alphaDecay(0.001) // [0, 1] The rate at which the simulation alpha approaches 0. you should decrease this if your bubbles are not completing their transitions between simulation states.
+      .alpha(alpha) // [0, 1] The rate at which the simulation finishes. You should increase this if you want a faster simulation, or decrease it if you want more "movement" in the simulation.
+      .alphaDecay(alphaDecay) // [0, 1] The rate at which the simulation alpha approaches 0. you should decrease this if your bubbles are not completing their transitions between simulation states.
       .restart(); // Restart the simulation
   }
 
@@ -131,7 +167,7 @@
     <text x={w/2} y={h - margin.bottom - 5} text-anchor='middle' font-size='13'>Let op logaritmische schaal</text>
   {/if}
 
-  <g class="inner-chart" transform="translate({margin.left}, {margin.top})">
+  <g class="inner-chart" transform="translate({margin.left}, {margin.top})" on:click={() => changeYear()}>
     {#each nodes as node (node.id + indicator.attribute)}
       <circle class={getClassName(node) + ' ' + 'svgelements_' + node.properties[$buurtCode]}
       stroke={(node.properties[$buurtCode] === $buurtSelection) ? '#E1575A' : 'none'}
