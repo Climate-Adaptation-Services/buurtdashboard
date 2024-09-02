@@ -35,9 +35,16 @@
         rangeExtent = extent($buurtenInGemeente.features, d => +d.properties[indicator.attribute])
         // this can deal with any amount of colors in the scale
         const step = (rangeExtent[1] - rangeExtent[0]) / (indicator.color.range.length-1)
-        color = scaleLinear()
-          .domain([...Array(indicator.color.range.length).keys()].map(i => rangeExtent[0] + i * step))
-          .range(indicator.color.range);
+        if(indicator.titel !== 'Grondwaterstand 2050 hoog'){
+          color = scaleLinear()
+            .domain([...Array(indicator.color.range.length).keys()].map(i => rangeExtent[0] + i * step))
+            .range(indicator.color.range);
+        }else{
+          color = scaleLinear()
+            .domain([...Array(indicator.color.range.length).keys()].map(i => rangeExtent[0] + i * step).reverse())
+            .range(indicator.color.range);
+        }
+
       }
     }else{
       color = scaleOrdinal()

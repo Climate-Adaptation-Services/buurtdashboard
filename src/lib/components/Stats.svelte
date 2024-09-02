@@ -62,8 +62,13 @@
   if(xScaleMin < 0){
     xScaleMin -= 0.5
   }
+
+  const xDomain = (indicator.titel !== 'Grondwaterstand 2050 hoog')
+    ? [xScaleMin, max([meanValuesDict['meanValueNederland'], meanValuesDict['meanValueGemeente'], meanValuesDict['meanValueBuurt'], meanValuesDict['meanValueWijktype']])]
+    : [xScaleMin, max([meanValuesDict['meanValueNederland'], meanValuesDict['meanValueGemeente'], meanValuesDict['meanValueBuurt'], meanValuesDict['meanValueWijktype']])].reverse()
+  // const xDomain = [xScaleMin, max([meanValuesDict['meanValueNederland'], meanValuesDict['meanValueGemeente'], meanValuesDict['meanValueBuurt'], meanValuesDict['meanValueWijktype']])]
   $: xScaleStats = scaleLinear()
-    .domain([xScaleMin, max([meanValuesDict['meanValueNederland'], meanValuesDict['meanValueGemeente'], meanValuesDict['meanValueBuurt'], meanValuesDict['meanValueWijktype']])])
+    .domain(xDomain)
     .range([0, wStats-240])
 
 </script>

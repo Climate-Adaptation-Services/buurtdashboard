@@ -9,6 +9,8 @@ export const hoveredValue = writable(null)
 export const mousePosition = writable(null)
 export const modal = writable(null);
 
+export const URLParams = writable(new URLSearchParams('https://www.google.com/'))
+
 export const buurtCode = readable('BU_CODE')
 export const gemeenteCode = readable('GM_CODE')
 export const buurtNaam = readable('BU_NAAM')
@@ -59,7 +61,7 @@ export const currentData = derived(
 export const buurtenInGemeente = derived(
   [gemeenteSelection, buurtData],
   ([$gemeenteSelection, $buurtData]) => {
-    if($gemeenteSelection !== null){
+    if($gemeenteSelection !== null && $buurtData){
       const newFeatures = $buurtData.features.filter(buurt => buurt.properties['GM_CODE'] === $gemeenteSelection)
       return {type: 'FeatureCollection', features: newFeatures}
     }else{
@@ -78,3 +80,5 @@ export const wijkTypeData = derived(
     }
   }
 )
+
+

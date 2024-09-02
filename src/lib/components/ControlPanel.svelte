@@ -1,5 +1,5 @@
 <script>
-  import { gemeenteData, buurtData, buurtSelection, gemeenteCode, gemeenteSelection, buurtSelectionData, buurtCode, buurtNaam, modal } from '$lib/stores';
+  import { gemeenteData, buurtData, buurtSelection, gemeenteCode, gemeenteSelection, buurtSelectionData, buurtCode, buurtNaam, modal, URLParams } from '$lib/stores';
   import Select from 'svelte-select'
   import * as _ from 'lodash'
   import { select, selectAll, easeLinear } from 'd3';
@@ -16,36 +16,54 @@
   let gemeenteList;
   let buurtList;
   $: if($gemeenteData !== null){
-    gemeenteList = $gemeenteData.features.map(gemeente => {return {'value':gemeente.properties['GM_CODE'], 'label':capSelectLabelLen(gemeente.properties['GM_NAAM'])}})
+    gemeenteList = $gemeenteData.features.map(gemeente => {return {'value':gemeente.properties[$gemeenteCode], 'label':capSelectLabelLen(gemeente.properties['GM_NAAM'])}})
     gemeenteList = _.orderBy(gemeenteList, [gemeente => gemeente.label], ['asc']);
   }
   $: if($gemeenteSelection !== null){
     const buurtenFeatures = $buurtData.features.filter(buurt => buurt.properties[$gemeenteCode] === $gemeenteSelection)
+    console.log('bf', buurtenFeatures)
     buurtList = buurtenFeatures.map(buurt => {return {'value':buurt.properties[$buurtCode], 'label':capSelectLabelLen(buurt.properties[$buurtNaam])}})
     buurtList = _.orderBy(buurtList, [buurt => buurt.label], ['asc']);
   }
 
+  $: console.log('buurtList', $buurtData, $gemeenteSelection)
+
   function handleGemeenteChange(e){
+    $URLParams.set('gemeente', e.detail.value);
+    window.history.pushState(null, '', '?' + $URLParams.toString());
+
     gemeenteSelection.set(null)
     buurtSelection.set(null)
     setTimeout(() => { gemeenteSelection.set(e.detail.value) }, 1);    
   }
 
   function handleBuurtChange(e){
+    $URLParams.set('buurt', e.detail.value);
+    window.history.pushState(null, '', '?' + $URLParams.toString());
+
     buurtSelection.set(e.detail.value)
     selectAll('.svgelements_' + e.detail.value)
       .raise()
   }
 
   function handleGemeenteClear(e){
+    $URLParams.delete('gemeente')
+    $URLParams.delete('buurt')
+    window.history.replaceState('null', '', './');
+    window.history.replaceState(null, '', '?' + $URLParams.toString());
+
     gemeenteSelection.set(null)
     buurtSelection.set(null)
   }
   function handleBuurtClear(e){
+    $URLParams.delete('buurt')
+    window.history.replaceState('null', '', './');
+    window.history.replaceState(null, '', '?' + $URLParams.toString());
+
     buurtSelection.set(null)
   }
 
-  $: wijktype = ($buurtSelection !== null && $buurtSelectionData.properties['def_wijkty']) 
+  $: wijktype = ($buurtData && $buurtSelection !== null && $buurtSelectionData.properties['def_wijkty']) 
     ? $buurtSelectionData.properties['def_wijkty']
     : 'Geen wijktype'
 
@@ -79,6 +97,20 @@
   const showModal = (type) => {
     modal.set(bind(OverDitDashboard, { type : type}))
   };
+
+  $: if($buurtData){readParams()}
+
+  onMount(() => {
+    URLParams.set(new URLSearchParams(window.location.search))
+  })
+
+  function readParams(){
+    console.log($URLParams.get("gemeente"), $URLParams.get("buurt"))
+    
+    setTimeout(() => {gemeenteSelection.set($URLParams.get("gemeente"))}, 10)
+    setTimeout(() => {buurtSelection.set($URLParams.get("buurt"))}, 10)
+
+  }
  
 </script>
 

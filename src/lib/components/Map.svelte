@@ -1,6 +1,6 @@
 <script>
   import center from '@turf/center'
-  import { currentData, gemeenteSelection, currentView, buurtSelection, hoveredRegion, hoveredValue, buurtCode, mousePosition, buurtNaam, buurtenInGemeente } from "$lib/stores";
+  import { currentData, gemeenteSelection, currentView, buurtSelection, hoveredRegion, hoveredValue, buurtCode, mousePosition, buurtNaam, buurtenInGemeente, URLParams } from "$lib/stores";
   import { geoMercator, geoPath, select, selectAll } from 'd3';
   import { loadMapData } from "$lib/noncomponents/loadMapData.js";
 
@@ -118,8 +118,14 @@
 
     const newSelection = feature.properties[classNameVariable].replaceAll(' ','').replaceAll('(','').replaceAll(')','')
     if($currentView === 'Nederland'){
+      $URLParams.set('gemeente', newSelection);
+      window.history.pushState(null, '', '?' + $URLParams.toString());
+
       gemeenteSelection.set(newSelection)
     }else{
+      $URLParams.set('buurt', newSelection);
+      window.history.pushState(null, '', '?' + $URLParams.toString());
+
       buurtSelection.set(newSelection)
     }
   }
