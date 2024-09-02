@@ -1,6 +1,6 @@
 <script>
 
-  import { gemeenteData, hoveredValue, currentView, gemeenteSelection, buurtSelection, hoveredRegion, buurtenInGemeente, buurtCode, buurtNaam } from "$lib/stores";
+  import { gemeenteData, hoveredValue, currentView, gemeenteSelection, buurtSelection, hoveredRegion, buurtenInGemeente, buurtCode, buurtNaam, URLParams } from "$lib/stores";
   import { extent, scaleLinear, scaleLog, select, selectAll } from "d3";
   import XAxis from '$lib/components/XAxis.svelte';
   import { forceSimulation, forceY, forceX, forceCollide, forceManyBody } from "d3-force";
@@ -112,8 +112,14 @@
 
     const newSelection = feature.properties[classNameVariable].replaceAll(' ','').replaceAll('(','').replaceAll(')','')
     if($currentView === 'Nederland'){
+      $URLParams.set('gemeente', newSelection);
+      window.history.pushState(null, '', '?' + $URLParams.toString());
+
       gemeenteSelection.set(newSelection)
     }else{
+      $URLParams.set('buurt', newSelection);
+      window.history.pushState(null, '', '?' + $URLParams.toString());
+      
       buurtSelection.set(newSelection)
     }
   }
