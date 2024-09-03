@@ -1,14 +1,12 @@
 <script>
-  import { gemeenteData, buurtData, buurtSelection, gemeenteCode, gemeenteSelection, buurtSelectionData, buurtCode, buurtNaam, modal, URLParams } from '$lib/stores';
-  import Select from 'svelte-select'
+  import { gemeenteData, buurtData, buurtSelection, gemeenteCode, gemeenteSelection, buurtSelectionData, buurtCode, buurtNaam, modal, URLParams, indicatorenSelectie } from '$lib/stores';
   import * as _ from 'lodash'
-  import { select, selectAll, easeLinear } from 'd3';
-  import MultiSelect from 'svelte-multiselect?client'
-  import { browser } from '$app/environment';
-  import { indicatorenSelectie } from '$lib/stores';
-  import { afterUpdate, onMount } from 'svelte';
+  import { onMount } from 'svelte';
   import OverDitDashboard from '$lib/components/OverDitDashboard.svelte';
   import { bind } from 'svelte-simple-modal';
+  import IndicatorFilter from './indicatorFilter.svelte';
+  import GemeenteSelect from './GemeenteSelect.svelte';
+  import BuurtSelect from './BuurtSelect.svelte';
 
   export let indicatorenLijst
 
@@ -26,43 +24,6 @@
     buurtList = _.orderBy(buurtList, [buurt => buurt.label], ['asc']);
   }
 
-  $: console.log('buurtList', $buurtData, $gemeenteSelection)
-
-  function handleGemeenteChange(e){
-    $URLParams.set('gemeente', e.detail.value);
-    window.history.pushState(null, '', '?' + $URLParams.toString());
-
-    gemeenteSelection.set(null)
-    buurtSelection.set(null)
-    setTimeout(() => { gemeenteSelection.set(e.detail.value) }, 1);    
-  }
-
-  function handleBuurtChange(e){
-    $URLParams.set('buurt', e.detail.value);
-    window.history.pushState(null, '', '?' + $URLParams.toString());
-
-    buurtSelection.set(e.detail.value)
-    selectAll('.svgelements_' + e.detail.value)
-      .raise()
-  }
-
-  function handleGemeenteClear(e){
-    $URLParams.delete('gemeente')
-    $URLParams.delete('buurt')
-    window.history.replaceState('null', '', './');
-    window.history.replaceState(null, '', '?' + $URLParams.toString());
-
-    gemeenteSelection.set(null)
-    buurtSelection.set(null)
-  }
-  function handleBuurtClear(e){
-    $URLParams.delete('buurt')
-    window.history.replaceState('null', '', './');
-    window.history.replaceState(null, '', '?' + $URLParams.toString());
-
-    buurtSelection.set(null)
-  }
-
   $: wijktype = ($buurtData && $buurtSelection !== null && $buurtSelectionData.properties['def_wijkty']) 
     ? $buurtSelectionData.properties['def_wijkty']
     : 'Geen wijktype'
@@ -75,25 +36,6 @@
     }
   }
 
-  const indicators = indicatorenLijst.map(d => d.titel)
-
-  afterUpdate(() => {
-    selectAll('li')
-      .style('color', 'black')
-      .style('cursor', 'pointer')
-      .attr('background-color', 'white')
-      .style('text-align', 'left')
-
-    selectAll('.disabled')
-      .style('color', 'steelblue')
-      .style('cursor', 'default')
-      .attr('background-color', '#e5e3e3')
-      .style('text-align', 'center')
-
-    selectAll('.selected li')
-      .style('background-color', 'white')
-  })
-
   const showModal = (type) => {
     modal.set(bind(OverDitDashboard, { type : type}))
   };
@@ -104,12 +46,10 @@
     URLParams.set(new URLSearchParams(window.location.search))
   })
 
-  function readParams(){
-    console.log($URLParams.get("gemeente"), $URLParams.get("buurt"))
-    
+  function readParams(){    
     setTimeout(() => {gemeenteSelection.set($URLParams.get("gemeente"))}, 10)
     setTimeout(() => {buurtSelection.set($URLParams.get("buurt"))}, 10)
-
+    setTimeout(() => {indicatorenSelectie.set($URLParams.getAll("indicator"))}, 10)
   }
  
 </script>
@@ -133,38 +73,18 @@
         <p class='download-and-about-text'>Download data</p>
       </div>
     </div>
-    <p class='select-title'>Gemeente:</p>
-    <Select items={gemeenteList} placeholder="Zoek gemeente..." value={$gemeenteSelection} on:change={handleGemeenteChange} on:clear={handleGemeenteClear}/>
-    {#if $gemeenteSelection !== null}
-      <p class='select-title'>Buurt:</p>
-      <Select items={buurtList} placeholder="Zoek buurt..." value={$buurtSelection} on:change={handleBuurtChange} on:clear={handleBuurtClear}/>
-    {/if}
+    <GemeenteSelect {gemeenteList} />
+    <BuurtSelect {buurtList} />
     {#if $buurtSelection !== null}
         <p style='color:white'>Wijktype: <strong>{wijktype}</strong></p>
     {/if}
-    {#if browser}
-      <div class='multiselectdiv'>
-        <p style='margin-bottom:5px'>Filter indicatoren:</p>
-        <MultiSelect bind:value={$indicatorenSelectie} options={indicators} />
-      </div>
-    {/if}
-    </div>
+    <IndicatorFilter {indicatorenLijst} />
+  </div>
 </div>
 
 <style>
   .search{
     padding:10px 40px 10px 40px;
-  }
-
-  .multiselectdiv{
-    width:330px;
-    color:white;
-    font-size: 12px;
-  }
-
-  .select-title{
-    color:white;
-    margin:5px;
   }
 
   .download-and-about{

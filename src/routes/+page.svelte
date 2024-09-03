@@ -1,5 +1,5 @@
 <script>
-  import ControlPanel from '$lib/components/ControlPanel.svelte';
+  import ControlPanel from '$lib/components/controlPanel/ControlPanel.svelte';
   import Indicator from '$lib/components/Indicator.svelte';
   import Map from '$lib/components/Map.svelte';
   import Tooltip from '$lib/components/Tooltip.svelte';
