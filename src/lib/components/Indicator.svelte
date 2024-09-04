@@ -8,6 +8,7 @@
   import BarPlotMulti from "./BarPlotMulti.svelte";
   import BarPlotLegend from "./BarPlotLegend.svelte";
   import { afterUpdate, onMount } from "svelte";
+  import { _ } from 'svelte-i18n'
 
   export let h
   export let indicator
@@ -75,7 +76,7 @@
   </div>
 
   <div class='indicator-title' style='height: {titleHeight}px'>
-    <h4 style='margin:0px; color:#BB9012'>Categorie: {indicator.categorie}</h4>
+    <h4 style='margin:0px; color:#BB9012'>{$_("Categorie")}: {indicator.categorie}</h4>
     <h2 style='padding:5px 15px 5px 15px; margin:10px 0px 7px 0px; background-color:#36575B; border-radius:15px; color:white'>{indicator.titel}</h2>
     <h4 style='margin:0px; padding:0px 10px 0px 10px; font-weight:normal; color:#7e7975; text-align: center;'>{indicator.subtitel}</h4>
   </div>
@@ -88,7 +89,7 @@
         {#if $gemeenteSelection !== null}
           <BeeswarmPlot w={wGraph} h={bodyHeight*0.4} {indicator} {color} nodesData={structuredClone($buurtenInGemeente.features)}/>
         {:else}
-          <p style='text-align:center; padding-top:50px; font-size:18px; position:absolute; left:{wGraph/3.4}px'><em>Selecteer gemeente...</em></p>
+          <p style='text-align:center; padding-top:50px; font-size:18px; position:absolute; left:{wGraph/3.4}px'><em>{$_("Selecteer_gemeente")}...</em></p>
         {/if}
       </div>
     {:else}
@@ -107,7 +108,7 @@
       {/if}
       <span style='width:100%; position:absolute; bottom:0px; display:flex; justify-content:space-between; pointer-events:none'>
         <h5><strong>{indicator.bron}</strong></h5>
-        <h5 style='pointer-events:auto'><a target='_blank' href={indicator.link}>Meer informatie</a></h5>
+        <h5 style='pointer-events:auto'><a target='_blank' href={indicator.link}>{$_("Meer_info")}</a></h5>
       </span>
     </div>
   </div>

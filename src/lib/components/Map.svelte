@@ -3,6 +3,7 @@
   import { currentData, gemeenteSelection, currentView, buurtSelection, hoveredRegion, hoveredValue, buurtCode, mousePosition, buurtNaam, buurtenInGemeente, URLParams } from "$lib/stores";
   import { geoMercator, geoPath, select, selectAll } from 'd3';
   import { loadMapData } from "$lib/noncomponents/loadMapData.js";
+  import { _ } from 'svelte-i18n'
 
   export let datajson
   export let w
@@ -207,7 +208,7 @@
 
 {#if indicator && indicator.multiline === true}
   <div class={'tooltip-multi tooltip-multi' + indicator.attribute}>
-    <p>De kleuren in deze kaart geven aan welke klasse in die buurt het meest voorkomt</p>
+    <p>{$_("multi-indicator-map-explanation")}</p>
   </div>
 {/if}
 
