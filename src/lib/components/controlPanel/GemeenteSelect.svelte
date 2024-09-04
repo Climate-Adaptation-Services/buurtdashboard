@@ -1,5 +1,6 @@
 <script>
     import Select from 'svelte-select'
+    import { _ } from 'svelte-i18n'
 
     import { URLParams, gemeenteSelection, buurtSelection } from '$lib/stores';
 
@@ -25,5 +26,5 @@
 </script>
 
 
-<p class='select-title'>Gemeente:</p>
-<Select items={gemeenteList} placeholder="Zoek gemeente..." value={$gemeenteSelection} on:change={handleGemeenteChange} on:clear={handleGemeenteClear}/>
+<p class='select-title'>{$_("Gemeente")}:</p>
+<Select items={gemeenteList} placeholder={$_("Zoek_gemeente")} value={$gemeenteSelection} on:change={handleGemeenteChange} on:clear={handleGemeenteClear}/>

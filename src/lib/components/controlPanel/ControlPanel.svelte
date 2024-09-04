@@ -1,27 +1,27 @@
 <script>
   import { gemeenteData, buurtData, buurtSelection, gemeenteCode, gemeenteSelection, buurtSelectionData, buurtCode, buurtNaam, modal, URLParams, indicatorenSelectie } from '$lib/stores';
-  import * as _ from 'lodash'
+  import * as lo from 'lodash'
   import { onMount } from 'svelte';
   import OverDitDashboard from '$lib/components/OverDitDashboard.svelte';
   import { bind } from 'svelte-simple-modal';
   import IndicatorFilter from './indicatorFilter.svelte';
   import GemeenteSelect from './GemeenteSelect.svelte';
   import BuurtSelect from './BuurtSelect.svelte';
+  import { _, locale } from 'svelte-i18n'
 
   export let indicatorenLijst
-
 
   let gemeenteList;
   let buurtList;
   $: if($gemeenteData !== null){
     gemeenteList = $gemeenteData.features.map(gemeente => {return {'value':gemeente.properties[$gemeenteCode], 'label':capSelectLabelLen(gemeente.properties['GM_NAAM'])}})
-    gemeenteList = _.orderBy(gemeenteList, [gemeente => gemeente.label], ['asc']);
+    gemeenteList = lo.orderBy(gemeenteList, [gemeente => gemeente.label], ['asc']);
   }
   $: if($gemeenteSelection !== null){
     const buurtenFeatures = $buurtData.features.filter(buurt => buurt.properties[$gemeenteCode] === $gemeenteSelection)
     console.log('bf', buurtenFeatures)
     buurtList = buurtenFeatures.map(buurt => {return {'value':buurt.properties[$buurtCode], 'label':capSelectLabelLen(buurt.properties[$buurtNaam])}})
-    buurtList = _.orderBy(buurtList, [buurt => buurt.label], ['asc']);
+    buurtList = lo.orderBy(buurtList, [buurt => buurt.label], ['asc']);
   }
 
   $: wijktype = ($buurtData && $buurtSelection !== null && $buurtSelectionData.properties['def_wijkty']) 
@@ -50,6 +50,7 @@
     setTimeout(() => {gemeenteSelection.set($URLParams.get("gemeente"))}, 10)
     setTimeout(() => {buurtSelection.set($URLParams.get("buurt"))}, 10)
     setTimeout(() => {indicatorenSelectie.set($URLParams.getAll("indicator"))}, 10)
+
   }
  
 </script>
@@ -66,7 +67,7 @@
       </div>
       <div class='about' on:click={() => showModal('graphs')}>
         <img src='./chart.png' width='30px'/>
-        <p class='download-and-about-text'>Uitleg grafieken</p>
+        <p class='download-and-about-text'>{$_('Uitleg_grafieken')}</p>
       </div>
       <div class='download'>
         <a href='https://github.com/Climate-Adaptation-Services/buurtdashboard-data/raw/main/BuurtdashboardDownload20240805.xlsx' download='BuurtdashboardDownload20240805'><img src='./download.png' width='30px'/></a>
@@ -76,7 +77,7 @@
     <GemeenteSelect {gemeenteList} />
     <BuurtSelect {buurtList} />
     {#if $buurtSelection !== null}
-        <p style='color:white'>Wijktype: <strong>{wijktype}</strong></p>
+        <p style='color:white'>{$_("Wijktype")}: <strong>{wijktype}</strong></p>
     {/if}
     <IndicatorFilter {indicatorenLijst} />
   </div>

@@ -3,10 +3,13 @@
   import Indicator from '$lib/components/Indicator.svelte';
   import Map from '$lib/components/Map.svelte';
   import Tooltip from '$lib/components/Tooltip.svelte';
-  import { buurtData, buurtSelection, indicatorenSelectie, gemeenteSelection, modal } from '$lib/stores';
+  import { buurtData, buurtSelection, indicatorenSelectie, gemeenteSelection, modal, URLParams } from '$lib/stores';
   import { getIndicatorenLijst } from '$lib/noncomponents/indicatorenLijst.js'
   import { afterUpdate } from 'svelte';
   import Modal from 'svelte-simple-modal';
+  import { locale } from 'svelte-i18n';
+  import { _ } from 'svelte-i18n'
+
 
   let screenSize = 1000
   let wMap;
@@ -16,7 +19,11 @@
 
   export let data
 
-  const indicatorenLijst = getIndicatorenLijst(data.metadata)
+  $: indicatorenLijst = ($locale === 'nl') 
+    ? getIndicatorenLijst(data.metadata, $_("Effecten"), $_("Gebiedskenmerken"), $_("Kwetsbaarheid"))
+    : getIndicatorenLijst(data.metadata_english, $_("Effecten"), $_("Gebiedskenmerken"), $_("Kwetsbaarheid"))
+
+  $: if($URLParams.get("lang") === 'en'){locale.set('en')}
 
   $: console.log($buurtData)
   

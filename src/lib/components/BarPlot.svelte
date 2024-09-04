@@ -1,9 +1,9 @@
 <script>
   import { wijkTypeData, buurtData, gemeenteSelection, buurtenInGemeente, buurtSelection, currentData, gemeenteData, buurtSelectionData, hoveredRegion, hoveredValue, buurtNaam } from "$lib/stores";
   import { scaleLinear, select, scaleBand, stack } from "d3";
-  import * as _ from 'lodash';
   import { onMount } from "svelte";
   import { checkContrast } from "$lib/noncomponents/checkContrast";
+  import { _ } from 'svelte-i18n'
 
   export let w;
   export let h;
@@ -74,12 +74,12 @@
     
   function getName(group){
     return (group === 'Nederland')
-    ? group
+    ? $_("Nederland")
     : (group === 'Gemeente')
-      ? 'Gemeente ' + $gemeenteData.features.filter(gemeente => gemeente.properties['GM_CODE'] === $gemeenteSelection)[0].properties['GM_NAAM']
+      ? $_("Gemeente") + ' ' + $gemeenteData.features.filter(gemeente => gemeente.properties['GM_CODE'] === $gemeenteSelection)[0].properties['GM_NAAM']
       : (group === 'Buurt')
-        ? 'De buurt ' + $buurtSelectionData.properties[$buurtNaam]
-        : 'Wijktype ' + $buurtSelectionData.properties['def_wijkty']
+        ? $_("Buurt") + ' ' + $buurtSelectionData.properties[$buurtNaam]
+        : $_("Wijktype") + ' ' + $buurtSelectionData.properties['def_wijkty']
   }
 
   function mouseOver(st, stacked){
