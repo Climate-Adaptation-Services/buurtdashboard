@@ -1,4 +1,4 @@
-{
+export const nederlands = {
   "Uitleg_grafieken": "Uitleg grafieken",
   "Gemeente": "Gemeente",
   "Zoek_gemeente": "Zoek gemeente...",

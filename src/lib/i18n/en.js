@@ -1,4 +1,4 @@
-{
+export const english = {
   "Uitleg_grafieken": "Explain graphs",
   "Gemeente": "Municipality",
   "Zoek_gemeente": "Search municipality...",

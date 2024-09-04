@@ -4,7 +4,9 @@
   import { browser } from "$app/environment";
   import { selectAll } from "d3";
   import { afterUpdate } from "svelte";
-  import { _ } from 'svelte-i18n'
+  // import { _ } from 'svelte-i18n'
+  import { t } from '$lib/i18n/translate.js';
+
 
   export let indicatorenLijst
 
@@ -49,7 +51,7 @@
 
 {#if browser}
   <div class='multiselectdiv'>
-    <p style='margin-bottom:5px'>{`Filter ${$_("indicatoren")}:`}</p>
+    <p style='margin-bottom:5px'>{`Filter ${t("indicatoren")}:`}</p>
     <MultiSelect bind:value={$indicatorenSelectie} options={indicators} on:add={handleIndicatorFilterAdd} on:remove={handleIndicatorFilterRemove} on:removeAll={handleIndicatorFilterClear}/>
   </div>
 {/if}

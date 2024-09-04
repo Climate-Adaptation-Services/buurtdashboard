@@ -2,7 +2,8 @@
   import { gemeenteSelection, buurtSelection, URLParams } from "$lib/stores";
   import { selectAll } from 'd3';
   import Select from 'svelte-select'
-  import { _ } from 'svelte-i18n'
+  import { t } from '$lib/i18n/translate.js';
+  // import { _ } from 'svelte-i18n'
 
 
   export let buurtList
@@ -26,6 +27,6 @@
 </script>
 
 {#if $gemeenteSelection !== null}
-  <p class='select-title'>{$_("Buurt")}:</p>
-  <Select items={buurtList} placeholder="{$_("Zoek_buurt")}..." value={$buurtSelection} on:change={handleBuurtChange} on:clear={handleBuurtClear}/>
+  <p class='select-title'>{t("Buurt")}:</p>
+  <Select items={buurtList} placeholder="{t("Zoek_buurt")}..." value={$buurtSelection} on:change={handleBuurtChange} on:clear={handleBuurtClear}/>
 {/if}

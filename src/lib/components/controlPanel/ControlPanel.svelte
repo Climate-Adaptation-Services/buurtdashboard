@@ -7,7 +7,9 @@
   import IndicatorFilter from './indicatorFilter.svelte';
   import GemeenteSelect from './GemeenteSelect.svelte';
   import BuurtSelect from './BuurtSelect.svelte';
-  import { _, locale } from 'svelte-i18n'
+  // import { _, locale } from 'svelte-i18n'
+  import { t } from '$lib/i18n/translate.js';
+
 
   export let indicatorenLijst
 
@@ -67,7 +69,7 @@
       </div>
       <div class='about' on:click={() => showModal('graphs')}>
         <img src='./chart.png' width='30px'/>
-        <p class='download-and-about-text'>{$_('Uitleg_grafieken')}</p>
+        <p class='download-and-about-text'>{t('Uitleg_grafieken')}</p>
       </div>
       <div class='download'>
         <a href='https://github.com/Climate-Adaptation-Services/buurtdashboard-data/raw/main/BuurtdashboardDownload20240805.xlsx' download='BuurtdashboardDownload20240805'><img src='./download.png' width='30px'/></a>
@@ -77,7 +79,7 @@
     <GemeenteSelect {gemeenteList} />
     <BuurtSelect {buurtList} />
     {#if $buurtSelection !== null}
-        <p style='color:white'>{$_("Wijktype")}: <strong>{wijktype}</strong></p>
+        <p style='color:white'>{t("Wijktype")}: <strong>{wijktype}</strong></p>
     {/if}
     <IndicatorFilter {indicatorenLijst} />
   </div>
