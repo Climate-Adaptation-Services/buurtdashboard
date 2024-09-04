@@ -1,4 +1,3 @@
-// hooks.server.ts
 import { locale } from 'svelte-i18n'
 
 export const handle = async ({ event, resolve }) => {

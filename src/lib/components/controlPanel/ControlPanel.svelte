@@ -7,7 +7,7 @@
   import IndicatorFilter from './indicatorFilter.svelte';
   import GemeenteSelect from './GemeenteSelect.svelte';
   import BuurtSelect from './BuurtSelect.svelte';
-  import { _ } from 'svelte-i18n'
+  import { _, locale } from 'svelte-i18n'
 
   export let indicatorenLijst
 
@@ -50,6 +50,7 @@
     setTimeout(() => {gemeenteSelection.set($URLParams.get("gemeente"))}, 10)
     setTimeout(() => {buurtSelection.set($URLParams.get("buurt"))}, 10)
     setTimeout(() => {indicatorenSelectie.set($URLParams.getAll("indicator"))}, 10)
+
   }
  
 </script>
@@ -76,7 +77,7 @@
     <GemeenteSelect {gemeenteList} />
     <BuurtSelect {buurtList} />
     {#if $buurtSelection !== null}
-        <p style='color:white'>Wijktype: <strong>{wijktype}</strong></p>
+        <p style='color:white'>{$_("Wijktype")}: <strong>{wijktype}</strong></p>
     {/if}
     <IndicatorFilter {indicatorenLijst} />
   </div>
