@@ -7,6 +7,9 @@
   import { getIndicatorenLijst } from '$lib/noncomponents/indicatorenLijst.js'
   import { afterUpdate } from 'svelte';
   import Modal from 'svelte-simple-modal';
+  import { locale } from 'svelte-i18n';
+  import { _ } from 'svelte-i18n'
+
 
   let screenSize = 1000
   let wMap;
@@ -16,7 +19,10 @@
 
   export let data
 
-  const indicatorenLijst = getIndicatorenLijst(data.metadata)
+  $: console.log($locale)
+  $: indicatorenLijst = (data.metadata && data.metadata_english && $locale === 'nl') 
+    ? getIndicatorenLijst(data.metadata, $_("Effecten"), $_("Gebiedskenmerken"), $_("Kwetsbaarheid"))
+    : getIndicatorenLijst(data.metadata_english, $_("Effecten"), $_("Gebiedskenmerken"), $_("Kwetsbaarheid"))
 
   $: console.log($buurtData)
   
