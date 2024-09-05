@@ -5,7 +5,7 @@
   import Tooltip from '$lib/components/Tooltip.svelte';
   import { buurtData, buurtSelection, indicatorenSelectie, gemeenteSelection, modal, URLParams, lang } from '$lib/stores';
   import { getIndicatorenLijst } from '$lib/noncomponents/indicatorenLijst.js'
-  import { afterUpdate } from 'svelte';
+  import { afterUpdate, onMount } from 'svelte';
   import Modal from 'svelte-simple-modal';
   import { t } from '$lib/i18n/translate.js';
   // import { locale, isLoading } from 'svelte-i18n';
@@ -20,17 +20,17 @@
 
   export let data
 
-  $: if($URLParams.get("lang") === 'en'){lang.set('en')}
-
   let getoondeIndicatoren = []
   let indicatorenLijst = []
 
-  $: if(!$URLParams.get("foo")){
-    indicatorenLijst = ($lang === 'en')
-      ? getIndicatorenLijst(data.metadata_english, t("Effecten"), t("Gebiedskenmerken"), t("Kwetsbaarheid"))
-      : getIndicatorenLijst(data.metadata, t("Effecten"), t("Gebiedskenmerken"), t("Kwetsbaarheid"))
+  $: if($URLParams.get('lang') === 'en'){
+    indicatorenLijst = getIndicatorenLijst(data.metadata_english, t("Effecten"), t("Gebiedskenmerken"), t("Kwetsbaarheid"))
     getoondeIndicatoren = indicatorenLijst
   }
+
+  indicatorenLijst = getIndicatorenLijst(data.metadata, t("Effecten"), t("Gebiedskenmerken"), t("Kwetsbaarheid"))
+  getoondeIndicatoren = indicatorenLijst
+  
 
   const getData = (async () => {
 		const response = await Promise.all([
