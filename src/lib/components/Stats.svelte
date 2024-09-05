@@ -15,11 +15,6 @@
 
     // is it a number
     const OnlyNumbers = array.filter(d => /\d/.test(d)).map(d => +d)
-    if(indicator.titel === 'Sociaal minimum huishoudens'){
-      console.log(array)
-      console.log(OnlyNumbers)
-    }
-
 
     OnlyNumbers.sort((a, b) => b - a); 
     const length = OnlyNumbers.length; 

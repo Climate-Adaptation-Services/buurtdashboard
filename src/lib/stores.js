@@ -10,7 +10,7 @@ export const mousePosition = writable(null)
 export const modal = writable(null);
 export const lang = writable('nl')
 
-export const URLParams = writable(new URLSearchParams('https://www.google.com/'))
+export const URLParams = writable(new URLSearchParams("foo=1"))
 
 export const buurtCode = readable('BU_CODE')
 export const gemeenteCode = readable('GM_CODE')

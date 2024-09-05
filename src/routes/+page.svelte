@@ -20,15 +20,18 @@
 
   export let data
 
-
-  $: indicatorenLijst = ($lang === 'nl') 
-    ? getIndicatorenLijst(data.metadata, t("Effecten"), t("Gebiedskenmerken"), t("Kwetsbaarheid"))
-    : getIndicatorenLijst(data.metadata_english, t("Effecten"), t("Gebiedskenmerken"), t("Kwetsbaarheid"))
-
   $: if($URLParams.get("lang") === 'en'){lang.set('en')}
 
-  $: console.log($buurtData)
-  
+  let getoondeIndicatoren = []
+  let indicatorenLijst = []
+
+  $: if(!$URLParams.get("foo")){
+    indicatorenLijst = ($lang === 'en')
+      ? getIndicatorenLijst(data.metadata_english, t("Effecten"), t("Gebiedskenmerken"), t("Kwetsbaarheid"))
+      : getIndicatorenLijst(data.metadata, t("Effecten"), t("Gebiedskenmerken"), t("Kwetsbaarheid"))
+    getoondeIndicatoren = indicatorenLijst
+  }
+
   const getData = (async () => {
 		const response = await Promise.all([
       // fetch('https://raw.githubusercontent.com/Climate-Adaptation-Services/buurtdashboard-data/main/GemeenteGrenzen2023.json'),
@@ -41,8 +44,6 @@
 	})()
 
   const indicatorHeight = 650
-
-  let getoondeIndicatoren = indicatorenLijst
 
   $: onChange($indicatorenSelectie)
 
@@ -71,38 +72,40 @@
 
 <svelte:head><link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet"></svelte:head>
 
-<div class='container' style='justify-content:{screenSize < 800 ? 'center' : 'left'}'>
-  <div class='sidebar' style='position:{screenSize > 800 ? "fixed" : "relative"}'>
-    <!-- <div class='title'><h1>Buurtdashboard</h1></div> -->
-    <div class='control-panel'><ControlPanel {indicatorenSelectie} {indicatorenLijst} /></div>
-    <div class='map' bind:clientWidth={wMap} bind:clientHeight={hMap}>
-      {#await getData}
-        <pre style='color:white'>Loading...</pre>
-      {:then res}
-        <Map datajson={res} w={wMap} h={hMap} mainMapFlag={true}/>
-      {:catch error}
-        <p>An error occurred!</p>
-      {/await}
+{#if !$URLParams.has('foo')}
+  <div class='container' style='justify-content:{screenSize < 800 ? 'center' : 'left'}'>
+    <div class='sidebar' style='position:{screenSize > 800 ? "fixed" : "relative"}'>
+      <!-- <div class='title'><h1>Buurtdashboard</h1></div> -->
+      <div class='control-panel'><ControlPanel {indicatorenSelectie} {indicatorenLijst} /></div>
+      <div class='map' bind:clientWidth={wMap} bind:clientHeight={hMap}>
+        {#await getData}
+          <pre style='color:white'>Loading...</pre>
+        {:then res}
+          <Map datajson={res} w={wMap} h={hMap} mainMapFlag={true}/>
+        {:catch error}
+          <p>An error occurred!</p>
+        {/await}
+      </div>
     </div>
+    
+    <div class='indicators' style='margin-left:{screenSize > 800 ? 400 : 0}px'>
+      {#if $buurtData !== null}
+        {#each getoondeIndicatoren as indicator}
+          {#if indicator.attribute}
+            <div class='indicator' style='height:{indicatorHeight}px'>
+              <Indicator h={indicatorHeight} {indicator}/>
+            </div>
+          {/if}
+        {/each}
+      {/if}
+    </div>
+
+    <Tooltip />
+
+    <Modal show={$modal} style='position:absolute; left:0'></Modal>
+
   </div>
-  
-  <div class='indicators' style='margin-left:{screenSize > 800 ? 400 : 0}px'>
-    {#if $buurtData !== null}
-      {#each getoondeIndicatoren as indicator}
-        {#if indicator.attribute}
-          <div class='indicator' style='height:{indicatorHeight}px'>
-            <Indicator h={indicatorHeight} {indicator}/>
-          </div>
-        {/if}
-      {/each}
-    {/if}
-  </div>
-
-  <Tooltip />
-
-  <Modal show={$modal} style='position:absolute; left:0'></Modal>
-
-</div>
+{/if}
 
 <style>
   .container{
