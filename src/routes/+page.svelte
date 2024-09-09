@@ -21,19 +21,25 @@
 
   export let data
 
+  console.log(data)
+
+  if(data.lang === 'en'){
+    lang.set('en')
+  }else{
+    lang.set('nl')
+  }
+
   let getoondeIndicatoren = []
   let indicatorenLijst = []
 
-  $: if(browser){
-    if($URLParams.get('lang') === 'en'){
-      lang.set('en')
-      indicatorenLijst = getIndicatorenLijst(data.metadata_english, t("Effecten"), t("Gebiedskenmerken"), t("Kwetsbaarheid"))
-      getoondeIndicatoren = indicatorenLijst
-    }else{
-      indicatorenLijst = getIndicatorenLijst(data.metadata, t("Effecten"), t("Gebiedskenmerken"), t("Kwetsbaarheid"))
-      getoondeIndicatoren = indicatorenLijst
-    }
+  if($lang === 'en'){
+    indicatorenLijst = getIndicatorenLijst(data.metadata_english, t("Effecten"), t("Gebiedskenmerken"), t("Kwetsbaarheid"))
+    getoondeIndicatoren = indicatorenLijst
+  }else{
+    indicatorenLijst = getIndicatorenLijst(data.metadata, t("Effecten"), t("Gebiedskenmerken"), t("Kwetsbaarheid"))
+    getoondeIndicatoren = indicatorenLijst
   }
+  
 
   const getData = (async () => {
 		const response = await Promise.all([
@@ -71,49 +77,44 @@
 
   $: if(browser){URLParams.set(new URLSearchParams(window.location.search))}
 
-  // onMount(() => {
-  //   URLParams.set(new URLSearchParams(window.location.search))
-  // })
-
 </script>
 
 <svelte:window bind:innerWidth={screenSize} />
 
 <svelte:head><link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet"></svelte:head>
 
-{#if browser && !$URLParams.has('foo')}
-  <div class='container' style='justify-content:{screenSize < 800 ? 'center' : 'left'}'>
-    <div class='sidebar' style='position:{screenSize > 800 ? "fixed" : "relative"}'>
-      <div class='control-panel'><ControlPanel {indicatorenSelectie} {indicatorenLijst} /></div>
-      <div class='map' bind:clientWidth={wMap} bind:clientHeight={hMap}>
-        {#await getData}
-          <pre style='color:white'>Loading...</pre>
-        {:then res}
-          <Map datajson={res} w={wMap} h={hMap} mainMapFlag={true}/>
-        {:catch error}
-          <p>An error occurred!</p>
-        {/await}
-      </div>
+
+<div class='container' style='justify-content:{screenSize < 800 ? 'center' : 'left'}'>
+  <div class='sidebar' style='position:{screenSize > 800 ? "fixed" : "relative"}'>
+    <div class='control-panel'><ControlPanel {indicatorenSelectie} {indicatorenLijst} /></div>
+    <div class='map' bind:clientWidth={wMap} bind:clientHeight={hMap}>
+      {#await getData}
+        <pre style='color:white'>Loading...</pre>
+      {:then res}
+        <Map datajson={res} w={wMap} h={hMap} mainMapFlag={true}/>
+      {:catch error}
+        <p>An error occurred!</p>
+      {/await}
     </div>
-    
-    <div class='indicators' style='margin-left:{screenSize > 800 ? 400 : 0}px'>
-      {#if $buurtData !== null}
-        {#each getoondeIndicatoren as indicator}
-          {#if indicator.attribute}
-            <div class='indicator' style='height:{indicatorHeight}px'>
-              <Indicator h={indicatorHeight} {indicator}/>
-            </div>
-          {/if}
-        {/each}
-      {/if}
-    </div>
-
-    <Tooltip />
-
-    <Modal show={$modal} style='position:absolute; left:0'></Modal>
-
   </div>
-{/if}
+  
+  <div class='indicators' style='margin-left:{screenSize > 800 ? 400 : 0}px'>
+    {#if $buurtData !== null}
+      {#each getoondeIndicatoren as indicator}
+        {#if indicator.attribute}
+          <div class='indicator' style='height:{indicatorHeight}px'>
+            <Indicator h={indicatorHeight} {indicator}/>
+        </div>
+      {/if}
+    {/each}
+  {/if}
+</div>
+
+<Tooltip />
+
+<Modal show={$modal} style='position:absolute; left:0'></Modal>
+
+</div>
 
 <style>
   .container{
