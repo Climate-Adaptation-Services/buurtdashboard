@@ -35,17 +35,6 @@
     }
   }
 
-  // $: if($URLParams.get('lang') === 'en'){
-  //   indicatorenLijst = getIndicatorenLijst(data.metadata_english, t("Effecten"), t("Gebiedskenmerken"), t("Kwetsbaarheid"))
-  //   getoondeIndicatoren = indicatorenLijst
-  // }
-
-  // $: if(data.metadata){
-  //   console.log(data.metadata)
-  //   indicatorenLijst = getIndicatorenLijst(data.metadata, t("Effecten"), t("Gebiedskenmerken"), t("Kwetsbaarheid"))
-  //   getoondeIndicatoren = indicatorenLijst
-  // }
-
   const getData = (async () => {
 		const response = await Promise.all([
       // fetch('https://raw.githubusercontent.com/Climate-Adaptation-Services/buurtdashboard-data/main/GemeenteGrenzen2023.json'),
@@ -80,9 +69,11 @@
     }, 1)
   }
 
-  onMount(() => {
-    URLParams.set(new URLSearchParams(window.location.search))
-  })
+  $: if(browser){URLParams.set(new URLSearchParams(window.location.search))}
+
+  // onMount(() => {
+  //   URLParams.set(new URLSearchParams(window.location.search))
+  // })
 
 </script>
 
