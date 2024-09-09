@@ -1,5 +1,6 @@
 <script>
   import { gemeenteSelection, gemeenteData, buurtSelectionData, buurtNaam } from "$lib/stores";
+  import { t } from '$lib/i18n/translate.js';
 
   export let w;
   export let h;
@@ -10,12 +11,12 @@
   export let color;
 
   $: name = (regio === 'Nederland')
-    ? regio
+    ? t('Nederland')
     : (regio === 'Gemeente')
-      ? 'Gemeente ' + $gemeenteData.features.filter(gemeente => gemeente.properties['GM_CODE'] === $gemeenteSelection)[0].properties['GM_NAAM']
+      ? t("Gemeente") + ' ' + $gemeenteData.features.filter(gemeente => gemeente.properties['GM_CODE'] === $gemeenteSelection)[0].properties['GM_NAAM']
       : (regio === 'Buurt')
-        ? 'De buurt ' + $buurtSelectionData.properties[$buurtNaam]
-        : 'Wijktype ' + $buurtSelectionData.properties['def_wijkty']
+        ? t('Buurt') + ' ' + $buurtSelectionData.properties[$buurtNaam]
+        : t('Wijktype') + ' ' + $buurtSelectionData.properties['def_wijkty']
   
   $: if(name && name.length > 25){
     name = name.slice(0, 23) + '...'

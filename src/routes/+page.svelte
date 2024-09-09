@@ -5,9 +5,10 @@
   import Tooltip from '$lib/components/Tooltip.svelte';
   import { buurtData, buurtSelection, indicatorenSelectie, gemeenteSelection, modal, URLParams, lang } from '$lib/stores';
   import { getIndicatorenLijst } from '$lib/noncomponents/indicatorenLijst.js'
-  import { afterUpdate } from 'svelte';
+  import { afterUpdate, onMount } from 'svelte';
   import Modal from 'svelte-simple-modal';
   import { t } from '$lib/i18n/translate.js';
+  import { browser } from '$app/environment';
   // import { locale, isLoading } from 'svelte-i18n';
   // import { _ } from 'svelte-i18n'
 
@@ -20,15 +21,26 @@
 
   export let data
 
+  console.log(data)
 
-  $: indicatorenLijst = ($lang === 'nl') 
-    ? getIndicatorenLijst(data.metadata, t("Effecten"), t("Gebiedskenmerken"), t("Kwetsbaarheid"))
-    : getIndicatorenLijst(data.metadata_english, t("Effecten"), t("Gebiedskenmerken"), t("Kwetsbaarheid"))
+  if(data.lang === 'en'){
+    lang.set('en')
+  }else{
+    lang.set('nl')
+  }
 
-  $: if($URLParams.get("lang") === 'en'){lang.set('en')}
+  let getoondeIndicatoren = []
+  let indicatorenLijst = []
 
-  $: console.log($buurtData)
+  if($lang === 'en'){
+    indicatorenLijst = getIndicatorenLijst(data.metadata_english, t("Effecten"), t("Gebiedskenmerken"), t("Kwetsbaarheid"))
+    getoondeIndicatoren = indicatorenLijst
+  }else{
+    indicatorenLijst = getIndicatorenLijst(data.metadata, t("Effecten"), t("Gebiedskenmerken"), t("Kwetsbaarheid"))
+    getoondeIndicatoren = indicatorenLijst
+  }
   
+
   const getData = (async () => {
 		const response = await Promise.all([
       // fetch('https://raw.githubusercontent.com/Climate-Adaptation-Services/buurtdashboard-data/main/GemeenteGrenzen2023.json'),
@@ -41,8 +53,6 @@
 	})()
 
   const indicatorHeight = 650
-
-  let getoondeIndicatoren = indicatorenLijst
 
   $: onChange($indicatorenSelectie)
 
@@ -65,15 +75,17 @@
     }, 1)
   }
 
+  $: if(browser){URLParams.set(new URLSearchParams(window.location.search))}
+
 </script>
 
 <svelte:window bind:innerWidth={screenSize} />
 
 <svelte:head><link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet"></svelte:head>
 
+
 <div class='container' style='justify-content:{screenSize < 800 ? 'center' : 'left'}'>
   <div class='sidebar' style='position:{screenSize > 800 ? "fixed" : "relative"}'>
-    <!-- <div class='title'><h1>Buurtdashboard</h1></div> -->
     <div class='control-panel'><ControlPanel {indicatorenSelectie} {indicatorenLijst} /></div>
     <div class='map' bind:clientWidth={wMap} bind:clientHeight={hMap}>
       {#await getData}
@@ -92,15 +104,15 @@
         {#if indicator.attribute}
           <div class='indicator' style='height:{indicatorHeight}px'>
             <Indicator h={indicatorHeight} {indicator}/>
-          </div>
-        {/if}
-      {/each}
-    {/if}
-  </div>
+        </div>
+      {/if}
+    {/each}
+  {/if}
+</div>
 
-  <Tooltip />
+<Tooltip />
 
-  <Modal show={$modal} style='position:absolute; left:0'></Modal>
+<Modal show={$modal} style='position:absolute; left:0'></Modal>
 
 </div>
 

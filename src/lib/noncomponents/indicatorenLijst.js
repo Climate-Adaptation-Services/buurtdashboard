@@ -1,6 +1,6 @@
 
 export function getIndicatorenLijst(metadata, eff, geb, kwe){
-  console.log('metadata', metadata)
+  console.log('metadata', metadata, eff, geb, kwe)
 
   let indicatorenLijst = []
 
@@ -9,7 +9,7 @@ export function getIndicatorenLijst(metadata, eff, geb, kwe){
   indicatorenLijst = addIndicatorCategorie(indicatorenLijst, metadata.filter(d => d.Categorie === geb))
   indicatorenLijst = addIndicatorCategorie(indicatorenLijst, metadata.filter(d => d.Categorie === kwe))
 
-  console.log(indicatorenLijst)
+  console.log('indicatorenLijst', indicatorenLijst)
 
   return indicatorenLijst
 }
