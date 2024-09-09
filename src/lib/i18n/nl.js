@@ -14,5 +14,6 @@ export const nederlands = {
   "Kwetsbaarheid": "Kwetsbaarheid",
   "Nederland": "Nederland",
   "Wijktype": "Wijktype",
-  "Geen_data": "Geen data"
+  "Geen_data": "Geen data",
+  "Gevoelstemperatuur":"Gevoelstemperatuur"
 }

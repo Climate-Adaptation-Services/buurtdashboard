@@ -14,5 +14,7 @@ export const english = {
   "Kwetsbaarheid": "Vulnerability",
   "Nederland": "Netherlands",
   "Wijktype": "District type",
-  "Geen_data": "No data"
+  "Geen_data": "No data",
+  "Gevoelstemperatuur":"Perceived temperature"
+
 }

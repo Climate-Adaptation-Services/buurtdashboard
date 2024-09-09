@@ -30,7 +30,7 @@
       // if(indicator.titel === 'Groen en grijs openbare ruimte'){totalOpp -= buurtOpp * ((100 - buurt.properties['Openbaar'])/100)}
       
       // Geen data categorie eruit, rest tot 100%
-      if(indicator.titel === 'Gevoelstemperatuur'){totalOpp -= buurtOpp * buurt.properties['NDPETperc']}
+      if(indicator.titel === t('Gevoelstemperatuur')){totalOpp -= buurtOpp * buurt.properties['NDPETperc']}
       
       Object.keys(indicator.klassen).forEach(kl => {
         // is dit goed zo of moeten we anders met no data (NaN) omgaan
@@ -43,7 +43,7 @@
 
     klassenTotal.forEach(kl => {
       kl.waarde = (kl.waarde/totalOpp)
-      if(indicator.titel === 'Gevoelstemperatuur'){kl.waarde *= 100}
+      if(indicator.titel === t('Gevoelstemperatuur')){kl.waarde *= 100}
     })
 
     let result = {'group':regio}
