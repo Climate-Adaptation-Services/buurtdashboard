@@ -1,6 +1,6 @@
 
 export function getIndicatorenLijst(metadata, eff, geb, kwe){
-  console.log('metadata', metadata)
+  console.log('metadata', metadata, eff, geb, kwe)
 
   let indicatorenLijst = []
 

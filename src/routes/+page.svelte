@@ -23,14 +23,28 @@
   let getoondeIndicatoren = []
   let indicatorenLijst = []
 
-  $: if($URLParams.get('lang') === 'en'){
-    indicatorenLijst = getIndicatorenLijst(data.metadata_english, t("Effecten"), t("Gebiedskenmerken"), t("Kwetsbaarheid"))
-    getoondeIndicatoren = indicatorenLijst
+  $: {
+    if($URLParams.get('lang') === 'en'){
+      lang.set('en')
+      indicatorenLijst = getIndicatorenLijst(data.metadata_english, t("Effecten"), t("Gebiedskenmerken"), t("Kwetsbaarheid"))
+      getoondeIndicatoren = indicatorenLijst
+    }else{
+      indicatorenLijst = getIndicatorenLijst(data.metadata, t("Effecten"), t("Gebiedskenmerken"), t("Kwetsbaarheid"))
+      getoondeIndicatoren = indicatorenLijst
+    }
   }
 
-  indicatorenLijst = getIndicatorenLijst(data.metadata, t("Effecten"), t("Gebiedskenmerken"), t("Kwetsbaarheid"))
-  getoondeIndicatoren = indicatorenLijst
-  
+  $: console.log('urlp', $URLParams)
+  // $: if($URLParams.get('lang') === 'en'){
+  //   indicatorenLijst = getIndicatorenLijst(data.metadata_english, t("Effecten"), t("Gebiedskenmerken"), t("Kwetsbaarheid"))
+  //   getoondeIndicatoren = indicatorenLijst
+  // }
+
+  // $: if(data.metadata){
+  //   console.log(data.metadata)
+  //   indicatorenLijst = getIndicatorenLijst(data.metadata, t("Effecten"), t("Gebiedskenmerken"), t("Kwetsbaarheid"))
+  //   getoondeIndicatoren = indicatorenLijst
+  // }
 
   const getData = (async () => {
 		const response = await Promise.all([
@@ -66,6 +80,10 @@
     }, 1)
   }
 
+  onMount(() => {
+    URLParams.set(new URLSearchParams(window.location.search))
+  })
+
 </script>
 
 <svelte:window bind:innerWidth={screenSize} />
@@ -75,7 +93,6 @@
 {#if !$URLParams.has('foo')}
   <div class='container' style='justify-content:{screenSize < 800 ? 'center' : 'left'}'>
     <div class='sidebar' style='position:{screenSize > 800 ? "fixed" : "relative"}'>
-      <!-- <div class='title'><h1>Buurtdashboard</h1></div> -->
       <div class='control-panel'><ControlPanel {indicatorenSelectie} {indicatorenLijst} /></div>
       <div class='map' bind:clientWidth={wMap} bind:clientHeight={hMap}>
         {#await getData}

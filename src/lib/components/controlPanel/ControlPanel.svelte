@@ -44,10 +44,6 @@
 
   $: if($buurtData){readParams()}
 
-  onMount(() => {
-    URLParams.set(new URLSearchParams(window.location.search))
-  })
-
   function readParams(){    
     setTimeout(() => {gemeenteSelection.set($URLParams.get("gemeente"))}, 10)
     setTimeout(() => {buurtSelection.set($URLParams.get("buurt"))}, 10)
