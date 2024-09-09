@@ -8,7 +8,7 @@
   import { afterUpdate, onMount } from 'svelte';
   import Modal from 'svelte-simple-modal';
   import { t } from '$lib/i18n/translate.js';
-    import { browser } from '$app/environment';
+  import { browser } from '$app/environment';
   // import { locale, isLoading } from 'svelte-i18n';
   // import { _ } from 'svelte-i18n'
 
@@ -90,7 +90,7 @@
 
 <svelte:head><link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet"></svelte:head>
 
-{#if !$URLParams.has('foo')}
+{#if browser && !$URLParams.has('foo')}
   <div class='container' style='justify-content:{screenSize < 800 ? 'center' : 'left'}'>
     <div class='sidebar' style='position:{screenSize > 800 ? "fixed" : "relative"}'>
       <div class='control-panel'><ControlPanel {indicatorenSelectie} {indicatorenLijst} /></div>
