@@ -77,7 +77,7 @@
     
     // @ts-ignore
     hoveredRegion.set({
-      'region': ($gemeenteSelection === null) ? 'Gemeente' : 'Buurt',
+      'region': ($gemeenteSelection === null) ? t('Gemeente') : t('Buurt'),
       'center': tooltipCenter,
       'name': feature.properties[regionVariable]
     })

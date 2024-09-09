@@ -3,6 +3,7 @@
   import { wijkTypeData, buurtData, gemeenteSelection, buurtenInGemeente, buurtSelection, currentData, gemeenteData, buurtSelectionData, hoveredRegion, hoveredValue, buurtNaam } from "$lib/stores";
   import { scaleLinear, select, scaleBand, stack } from "d3";
   import * as _ from 'lodash';
+  import { t } from '$lib/i18n/translate.js';
 
   export let w;
   export let h;
@@ -39,8 +40,6 @@
       });
 
     });
-
-
 
     klassenTotal.forEach(kl => {
       kl.waarde = (kl.waarde/totalOpp)
@@ -93,12 +92,12 @@
     
   function getName(group){
     return (group === 'Nederland')
-    ? group
+    ? t('Nederland')
     : (group === 'Gemeente')
-      ? 'Gemeente ' + $gemeenteData.features.filter(gemeente => gemeente.properties['GM_CODE'] === $gemeenteSelection)[0].properties['GM_NAAM']
+      ? t("Gemeente") + ' ' + $gemeenteData.features.filter(gemeente => gemeente.properties['GM_CODE'] === $gemeenteSelection)[0].properties['GM_NAAM']
       : (group === 'Buurt')
-        ? 'De buurt ' + $buurtSelectionData.properties[$buurtNaam]
-        : 'Wijktype ' + $buurtSelectionData.properties['def_wijkty']
+        ? t('Buurt') + ' ' + $buurtSelectionData.properties[$buurtNaam]
+        : t('Wijktype') + ' ' + $buurtSelectionData.properties['def_wijkty']
   }
 
   function mouseOver(st, stacked){
