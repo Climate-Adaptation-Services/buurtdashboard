@@ -8,6 +8,7 @@
   import { afterUpdate, onMount } from 'svelte';
   import Modal from 'svelte-simple-modal';
   import { t } from '$lib/i18n/translate.js';
+    import { browser } from '$app/environment';
   // import { locale, isLoading } from 'svelte-i18n';
   // import { _ } from 'svelte-i18n'
 
@@ -23,7 +24,7 @@
   let getoondeIndicatoren = []
   let indicatorenLijst = []
 
-  $: {
+  $: if(browser){
     if($URLParams.get('lang') === 'en'){
       lang.set('en')
       indicatorenLijst = getIndicatorenLijst(data.metadata_english, t("Effecten"), t("Gebiedskenmerken"), t("Kwetsbaarheid"))
@@ -34,7 +35,6 @@
     }
   }
 
-  $: console.log('urlp', $URLParams)
   // $: if($URLParams.get('lang') === 'en'){
   //   indicatorenLijst = getIndicatorenLijst(data.metadata_english, t("Effecten"), t("Gebiedskenmerken"), t("Kwetsbaarheid"))
   //   getoondeIndicatoren = indicatorenLijst
