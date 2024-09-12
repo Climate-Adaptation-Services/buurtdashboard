@@ -15,5 +15,6 @@ export const nederlands = {
   "Nederland": "Nederland",
   "Wijktype": "Wijktype",
   "Geen_data": "Geen data",
-  "Gevoelstemperatuur":"Gevoelstemperatuur"
+  "Gevoelstemperatuur":"Gevoelstemperatuur",
+  'Grondwaterstand 2050 hoog':'Grondwaterstand 2050 hoog'
 }
