@@ -54,14 +54,14 @@
   }
 
   // grondwater hoog kan negatief zijn, en de schaal moet wat opgerekt
-  // let xScaleMin = min([0, meanValuesDict['meanValueNederland'], meanValuesDict['meanValueGemeente'], meanValuesDict['meanValueBuurt'], meanValuesDict['meanValueWijktype']])
-  // if(xScaleMin < 0){
-  //   xScaleMin -= 0.5
-  // }
+  $: xScaleMin = min([0, meanValuesDict['meanValueNederland'], meanValuesDict['meanValueGemeente'], meanValuesDict['meanValueBuurt'], meanValuesDict['meanValueWijktype']])
+  if(xScaleMin < 0){
+    xScaleMin -= 10
+  }
 
-  const xDomain = (indicator.titel !== t('Grondwaterstand 2050 hoog'))
+  $: xDomain = (indicator.titel !== t('Grondwaterstand 2050 hoog'))
     ? [0, max([meanValuesDict['meanValueNederland'], meanValuesDict['meanValueGemeente'], meanValuesDict['meanValueBuurt'], meanValuesDict['meanValueWijktype']])]
-    : [0, max([meanValuesDict['meanValueNederland'], meanValuesDict['meanValueGemeente'], meanValuesDict['meanValueBuurt'], meanValuesDict['meanValueWijktype']])].reverse()
+    : [0, min([meanValuesDict['meanValueNederland'], meanValuesDict['meanValueGemeente'], meanValuesDict['meanValueBuurt'], meanValuesDict['meanValueWijktype']])]
   // const xDomain = [xScaleMin, max([meanValuesDict['meanValueNederland'], meanValuesDict['meanValueGemeente'], meanValuesDict['meanValueBuurt'], meanValuesDict['meanValueWijktype']])]
   $: xScaleStats = scaleLinear()
     .domain(xDomain)
