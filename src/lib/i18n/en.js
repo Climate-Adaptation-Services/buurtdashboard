@@ -15,6 +15,7 @@ export const english = {
   "Nederland": "Netherlands",
   "Wijktype": "District type",
   "Geen_data": "No data",
-  "Gevoelstemperatuur":"Perceived temperature"
+  "Gevoelstemperatuur":"Perceived temperature",
+  'Grondwaterstand 2050 hoog':'Groundwater level 2050 high'
 
 }
