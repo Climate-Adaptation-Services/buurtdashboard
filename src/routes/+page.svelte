@@ -39,7 +39,6 @@
     indicatorenLijst = getIndicatorenLijst(data.metadata, t("Effecten"), t("Gebiedskenmerken"), t("Kwetsbaarheid"))
     getoondeIndicatoren = indicatorenLijst
   }
-  
 
   const getData = (async () => {
 		const response = await Promise.all([
