@@ -30,6 +30,7 @@ function addIndicatorCategorie(indicatorenLijst, indicatoren){
       });
     }
 
+    
     indicatorenLijst.push({
       titel:indicator.Titel, 
       attribute:indicator.Indicatornaamtabel.split(',')[0], 
