@@ -22,12 +22,12 @@
   {#if browser && type === 'graphs'}
     <Carousel bind:this={carousel}>
       <div class='carousel-div'>
-        <h4>Indicator type 1: Enkelvoudige numerieke indicator</h4>
-        <img src='./carousel-2.png' alt='carousel2' />
+        <h4>{t("Indicator 1")}</h4>
+        <img src='./{t("Carousel1-path")}' alt='carousel2' />
       </div>
       <div class='carousel-div'>
-        <h4>Indicator type 2: Meervoudige categorische indicator</h4>
-        <img src='./carousel-1.png' alt='carousel1' />
+        <h4>{t("Indicator 2")}</h4>
+        <img src='./{t("Carousel2-path")}' alt='carousel1' />
       </div>
     </Carousel>
   {:else if type === 'intro'}
