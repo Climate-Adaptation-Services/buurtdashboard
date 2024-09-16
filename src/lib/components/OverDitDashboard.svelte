@@ -10,7 +10,7 @@
     export let type = 'intro'
 
     onMount(() => {
-      selectAll('h1,h3').style('color', "#36575B")
+      // selectAll('h1,h3').style('color', "#36575B")
       selectAll("h3").style("margin-bottom", "0px")
       selectAll("p").style("margin-top", '8px')
   
