@@ -9,6 +9,7 @@
   import Modal from 'svelte-simple-modal';
   import { t } from '$lib/i18n/translate.js';
   import { browser } from '$app/environment';
+    import LoadingIcon from '$lib/components/LoadingIcon.svelte';
   // import { locale, isLoading } from 'svelte-i18n';
   // import { _ } from 'svelte-i18n'
 
@@ -88,30 +89,30 @@
     <div class='control-panel'><ControlPanel {indicatorenSelectie} {indicatorenLijst} /></div>
     <div class='map' bind:clientWidth={wMap} bind:clientHeight={hMap}>
       {#await getData}
-        <pre style='color:white'>Loading...</pre>
+        <pre style='color:white'>Kaart laden...</pre>
       {:then res}
         <Map datajson={res} w={wMap} h={hMap} mainMapFlag={true}/>
-      {:catch error}
-        <p>An error occurred!</p>
       {/await}
     </div>
   </div>
   
   <div class='indicators' style='margin-left:{screenSize > 800 ? 400 : 0}px'>
-    {#if $buurtData !== null}
+    {#await getData}
+      <LoadingIcon />
+    {:then res}
       {#each getoondeIndicatoren as indicator}
         {#if indicator.attribute}
-          <div class='indicator' style='height:{indicatorHeight}px'>
-            <Indicator h={indicatorHeight} {indicator}/>
-        </div>
-      {/if}
-    {/each}
-  {/if}
-</div>
+            <div class='indicator' style='height:{indicatorHeight}px'>
+              <Indicator h={indicatorHeight} {indicator}/>
+          </div>
+        {/if}
+      {/each}
+    {/await}
+  </div>
 
-<Tooltip />
+  <Tooltip />
 
-<Modal show={$modal} style='position:absolute; left:0'></Modal>
+  <Modal show={$modal} style='position:absolute; left:0'></Modal>
 
 </div>
 
