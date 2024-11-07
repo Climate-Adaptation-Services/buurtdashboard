@@ -5,9 +5,9 @@ export function getIndicatorenLijst(metadata, eff, geb, kwe){
   let indicatorenLijst = []
 
   // let indicatorenOpCategorie = [...metadata.filter(d => d.Categorie === 'Gebiedskenmerken'), ...metadata.filter(d => d.Categorie === 'Effecten'), ...metadata.filter(d => d.Categorie === 'Kwetsbaarheid')]
-  indicatorenLijst = addIndicatorCategorie(indicatorenLijst, metadata.filter(d => d.Categorie === eff))
-  indicatorenLijst = addIndicatorCategorie(indicatorenLijst, metadata.filter(d => d.Categorie === geb))
-  indicatorenLijst = addIndicatorCategorie(indicatorenLijst, metadata.filter(d => d.Categorie === kwe))
+  // indicatorenLijst = addIndicatorCategorie(indicatorenLijst, metadata.filter(d => d.Categorie === eff))
+  indicatorenLijst = addIndicatorCategorie(indicatorenLijst, metadata.filter(d => d.Categorie === geb)).slice(0,4)
+  // indicatorenLijst = addIndicatorCategorie(indicatorenLijst, metadata.filter(d => d.Categorie === kwe))
 
   console.log('indicatorenLijst', indicatorenLijst)
 
@@ -26,6 +26,7 @@ function addIndicatorCategorie(indicatorenLijst, indicatoren){
       });
     }else{
       indicator.Domein.split(',').forEach((d,i) => {
+        console.log('indnata',indicator.Indicatornaamtabel.split(','))
         klassen[d] = indicator.klassenthresholds.split(',')[i]
       });
     }

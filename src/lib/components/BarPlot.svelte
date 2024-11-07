@@ -16,11 +16,15 @@
   const margin = {bottom:0, top:30, left:30, right:30}
 
   function getPercentages(data, regio){
+
     let totalAmount = 0
     let klassenTotal = []
     for(let i=0;i<Object.keys(indicator.klassen).length;i++){
       klassenTotal.push({klasseNaam: Object.keys(indicator.klassen)[i], waarde:0})
     }
+
+    console.log('getperc', indicator, klassenTotal)
+
     data.features.forEach(buurtOfGemeente => {
       klassenTotal.filter(kl => kl.klasseNaam === getClass(buurtOfGemeente.properties[indicator.attribute]))[0].waarde += 1
       totalAmount += 1
@@ -29,6 +33,7 @@
     klassenTotal.forEach(kl => {
       kl.waarde = (kl.waarde/totalAmount) * 100
     })
+
 
     let result = {'group':regio}
     Object.keys(indicator.klassen).forEach(klasse => {

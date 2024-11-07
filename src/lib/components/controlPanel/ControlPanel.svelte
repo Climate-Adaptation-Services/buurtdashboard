@@ -21,7 +21,6 @@
   }
   $: if($gemeenteSelection !== null){
     const buurtenFeatures = $buurtData.features.filter(buurt => buurt.properties[$gemeenteCode] === $gemeenteSelection)
-    console.log('bf', buurtenFeatures)
     buurtList = buurtenFeatures.map(buurt => {return {'value':buurt.properties[$buurtCode], 'label':capSelectLabelLen(buurt.properties[$buurtNaam])}})
     buurtList = lo.orderBy(buurtList, [buurt => buurt.label], ['asc']);
   }

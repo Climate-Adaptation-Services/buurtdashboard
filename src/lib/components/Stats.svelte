@@ -26,7 +26,7 @@
     } }
 
   let meanValuesDict = {
-    'meanValueNederland':median($buurtData.features.map(buurt => buurt.properties[indicator.attribute])),
+    // 'meanValueNederland':median($buurtData.features.map(buurt => buurt.properties[indicator.attribute])),
     'meanValueGemeente':0,
     'meanValueBuurt':0,
     'meanValueWijktype':0
@@ -53,6 +53,8 @@
     meanValuesDict['meanValueWijktype'] = 0
   }
 
+  $: console.log('meanvalues', meanValuesDict)
+
   // grondwater hoog kan negatief zijn, en de schaal moet wat opgerekt
   $: xScaleMin = min([0, meanValuesDict['meanValueNederland'], meanValuesDict['meanValueGemeente'], meanValuesDict['meanValueBuurt'], meanValuesDict['meanValueWijktype']])
   if(xScaleMin < 0){
@@ -69,7 +71,7 @@
 
 </script>
 
-<div class='indicator-stats' style='height: {bodyHeight*0.2*0.25}px' bind:clientWidth={wStats}><Stat {color} w={wStats} h={bodyHeight*0.2*0.25} regio='Nederland' meanValue={meanValuesDict['meanValueNederland']} {xScaleStats}/></div>
+<div class='indicator-stats' style='visibility:hidden;height: {bodyHeight*0.2*0.25}px' bind:clientWidth={wStats}><Stat {color} w={wStats} h={bodyHeight*0.2*0.25} regio='Nederland' meanValue={meanValuesDict['meanValueNederland']} {xScaleStats}/></div>
 {#if $gemeenteSelection !== null}
   <div class='indicator-stats' style='height: {bodyHeight*0.2*0.25}px'><Stat {color} w={wStats} h={bodyHeight*0.2*0.25} regio='Gemeente' meanValue={meanValuesDict['meanValueGemeente']} {xScaleStats}/></div>
 {/if}
@@ -79,8 +81,6 @@
     <div class='indicator-stats' style='height: {bodyHeight*0.2*0.25}px'><Stat {color} w={wStats} h={bodyHeight*0.2*0.25} regio='Wijktype' meanValue={meanValuesDict['meanValueWijktype']} {xScaleStats}/></div>
   {/if}
 {/if}
-
-
 
 
 <style>
