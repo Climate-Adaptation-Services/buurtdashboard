@@ -23,8 +23,6 @@
       klassenTotal.push({klasseNaam: Object.keys(indicator.klassen)[i], waarde:0})
     }
 
-    console.log('getperc', indicator, klassenTotal)
-
     data.features.forEach(buurtOfGemeente => {
       klassenTotal.filter(kl => kl.klasseNaam === getClass(buurtOfGemeente.properties[indicator.attribute]))[0].waarde += 1
       totalAmount += 1

@@ -53,8 +53,6 @@
     meanValuesDict['meanValueWijktype'] = 0
   }
 
-  $: console.log('meanvalues', meanValuesDict)
-
   // grondwater hoog kan negatief zijn, en de schaal moet wat opgerekt
   $: xScaleMin = min([0, meanValuesDict['meanValueNederland'], meanValuesDict['meanValueGemeente'], meanValuesDict['meanValueBuurt'], meanValuesDict['meanValueWijktype']])
   if(xScaleMin < 0){

@@ -15,9 +15,18 @@ export function loadMapData(datajson){
 
     // Dordrecht pilot
     buurt.properties['GM_CODE'] = 'GM0505'
+    buurt.properties['GM_NAAM'] = 'Dordrecht'
+
     buurt.properties['Aantal_bomen'] = buurt.properties['buurtniveau_openbaar_aantal_bomen'] + buurt.properties['buurtniveau_privaat_aantal_bomen']
 
-    
+    buurt.properties['buurt_opp_zonderagr'] = buurt.properties['buurtniveau_privaat_m2_oppervlakte'] + buurt.properties['buurtniveau_openbaar_m2_oppervlakte']
+
+    buurt.properties['buurtniveau_openbaar_m2_grijs'] = buurt.properties['buurtniveau_openbaar_m2_oppervlakte'] - buurt.properties['buurtniveau_openbaar_m2_boomkroon']
+    buurt.properties['buurtniveau_privaat_m2_grijs'] = buurt.properties['buurtniveau_privaat_m2_oppervlakte'] - buurt.properties['buurtniveau_privaat_m2_boomkroon']
+
+    // buurtniveau_privaat_m2_oppervlakte,buurtniveau_openbaar_m2_oppervlakte
+    // buurtniveau_privaat_m2_boomkroon,buurtniveau_openbaar_m2_boomkroon
+
     // buurt.properties['m2GroenPI'] = (isNaN(parseFloat(buurt.properties['m2GroenPI']))) ? null : parseFloat(buurt.properties['m2GroenPI'])
 
     // // verschillende variabelen van string naar num
