@@ -10,6 +10,9 @@
   export let indicator;
   export let color;
   export let nodesData
+  export let type
+
+  const dy = (type === 'lower_beeswarm') ? 40 : 0
 
   // filter out null values
   nodesData = nodesData.filter(d => d.properties[indicator.attribute] !== null)
@@ -18,11 +21,12 @@
   }
 
   const margin = {bottom:50, top:20, left:30, right:30}
+  const xScaleLeftMargin = (type === 'lower_beeswarm' || type === 'upper_beeswarm') ? 30 : 0
 
   $: xScale = (indicator.titel !== 'Groen per inwoner')
     ? scaleLinear()
         .domain(extent($buurtenInGemeente.features, d => +d.properties[indicator.attribute]))
-        .range([0, w-margin.left-margin.right])
+        .range([xScaleLeftMargin, w-margin.left-margin.right])
         .nice()
     : scaleLog()
         .domain(extent(nodesData, d => +d.properties[indicator.attribute]))
@@ -37,14 +41,14 @@
       nodes = simulation.nodes(); // Repopulate and update
   });
 
-  $: RADIUS = (nodesData.length > 150) ? 3 : 5
+  $: RADIUS = (nodesData.length > 150) ? 3 : 3
 
   // Run the simulation whenever any of the variables inside of it change
   $: {
     simulation = forceSimulation(nodesData)
       .force("x", forceX().x(d => xScale(d.properties[indicator.attribute]))
         .strength(d => (xScale(d.properties[indicator.attribute]) > 0) ? 0.1 : 1))
-      .force("y", forceY().y(70)
+      .force("y", forceY().y(dy+20)
         .strength(d => (xScale(d.properties[indicator.attribute]) > 0) ? 0.04 : 0.01))
       .force('charge', forceManyBody().strength(-0.5))
       .force("collide", forceCollide().radius(RADIUS*1.2))
@@ -107,6 +111,7 @@
 
   function click(feature){
     mouseOut(feature)
+
     selectAll('.svgelements_' + feature.properties[$buurtCode])
       .raise()
 
@@ -131,33 +136,36 @@
 
 </script>
 
-<svg class={'beeswarm_' + indicator.attribute}>
-  <XAxis {xScale} height={h} {margin}/>
-  {#if indicator.titel === 'Groen per inwoner'}
-    <text x={w/2} y={h - margin.bottom - 5} text-anchor='middle' font-size='13'>Let op logaritmische schaal</text>
-  {/if}
+{#if type !== 'upper_beeswarm'}
+  <XAxis {xScale} height={h*2} {margin} {dy}/>
+{/if}
 
-  <g class="inner-chart" transform="translate({margin.left}, {margin.top})">
-    {#each nodes as node (node.id + indicator.attribute)}
-      <circle class={getClassName(node) + ' ' + 'svgelements_' + node.properties[$buurtCode]}
-      stroke={(node.properties[$buurtCode] === $buurtSelection) ? '#E1575A' : 'none'}
-      style='filter: {(node.properties[$buurtCode] === $buurtSelection) ? 'drop-shadow(0 0 5px #36575A)' : 'none'}'
-      cx={node.x} cy={node.y} r={(node.properties[$buurtCode] === $buurtSelection) ? RADIUS+3 : RADIUS} fill={color(+node.properties[indicator.attribute])} stroke-width='3'
-      on:mouseover={() => mouseOver(node)}
-      on:mouseout={() => mouseOut(node)}
-      on:click={() => click(node)}
-      />
-    {/each}
-  </g>
-  <text x={w/2} y={h-18} fill='#645F5E' text-anchor='middle' font-size='14'>{indicator.plottitel} per buurt in gemeente {$gemeenteData.features.filter(gemeente => gemeente.properties['GM_CODE'] === $gemeenteSelection)[0].properties['GM_NAAM']}</text>
-</svg>
+<line x1={xScale.range()[0]+margin.left} x2={xScale.range()[1]+margin.left} y1={80} y2={80} stroke='lightgrey'></line>
+
+{#if indicator.titel === 'Groen per inwoner'}
+  <text x={w/2} y={h - margin.bottom - 5} text-anchor='middle' font-size='13'>Let op logaritmische schaal</text>
+{/if}
+
+<g class="inner-chart" transform="translate({margin.left}, {margin.top+dy})">
+  {#if type === 'lower_beeswarm' || type === 'upper_beeswarm'}
+    <text x='-20' y={dy+20+7}>{(type === 'lower_beeswarm') ? 2023 : 2019}</text>
+  {/if}
+  {#each nodes as node (node.id + indicator.attribute)}
+    <circle class={getClassName(node) + ' ' + 'svgelements_' + node.properties[$buurtCode]}
+    stroke={(node.properties[$buurtCode] === $buurtSelection) ? '#E1575A' : 'none'}
+    style='filter: {(node.properties[$buurtCode] === $buurtSelection) ? 'drop-shadow(0 0 5px #36575A)' : 'none'}'
+    cx={node.x} cy={node.y} r={(node.properties[$buurtCode] === $buurtSelection) ? RADIUS+3 : RADIUS} fill={color(+node.properties[indicator.attribute])} stroke-width='3'
+    on:mouseover={() => mouseOver(node)}
+    on:mouseout={() => mouseOut(node)}
+    on:click={() => click(node)}
+    />
+  {/each}
+</g>
+
 
 
 <style>
 
-  svg{
-    width: 100%;
-    height:100%;
-  }
+
 
 </style>

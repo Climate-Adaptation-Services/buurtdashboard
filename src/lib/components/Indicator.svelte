@@ -1,5 +1,5 @@
 <script>
-  import { buurtData, buurtSelection, gemeenteSelection, buurtenInGemeente, wijkTypeData } from "$lib/stores";
+  import { gemeenteSelection, buurtenInGemeente, gemeenteData, indicatorenLijst2019 } from "$lib/stores";
   import BeeswarmPlot from "./BeeswarmPlot.svelte";
   import Stats from "./Stats.svelte";
   import { scaleLinear, extent, scaleOrdinal } from 'd3';
@@ -89,7 +89,11 @@
       </div>
       <div class='indicator-graph' style='height:{bodyHeight*0.4}px' bind:clientWidth={wGraph}>
         {#if $gemeenteSelection !== null}
-          <BeeswarmPlot w={wGraph} h={bodyHeight*0.4} {indicator} {color} nodesData={structuredClone($buurtenInGemeente.features)}/>
+          <svg class={'beeswarm_' + indicator.attribute}>
+            <BeeswarmPlot w={wGraph} h={bodyHeight*0.2} type='upper_beeswarm' {indicator} {color} nodesData={structuredClone($buurtenInGemeente.features)}/>
+            <BeeswarmPlot w={wGraph} h={bodyHeight*0.2} type='lower_beeswarm' indicator={$indicatorenLijst2019[0]} {color} nodesData={structuredClone($buurtenInGemeente.features)}/>
+            <text x={wGraph/2} y={bodyHeight*0.4-18} fill='#645F5E' text-anchor='middle' font-size='14'>{indicator.plottitel} per buurt in gemeente {$gemeenteData.features.filter(gemeente => gemeente.properties['GM_CODE'] === $gemeenteSelection)[0].properties['GM_NAAM']}</text>
+          </svg>
         {:else}
           <p style='text-align:center; padding-top:50px; font-size:18px; position:absolute; left:{wGraph/3.4}px'><em>{t("Selecteer_gemeente")}...</em></p>
         {/if}
@@ -118,6 +122,11 @@
 
 
 <style>
+  svg{
+    width: 100%;
+    height:100%;
+  }
+
   .indicator-div{
     height: 100%;
     display: flex;

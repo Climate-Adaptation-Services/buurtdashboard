@@ -17,6 +17,7 @@ export const gemeenteCode = readable('GM_CODE')
 export const buurtNaam = readable('BU_NAAM')
 
 export const indicatorenSelectie = writable([])
+export const indicatorenLijst2019 = writable([])
 
 export const buurtSelectionData = derived(
   [buurtData, buurtSelection],

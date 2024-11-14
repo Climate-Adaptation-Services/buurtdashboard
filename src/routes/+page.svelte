@@ -3,7 +3,7 @@
   import Indicator from '$lib/components/Indicator.svelte';
   import Map from '$lib/components/Map.svelte';
   import Tooltip from '$lib/components/Tooltip.svelte';
-  import { buurtData, buurtSelection, indicatorenSelectie, gemeenteSelection, modal, URLParams, lang } from '$lib/stores';
+  import { buurtData, buurtSelection, indicatorenSelectie, gemeenteSelection, modal, URLParams, lang, indicatorenLijst2019 } from '$lib/stores';
   import { getIndicatorenLijst } from '$lib/noncomponents/indicatorenLijst.js'
   import { afterUpdate, onMount } from 'svelte';
   import Modal from 'svelte-simple-modal';
@@ -33,13 +33,17 @@
   let getoondeIndicatoren = []
   let indicatorenLijst = []
 
-  if($lang === 'en'){
-    indicatorenLijst = getIndicatorenLijst(data.metadata_dordrecht, t("Effecten"), t("Gebiedskenmerken"), t("Kwetsbaarheid"))
-    getoondeIndicatoren = indicatorenLijst
-  }else{
-    indicatorenLijst = getIndicatorenLijst(data.metadata_dordrecht, t("Effecten"), t("Gebiedskenmerken"), t("Kwetsbaarheid"))
-    getoondeIndicatoren = indicatorenLijst
-  }
+  // if($lang === 'en'){
+  const indicatorenLijsten = getIndicatorenLijst(data.metadata_dordrecht, t("Effecten"), t("Gebiedskenmerken"), t("Kwetsbaarheid"))
+  indicatorenLijst = indicatorenLijsten.indicatorenLijst2023
+  indicatorenLijst2019.set(indicatorenLijsten.indicatorenLijst2019)
+
+  getoondeIndicatoren = indicatorenLijst
+  // }
+  // else{
+  //   indicatorenLijst = getIndicatorenLijst(data.metadata_dordrecht, t("Effecten"), t("Gebiedskenmerken"), t("Kwetsbaarheid")).indicatorenLijst2023
+  //   getoondeIndicatoren = indicatorenLijst
+  // }
 
   const getData = (async () => {
 		const response = await Promise.all([

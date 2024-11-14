@@ -4,7 +4,7 @@
   import { geoMercator, geoPath, select, selectAll } from 'd3';
   import { loadMapData } from "$lib/noncomponents/loadMapData.js";
   import { t } from '$lib/i18n/translate.js';
-    import { onMount } from 'svelte';
+  import { onMount } from 'svelte';
 
   export let datajson
   export let w
@@ -130,6 +130,7 @@
 
       buurtSelection.set(newSelection)
     }
+
   }
 
   function getClassName(feature){

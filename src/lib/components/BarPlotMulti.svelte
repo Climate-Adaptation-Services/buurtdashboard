@@ -41,8 +41,6 @@
 
     });
 
-    console.log('klassenTotal', klassenTotal, totalOpp, regio, data)
-
     klassenTotal.forEach(kl => {
       kl.waarde = (kl.waarde/totalOpp)
       if(indicator.titel === t('Gevoelstemperatuur')){kl.waarde *= 100}
