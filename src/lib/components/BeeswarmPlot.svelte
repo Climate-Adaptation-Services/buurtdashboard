@@ -12,7 +12,13 @@
   export let nodesData
   export let type
 
-  const dy = (type === 'lower_beeswarm') ? 40 : 0
+  // console.log('indicator', indicator)
+
+  const dy = (type === 'lower_beeswarm') 
+    ? 50
+    : (type === 'upper_beeswarm')
+      ? 13
+      : 34
 
   // filter out null values
   nodesData = nodesData.filter(d => d.properties[indicator.attribute] !== null)
@@ -41,14 +47,14 @@
       nodes = simulation.nodes(); // Repopulate and update
   });
 
-  $: RADIUS = (nodesData.length > 150) ? 3 : 3
+  $: RADIUS = (nodesData.length > 150 || type !== 'beeswarm') ? 3 : 5
 
   // Run the simulation whenever any of the variables inside of it change
   $: {
     simulation = forceSimulation(nodesData)
       .force("x", forceX().x(d => xScale(d.properties[indicator.attribute]))
         .strength(d => (xScale(d.properties[indicator.attribute]) > 0) ? 0.1 : 1))
-      .force("y", forceY().y(dy+20)
+      .force("y", forceY().y(dy)
         .strength(d => (xScale(d.properties[indicator.attribute]) > 0) ? 0.04 : 0.01))
       .force('charge', forceManyBody().strength(-0.5))
       .force("collide", forceCollide().radius(RADIUS*1.2))
@@ -140,15 +146,16 @@
   <XAxis {xScale} height={h*2} {margin} {dy}/>
 {/if}
 
-<line x1={xScale.range()[0]+margin.left} x2={xScale.range()[1]+margin.left} y1={80} y2={80} stroke='lightgrey'></line>
-
+{#if type === 'upper_beeswarm'}
+  <line x1={xScale.range()[0]+margin.left} x2={xScale.range()[1]+margin.left} y1={80} y2={80} stroke='lightgrey'></line>
+{/if}
 {#if indicator.titel === 'Groen per inwoner'}
   <text x={w/2} y={h - margin.bottom - 5} text-anchor='middle' font-size='13'>Let op logaritmische schaal</text>
 {/if}
 
 <g class="inner-chart" transform="translate({margin.left}, {margin.top+dy})">
   {#if type === 'lower_beeswarm' || type === 'upper_beeswarm'}
-    <text x='-20' y={dy+20+7}>{(type === 'lower_beeswarm') ? 2023 : 2019}</text>
+    <text x='-20' y={dy+7}>{(type === 'lower_beeswarm') ? 2023 : 2019}</text>
   {/if}
   {#each nodes as node (node.id + indicator.attribute)}
     <circle class={getClassName(node) + ' ' + 'svgelements_' + node.properties[$buurtCode]}

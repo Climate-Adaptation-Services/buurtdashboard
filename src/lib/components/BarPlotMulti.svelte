@@ -22,7 +22,8 @@
     data.features.forEach(buurt => {
       let buurtOpp = (indicator.titel === 'Functionele gebieden')
         ? buurt.properties['buurt_opp_incl_agrarisch']
-        : buurt.properties['buurt_opp_zonderagr']
+        // : buurt.properties['buurt_opp_zonderagr']
+        : buurt.properties['Shape_Area']
 
       totalOpp += buurtOpp
 
@@ -50,6 +51,7 @@
     Object.keys(indicator.klassen).forEach(klasse => {
       result[klasse] = klassenTotal.filter(kl => kl.klasseNaam === klasse)[0].waarde
     });  
+
 
     return result
   }

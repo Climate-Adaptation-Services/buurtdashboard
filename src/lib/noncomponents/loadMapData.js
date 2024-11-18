@@ -22,10 +22,10 @@ export function loadMapData(datajson){
     // const totalOpp = buurt.properties['buurtniveau_privaat_m2_oppervlakte'] + buurt.properties['buurtniveau_openbaar_m2_oppervlakte']
     // buurt.properties['Shape_Area'] = totalOpp
 
-    buurt.properties['buurtniveau_openbaar_perc_boomkroon'] = (buurt.properties['buurtniveau_openbaar_m2_boomkroon'] / buurt.properties['Shape_Area']) * 100
-    buurt.properties['buurtniveau_privaat_perc_boomkroon'] = (buurt.properties['buurtniveau_privaat_m2_boomkroon'] / buurt.properties['Shape_Area']) * 100
-    buurt.properties['buurtniveau_openbaar_perc_grijs'] = ((buurt.properties['buurtniveau_openbaar_m2_oppervlakte'] - buurt.properties['buurtniveau_openbaar_m2_boomkroon']) / buurt.properties['Shape_Area']) * 100
-    buurt.properties['buurtniveau_privaat_perc_grijs'] = ((buurt.properties['buurtniveau_privaat_m2_oppervlakte'] - buurt.properties['buurtniveau_privaat_m2_boomkroon']) / buurt.properties['Shape_Area']) * 100
+    buurt.properties['buurtniveau_openbaar_perc_boomkroon'] = (buurt.properties['buurtniveau_openbaar_m2_boomkroon'] / +buurt.properties['Shape_Area']) * 100
+    buurt.properties['buurtniveau_privaat_perc_boomkroon'] = (buurt.properties['buurtniveau_privaat_m2_boomkroon'] / +buurt.properties['Shape_Area']) * 100
+    buurt.properties['buurtniveau_openbaar_perc_grijs'] = ((buurt.properties['buurtniveau_openbaar_m2_oppervlakte'] - buurt.properties['buurtniveau_openbaar_m2_boomkroon']) / +buurt.properties['Shape_Area']) * 100
+    buurt.properties['buurtniveau_privaat_perc_grijs'] = ((buurt.properties['buurtniveau_privaat_m2_oppervlakte'] - buurt.properties['buurtniveau_privaat_m2_boomkroon']) / +buurt.properties['Shape_Area']) * 100
 
     // buurtniveau_privaat_m2_oppervlakte,buurtniveau_openbaar_m2_oppervlakte
     // buurtniveau_privaat_m2_boomkroon,buurtniveau_openbaar_m2_boomkroon

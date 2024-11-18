@@ -66,7 +66,6 @@
     : 0
   })
 
-
 </script>
 
 <div class='indicator-div'>
@@ -90,8 +89,12 @@
       <div class='indicator-graph' style='height:{bodyHeight*0.4}px' bind:clientWidth={wGraph}>
         {#if $gemeenteSelection !== null}
           <svg class={'beeswarm_' + indicator.attribute}>
-            <BeeswarmPlot w={wGraph} h={bodyHeight*0.2} type='upper_beeswarm' {indicator} {color} nodesData={structuredClone($buurtenInGemeente.features)}/>
-            <BeeswarmPlot w={wGraph} h={bodyHeight*0.2} type='lower_beeswarm' indicator={$indicatorenLijst2019[0]} {color} nodesData={structuredClone($buurtenInGemeente.features)}/>
+            {#if ['Boomkroonbedekking', 'Boomkroonbedekking binnen 500 meter per pand '].includes(indicator.titel)}
+              <BeeswarmPlot w={wGraph} h={bodyHeight*0.2} type='upper_beeswarm' {indicator} {color} nodesData={structuredClone($buurtenInGemeente.features)}/>
+              <BeeswarmPlot w={wGraph} h={bodyHeight*0.2} type='lower_beeswarm' indicator={$indicatorenLijst2019.filter(indicator2019 => indicator2019.attribute.split('_20')[0] === indicator.attribute.split('_20')[0])[0]} {color} nodesData={structuredClone($buurtenInGemeente.features)}/>
+            {:else}
+              <BeeswarmPlot w={wGraph} h={bodyHeight*0.2} type='beeswarm' {indicator} {color} nodesData={structuredClone($buurtenInGemeente.features)}/>
+            {/if}
             <text x={wGraph/2} y={bodyHeight*0.4-18} fill='#645F5E' text-anchor='middle' font-size='14'>{indicator.plottitel} per buurt in gemeente {$gemeenteData.features.filter(gemeente => gemeente.properties['GM_CODE'] === $gemeenteSelection)[0].properties['GM_NAAM']}</text>
           </svg>
         {:else}
