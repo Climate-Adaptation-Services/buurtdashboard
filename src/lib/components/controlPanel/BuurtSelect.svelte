@@ -3,10 +3,8 @@
   import { selectAll } from 'd3';
   import Select from 'svelte-select'
   import { t } from '$lib/i18n/translate.js';
-  // import { _ } from 'svelte-i18n'
 
-
-  export let buurtList
+  export let lijstAlleBuurtenInGemeenteVoorDropdown
 
   function handleBuurtChange(e){
     $URLParams.set('buurt', e.detail.value);
@@ -28,5 +26,5 @@
 
 {#if $gemeenteSelection !== null}
   <p class='select-title'>{t("Buurt")}:</p>
-  <Select items={buurtList} placeholder="{t("Zoek_buurt")}..." value={$buurtSelection} on:change={handleBuurtChange} on:clear={handleBuurtClear}/>
+  <Select items={lijstAlleBuurtenInGemeenteVoorDropdown} placeholder="{t("Zoek_buurt")}..." value={$buurtSelection} on:change={handleBuurtChange} on:clear={handleBuurtClear}/>
 {/if}

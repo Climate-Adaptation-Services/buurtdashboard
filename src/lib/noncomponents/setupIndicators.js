@@ -1,6 +1,9 @@
 
-export function getIndicatorenLijst(metadata, eff, geb, kwe){
-  console.log('metadata', metadata, eff, geb, kwe)
+export function setupIndicators(data, eff, geb, kwe){
+
+  const metadata = (data.lang === 'en')
+    ? data.metadata_english
+    : data.metadata
 
   let indicatorenLijst = []
 

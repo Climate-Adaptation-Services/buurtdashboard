@@ -6,7 +6,6 @@ export async function load({ url }) {
 
   // Get individual query parameters
   const lang = searchParams.get('lang');
-  // const name = searchParams.get('name');
 
   const metadata = await dsv(';', "https://raw.githubusercontent.com/Climate-Adaptation-Services/buurtdashboard-data/main/metadata.csv")
   const metadata_english = await dsv(';', "https://raw.githubusercontent.com/Climate-Adaptation-Services/buurtdashboard-data/main/metadata-english.csv")

@@ -2,27 +2,30 @@ import { writable, derived, readable } from 'svelte/store';
 
 export const gemeenteSelection = writable(null);
 export const buurtSelection = writable(null);
-export const gemeenteData = writable(null)
-export const buurtData = writable(null)
-export const hoveredRegion = writable(null)
-export const hoveredValue = writable(null)
+export const alleGemeentesJSONData = writable(null)
+export const alleBuurtenJSONData = writable(null)
+export const tooltipRegion = writable(null)
+export const tooltipValues = writable(null)
+// mousePosition is used for positioning the tooltip
 export const mousePosition = writable(null)
 export const modal = writable(null);
 export const lang = writable('')
 
 export const URLParams = writable(new URLSearchParams("foo=1"))
 
-export const buurtCode = readable('BU_CODE')
-export const gemeenteCode = readable('GM_CODE')
-export const buurtNaam = readable('BU_NAAM')
+export const buurtCodeAfkorting = readable('BU_CODE')
+export const gemeenteCodeAfkorting = readable('GM_CODE')
+export const buurtNaamAfkorting = readable('BU_NAAM')
+export const gemeenteNaamAfkorting = readable('GM_NAAM')
+export const wijktypeAfkorting = readable('def_wijkty')
 
 export const indicatorenSelectie = writable([])
 
-export const buurtSelectionData = derived(
-  [buurtData, buurtSelection],
-  ([$buurtData, $buurtSelection]) => {
-    if($buurtData !== null){
-      return $buurtData.features.filter(buurt => buurt.properties['BU_CODE'] === $buurtSelection)[0]
+export const geselecteerdeBuurtJSONData = derived(
+  [alleBuurtenJSONData, buurtSelection],
+  ([$alleBuurtenJSONData, $buurtSelection]) => {
+    if($alleBuurtenJSONData !== null){
+      return $alleBuurtenJSONData.features.filter(buurt => buurt.properties['BU_CODE'] === $buurtSelection)[0]
     }else{
       return null
     }
@@ -30,7 +33,7 @@ export const buurtSelectionData = derived(
 );
 
 // derive the current level of view in text. Mostly for understanding whats happening
-export const currentView = derived(
+export const huidigOverzichtsniveau = derived(
   [gemeenteSelection, buurtSelection],
   ([$gemeenteSelection, $buurtSelection]) => {
     return ($gemeenteSelection === null)
@@ -41,29 +44,29 @@ export const currentView = derived(
   }
 )
 
-// filter the current data for the map, based on the currentView
-export const currentData = derived(
-  [currentView, gemeenteData, buurtData, gemeenteSelection, buurtSelection],
-  ([$currentView, $gemeenteData, $buurtData, $gemeenteSelection, $buurtSelection]) => {
-    if($currentView === 'Nederland'){
-      return $gemeenteData
-    }else if($currentView === 'Gemeente'){
-      const newFeatures = $buurtData.features.filter(buurt => buurt.properties['GM_CODE'] === $gemeenteSelection)
+// filter the current data for the map, based on the huidigOverzichtsniveau
+export const huidigeJSONData = derived(
+  [huidigOverzichtsniveau, alleGemeentesJSONData, alleBuurtenJSONData, gemeenteSelection, buurtSelection],
+  ([$huidigOverzichtsniveau, $alleGemeentesJSONData, $alleBuurtenJSONData, $gemeenteSelection, $buurtSelection]) => {
+    if($huidigOverzichtsniveau === 'Nederland'){
+      return $alleGemeentesJSONData
+    }else if($huidigOverzichtsniveau === 'Gemeente'){
+      const newFeatures = $alleBuurtenJSONData.features.filter(buurt => buurt.properties['GM_CODE'] === $gemeenteSelection)
       return {type: 'FeatureCollection', features: newFeatures}
     }else{
-      const newFeatures = $buurtData.features.filter(buurt => buurt.properties['GM_CODE'] === $gemeenteSelection)
+      const newFeatures = $alleBuurtenJSONData.features.filter(buurt => buurt.properties['GM_CODE'] === $gemeenteSelection)
       return {type: 'FeatureCollection', features: newFeatures}
-      // const newFeatures = $buurtData.features.filter(buurt => buurt.properties['bu_code'] === $buurtSelection)
+      // const newFeatures = $alleBuurtenJSONData.features.filter(buurt => buurt.properties['bu_code'] === $buurtSelection)
       // return {type: 'FeatureCollection', features: newFeatures}
     }
   }
 )
 
-export const buurtenInGemeente = derived(
-  [gemeenteSelection, buurtData],
-  ([$gemeenteSelection, $buurtData]) => {
-    if($gemeenteSelection !== null && $buurtData){
-      const newFeatures = $buurtData.features.filter(buurt => buurt.properties['GM_CODE'] === $gemeenteSelection)
+export const buurtenInGemeenteJSONData = derived(
+  [gemeenteSelection, alleBuurtenJSONData],
+  ([$gemeenteSelection, $alleBuurtenJSONData]) => {
+    if($gemeenteSelection !== null && $alleBuurtenJSONData){
+      const newFeatures = $alleBuurtenJSONData.features.filter(buurt => buurt.properties['GM_CODE'] === $gemeenteSelection)
       return {type: 'FeatureCollection', features: newFeatures}
     }else{
       return null
@@ -71,15 +74,39 @@ export const buurtenInGemeente = derived(
   }
 )
 
-export const wijkTypeData = derived(
-  [buurtSelection, buurtData, buurtSelectionData],
-  ([$buurtSelection, $buurtData, $buurtSelectionData]) => {
+export const circleRadius = derived(
+  [buurtenInGemeenteJSONData],
+  ([$buurtenInGemeenteJSONData]) => {
+    if($buurtenInGemeenteJSONData){
+      return ($buurtenInGemeenteJSONData.features.length > 150) ? 3 : 5
+    }else{
+      return 0
+    }
+  }
+)
+
+export const wijkTypeJSONData = derived(
+  [buurtSelection, alleBuurtenJSONData, geselecteerdeBuurtJSONData, wijktypeAfkorting],
+  ([$buurtSelection, $alleBuurtenJSONData, $geselecteerdeBuurtJSONData, $wijktypeAfkorting]) => {
     if($buurtSelection !== null){
-      return {type: 'FeatureCollection', features: $buurtData.features.filter(buurt => buurt.properties['def_wijkty'] === $buurtSelectionData.properties['def_wijkty'])}
+      return {type: 'FeatureCollection', features: $alleBuurtenJSONData.features.filter(buurt => buurt.properties[$wijktypeAfkorting] === $geselecteerdeBuurtJSONData.properties[$wijktypeAfkorting])}
     }else{
       return null
     }
   }
 )
 
+export const huidigeCodeAfkorting = derived(
+  [huidigOverzichtsniveau, gemeenteCodeAfkorting, buurtCodeAfkorting],
+  ([$huidigOverzichtsniveau, $gemeenteCodeAfkorting, $buurtCodeAfkorting]) => {
+    return ($huidigOverzichtsniveau === 'Nederland') ? $gemeenteCodeAfkorting : $buurtCodeAfkorting
+  }
+)
+
+export const huidigeNaamAfkorting = derived(
+  [huidigOverzichtsniveau, gemeenteNaamAfkorting, buurtNaamAfkorting],
+  ([$huidigOverzichtsniveau, $gemeenteNaamAfkorting, $buurtNaamAfkorting]) => {
+    return ($huidigOverzichtsniveau === 'Nederland') ? $gemeenteNaamAfkorting : $buurtNaamAfkorting
+  }
+)
 

@@ -1,5 +1,5 @@
 <script>
-  import { buurtData, buurtSelection, gemeenteSelection, buurtenInGemeente, wijkTypeData } from "$lib/stores";
+  import { alleBuurtenJSONData, buurtSelection, gemeenteSelection, buurtenInGemeenteJSONData, wijkTypeJSONData } from "$lib/stores";
   import BeeswarmPlot from "./BeeswarmPlot.svelte";
   import Stats from "./Stats.svelte";
   import { scaleLinear, extent, scaleOrdinal } from 'd3';
@@ -18,10 +18,10 @@
   let wGraph;
   let wMap;
 
-  let color = null
+  let indicatorValueColor = null
   let rangeExtent = [0,1]
 
-  function getClass(value){
+  function getClassByIndicatorValue(value){
     if(value === null){return t("Geen_data")}
     let kl = ''
     Object.keys(indicator.klassen).reverse().forEach(klasse => {
@@ -35,22 +35,22 @@
   $: {
     if(indicator.numerical){
       if($gemeenteSelection !== null){
-        rangeExtent = extent($buurtenInGemeente.features, d => +d.properties[indicator.attribute])
+        rangeExtent = extent($buurtenInGemeenteJSONData.features, d => +d.properties[indicator.attribute])
         // this can deal with any amount of colors in the scale
         const step = (rangeExtent[1] - rangeExtent[0]) / (indicator.color.range.length-1)
         if(indicator.titel !== 'Grondwaterstand 2050 hoog'){
-          color = scaleLinear()
+          indicatorValueColor = scaleLinear()
             .domain([...Array(indicator.color.range.length).keys()].map(i => rangeExtent[0] + i * step))
             .range(indicator.color.range);
         }else{
-          color = scaleLinear()
+          indicatorValueColor = scaleLinear()
             .domain([...Array(indicator.color.range.length).keys()].map(i => rangeExtent[0] + i * step).reverse())
             .range(indicator.color.range);
         }
 
       }
     }else{
-      color = scaleOrdinal()
+      indicatorValueColor = scaleOrdinal()
         .domain(indicator.color.domain)
         .range(indicator.color.range)
     }
@@ -85,11 +85,11 @@
   <div class='indicator-body' style='height: {bodyHeight}px'>
     {#if indicator.numerical === true}
       <div class='indicator-overview' style='height: {bodyHeight*0.2}px'>
-        <Stats {bodyHeight} {indicator} {color}/>
+        <Stats {bodyHeight} {indicator} {indicatorValueColor}/>
       </div>
       <div class='indicator-graph' style='height:{bodyHeight*0.4}px' bind:clientWidth={wGraph}>
         {#if $gemeenteSelection !== null}
-          <BeeswarmPlot w={wGraph} h={bodyHeight*0.4} {indicator} {color} nodesData={structuredClone($buurtenInGemeente.features)}/>
+          <BeeswarmPlot w={wGraph} h={bodyHeight*0.4} {indicator} {indicatorValueColor} nodesData={structuredClone($buurtenInGemeenteJSONData.features)}/>
         {:else}
           <p style='text-align:center; padding-top:50px; font-size:18px; position:absolute; left:{wGraph/3.4}px'><em>{t("Selecteer_gemeente")}...</em></p>
         {/if}
@@ -97,16 +97,16 @@
     {:else}
       <div class='indicator-graph' style='height:{bodyHeight*0.6}px' bind:clientWidth={wGraph}>
         {#if indicator.multiline}
-          <BarPlotMulti w={wGraph} h={bodyHeight*0.4} {indicator} {color} {getClass} />
+          <BarPlotMulti w={wGraph} h={bodyHeight*0.4} {indicator} {indicatorValueColor} {getClassByIndicatorValue} />
         {:else}
-          <BarPlot w={wGraph} h={bodyHeight*0.4} {indicator} {color} {getClass} />
+          <BarPlot w={wGraph} h={bodyHeight*0.4} {indicator} {indicatorValueColor} {getClassByIndicatorValue} />
         {/if}
-        <BarPlotLegend w={wGraph} style='height:{bodyHeight*0.2}px' {color} {indicator}/>
+        <BarPlotLegend w={wGraph} style='height:{bodyHeight*0.2}px' {indicatorValueColor} {indicator}/>
       </div>
     {/if}
     <div class='indicator-map' style='height:{bodyHeight*0.4}px' bind:clientWidth={wMap}>
       {#if $gemeenteSelection !== null}
-        <Map w={wMap} h={bodyHeight*0.4} mainMapFlag={false} {color} {indicator} {getClass} />
+        <Map mapWidth={wMap} mapHeight={bodyHeight*0.4} mapType={'indicator map'} {indicatorValueColor} {indicator} {getClassByIndicatorValue} />
       {/if}
       <span style='width:100%; position:absolute; bottom:0px; display:flex; justify-content:space-between; pointer-events:none'>
         <h5><strong>{indicator.bron}</strong></h5>

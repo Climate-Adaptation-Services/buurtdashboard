@@ -1,5 +1,5 @@
 <script>
-  import { wijkTypeData, buurtData, gemeenteSelection, buurtenInGemeente, buurtSelection, currentData, gemeenteData, buurtSelectionData, hoveredRegion, hoveredValue, buurtNaam } from "$lib/stores";
+  import { wijkTypeJSONData, wijktypeAfkorting, alleBuurtenJSONData, gemeenteSelection, buurtenInGemeenteJSONData, buurtSelection, gemeenteNaamAfkorting, alleGemeentesJSONData, geselecteerdeBuurtJSONData, tooltipRegion, tooltipValues, buurtNaamAfkorting } from "$lib/stores";
   import { scaleLinear, select, scaleBand, stack } from "d3";
   import { onMount } from "svelte";
   import { checkContrast } from "$lib/noncomponents/checkContrast";
@@ -10,8 +10,8 @@
   export let w;
   export let h;
   export let indicator;
-  export let color;
-  export let getClass
+  export let indicatorValueColor;
+  export let getClassByIndicatorValue
 
   const margin = {bottom:0, top:30, left:30, right:30}
 
@@ -22,7 +22,7 @@
       klassenTotal.push({klasseNaam: Object.keys(indicator.klassen)[i], waarde:0})
     }
     data.features.forEach(buurtOfGemeente => {
-      klassenTotal.filter(kl => kl.klasseNaam === getClass(buurtOfGemeente.properties[indicator.attribute]))[0].waarde += 1
+      klassenTotal.filter(kl => kl.klasseNaam === getClassByIndicatorValue(buurtOfGemeente.properties[indicator.attribute]))[0].waarde += 1
       totalAmount += 1
     });
 
@@ -38,24 +38,24 @@
     return result
   }
 
-  const nederlandValues = getPercentages($buurtData, 'Nederland')
+  const nederlandValues = getPercentages($alleBuurtenJSONData, 'Nederland')
   let barData = []
   let groups = []
 
   $: {
     if($buurtSelection !== null){
-      if($buurtSelectionData.properties['def_wijkty']){
-        barData = [getPercentages($buurtData, 'Nederland'), getPercentages($buurtenInGemeente, 'Gemeente'), getPercentages({type: 'FeatureCollection', features: [$buurtSelectionData]}, 'Buurt'), getPercentages($wijkTypeData, 'Wijktype')]
+      if($geselecteerdeBuurtJSONData.properties[$wijktypeAfkorting]){
+        barData = [getPercentages($alleBuurtenJSONData, 'Nederland'), getPercentages($buurtenInGemeenteJSONData, 'Gemeente'), getPercentages({type: 'FeatureCollection', features: [$geselecteerdeBuurtJSONData]}, 'Buurt'), getPercentages($wijkTypeJSONData, 'Wijktype')]
         groups = ['Nederland', 'Gemeente', 'Buurt', 'Wijktype']
       }else{
-        barData = [getPercentages($buurtData, 'Nederland'), getPercentages($buurtenInGemeente, 'Gemeente'), getPercentages({type: 'FeatureCollection', features: [$buurtSelectionData]}, 'Buurt')]
+        barData = [getPercentages($alleBuurtenJSONData, 'Nederland'), getPercentages($buurtenInGemeenteJSONData, 'Gemeente'), getPercentages({type: 'FeatureCollection', features: [$geselecteerdeBuurtJSONData]}, 'Buurt')]
         groups = ['Nederland', 'Gemeente', 'Buurt']
       }
     }else if($gemeenteSelection !== null){
-      barData = [getPercentages($buurtData, 'Nederland'), getPercentages($buurtenInGemeente, 'Gemeente')]
+      barData = [getPercentages($alleBuurtenJSONData, 'Nederland'), getPercentages($buurtenInGemeenteJSONData, 'Gemeente')]
       groups = ['Nederland', 'Gemeente']
     }else{
-      barData = [getPercentages($buurtData, 'Nederland')]
+      barData = [getPercentages($alleBuurtenJSONData, 'Nederland')]
       groups = ['Nederland']
     }
   }
@@ -78,10 +78,10 @@
     return (group === 'Nederland')
     ? t("Nederland")
     : (group === 'Gemeente')
-      ? t("Gemeente") + ' ' + $gemeenteData.features.filter(gemeente => gemeente.properties['GM_CODE'] === $gemeenteSelection)[0].properties['GM_NAAM']
+      ? t("Gemeente") + ' ' + $alleGemeentesJSONData.features.filter(gemeente => gemeente.properties['GM_CODE'] === $gemeenteSelection)[0].properties[$gemeenteNaamAfkorting]
       : (group === 'Buurt')
-        ? t("Buurt") + ' ' + $buurtSelectionData.properties[$buurtNaam]
-        : t("Wijktype") + ' ' + $buurtSelectionData.properties['def_wijkty']
+        ? t("Buurt") + ' ' + $geselecteerdeBuurtJSONData.properties[$buurtNaamAfkorting]
+        : t("Wijktype") + ' ' + $geselecteerdeBuurtJSONData.properties[$wijktypeAfkorting]
   }
 
   function mouseOver(st, stacked){
@@ -90,26 +90,26 @@
     // select('.' + 'barplot_rect' + indicator.attribute + stacked.key.replace(' ', '')  + st.data.group)
     //   .style('filter', "url(#highlightFilter)")
 
-    hoveredValue.set({
+    tooltipValues.set({
       indicator: stacked.key, 
       value: Math.round((st[1]-st[0])*100)/100 + '%',
-      color: color(stacked.key)
+      color: indicatorValueColor(stacked.key)
     })
 
     let elem = document.getElementsByClassName('barplot_rect' + indicator.attribute + stacked.key.replace(' ', '')  + st.data.group)[0]
     let rectmap = elem.getBoundingClientRect();
     let tooltipCenter = [rectmap.left, rectmap.top]
     
-    hoveredRegion.set({
+    tooltipRegion.set({
       'region': ($gemeenteSelection === null) ? 'Gemeente' : 'Buurt',
       'center': tooltipCenter,
       'name': (st.data.group === 'Nederland') 
         ? 'Nederland'
         : (st.data.group === 'Gemeente') 
-          ? 'Gemeente ' + $gemeenteData.features.filter(gem => gem.properties['GM_CODE'] === $gemeenteSelection)[0].properties['GM_NAAM']
+          ? 'Gemeente ' + $alleGemeentesJSONData.features.filter(gem => gem.properties['GM_CODE'] === $gemeenteSelection)[0].properties[$gemeenteNaamAfkorting]
           : (st.data.group === 'Wijktype') 
-            ? 'Wijktype ' + $buurtSelectionData.properties['def_wijkty']
-            : 'De buurt ' + $buurtSelectionData.properties[$buurtNaam]
+            ? 'Wijktype ' + $geselecteerdeBuurtJSONData.properties[$wijktypeAfkorting]
+            : 'De buurt ' + $geselecteerdeBuurtJSONData.properties[$buurtNaamAfkorting]
     })
     
   }
@@ -118,9 +118,9 @@
     select('.' + 'barplot_rect' + indicator.attribute + stacked.key.replace(' ', '')  + st.data.group)
       .attr('stroke', 'none')
           
-    hoveredValue.set(null)
+    tooltipValues.set(null)
 
-    hoveredRegion.set(null)
+    tooltipRegion.set(null)
   }
 
 </script>
@@ -130,13 +130,13 @@
 
   <g class="inner-chart-bar" transform="translate(0, {margin.top})">
     {#each stackedData as stacked, i}
-      <g class='stack' fill={color(stacked.key)}>
+      <g class='stack' fill={indicatorValueColor(stacked.key)}>
         {#each stacked as st}
           <rect on:mouseover={() => mouseOver(st, stacked)} on:mouseout={mouseOut(st, stacked)} class={'barplot_rect' + indicator.attribute + stacked.key.replace(' ', '') + st.data.group}
             x={xScale(st[0])} y={yScale(st.data.group)} width={xScale(st[1]) - xScale(st[0])} height={yScale.bandwidth()/2} stroke-width='4'>
           </rect>
           {#if xScale(st[1]) - xScale(st[0]) > 40}
-            <text text-anchor='middle' x={xScale(st[0]) + (xScale(st[1]) - xScale(st[0]))/2} y={yScale(st.data.group)} fill={(checkContrast(color(stacked.key))) ? 'white' : 'black'} dy='1.3em' font-size='14px' pointer-events='none'>{Math.round(st.data[stacked.key]*10)/10}%</text>
+            <text text-anchor='middle' x={xScale(st[0]) + (xScale(st[1]) - xScale(st[0]))/2} y={yScale(st.data.group)} fill={(checkContrast(indicatorValueColor(stacked.key))) ? 'white' : 'black'} dy='1.3em' font-size='14px' pointer-events='none'>{Math.round(st.data[stacked.key]*10)/10}%</text>
           {/if}
         {/each}
       </g>

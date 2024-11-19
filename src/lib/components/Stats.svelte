@@ -1,6 +1,6 @@
 <script>
 
-  import { buurtData, wijkTypeData, gemeenteSelection, buurtSelection, buurtCode, gemeenteCode, buurtSelectionData } from "$lib/stores";
+  import { alleBuurtenJSONData, wijkTypeJSONData, wijktypeAfkorting, gemeenteSelection, buurtSelection, buurtCodeAfkorting, gemeenteCodeAfkorting, geselecteerdeBuurtJSONData } from "$lib/stores";
   import Stat from "./Stat.svelte";
   import * as _ from 'lodash';
   import { scaleLinear, max, min } from 'd3';
@@ -8,7 +8,7 @@
 
   export let bodyHeight
   export let indicator
-  export let color
+  export let indicatorValueColor
 
   let wStats;
 
@@ -26,7 +26,7 @@
     } }
 
   let meanValuesDict = {
-    'meanValueNederland':median($buurtData.features.map(buurt => buurt.properties[indicator.attribute])),
+    'meanValueNederland':median($alleBuurtenJSONData.features.map(buurt => buurt.properties[indicator.attribute])),
     'meanValueGemeente':0,
     'meanValueBuurt':0,
     'meanValueWijktype':0
@@ -34,19 +34,19 @@
 
   $: if($gemeenteSelection !== null){
     // buurten binnen gemeente
-    const gemeenteFilter = $buurtData.features.filter(buurt => buurt.properties[$gemeenteCode] === $gemeenteSelection)
+    const gemeenteFilter = $alleBuurtenJSONData.features.filter(buurt => buurt.properties[$gemeenteCodeAfkorting] === $gemeenteSelection)
     meanValuesDict['meanValueGemeente'] = median(gemeenteFilter.map(buurt => buurt.properties[indicator.attribute]))
   }else{
     meanValuesDict['meanValueGemeente'] = 0
   }
   $: if($buurtSelection !== null){
     // deze filter is 1 buurt
-    const buurtFilter = $buurtData.features.filter(buurt => buurt.properties[$buurtCode] === $buurtSelection)
+    const buurtFilter = $alleBuurtenJSONData.features.filter(buurt => buurt.properties[$buurtCodeAfkorting] === $buurtSelection)
     meanValuesDict['meanValueBuurt'] = (buurtFilter[0].properties[indicator.attribute] !== null)
       ? Math.round(buurtFilter[0].properties[indicator.attribute]*100)/100
       : 'Geen data'
 
-    meanValuesDict['meanValueWijktype'] = median($wijkTypeData.features.map(buurt => buurt.properties[indicator.attribute]))
+    meanValuesDict['meanValueWijktype'] = median($wijkTypeJSONData.features.map(buurt => buurt.properties[indicator.attribute]))
 
   }else{
     meanValuesDict['meanValueBuurt'] = 0
@@ -69,14 +69,14 @@
 
 </script>
 
-<div class='indicator-stats' style='height: {bodyHeight*0.2*0.25}px' bind:clientWidth={wStats}><Stat {color} w={wStats} h={bodyHeight*0.2*0.25} regio='Nederland' meanValue={meanValuesDict['meanValueNederland']} {xScaleStats}/></div>
+<div class='indicator-stats' style='height: {bodyHeight*0.2*0.25}px' bind:clientWidth={wStats}><Stat {indicatorValueColor} w={wStats} h={bodyHeight*0.2*0.25} regio='Nederland' meanValue={meanValuesDict['meanValueNederland']} {xScaleStats}/></div>
 {#if $gemeenteSelection !== null}
-  <div class='indicator-stats' style='height: {bodyHeight*0.2*0.25}px'><Stat {color} w={wStats} h={bodyHeight*0.2*0.25} regio='Gemeente' meanValue={meanValuesDict['meanValueGemeente']} {xScaleStats}/></div>
+  <div class='indicator-stats' style='height: {bodyHeight*0.2*0.25}px'><Stat {indicatorValueColor} w={wStats} h={bodyHeight*0.2*0.25} regio='Gemeente' meanValue={meanValuesDict['meanValueGemeente']} {xScaleStats}/></div>
 {/if}
 {#if $buurtSelection !== null}
-  <div class='indicator-stats' style='height: {bodyHeight*0.2*0.25}px'><Stat {color} w={wStats} h={bodyHeight*0.2*0.25} regio='Buurt' meanValue={meanValuesDict['meanValueBuurt']} {xScaleStats}/></div>
-  {#if $buurtSelectionData.properties['def_wijkty']}
-    <div class='indicator-stats' style='height: {bodyHeight*0.2*0.25}px'><Stat {color} w={wStats} h={bodyHeight*0.2*0.25} regio='Wijktype' meanValue={meanValuesDict['meanValueWijktype']} {xScaleStats}/></div>
+  <div class='indicator-stats' style='height: {bodyHeight*0.2*0.25}px'><Stat {indicatorValueColor} w={wStats} h={bodyHeight*0.2*0.25} regio='Buurt' meanValue={meanValuesDict['meanValueBuurt']} {xScaleStats}/></div>
+  {#if $geselecteerdeBuurtJSONData.properties[$wijktypeAfkorting]}
+    <div class='indicator-stats' style='height: {bodyHeight*0.2*0.25}px'><Stat {indicatorValueColor} w={wStats} h={bodyHeight*0.2*0.25} regio='Wijktype' meanValue={meanValuesDict['meanValueWijktype']} {xScaleStats}/></div>
   {/if}
 {/if}
 

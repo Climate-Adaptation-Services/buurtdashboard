@@ -4,13 +4,11 @@
   import { browser } from "$app/environment";
   import { selectAll } from "d3";
   import { afterUpdate } from "svelte";
-  // import { _ } from 'svelte-i18n'
   import { t } from '$lib/i18n/translate.js';
 
+  export let alleIndicatoren
 
-  export let indicatorenLijst
-
-  const indicators = indicatorenLijst.map(d => d.titel)
+  const indicators = alleIndicatoren.map(d => d.titel)
 
   function handleIndicatorFilterAdd(e){
     $URLParams.append('indicator', e.detail.option);
@@ -30,6 +28,7 @@
     window.history.replaceState(null, '', '?' + $URLParams.toString());
   }
 
+  // deze styling gebeurt hier, omdat het via css niet lukte
   afterUpdate(() => {
     selectAll('li')
       .style('color', 'black')

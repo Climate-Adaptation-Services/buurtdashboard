@@ -1,35 +1,35 @@
 <script>
-  import { hoveredRegion, mousePosition } from "$lib/stores";
-  import { hoveredValue } from "$lib/stores";
+  import { tooltipRegion, mousePosition } from "$lib/stores";
+  import { tooltipValues } from "$lib/stores";
   import { checkContrast } from "$lib/noncomponents/checkContrast";
 
   function getTooltipTop(){
     return ($mousePosition && $mousePosition < 100)
-      ? $hoveredRegion.center[1] - 100
-      : $hoveredRegion.center[1]
+      ? $tooltipRegion.center[1] - 100
+      : $tooltipRegion.center[1]
   }
 
   function getTooltipLeft(){
-    return (window.innerWidth - $hoveredRegion.center[0] < 300)
-      ? $hoveredRegion.center[0] - 180
-      : $hoveredRegion.center[0]
+    return (window.innerWidth - $tooltipRegion.center[0] < 300)
+      ? $tooltipRegion.center[0] - 180
+      : $tooltipRegion.center[0]
   }
   
 </script>
 
-{#if $hoveredRegion !== null}
+{#if $tooltipRegion !== null}
   <div class='tooltip' style='left:{getTooltipLeft()}px;top:{getTooltipTop()}px'>
-    {#if $hoveredValue === null}
+    {#if $tooltipValues === null}
       <div class='tooltip-title'>
-        {$hoveredRegion.region}
+        {$tooltipRegion.region}
       </div>
     {/if}
     <div class='tooltip-description'>
-      <strong>{$hoveredRegion.name}</strong>
+      <strong>{$tooltipRegion.name}</strong>
     </div>
-    {#if $hoveredValue !== null}
+    {#if $tooltipValues !== null}
       <div class='tooltip-value'>
-        <p>{$hoveredValue.indicator + ': '}<span style='color:{$hoveredValue.color}; background-color:{(checkContrast($hoveredValue.color)) ? 'white' : '#5e5e5f'}; padding:4px; border-radius:3px'>{$hoveredValue.value}</span></p>
+        <p>{$tooltipValues.indicator + ': '}<span style='color:{$tooltipValues.color}; background-color:{(checkContrast($tooltipValues.color)) ? 'white' : '#5e5e5f'}; padding:4px; border-radius:3px'>{$tooltipValues.value}</span></p>
       </div>
     {/if}
   </div>

@@ -1,14 +1,15 @@
 <script>
 
-  import { gemeenteData, hoveredValue, currentView, gemeenteSelection, buurtSelection, hoveredRegion, buurtenInGemeente, buurtCode, buurtNaam, URLParams } from "$lib/stores";
+  import { alleGemeentesJSONData, huidigeCodeAfkorting, huidigeNaamAfkorting, tooltipValues, huidigOverzichtsniveau, gemeenteSelection, buurtSelection, tooltipRegion, buurtenInGemeenteJSONData, buurtCodeAfkorting, buurtNaamAfkorting, URLParams, gemeenteNaamAfkorting } from "$lib/stores";
   import { extent, scaleLinear, scaleLog, select, selectAll } from "d3";
   import XAxis from '$lib/components/XAxis.svelte';
   import { forceSimulation, forceY, forceX, forceCollide, forceManyBody } from "d3-force";
+  import { getClassName } from '$lib/noncomponents/getClassName';
 
   export let w;
   export let h;
   export let indicator;
-  export let color;
+  export let indicatorValueColor;
   export let nodesData
 
   // filter out null values
@@ -21,7 +22,7 @@
 
   $: xScale = (indicator.titel !== 'Groen per inwoner')
     ? scaleLinear()
-        .domain(extent($buurtenInGemeente.features, d => +d.properties[indicator.attribute]))
+        .domain(extent($buurtenInGemeenteJSONData.features, d => +d.properties[indicator.attribute]))
         .range([0, w-margin.left-margin.right])
         .nice()
     : scaleLog()
@@ -53,65 +54,63 @@
       .restart(); // Restart the simulation
   }
 
-  $: classNameVariable = ($currentView === 'Nederland') ? 'GM_CODE' : $buurtCode
-  $: regionVariable = ($currentView === 'Nederland') ? 'GM_NAAM' : $buurtNaam
-
   function mouseOver(feature){
-    if(feature.properties[$buurtCode] !== $buurtSelection){
+    if(feature.properties[$buurtCodeAfkorting] !== $buurtSelection){
 
-      select('.' + getClassName(feature))
+      select('.' + getClassName(feature, 'node', $huidigeCodeAfkorting, indicator, ''))
         .attr('stroke', 'white')
         .attr('r', RADIUS+3)
         .style('filter', 'drop-shadow(0 0 5px #36575A)')
         .raise()
       
-      select('.' + getClassName(feature).replace('node', 'path'))
+      select('.' + getClassName(feature, 'path', $huidigeCodeAfkorting, indicator, ''))
         .attr('stroke-width', 2)
         .style('filter', 'drop-shadow(0 0 5px #36575A)')
     }
 
-    hoveredValue.set({
+    tooltipValues.set({
       indicator: indicator.titel, 
       value: Math.round(feature.properties[indicator.attribute]*100)/100, 
-      color: color(feature.properties[indicator.attribute])
+      color: indicatorValueColor(feature.properties[indicator.attribute])
     })
 
     let elem = document.getElementsByClassName('beeswarm_' + indicator.attribute)[0]
     let rectmap = elem.getBoundingClientRect();
     let tooltipCenter = [feature.x + rectmap.left + margin.left, rectmap.top + margin.top + feature.y + 10]
  
-    hoveredRegion.set({
+    // @ts-ignore
+    tooltipRegion.set({
       'region': ($gemeenteSelection === null) ? 'Gemeente' : 'Buurt',
       'center': tooltipCenter,
-      'name': feature.properties[regionVariable]
+      'name': feature.properties[$huidigeNaamAfkorting]
     })
   }
 
   function mouseOut(feature){
-    if(feature.properties[$buurtCode] !== $buurtSelection){
+    if(feature.properties[$buurtCodeAfkorting] !== $buurtSelection){
 
-      select('.' + getClassName(feature))
+      select('.' + getClassName(feature, 'node', $huidigeCodeAfkorting, indicator, ''))
         .attr('stroke', 'none')
         .attr('r', RADIUS)
         .style('filter', 'none')
         .lower()
 
-      select('.' + getClassName(feature).replace('node', 'path'))
+      select('.' + getClassName(feature, 'node', $huidigeCodeAfkorting, indicator, '').replace('node', 'path'))
         .attr('stroke-width', 0.5)
         .style('filter', 'none')
     }
 
-    hoveredValue.set(null)
-    hoveredRegion.set(null)
+    tooltipValues.set(null)
+    tooltipRegion.set(null)
   }
 
   function click(feature){
     mouseOut(feature)
-    selectAll('.svgelements_' + feature.properties[$buurtCode])
+    selectAll('.svgelements_' + feature.properties[$buurtCodeAfkorting])
       .raise()
 
     const newSelection = feature.properties[classNameVariable].replaceAll(' ','').replaceAll('(','').replaceAll(')','')
-    if($currentView === 'Nederland'){
+    if($huidigOverzichtsniveau === 'Nederland'){
       $URLParams.set('gemeente', newSelection);
       window.history.pushState(null, '', '?' + $URLParams.toString());
 
@@ -124,11 +123,6 @@
     }
   }
 
-  function getClassName(feature){
-    let className = feature.properties[classNameVariable] + "_node_" + indicator.attribute
-    return className.replaceAll(' ','').replaceAll('(','').replaceAll(')','')
-  }
-
 </script>
 
 <svg class={'beeswarm_' + indicator.attribute}>
@@ -139,17 +133,17 @@
 
   <g class="inner-chart" transform="translate({margin.left}, {margin.top})">
     {#each nodes as node (node.id + indicator.attribute)}
-      <circle class={getClassName(node) + ' ' + 'svgelements_' + node.properties[$buurtCode]}
-      stroke={(node.properties[$buurtCode] === $buurtSelection) ? '#E1575A' : 'none'}
-      style='filter: {(node.properties[$buurtCode] === $buurtSelection) ? 'drop-shadow(0 0 5px #36575A)' : 'none'}'
-      cx={node.x} cy={node.y} r={(node.properties[$buurtCode] === $buurtSelection) ? RADIUS+3 : RADIUS} fill={color(+node.properties[indicator.attribute])} stroke-width='3'
+      <circle class={getClassName(node, 'node', $huidigeCodeAfkorting, indicator, '') + ' ' + 'svgelements_' + node.properties[$buurtCodeAfkorting]}
+      stroke={(node.properties[$buurtCodeAfkorting] === $buurtSelection) ? '#E1575A' : 'none'}
+      style='filter: {(node.properties[$buurtCodeAfkorting] === $buurtSelection) ? 'drop-shadow(0 0 5px #36575A)' : 'none'}'
+      cx={node.x} cy={node.y} r={(node.properties[$buurtCodeAfkorting] === $buurtSelection) ? RADIUS+3 : RADIUS} fill={indicatorValueColor(+node.properties[indicator.attribute])} stroke-width='3'
       on:mouseover={() => mouseOver(node)}
       on:mouseout={() => mouseOut(node)}
       on:click={() => click(node)}
       />
     {/each}
   </g>
-  <text x={w/2} y={h-18} fill='#645F5E' text-anchor='middle' font-size='14'>{indicator.plottitel} per buurt in gemeente {$gemeenteData.features.filter(gemeente => gemeente.properties['GM_CODE'] === $gemeenteSelection)[0].properties['GM_NAAM']}</text>
+  <text x={w/2} y={h-18} fill='#645F5E' text-anchor='middle' font-size='14'>{indicator.plottitel} per buurt in gemeente {$alleGemeentesJSONData.features.filter(gemeente => gemeente.properties['GM_CODE'] === $gemeenteSelection)[0].properties[$gemeenteNaamAfkorting]}</text>
 </svg>
 
 

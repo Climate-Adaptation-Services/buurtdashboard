@@ -1,6 +1,6 @@
 <script>
 
-  export let color
+  export let indicatorValueColor
   export let w;
   export let indicator
 
@@ -21,7 +21,7 @@
     <div class='legend-element' style='width:{legendElementWidth}px'>
       <svg>
         <g>
-          <rect x={0} y={0} width={12} height={12} fill={color(klasse)}></rect>
+          <rect x={0} y={0} width={12} height={12} fill={indicatorValueColor(klasse)}></rect>
           <text style='fill:#645F5E' dx='20px' dy='0.74em'>{klasse}</text>
         </g>
       </svg>
