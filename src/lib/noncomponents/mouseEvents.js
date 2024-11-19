@@ -5,6 +5,7 @@ import { select, selectAll } from 'd3';
 import { getClassByIndicatorValue } from './getClassByIndicatorValue';
 import { mostCommonClass } from './mostCommonClass';
 import center from '@turf/center'
+import { t } from '$lib/i18n/translate.js';
 
 export function mouseOver(e, feature, indicator, mapType, indicatorValueColor, projection){
   const shapeClassName = getClassName(feature, 'path', indicator, mapType)
@@ -28,42 +29,62 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColor, p
         .raise()
     }
 
-    const hoverColor = (indicator.numerical) 
-      ? (feature.properties[indicator.attribute])
-        ? indicatorValueColor(feature.properties[indicator.attribute]) 
-        : '#000000'
-      : (indicator.multiline)
-        ? indicatorValueColor(mostCommonClass(feature))
-        : indicatorValueColor(getClassByIndicatorValue(indicator, feature.properties[indicator.attribute]))
-    
-    const hoverValue = (indicator.numerical)
-      // check of dit iets is
-      ? (/\d/.test(feature.properties[indicator.attribute]))
-        ? Math.round(+feature.properties[indicator.attribute]*100)/100
-        : 'Geen data'
-      : (indicator.multiline)
-        ? mostCommonClass(feature)
-        : getClassByIndicatorValue(+feature.properties[indicator.attribute])
-    
-    tooltipValues.set({
-      indicator: indicator.titel, 
-      value: hoverValue, 
-      color: hoverColor
-    })
-  }
+    if(mapType !== ''){
+      const tooltipValueColor = (indicator.numerical) 
+        ? (feature.properties[indicator.attribute])
+          ? indicatorValueColor(feature.properties[indicator.attribute]) 
+          : '#000000'
+        : (indicator.multiline)
+          ? indicatorValueColor(mostCommonClass(indicator, feature))
+          : indicatorValueColor(getClassByIndicatorValue(indicator, indicator, feature.properties[indicator.attribute]))
+      
+      const tooltipValue = (indicator.numerical)
+        // check of dit iets is
+        ? (/\d/.test(feature.properties[indicator.attribute]))
+          ? Math.round(+feature.properties[indicator.attribute]*100)/100
+          : 'Geen data'
+        : (indicator.multiline)
+          ? mostCommonClass(indicator, feature)
+          : getClassByIndicatorValue(indicator, +feature.properties[indicator.attribute])
+      
+      // @ts-ignore
+      tooltipValues.set({
+        indicator: indicator.titel, 
+        value: tooltipValue, 
+        color: tooltipValueColor
+      })
+      
+      const mapElement = (mapType === 'main map') ? document.getElementsByClassName("main-map")[0] : document.getElementsByClassName("indicator-map-" + indicator.attribute)[0]
+      const rectmap = mapElement.getBoundingClientRect();
+      const featureCenter = projection(center(feature).geometry.coordinates)
+      const tooltipCenter = [featureCenter[0] + rectmap.left, featureCenter[1] + rectmap.top]
+      
+      // @ts-ignore
+      tooltipRegion.set({
+        'region': (get(gemeenteSelection) === null) ? t('Gemeente') : t('Buurt'),
+        'center': tooltipCenter,
+        'name': feature.properties[get(huidigeNaamAfkorting)]
+      })
+    }else{
+      // @ts-ignore
+      tooltipValues.set({
+        indicator: indicator.titel, 
+        value: Math.round(feature.properties[indicator.attribute]*100)/100, 
+        color: indicatorValueColor(feature.properties[indicator.attribute])
+      })
 
-  const mapElement = (mapType === 'main map') ? document.getElementsByClassName("main-map")[0] : document.getElementsByClassName("indicator-map-" + indicator.attribute)[0]
-  const rectmap = mapElement.getBoundingClientRect();
-  const featureCenter = projection(center(feature).geometry.coordinates)
-  const tooltipCenter = [featureCenter[0] + rectmap.left, featureCenter[1] + rectmap.top]
-  
-  // @ts-ignore
-  tooltipRegion.set({
-    'region': (get(gemeenteSelection) === null) ? t('Gemeente') : t('Buurt'),
-    'center': tooltipCenter,
-    'name': feature.properties[get(huidigeNaamAfkorting)]
-  })
-  
+      let elem = document.getElementsByClassName('beeswarm_' + indicator.attribute)[0]
+      let rectmap = elem.getBoundingClientRect();
+      let tooltipCenter = [feature.x + rectmap.left + margin.left, rectmap.top + margin.top + feature.y + 10]
+   
+      // @ts-ignore
+      tooltipRegion.set({
+        'region': ($gemeenteSelection === null) ? 'Gemeente' : 'Buurt',
+        'center': tooltipCenter,
+        'name': feature.properties[$huidigeNaamAfkorting]
+      })
+    } 
+  }
 }
 
 export function mouseOut(feature, indicator, mapType){
@@ -94,11 +115,9 @@ export function mouseOut(feature, indicator, mapType){
   tooltipRegion.set(null)
 }
 
+export function click(feature, indicator, mapType){
 
-
-export function click(feature){
-
-  mouseOut(feature)
+  mouseOut(feature, indicator, mapType)
   selectAll('.svgelements_' + feature.properties[get(buurtCodeAfkorting)])
     .raise()
 

@@ -7,9 +7,9 @@
   import BarPlot from "./BarPlot.svelte";
   import BarPlotMulti from "./BarPlotMulti.svelte";
   import BarPlotLegend from "./BarPlotLegend.svelte";
-  import { afterUpdate, onMount } from "svelte";
-  // import { _ } from 'svelte-i18n'
+  import { afterUpdate } from "svelte";
   import { t } from '$lib/i18n/translate.js';
+  import { getClassByIndicatorValue } from "$lib/noncomponents/getClassByIndicatorValue";
 
 
   export let h
@@ -20,17 +20,6 @@
 
   let indicatorValueColor = null
   let rangeExtent = [0,1]
-
-  function getClassByIndicatorValue(value){
-    if(value === null){return t("Geen_data")}
-    let kl = ''
-    Object.keys(indicator.klassen).reverse().forEach(klasse => {
-      if(value < indicator.klassen[klasse]){
-        kl = klasse;
-      }
-    });
-    return kl;
-  }
 
   $: {
     if(indicator.numerical){

@@ -5,6 +5,7 @@
   import { t } from '$lib/i18n/translate.js';
   import { getClassName } from '$lib/noncomponents/getClassName';
   import { click, mouseOver, mouseOut } from '$lib/noncomponents/mouseEvents';
+  import { mostCommonClass } from "$lib/noncomponents/mostCommonClass";
 
   export let JSONdata
   export let mapWidth
@@ -34,7 +35,7 @@
     <!-- svelte-ignore a11y-mouse-events-have-key-events -->
     <path
       d={path(feature)}
-      class={getClassName(feature, 'path', $huidigeCodeAfkorting, indicator, mapType) + ' ' + 'svgelements_' + feature.properties[$buurtCodeAfkorting]}
+      class={getClassName(feature, 'path', indicator, mapType) + ' ' + 'svgelements_' + feature.properties[$buurtCodeAfkorting]}
       fill={
         (mapType === 'main map') 
         ? (feature.properties[$buurtCodeAfkorting] === $buurtSelection)
@@ -46,8 +47,8 @@
             ? indicatorValueColor(feature.properties[indicator.attribute])
             : '#000000'
           : (indicator.multiline)
-            ? indicatorValueColor(mostCommonClass(feature))
-            : indicatorValueColor(getClassByIndicatorValue(feature.properties[indicator.attribute]))
+            ? indicatorValueColor(mostCommonClass(indicator, feature))
+            : indicatorValueColor(getClassByIndicatorValue(indicator, indicator, feature.properties[indicator.attribute]))
       }
       stroke={(mapType === 'main map') 
         ? "grey" 
@@ -58,7 +59,7 @@
       cursor='pointer'
       on:mouseover={(e) => mouseOver(e, feature, indicator, mapType, indicatorValueColor, projection)}
       on:mouseout={() => mouseOut(feature, indicator, mapType)}
-      on:click={() => click(feature)}
+      on:click={() => click(feature, indicator, mapType)}
       />
   {/each}
   {#if indicator && indicator.multiline === true}

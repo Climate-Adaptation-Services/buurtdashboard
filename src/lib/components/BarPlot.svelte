@@ -22,7 +22,7 @@
       klassenTotal.push({klasseNaam: Object.keys(indicator.klassen)[i], waarde:0})
     }
     data.features.forEach(buurtOfGemeente => {
-      klassenTotal.filter(kl => kl.klasseNaam === getClassByIndicatorValue(buurtOfGemeente.properties[indicator.attribute]))[0].waarde += 1
+      klassenTotal.filter(kl => kl.klasseNaam === getClassByIndicatorValue(indicator, buurtOfGemeente.properties[indicator.attribute]))[0].waarde += 1
       totalAmount += 1
     });
 
