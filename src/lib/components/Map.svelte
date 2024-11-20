@@ -1,21 +1,21 @@
 <script>
-  import { huidigeJSONData, huidigeCodeAfkorting, huidigeNaamAfkorting, gemeenteSelection, huidigOverzichtsniveau, gemeenteCodeAfkorting, buurtSelection, tooltipRegion, tooltipValues, buurtCodeAfkorting, mousePosition, buurtNaamAfkorting, gemeenteNaamAfkorting, URLParams, circleRadius } from "$lib/stores";
-  import { geoMercator, geoPath, select, selectAll } from 'd3';
-  import { loadJSONData } from "$lib/noncomponents/loadMapData.js";
+  import { huidigeJSONData, buurtSelection, buurtCodeAfkorting } from "$lib/stores";
+  import { geoMercator, geoPath, select } from 'd3';
+  import { prepareJSONData } from "$lib/noncomponents/prepareJSONData.js";
   import { t } from '$lib/i18n/translate.js';
   import { getClassName } from '$lib/noncomponents/getClassName';
-  import { click, mouseOver, mouseOut } from '$lib/noncomponents/mouseEvents';
+  import { click, mouseOver, mouseOut } from '$lib/noncomponents/majorMouseEvents';
   import { mostCommonClass } from "$lib/noncomponents/mostCommonClass";
 
   export let JSONdata
   export let mapWidth
   export let mapHeight
   export let mapType
-  export let indicatorValueColor
+  export let indicatorValueColorscale
   export let indicator
   export let getClassByIndicatorValue
 
-  if(mapType === 'main map'){loadJSONData(JSONdata)}
+  if(mapType === 'main map'){prepareJSONData(JSONdata)}
 
   $: projection = geoMercator().fitExtent([[10,10],[mapWidth-10,mapHeight-20]], $huidigeJSONData)
   $: path = geoPath(projection);
@@ -44,11 +44,11 @@
         : (indicator.numerical) 
           // check if value not null 
           ? (feature.properties[indicator.attribute] !== null)
-            ? indicatorValueColor(feature.properties[indicator.attribute])
+            ? indicatorValueColorscale(feature.properties[indicator.attribute])
             : '#000000'
           : (indicator.multiline)
-            ? indicatorValueColor(mostCommonClass(indicator, feature))
-            : indicatorValueColor(getClassByIndicatorValue(indicator, indicator, feature.properties[indicator.attribute]))
+            ? indicatorValueColorscale(mostCommonClass(indicator, feature))
+            : indicatorValueColorscale(getClassByIndicatorValue(indicator, indicator, feature.properties[indicator.attribute]))
       }
       stroke={(mapType === 'main map') 
         ? "grey" 
@@ -57,7 +57,7 @@
       style='filter:{(feature.properties[$buurtCodeAfkorting] === $buurtSelection) ? 'drop-shadow(0 0 15px black)' : 'none'}'
       stroke-width={(mapType === 'main map') ? "1" : (feature.properties[$buurtCodeAfkorting] === $buurtSelection) ? '3' : '0.5'}
       cursor='pointer'
-      on:mouseover={(e) => mouseOver(e, feature, indicator, mapType, indicatorValueColor, projection)}
+      on:mouseover={(e) => mouseOver(e, feature, indicator, mapType, indicatorValueColorscale, projection)}
       on:mouseout={() => mouseOut(feature, indicator, mapType)}
       on:click={() => click(feature, indicator, mapType)}
       />

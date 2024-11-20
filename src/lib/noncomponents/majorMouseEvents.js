@@ -7,7 +7,7 @@ import { mostCommonClass } from './mostCommonClass';
 import center from '@turf/center'
 import { t } from '$lib/i18n/translate.js';
 
-export function mouseOver(e, feature, indicator, mapType, indicatorValueColor, projection){
+export function mouseOver(e, feature, indicator, mapType, indicatorValueColorscale, projection){
   const shapeClassName = getClassName(feature, 'path', indicator, mapType)
   const circleClassName = getClassName(feature, 'node', indicator, mapType)
 
@@ -29,14 +29,15 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColor, p
         .raise()
     }
 
-    if(mapType !== ''){
+    let tooltipCenter
+    if(mapType === 'main map' || mapType === 'indicator map'){
       const tooltipValueColor = (indicator.numerical) 
         ? (feature.properties[indicator.attribute])
-          ? indicatorValueColor(feature.properties[indicator.attribute]) 
+          ? indicatorValueColorscale(feature.properties[indicator.attribute]) 
           : '#000000'
         : (indicator.multiline)
-          ? indicatorValueColor(mostCommonClass(indicator, feature))
-          : indicatorValueColor(getClassByIndicatorValue(indicator, indicator, feature.properties[indicator.attribute]))
+          ? indicatorValueColorscale(mostCommonClass(indicator, feature))
+          : indicatorValueColorscale(getClassByIndicatorValue(indicator, indicator, feature.properties[indicator.attribute]))
       
       const tooltipValue = (indicator.numerical)
         // check of dit iets is
@@ -53,37 +54,32 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColor, p
         value: tooltipValue, 
         color: tooltipValueColor
       })
-      
+
       const mapElement = (mapType === 'main map') ? document.getElementsByClassName("main-map")[0] : document.getElementsByClassName("indicator-map-" + indicator.attribute)[0]
       const rectmap = mapElement.getBoundingClientRect();
       const featureCenter = projection(center(feature).geometry.coordinates)
-      const tooltipCenter = [featureCenter[0] + rectmap.left, featureCenter[1] + rectmap.top]
+      tooltipCenter = [featureCenter[0] + rectmap.left, featureCenter[1] + rectmap.top]
       
-      // @ts-ignore
-      tooltipRegion.set({
-        'region': (get(gemeenteSelection) === null) ? t('Gemeente') : t('Buurt'),
-        'center': tooltipCenter,
-        'name': feature.properties[get(huidigeNaamAfkorting)]
-      })
+    // if beeswarm interaction 
     }else{
       // @ts-ignore
       tooltipValues.set({
         indicator: indicator.titel, 
         value: Math.round(feature.properties[indicator.attribute]*100)/100, 
-        color: indicatorValueColor(feature.properties[indicator.attribute])
+        color: indicatorValueColorscale(feature.properties[indicator.attribute])
       })
 
       let elem = document.getElementsByClassName('beeswarm_' + indicator.attribute)[0]
       let rectmap = elem.getBoundingClientRect();
-      let tooltipCenter = [feature.x + rectmap.left + margin.left, rectmap.top + margin.top + feature.y + 10]
-   
-      // @ts-ignore
-      tooltipRegion.set({
-        'region': ($gemeenteSelection === null) ? 'Gemeente' : 'Buurt',
-        'center': tooltipCenter,
-        'name': feature.properties[$huidigeNaamAfkorting]
-      })
+      tooltipCenter = [feature.x + rectmap.left + margin.left, rectmap.top + margin.top + feature.y + 10]
     } 
+
+    // @ts-ignore
+    tooltipRegion.set({
+      'region': (get(gemeenteSelection) === null) ? t('Gemeente') : t('Buurt'),
+      'center': tooltipCenter,
+      'name': feature.properties[get(huidigeNaamAfkorting)]
+    })
   }
 }
 

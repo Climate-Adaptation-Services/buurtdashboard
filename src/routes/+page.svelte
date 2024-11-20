@@ -85,7 +85,7 @@
       {#each getoondeIndicatoren as indicator}
         {#if indicator.attribute}
             <div class='indicator' style='height:{indicatorHeight}px'>
-              <Indicator h={indicatorHeight} {indicator}/>
+              <Indicator {indicatorHeight} {indicator}/>
           </div>
         {/if}
       {/each}

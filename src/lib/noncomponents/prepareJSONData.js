@@ -2,7 +2,7 @@ import { alleGemeentesJSONData, alleBuurtenJSONData } from "$lib/stores"
 import * as topojsonsimplify from "topojson-simplify";
 import * as topojson from "topojson-client";
 
-export function loadJSONData(JSONdata){
+export function prepareJSONData(JSONdata){
   console.log('JSONdata', JSONdata)
   let gemeenteTopojson = topojsonsimplify.presimplify(JSONdata[0])
   gemeenteTopojson = topojson.feature(gemeenteTopojson, gemeenteTopojson.objects.GemeenteGrenzen2023)

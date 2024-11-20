@@ -5,10 +5,10 @@
   import * as _ from 'lodash';
   import { t } from '$lib/i18n/translate.js';
 
-  export let w;
-  export let h;
+  export let graphWidth;
+  export let indicatorHeight;
   export let indicator;
-  export let indicatorValueColor;
+  export let indicatorValueColorscale;
 
   const margin = {bottom:0, top:30, left:30, right:30}
 
@@ -82,12 +82,12 @@
   
   $: xScale = scaleLinear()
     .domain([0, 100])
-    .range([ margin.left, w-margin.right ])
+    .range([ margin.left, graphWidth-margin.right ])
   
   const padding = 0.6
   $: yScale = scaleBand()
     .domain(groups)
-    .range([0, (h - margin.top - margin.bottom) * (barData.length/3.5) ])
+    .range([0, (indicatorHeight - margin.top - margin.bottom) * (barData.length/3.5) ])
     // .padding([padding])
     
   function getName(group){
@@ -104,7 +104,7 @@
     tooltipValues.set({
       indicator: stacked.key, 
       value: Math.round((st[1]-st[0])*100)/100 + '%', 
-      color: indicatorValueColor(stacked.key)
+      color: indicatorValueColorscale(stacked.key)
     })
 
     let elem = document.getElementsByClassName('barplot_rect' + indicator.attribute + stacked.key.replaceAll(' ', '').replaceAll('>','')  + st.data.group)[0]
@@ -140,19 +140,19 @@
 
   <g class="inner-chart-bar" transform="translate(0, {margin.top})">
     {#each stackedData as stacked, i}
-      <g class='stack' fill={indicatorValueColor(stacked.key)}>
+      <g class='stack' fill={indicatorValueColorscale(stacked.key)}>
         {#each stacked as st}
           <rect on:mouseover={() => mouseOver(st, stacked)} on:mouseout={mouseOut(st, stacked)} class={'barplot_rect' + indicator.attribute + stacked.key.replaceAll(' ', '').replaceAll('>','') + st.data.group}
             x={xScale(st[0])} y={yScale(st.data.group)} width={xScale(st[1]) - xScale(st[0])} height={yScale.bandwidth()/2} stroke-width='4'>
           </rect>
           {#if xScale(st[1]) - xScale(st[0]) > 40}
-            <text text-anchor='middle' x={xScale(st[0]) + (xScale(st[1]) - xScale(st[0]))/2} y={yScale(st.data.group)} fill={(checkContrast(indicatorValueColor(stacked.key))) ? 'white' : 'black'} dy='1.3em' font-size='14px' pointer-events='none'>{Math.round(st.data[stacked.key]*10)/10}%</text>
+            <text text-anchor='middle' x={xScale(st[0]) + (xScale(st[1]) - xScale(st[0]))/2} y={yScale(st.data.group)} fill={(checkContrast(indicatorValueColorscale(stacked.key))) ? 'white' : 'black'} dy='1.3em' font-size='14px' pointer-events='none'>{Math.round(st.data[stacked.key]*10)/10}%</text>
           {/if}
         {/each}
       </g>
     {/each}
     {#each groups as group,i}
-      <text style='fill:#645F5E' x={w/2} text-anchor='middle' y={i*yScale.bandwidth()-5}>{getName(group)}</text>
+      <text style='fill:#645F5E' x={graphWidth/2} text-anchor='middle' y={i*yScale.bandwidth()-5}>{getName(group)}</text>
     {/each}
   </g>
 </svg>
