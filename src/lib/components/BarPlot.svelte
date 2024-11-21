@@ -18,38 +18,38 @@
   const berekenPercentagesVoorElkeKlasse = (multi) ? berekenPercentagesVoorElkeKlasseMultiIndicator : berekenPercentagesVoorElkeKlasseSingleIndicator
 
   const nederlandValues = berekenPercentagesVoorElkeKlasse(indicator, $alleBuurtenJSONData, 'Nederland')
-  let barData = []
-  let groups = []
+  let barPlotData = []
+  let regios = []
 
   $: {
     if($buurtSelection !== null){
       if($geselecteerdeBuurtJSONData.properties[$wijktypeAfkorting]){
-        barData = [nederlandValues, berekenPercentagesVoorElkeKlasse(indicator, $buurtenInGemeenteJSONData, 'Gemeente'), berekenPercentagesVoorElkeKlasse(indicator, {type: 'FeatureCollection', features: [$geselecteerdeBuurtJSONData]}, 'Buurt'), berekenPercentagesVoorElkeKlasse(indicator, $wijkTypeJSONData, 'Wijktype')]
-        groups = ['Nederland', 'Gemeente', 'Buurt', 'Wijktype']
+        barPlotData = [nederlandValues, berekenPercentagesVoorElkeKlasse(indicator, $buurtenInGemeenteJSONData, 'Gemeente'), berekenPercentagesVoorElkeKlasse(indicator, {type: 'FeatureCollection', features: [$geselecteerdeBuurtJSONData]}, 'Buurt'), berekenPercentagesVoorElkeKlasse(indicator, $wijkTypeJSONData, 'Wijktype')]
+        regios = ['Nederland', 'Gemeente', 'Buurt', 'Wijktype']
       }else{
-        barData = [nederlandValues, berekenPercentagesVoorElkeKlasse(indicator, $buurtenInGemeenteJSONData, 'Gemeente'), berekenPercentagesVoorElkeKlasse(indicator, {type: 'FeatureCollection', features: [$geselecteerdeBuurtJSONData]}, 'Buurt')]
-        groups = ['Nederland', 'Gemeente', 'Buurt']
+        barPlotData = [nederlandValues, berekenPercentagesVoorElkeKlasse(indicator, $buurtenInGemeenteJSONData, 'Gemeente'), berekenPercentagesVoorElkeKlasse(indicator, {type: 'FeatureCollection', features: [$geselecteerdeBuurtJSONData]}, 'Buurt')]
+        regios = ['Nederland', 'Gemeente', 'Buurt']
       }
     }else if($gemeenteSelection !== null){
-      barData = [nederlandValues, berekenPercentagesVoorElkeKlasse(indicator, $buurtenInGemeenteJSONData, 'Gemeente')]
-      groups = ['Nederland', 'Gemeente']
+      barPlotData = [nederlandValues, berekenPercentagesVoorElkeKlasse(indicator, $buurtenInGemeenteJSONData, 'Gemeente')]
+      regios = ['Nederland', 'Gemeente']
     }else{
-      barData = [nederlandValues]
-      groups = ['Nederland']
+      barPlotData = [nederlandValues]
+      regios = ['Nederland']
     }
   }
 
   $: stackedData = stack()
     .keys(Object.keys(indicator.klassen))
-    (barData)
+    (barPlotData)
   
   $: xScale = scaleLinear()
     .domain([0, 100])
     .range([ margin.left, graphWidth-margin.right ])
   
   $: yScale = scaleBand()
-    .domain(groups)
-    .range([0, (indicatorHeight - margin.top - margin.bottom) * (barData.length/3.5) ])
+    .domain(regios)
+    .range([0, (indicatorHeight - margin.top - margin.bottom) * (barPlotData.length/3.5) ])
 
 
 </script>
@@ -70,8 +70,8 @@
         {/each}
       </g>
     {/each}
-    {#each groups as group,i}
-      <text style='fill:#645F5E' x={graphWidth/2} text-anchor='middle' y={i*yScale.bandwidth()-5}>{getRegioNaam(group)}</text>
+    {#each regios as regio,i}
+      <text style='fill:#645F5E' x={graphWidth/2} text-anchor='middle' y={i*yScale.bandwidth()-5}>{getRegioNaam(regio)}</text>
     {/each}
   </g>
 </svg>
