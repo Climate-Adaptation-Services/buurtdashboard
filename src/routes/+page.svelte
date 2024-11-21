@@ -26,7 +26,7 @@
   let getoondeIndicatoren = []
   let alleIndicatoren = []
 
-  alleIndicatoren = setupIndicators(data, t("Effecten"), t("Gebiedskenmerken"), t("Kwetsbaarheid"))
+  alleIndicatoren = setupIndicators(data, t("Effecten"), t("Gebiedskenmerken"), t("Kwetsbaarheid"))['indicatorenLijst2023']
   getoondeIndicatoren = alleIndicatoren
 
   const jsonResponse = fetchJSONdata()

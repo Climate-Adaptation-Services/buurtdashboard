@@ -8,6 +8,8 @@
 
   export let alleIndicatoren
 
+  console.log('alleIndicatoren', alleIndicatoren)
+
   const indicators = alleIndicatoren.map(d => d.titel)
 
   function handleIndicatorFilterAdd(e){
