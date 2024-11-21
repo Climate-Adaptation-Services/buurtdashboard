@@ -1,68 +1,51 @@
 <script>
-  import { gemeenteData, buurtData, buurtSelection, gemeenteCode, gemeenteSelection, buurtSelectionData, buurtCode, buurtNaam, modal, URLParams, indicatorenSelectie } from '$lib/stores';
+  import { alleGemeentesJSONData, alleBuurtenJSONData, buurtSelection, gemeenteCodeAfkorting, wijktypeAfkorting, gemeenteSelection, geselecteerdeBuurtJSONData, buurtCodeAfkorting, buurtNaamAfkorting, gemeenteNaamAfkorting, modal, URLParams, indicatorenSelectie, buurtenInGemeenteJSONData } from '$lib/stores';
   import * as lo from 'lodash'
-  import { onMount } from 'svelte';
   import OverDitDashboard from '$lib/components/OverDitDashboard.svelte';
   import { bind } from 'svelte-simple-modal';
   import IndicatorFilter from './indicatorFilter.svelte';
   import GemeenteSelect from './GemeenteSelect.svelte';
   import BuurtSelect from './BuurtSelect.svelte';
-  // import { _, locale } from 'svelte-i18n'
   import { t } from '$lib/i18n/translate.js';
 
+  export let alleIndicatoren
 
-  export let indicatorenLijst
-
-  let gemeenteList;
-  let buurtList;
-  $: if($gemeenteData !== null){
-    gemeenteList = $gemeenteData.features.map(gemeente => {return {'value':gemeente.properties[$gemeenteCode], 'label':capSelectLabelLen(gemeente.properties['GM_NAAM'])}})
-    gemeenteList = lo.orderBy(gemeenteList, [gemeente => gemeente.label], ['asc']);
+  let lijstAlleGemeentesVoorDropdown;
+  let lijstAlleBuurtenInGemeenteVoorDropdown;
+  $: if($alleGemeentesJSONData !== null){
+    lijstAlleGemeentesVoorDropdown = $alleGemeentesJSONData.features.map(gemeente => {return {'value':gemeente.properties[$gemeenteCodeAfkorting], 'label':limitDropdownLabelLength(gemeente.properties[$gemeenteNaamAfkorting])}})
+    lijstAlleGemeentesVoorDropdown = lo.orderBy(lijstAlleGemeentesVoorDropdown, [gemeente => gemeente.label], ['asc']);
   }
   $: if($gemeenteSelection !== null){
-    const buurtenFeatures = $buurtData.features.filter(buurt => buurt.properties[$gemeenteCode] === $gemeenteSelection)
-    buurtList = buurtenFeatures.map(buurt => {return {'value':buurt.properties[$buurtCode], 'label':capSelectLabelLen(buurt.properties[$buurtNaam])}})
-    buurtList = lo.orderBy(buurtList, [buurt => buurt.label], ['asc']);
+    lijstAlleBuurtenInGemeenteVoorDropdown = $buurtenInGemeenteJSONData.features.map(buurt => {return {'value':buurt.properties[$buurtCodeAfkorting], 'label':limitDropdownLabelLength(buurt.properties[$buurtNaamAfkorting])}})
+    lijstAlleBuurtenInGemeenteVoorDropdown = lo.orderBy(lijstAlleBuurtenInGemeenteVoorDropdown, [buurt => buurt.label], ['asc']);
   }
 
-  $: wijktype = ($buurtData && $buurtSelection !== null && $buurtSelectionData.properties['def_wijkty']) 
-    ? $buurtSelectionData.properties['def_wijkty']
+  $: wijktype = ($alleBuurtenJSONData && $buurtSelection !== null && $geselecteerdeBuurtJSONData.properties[$wijktypeAfkorting]) 
+    ? $geselecteerdeBuurtJSONData.properties[$wijktypeAfkorting]
     : 'Geen wijktype'
 
-  function capSelectLabelLen(label){
-    if(label.length > 31){
-      return label.slice(0,29) + '...'
-    }else{
-      return label
-    }
+  function limitDropdownLabelLength(label){
+    return (label.length > 31) ? label.slice(0,29) + '...' : label
   }
 
-  const showModal = (type) => {
+  const laatMeerInfoPanelZien = (type) => {
     modal.set(bind(OverDitDashboard, { type : type}))
   };
-
-  $: if($buurtData){readParams()}
-
-  function readParams(){    
-    setTimeout(() => {gemeenteSelection.set($URLParams.get("gemeente"))}, 10)
-    setTimeout(() => {buurtSelection.set($URLParams.get("buurt"))}, 10)
-    setTimeout(() => {indicatorenSelectie.set($URLParams.getAll("indicator"))}, 10)
-
-  }
  
 </script>
 
 
-<div class='selection'></div>
+<!-- <div class='selection'></div> -->
 
 <div class='search'>
   <div>
     <div class='download-and-about'>
-      <div class='about' on:click={() => showModal('intro')}>
+      <div class='about' on:click={() => laatMeerInfoPanelZien('intro')}>
         <img src='./about.png' width='30px'/>
         <p class='download-and-about-text'>Intro dashboard</p>
       </div>
-      <div class='about' on:click={() => showModal('graphs')}>
+      <div class='about' on:click={() => laatMeerInfoPanelZien('graphs')}>
         <img src='./chart.png' width='30px'/>
         <p class='download-and-about-text'>{t('Uitleg_grafieken')}</p>
       </div>
@@ -71,12 +54,12 @@
         <p class='download-and-about-text'>Download data</p>
       </div>
     </div>
-    <GemeenteSelect {gemeenteList} />
-    <BuurtSelect {buurtList} />
+    <GemeenteSelect {lijstAlleGemeentesVoorDropdown} />
+    <BuurtSelect {lijstAlleBuurtenInGemeenteVoorDropdown} />
     {#if $buurtSelection !== null}
         <p style='color:white'>{t("Wijktype")}: <strong>{wijktype}</strong></p>
     {/if}
-    <IndicatorFilter {indicatorenLijst} />
+    <IndicatorFilter {alleIndicatoren} />
   </div>
 </div>
 

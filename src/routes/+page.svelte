@@ -3,110 +3,89 @@
   import Indicator from '$lib/components/Indicator.svelte';
   import Map from '$lib/components/Map.svelte';
   import Tooltip from '$lib/components/Tooltip.svelte';
-  import { buurtData, buurtSelection, indicatorenSelectie, gemeenteSelection, modal, URLParams, lang, indicatorenLijst2019 } from '$lib/stores';
-  import { getIndicatorenLijst } from '$lib/noncomponents/indicatorenLijst.js'
-  import { afterUpdate, onMount } from 'svelte';
+  import { buurtSelection, indicatorenSelectie, gemeenteSelection, modal, URLParams, alleBuurtenJSONData } from '$lib/stores';
+  import { setupIndicators } from '$lib/noncomponents/setupIndicators.js'
   import Modal from 'svelte-simple-modal';
   import { t } from '$lib/i18n/translate.js';
   import { browser } from '$app/environment';
-    import LoadingIcon from '$lib/components/LoadingIcon.svelte';
-  // import { locale, isLoading } from 'svelte-i18n';
-  // import { _ } from 'svelte-i18n'
-
-
-  let screenSize = 1000
-  let wMap;
-  let hMap;
-  // let wIndicator;
-  // let hIndicator;
+  import LoadingIcon from '$lib/components/LoadingIcon.svelte';
+  import { setLanguage } from '$lib/noncomponents/setLanguage.js';
+  import { fetchJSONdata } from '$lib/noncomponents/fetchJSONdata.js';
+  import { processURLParameters } from '$lib/noncomponents/processURLParameters.js';
 
   export let data
+  console.log('data',data)
 
-  console.log(data)
-
-  if(data.lang === 'en'){
-    lang.set('en')
-  }else{
-    lang.set('nl')
-  }
-
-  let getoondeIndicatoren = []
-  let indicatorenLijst = []
-
-  // if($lang === 'en'){
-  const indicatorenLijsten = getIndicatorenLijst(data.metadata_dordrecht, t("Effecten"), t("Gebiedskenmerken"), t("Kwetsbaarheid"))
-  indicatorenLijst = indicatorenLijsten.indicatorenLijst2023
-  indicatorenLijst2019.set(indicatorenLijsten.indicatorenLijst2019)
-
-  getoondeIndicatoren = indicatorenLijst
-  // }
-  // else{
-  //   indicatorenLijst = getIndicatorenLijst(data.metadata_dordrecht, t("Effecten"), t("Gebiedskenmerken"), t("Kwetsbaarheid")).indicatorenLijst2023
-  //   getoondeIndicatoren = indicatorenLijst
-  // }
-
-  const getData = (async () => {
-		const response = await Promise.all([
-      // fetch('https://raw.githubusercontent.com/Climate-Adaptation-Services/buurtdashboard-data/main/GemeenteGrenzen2023.json'),
-      fetch('https://raw.githubusercontent.com/Climate-Adaptation-Services/buurtdashboard-data/main/GemeenteGrenzen2023-small.json'),
-      fetch('https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/Dordrecht_buurten.json')
-
-    ])
-    return [await response[0].json(), await response[1].json()]
-	})()
-
+  let screenWidth = 1000 //default value
+  let mapWidth;
+  let mapHeight;
   const indicatorHeight = 650
 
-  $: onChange($indicatorenSelectie)
+  setLanguage(data)
 
-  function onChange(indSel){
+  let getoondeIndicatoren = []
+  let alleIndicatoren = []
+
+  alleIndicatoren = setupIndicators(data, t("Effecten"), t("Gebiedskenmerken"), t("Kwetsbaarheid"))
+  getoondeIndicatoren = alleIndicatoren
+
+  const jsonResponse = fetchJSONdata()
+
+  // de URL parameters laden
+  $: if(browser){URLParams.set(new URLSearchParams(window.location.search))}
+
+  // zodra alleBuurtenJSONData geladen is, lees de url parameters
+  $: if($alleBuurtenJSONData){processURLParameters()}
+
+  $: onChangeIndicatorenSelectie($indicatorenSelectie)
+
+  function onChangeIndicatorenSelectie(_){
     getoondeIndicatoren = []
 
-    const gemTemp = $gemeenteSelection
-    const buurtTemp = $buurtSelection
+    const tempGemeenteSelection = $gemeenteSelection
+    const tempBuurtSelection = $buurtSelection
     gemeenteSelection.set(null)
     buurtSelection.set(null)
 
+    // dit is een hacky oplossing om te zorgen dat alles even leeg is, 
+    // en vervolgens de indicatorenselectie weer toevoegen
     setTimeout(() => {
       getoondeIndicatoren = ($indicatorenSelectie.length === 0) 
-        ? indicatorenLijst
-        : indicatorenLijst.filter(d => $indicatorenSelectie.includes(d['titel']))
+        ? alleIndicatoren
+        : alleIndicatoren.filter(d => $indicatorenSelectie.includes(d['titel']))
     }, 1)
     setTimeout(() => {
-      gemeenteSelection.set(gemTemp)
-      buurtSelection.set(buurtTemp)
+      gemeenteSelection.set(tempGemeenteSelection)
+      buurtSelection.set(tempBuurtSelection)
     }, 1)
   }
 
-  $: if(browser){URLParams.set(new URLSearchParams(window.location.search))}
-
 </script>
 
-<svelte:window bind:innerWidth={screenSize} />
+<svelte:window bind:innerWidth={screenWidth} />
 
 <svelte:head><link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet"></svelte:head>
 
-
-<div class='container' style='justify-content:{screenSize < 800 ? 'center' : 'left'}'>
-  <div class='sidebar' style='position:{screenSize > 800 ? "fixed" : "relative"}'>
-    <div class='control-panel'><ControlPanel {indicatorenSelectie} {indicatorenLijst} /></div>
-    <div class='map' bind:clientWidth={wMap} bind:clientHeight={hMap}>
-      {#await getData}
+<div class='container' style='justify-content:{screenWidth < 800 ? 'center' : 'left'}'>
+  <div class='sidebar' style='position:{screenWidth > 800 ? "fixed" : "relative"}'>
+    <div class='control-panel'><ControlPanel {indicatorenSelectie} {alleIndicatoren} /></div>
+    <div class='map' bind:clientWidth={mapWidth} bind:clientHeight={mapHeight}>
+      {#await jsonResponse}
         <pre style='color:white'>Kaart laden...</pre>
-      {:then res}
-        <Map datajson={res} w={wMap} h={hMap} mainMapFlag={true}/>
+      {:then response}
+        <Map JSONdata={response} {mapWidth} {mapHeight} mapType={'main map'}/>
       {/await}
     </div>
   </div>
   
-  <div class='indicators' style='margin-left:{screenSize > 800 ? 400 : 0}px'>
-    {#await getData}
+  <div class='indicators' style='margin-left:{screenWidth > 800 ? 400 : 0}px'>
+    {#await jsonResponse}
       <LoadingIcon />
     {:then res}
       {#each getoondeIndicatoren as indicator}
         {#if indicator.attribute}
             <div class='indicator' style='height:{indicatorHeight}px'>
-              <Indicator h={indicatorHeight} {indicator}/>
+              <Indicator {indicatorHeight} {indicator}/>
           </div>
         {/if}
       {/each}
@@ -150,6 +129,7 @@
     background-color: #35575A;
     color:white;
   }
+
   h1{
     margin-bottom:5px;
   }
@@ -158,6 +138,7 @@
     flex:3;
     margin-top:20px;
   }
+
   .map{
     flex:6;
   }

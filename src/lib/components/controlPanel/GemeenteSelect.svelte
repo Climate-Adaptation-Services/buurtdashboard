@@ -1,12 +1,11 @@
 <script>
     import Select from 'svelte-select'
-    // import { _ } from 'svelte-i18n'
     import { t } from '$lib/i18n/translate.js';
 
     import { URLParams, gemeenteSelection, buurtSelection } from '$lib/stores';
     import { onMount } from 'svelte';
 
-    export let gemeenteList
+    export let lijstAlleGemeentesVoorDropdown
     
     function handleGemeenteChange(e){      
       $URLParams.set('gemeente', e.detail.value);
@@ -37,6 +36,5 @@
 
 </script>
 
-
 <p class='select-title'>{t("Gemeente")}:</p>
-<Select disabled items={gemeenteList} placeholder={t("Zoek_gemeente")} value={$gemeenteSelection} on:change={handleGemeenteChange} on:clear={handleGemeenteClear}/>
+<Select items={lijstAlleGemeentesVoorDropdown} placeholder={t("Zoek_gemeente")} value={$gemeenteSelection} on:change={handleGemeenteChange} on:clear={handleGemeenteClear}/>
