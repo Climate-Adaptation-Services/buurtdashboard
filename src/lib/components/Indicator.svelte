@@ -5,7 +5,6 @@
   import { scaleLinear, extent, scaleOrdinal } from 'd3';
   import Map from "./Map.svelte";
   import BarPlot from "./BarPlot.svelte";
-  import BarPlotMulti from "./BarPlotMulti.svelte";
   import BarPlotLegend from "./BarPlotLegend.svelte";
   import { afterUpdate } from "svelte";
   import { t } from '$lib/i18n/translate.js';
