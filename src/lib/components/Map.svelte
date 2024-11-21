@@ -4,7 +4,7 @@
   import { prepareJSONData } from "$lib/noncomponents/prepareJSONData.js";
   import { t } from '$lib/i18n/translate.js';
   import { getClassName } from '$lib/noncomponents/getClassName';
-  import { click, mouseOver, mouseOut } from '$lib/noncomponents/majorMouseEvents';
+  import { click, mouseOver, mouseOut } from '$lib/noncomponents/buurtMouseEvents';
   import { mostCommonClass } from "$lib/noncomponents/mostCommonClass";
 
   export let JSONdata

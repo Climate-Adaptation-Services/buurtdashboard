@@ -5,7 +5,7 @@
   import XAxis from '$lib/components/XAxis.svelte';
   import { forceSimulation, forceY, forceX, forceCollide, forceManyBody } from "d3-force";
   import { getClassName } from '$lib/noncomponents/getClassName';
-  import { click, mouseOut, mouseOver } from "$lib/noncomponents/majorMouseEvents";
+  import { click, mouseOut, mouseOver } from "$lib/noncomponents/buurtMouseEvents";
 
   export let graphWidth;
   export let indicatorHeight;

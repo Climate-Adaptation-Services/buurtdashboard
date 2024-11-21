@@ -85,11 +85,7 @@
       </div>
     {:else}
       <div class='indicator-graph' style='height:{bodyHeight*0.6}px' bind:clientWidth={graphWidth}>
-        {#if indicator.multiline}
-          <BarPlotMulti {graphWidth} indicatorHeight={bodyHeight*0.4} {indicator} {indicatorValueColorscale} {getClassByIndicatorValue} />
-        {:else}
-          <BarPlot {graphWidth} indicatorHeight={bodyHeight*0.4} {indicator} {indicatorValueColorscale} {getClassByIndicatorValue} />
-        {/if}
+        <BarPlot {graphWidth} indicatorHeight={bodyHeight*0.4} multi={(indicator.multiline) ? true : false} {indicator} {indicatorValueColorscale} {getClassByIndicatorValue} />
         <BarPlotLegend {graphWidth} style='height:{bodyHeight*0.2}px' {indicatorValueColorscale} {indicator}/>
       </div>
     {/if}

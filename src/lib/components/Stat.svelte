@@ -1,6 +1,7 @@
 <script>
   import { gemeenteSelection, alleGemeentesJSONData, geselecteerdeBuurtJSONData, buurtNaamAfkorting, gemeenteNaamAfkorting, wijktypeAfkorting } from "$lib/stores";
   import { t } from '$lib/i18n/translate.js';
+    import { getRegioNaam } from "$lib/noncomponents/getRegioNaam";
 
   export let graphWidth;
   export let indicatorHeight;
@@ -10,13 +11,7 @@
   export let medianValue;
   export let indicatorValueColorscale;
 
-  $: regioNaam = (regio === 'Nederland')
-    ? t('Nederland')
-    : (regio === 'Gemeente')
-      ? t("Gemeente") + ' ' + $alleGemeentesJSONData.features.filter(gemeente => gemeente.properties['GM_CODE'] === $gemeenteSelection)[0].properties[$gemeenteNaamAfkorting]
-      : (regio === 'Buurt')
-        ? t('Buurt') + ' ' + $geselecteerdeBuurtJSONData.properties[$buurtNaamAfkorting]
-        : t('Wijktype') + ' ' + $geselecteerdeBuurtJSONData.properties[$wijktypeAfkorting]
+  $: regioNaam = getRegioNaam(regio)
   
   $: if(regioNaam && regioNaam.length > 25){
     regioNaam = regioNaam.slice(0, 23) + '...'

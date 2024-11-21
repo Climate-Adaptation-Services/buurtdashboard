@@ -1,9 +1,11 @@
-<script>
+<!-- <script>
   import { checkContrast } from "$lib/noncomponents/checkContrast";
   import { wijkTypeJSONData, wijktypeAfkorting, alleBuurtenJSONData, gemeenteSelection, buurtenInGemeenteJSONData, buurtSelection, gemeenteNaamAfkorting, alleGemeentesJSONData, geselecteerdeBuurtJSONData, tooltipRegion, tooltipValues, buurtNaamAfkorting } from "$lib/stores";
   import { scaleLinear, select, scaleBand, stack } from "d3";
   import * as _ from 'lodash';
   import { t } from '$lib/i18n/translate.js';
+  import { getRegioNaam } from "$lib/noncomponents/getRegioNaam";
+  import { barPlotMouseOut, barPlotMouseOver } from "$lib/noncomponents/barPlotMouseEvents";
 
   export let graphWidth;
   export let indicatorHeight;
@@ -12,126 +14,44 @@
 
   const margin = {bottom:0, top:30, left:30, right:30}
 
-  function getPercentages(data, regio){
-    let totalOpp = 0
-    let klassenTotal = []
+  
 
-    for(let i=0;i<Object.keys(indicator.klassen).length;i++){
-      klassenTotal.push({klasseNaam: Object.keys(indicator.klassen)[i], waarde:0})
-    }
-    data.features.forEach(buurt => {
-      let buurtOpp = (indicator.titel === 'Functionele gebieden')
-        ? buurt.properties['buurt_opp_incl_agrarisch']
-        : buurt.properties['buurt_opp_zonderagr']
-
-      totalOpp += buurtOpp
-
-      // zorg ervoor dat groen/grijs openbaar optelt tot 100%, en niet maar tot % openbaar
-      // if(indicator.titel === 'Groen en grijs openbare ruimte'){totalOpp -= buurtOpp * ((100 - buurt.properties['Openbaar'])/100)}
-      
-      // Geen data categorie eruit, rest tot 100%
-      if(indicator.titel === t('Gevoelstemperatuur')){totalOpp -= buurtOpp * buurt.properties['NDPETperc']}
-      
-      Object.keys(indicator.klassen).forEach(kl => {
-        // is dit goed zo of moeten we anders met no data (NaN) omgaan
-        if(buurt.properties[indicator.klassen[kl]] && !isNaN(parseFloat(buurt.properties[indicator.klassen[kl]]))){
-          klassenTotal.filter(kl2 => kl2.klasseNaam === kl)[0].waarde += buurtOpp * +buurt.properties[indicator.klassen[kl]]
-        }
-      });
-
-    });
-
-    klassenTotal.forEach(kl => {
-      kl.waarde = (kl.waarde/totalOpp)
-      if(indicator.titel === t('Gevoelstemperatuur')){kl.waarde *= 100}
-    })
-
-    let result = {'group':regio}
-    Object.keys(indicator.klassen).forEach(klasse => {
-      result[klasse] = klassenTotal.filter(kl => kl.klasseNaam === klasse)[0].waarde
-    });  
-
-    return result
-  }
-
-  const nederlandValues = getPercentages($alleBuurtenJSONData, 'Nederland')
-  let barData = []
-  let groups = []
+  const nederlandValues = berekenPercentagesVoorElkeKlasse($alleBuurtenJSONData, 'Nederland')
+  let barPlotData = []
+  let regios = []
 
   $: {
     if($buurtSelection !== null){
       if($geselecteerdeBuurtJSONData.properties[$wijktypeAfkorting]){
-        barData = [nederlandValues, getPercentages($buurtenInGemeenteJSONData, 'Gemeente'), getPercentages({type: 'FeatureCollection', features: [$geselecteerdeBuurtJSONData]}, 'Buurt'), getPercentages($wijkTypeJSONData, 'Wijktype')]
-        groups = ['Nederland', 'Gemeente', 'Buurt', 'Wijktype']
+        barPlotData = [nederlandValues, berekenPercentagesVoorElkeKlasse($buurtenInGemeenteJSONData, 'Gemeente'), berekenPercentagesVoorElkeKlasse({type: 'FeatureCollection', features: [$geselecteerdeBuurtJSONData]}, 'Buurt'), berekenPercentagesVoorElkeKlasse($wijkTypeJSONData, 'Wijktype')]
+        regios = ['Nederland', 'Gemeente', 'Buurt', 'Wijktype']
       }else{
-        barData = [nederlandValues, getPercentages($buurtenInGemeenteJSONData, 'Gemeente'), getPercentages({type: 'FeatureCollection', features: [$geselecteerdeBuurtJSONData]}, 'Buurt')]
-        groups = ['Nederland', 'Gemeente', 'Buurt']
+        barPlotData = [nederlandValues, berekenPercentagesVoorElkeKlasse($buurtenInGemeenteJSONData, 'Gemeente'), berekenPercentagesVoorElkeKlasse({type: 'FeatureCollection', features: [$geselecteerdeBuurtJSONData]}, 'Buurt')]
+        regios = ['Nederland', 'Gemeente', 'Buurt']
       }
     }else if($gemeenteSelection !== null){
-      barData = [nederlandValues, getPercentages($buurtenInGemeenteJSONData, 'Gemeente')]
-      groups = ['Nederland', 'Gemeente']
+      barPlotData = [nederlandValues, berekenPercentagesVoorElkeKlasse($buurtenInGemeenteJSONData, 'Gemeente')]
+      regios = ['Nederland', 'Gemeente']
     }else{
-      barData = [nederlandValues]
-      groups = ['Nederland']
+      barPlotData = [nederlandValues]
+      regios = ['Nederland']
     }
   }
 
   $: stackedData = stack()
     .keys(Object.keys(indicator.klassen))
-    (barData)
+    (barPlotData)
   
   $: xScale = scaleLinear()
     .domain([0, 100])
     .range([ margin.left, graphWidth-margin.right ])
   
-  const padding = 0.6
   $: yScale = scaleBand()
-    .domain(groups)
-    .range([0, (indicatorHeight - margin.top - margin.bottom) * (barData.length/3.5) ])
-    // .padding([padding])
-    
-  function getName(group){
-    return (group === 'Nederland')
-    ? t('Nederland')
-    : (group === 'Gemeente')
-      ? t("Gemeente") + ' ' + $alleGemeentesJSONData.features.filter(gemeente => gemeente.properties['GM_CODE'] === $gemeenteSelection)[0].properties[$gemeenteNaamAfkorting]
-      : (group === 'Buurt')
-        ? t('Buurt') + ' ' + $geselecteerdeBuurtJSONData.properties[$buurtNaamAfkorting]
-        : t('Wijktype') + ' ' + $geselecteerdeBuurtJSONData.properties[$wijktypeAfkorting]
-  }
+    .domain(regios)
+    .range([0, (indicatorHeight - margin.top - margin.bottom) * (barPlotData.length/3.5) ])    
 
-  function mouseOver(st, stacked){
-    tooltipValues.set({
-      indicator: stacked.key, 
-      value: Math.round((st[1]-st[0])*100)/100 + '%', 
-      color: indicatorValueColorscale(stacked.key)
-    })
 
-    let elem = document.getElementsByClassName('barplot_rect' + indicator.attribute + stacked.key.replaceAll(' ', '').replaceAll('>','')  + st.data.group)[0]
-    let rectmap = elem.getBoundingClientRect();
-    let tooltipCenter = [rectmap.left, rectmap.top]
-    
-    tooltipRegion.set({
-      'region': ($gemeenteSelection === null) ? 'Gemeente' : 'Buurt',
-      'center': tooltipCenter,
-      'name': (st.data.group === 'Nederland') 
-        ? 'Nederland'
-        : (st.data.group === 'Gemeente') 
-          ? 'Gemeente ' + $alleGemeentesJSONData.features.filter(gem => gem.properties['GM_CODE'] === $gemeenteSelection)[0].properties[$gemeenteNaamAfkorting]
-          : (st.data.group === 'Wijktype') 
-            ? 'Wijktype ' + $geselecteerdeBuurtJSONData.properties[$wijktypeAfkorting]
-            : 'De buurt ' + $geselecteerdeBuurtJSONData.properties[$buurtNaamAfkorting]
-    })
-  }
 
-  function mouseOut(st, stacked){
-    select('.' + 'barplot_rect' + indicator.attribute + stacked.key.replaceAll(' ', '').replaceAll('>','')  + st.data.group)
-      .attr('stroke', 'none')
-          
-    tooltipValues.set(null)
-
-    tooltipRegion.set(null)
-  }
 
 </script>
 
@@ -142,7 +62,7 @@
     {#each stackedData as stacked, i}
       <g class='stack' fill={indicatorValueColorscale(stacked.key)}>
         {#each stacked as st}
-          <rect on:mouseover={() => mouseOver(st, stacked)} on:mouseout={mouseOut(st, stacked)} class={'barplot_rect' + indicator.attribute + stacked.key.replaceAll(' ', '').replaceAll('>','') + st.data.group}
+          <rect on:mouseover={() => barPlotMouseOver(indicator, st, stacked)} on:mouseout={barPlotMouseOut(indicator, st, stacked)} class={'barplot_rect' + indicator.attribute + stacked.key.replaceAll(' ', '').replaceAll('>','') + st.data.group}
             x={xScale(st[0])} y={yScale(st.data.group)} width={xScale(st[1]) - xScale(st[0])} height={yScale.bandwidth()/2} stroke-width='4'>
           </rect>
           {#if xScale(st[1]) - xScale(st[0]) > 40}
@@ -151,8 +71,8 @@
         {/each}
       </g>
     {/each}
-    {#each groups as group,i}
-      <text style='fill:#645F5E' x={graphWidth/2} text-anchor='middle' y={i*yScale.bandwidth()-5}>{getName(group)}</text>
+    {#each regios as regio,i}
+      <text style='fill:#645F5E' x={graphWidth/2} text-anchor='middle' y={i*yScale.bandwidth()-5}>{getRegioNaam(regio)}</text>
     {/each}
   </g>
 </svg>
@@ -169,4 +89,4 @@
     transition: all 2s;
   }
 
-</style>
+</style> -->
