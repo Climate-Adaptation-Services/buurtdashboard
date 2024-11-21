@@ -11,7 +11,7 @@
   import LoadingIcon from '$lib/components/LoadingIcon.svelte';
   import { setLanguage } from '$lib/noncomponents/setLanguage.js';
   import { fetchJSONdata } from '$lib/noncomponents/fetchJSONdata.js';
-  import { readURLParameters } from '$lib/noncomponents/readURLParameters.js';
+  import { processURLParameters } from '$lib/noncomponents/processURLParameters.js';
 
   export let data
   console.log('data',data)
@@ -35,7 +35,7 @@
   $: if(browser){URLParams.set(new URLSearchParams(window.location.search))}
 
   // zodra alleBuurtenJSONData geladen is, lees de url parameters
-  $: if($alleBuurtenJSONData){readURLParameters()}
+  $: if($alleBuurtenJSONData){processURLParameters()}
 
   $: onChangeIndicatorenSelectie($indicatorenSelectie)
 
