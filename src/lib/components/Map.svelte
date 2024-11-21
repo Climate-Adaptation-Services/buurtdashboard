@@ -1,208 +1,69 @@
 <script>
-  import center from '@turf/center'
-  import { currentData, gemeenteSelection, currentView, buurtSelection, hoveredRegion, hoveredValue, buurtCode, mousePosition, buurtNaam, buurtenInGemeente, URLParams } from "$lib/stores";
-  import { geoMercator, geoPath, select, selectAll } from 'd3';
-  import { loadMapData } from "$lib/noncomponents/loadMapData.js";
+  import { huidigeJSONData, buurtSelection, buurtCodeAfkorting } from "$lib/stores";
+  import { geoMercator, geoPath, select } from 'd3';
+  import { prepareJSONData } from "$lib/noncomponents/prepareJSONData.js";
   import { t } from '$lib/i18n/translate.js';
+  import { getClassName } from '$lib/noncomponents/getClassName';
+  import { click, mouseOver, mouseOut } from '$lib/noncomponents/buurtMouseEvents';
+  import { mostCommonClass } from "$lib/noncomponents/mostCommonClass";
 
-  export let datajson
-  export let w
-  export let h
-  export let mainMapFlag
-  export let color
+  export let JSONdata
+  export let mapWidth
+  export let mapHeight
+  export let mapType
+  export let indicatorValueColorscale
   export let indicator
-  export let getClass
+  export let getClassByIndicatorValue
 
-  if(mainMapFlag){loadMapData(datajson)}
+  if(mapType === 'main map'){prepareJSONData(JSONdata)}
 
-  $: classNameVariable = ($currentView === 'Nederland') ? 'GM_CODE' : $buurtCode
-  $: regionVariable = ($currentView === 'Nederland') ? 'GM_NAAM' : $buurtNaam
-  
-  $: projection = geoMercator()
-    .fitExtent([[10,10],[w-10,h-20]], $currentData)
-  
+  $: projection = geoMercator().fitExtent([[10,10],[mapWidth-10,mapHeight-20]], $huidigeJSONData)
   $: path = geoPath(projection);
 
+  function multilineMapInfo(){select('.tooltip-multi' + indicator.attribute).style('visibility', 'visible')}
 
-  function mouseOver(e, feature){
-    if(mainMapFlag){
-      if(feature.properties[classNameVariable] !== $buurtSelection){
-
-        select('.' + getClassName(feature))
-          .attr('fill', '#36575A')
-        mousePosition.set(window.innerHeight - e.screenY)
-      }
-    }else{
-      select('.' + getClassName(feature))
-        .attr('stroke-width', 3)
-        .style('filter', 'drop-shadow(0 0 15px black)')
-        .raise()
-      if(indicator.numerical === true){
-        const RADIUS = ($buurtenInGemeente.features.length > 150) ? 3 : 5
-
-        select('.' + getClassName(feature).replace('path', 'node'))
-        .attr('stroke', 'white')
-        .attr('r', RADIUS + 3)
-        .style('filter', 'drop-shadow(0 0 5px black)')
-        .raise()
-      }
-
-      const hoverColor = (indicator.numerical) 
-        ? (feature.properties[indicator.attribute])
-          ? color(feature.properties[indicator.attribute]) 
-          : '#000000'
-        : (indicator.multiline)
-          ? color(mostCommonClass(feature))
-          : color(getClass(feature.properties[indicator.attribute]))
-      
-      const hoverValue = (indicator.numerical)
-        ? (/\d/.test(feature.properties[indicator.attribute]))
-          ? Math.round(+feature.properties[indicator.attribute]*100)/100
-          : 'Geen data'
-        : (indicator.multiline)
-          ? mostCommonClass(feature)
-          : getClass(+feature.properties[indicator.attribute])
-      
-      hoveredValue.set({
-        indicator: indicator.titel, 
-        value: hoverValue, 
-        color: hoverColor
-      })
-    }
-
-    let elem = (mainMapFlag) ? document.getElementsByClassName("main-map")[0] : document.getElementsByClassName("indicator-map-" + indicator.attribute)[0]
-    let rectmap = elem.getBoundingClientRect();
-    let featureCenter = projection(center(feature).geometry.coordinates)
-    let tooltipCenter = [featureCenter[0] + rectmap.left, featureCenter[1] + rectmap.top]
-    
-    // @ts-ignore
-    hoveredRegion.set({
-      'region': ($gemeenteSelection === null) ? t('Gemeente') : t('Buurt'),
-      'center': tooltipCenter,
-      'name': feature.properties[regionVariable]
-    })
-    
-  }
-
-  function mouseOut(feature){
-    if(feature.properties[classNameVariable] !== $buurtSelection){
-
-      if(mainMapFlag){
-        select('.' + getClassName(feature))
-          .attr('fill', 'whitesmoke')
-        mousePosition.set(null)
-      }else{
-        select('.' + getClassName(feature))
-          .attr('stroke-width', 0.5)
-          .style('filter', 'none')
-          .lower()
-        if(indicator.numerical){
-          const RADIUS = ($buurtenInGemeente.features.length > 150) ? 3 : 5
-          select('.' + getClassName(feature).replace('path', 'node'))
-            .attr('stroke', 'none')
-            .attr('r', RADIUS)
-            .style('filter', 'none')
-            .lower()
-        }   
-        hoveredValue.set(null)
-      }
-    }
-    
-    hoveredRegion.set(null)
-  }
-
-  function click(feature){
-
-    mouseOut(feature)
-    selectAll('.svgelements_' + feature.properties[$buurtCode])
-      .raise()
-
-    const newSelection = feature.properties[classNameVariable].replaceAll(' ','').replaceAll('(','').replaceAll(')','')
-    if($currentView === 'Nederland'){
-      $URLParams.set('gemeente', newSelection);
-      window.history.pushState(null, '', '?' + $URLParams.toString());
-
-      gemeenteSelection.set(newSelection)
-    }else{
-      $URLParams.set('buurt', newSelection);
-      window.history.pushState(null, '', '?' + $URLParams.toString());
-
-      buurtSelection.set(newSelection)
-    }
-  }
-
-  function getClassName(feature){
-    let className = feature.properties[classNameVariable] + "_path"
-    if(!mainMapFlag){
-      className += '_' + indicator.attribute
-    }
-    return className.replaceAll(' ','').replaceAll('(','').replaceAll(')','')
-  }
-
-  function mostCommonClass(feature){
-    let mostCommon = ''
-    let highestValue = 0
-    Object.keys(indicator.klassen).forEach(key => {
-      if(feature.properties[indicator.klassen[key]] > highestValue){
-        highestValue = feature.properties[indicator.klassen[key]]
-        mostCommon = key
-      }
-    });
-
-    return mostCommon
-  }
-
-  function multiInfo(){
-    select('.tooltip-multi' + indicator.attribute).style('visibility', 'visible')
-  }
-
-  function multiInfoOut(){
-    select('.tooltip-multi' + indicator.attribute).style('visibility', 'hidden')
-  }
+  function multilineMapInfoOut(){select('.tooltip-multi' + indicator.attribute).style('visibility', 'hidden')}
 
 </script>
 
-<svg class={(mainMapFlag) ? 'main-map' : 'indicator-map-' + indicator.attribute} style='filter:drop-shadow(0 0 15px rgb(160, 160, 160))'
+<svg class={(mapType === 'main map') ? 'main-map' : 'indicator-map-' + indicator.attribute} style='filter:drop-shadow(0 0 15px rgb(160, 160, 160))'
 >
-  <!-- {#if mainMapFlag}
-    <rect width={w} height={h} fill='#fefffa' on:click={() => {gemeenteSelection.set(null);buurtSelection.set(null)}}></rect>
-  {/if} -->
   <!-- svelte-ignore a11y-mouse-events-have-key-events -->
   <!-- svelte-ignore a11y-no-static-element-interactions -->
-  {#each $currentData.features as feature}
+  {#each $huidigeJSONData.features as feature}
     <!-- svelte-ignore a11y-click-events-have-key-events -->
     <!-- svelte-ignore a11y-mouse-events-have-key-events -->
     <path
       d={path(feature)}
-      class={getClassName(feature) + ' ' + 'svgelements_' + feature.properties[$buurtCode]}
+      class={getClassName(feature, 'path', indicator, mapType) + ' ' + 'svgelements_' + feature.properties[$buurtCodeAfkorting]}
       fill={
-        (mainMapFlag) 
-        ? (feature.properties[$buurtCode] === $buurtSelection)
+        (mapType === 'main map') 
+        ? (feature.properties[$buurtCodeAfkorting] === $buurtSelection)
           ? '#E1575A'
           : 'whitesmoke' 
         : (indicator.numerical) 
           // check if value not null 
           ? (feature.properties[indicator.attribute] !== null)
-            ? color(feature.properties[indicator.attribute])
+            ? indicatorValueColorscale(feature.properties[indicator.attribute])
             : '#000000'
           : (indicator.multiline)
-            ? color(mostCommonClass(feature))
-            : color(getClass(feature.properties[indicator.attribute]))
+            ? indicatorValueColorscale(mostCommonClass(indicator, feature))
+            : indicatorValueColorscale(getClassByIndicatorValue(indicator, indicator, feature.properties[indicator.attribute]))
       }
-      stroke={(mainMapFlag) 
+      stroke={(mapType === 'main map') 
         ? "grey" 
-        : (feature.properties[$buurtCode] === $buurtSelection) ? '#E1575A' : 'white'
+        : (feature.properties[$buurtCodeAfkorting] === $buurtSelection) ? '#E1575A' : 'white'
       }
-      style='filter:{(feature.properties[$buurtCode] === $buurtSelection) ? 'drop-shadow(0 0 15px black)' : 'none'}'
-      stroke-width={(mainMapFlag) ? "1" : (feature.properties[$buurtCode] === $buurtSelection) ? '3' : '0.5'}
+      style='filter:{(feature.properties[$buurtCodeAfkorting] === $buurtSelection) ? 'drop-shadow(0 0 15px black)' : 'none'}'
+      stroke-width={(mapType === 'main map') ? "1" : (feature.properties[$buurtCodeAfkorting] === $buurtSelection) ? '3' : '0.5'}
       cursor='pointer'
-      on:mouseover={(e) => mouseOver(e, feature)}
-      on:mouseout={() => mouseOut(feature)}
-      on:click={() => click(feature)}
+      on:mouseover={(e) => mouseOver(e, feature, indicator, mapType, indicatorValueColorscale, projection)}
+      on:mouseout={() => mouseOut(feature, indicator, mapType)}
+      on:click={() => click(feature, indicator, mapType)}
       />
   {/each}
   {#if indicator && indicator.multiline === true}
-    <image href='info.png' opacity='0.7' width='20' y='5' x={w-25} on:mouseover={() => multiInfo()} on:mouseout={() => multiInfoOut()}/>
+    <image href='info.png' opacity='0.7' width='20' y='5' x={mapWidth-25} on:mouseover={() => multilineMapInfo()} on:mouseout={() => multilineMapInfoOut()}/>
   {/if}
 </svg>
 

@@ -1,5 +1,5 @@
 <script>
-  import { buurtData, buurtSelection, gemeenteSelection, buurtenInGemeente, wijkTypeData } from "$lib/stores";
+  import { gemeenteSelection, buurtenInGemeenteJSONData } from "$lib/stores";
   import BeeswarmPlot from "./BeeswarmPlot.svelte";
   import Stats from "./Stats.svelte";
   import { scaleLinear, extent, scaleOrdinal } from 'd3';
@@ -7,62 +7,51 @@
   import BarPlot from "./BarPlot.svelte";
   import BarPlotMulti from "./BarPlotMulti.svelte";
   import BarPlotLegend from "./BarPlotLegend.svelte";
-  import { afterUpdate, onMount } from "svelte";
-  // import { _ } from 'svelte-i18n'
+  import { afterUpdate } from "svelte";
   import { t } from '$lib/i18n/translate.js';
+  import { getClassByIndicatorValue } from "$lib/noncomponents/getClassByIndicatorValue";
 
 
-  export let h
+  export let indicatorHeight
   export let indicator
 
-  let wGraph;
-  let wMap;
+  let graphWidth;
+  let mapWidth;
 
-  let color = null
-  let rangeExtent = [0,1]
+  const titleHeight = indicatorHeight*0.2
+  const bodyHeight = indicatorHeight*0.8
 
-  function getClass(value){
-    if(value === null){return t("Geen_data")}
-    let kl = ''
-    Object.keys(indicator.klassen).reverse().forEach(klasse => {
-      if(value < indicator.klassen[klasse]){
-        kl = klasse;
-      }
-    });
-    return kl;
-  }
+  let indicatorValueColorscale = null
 
+  // this code block is to set the colorscale
   $: {
     if(indicator.numerical){
       if($gemeenteSelection !== null){
-        rangeExtent = extent($buurtenInGemeente.features, d => +d.properties[indicator.attribute])
+        let rangeExtent = [0,1] // default value [0,1]
+        rangeExtent = extent($buurtenInGemeenteJSONData.features, d => +d.properties[indicator.attribute])
         // this can deal with any amount of colors in the scale
         const step = (rangeExtent[1] - rangeExtent[0]) / (indicator.color.range.length-1)
         if(indicator.titel !== 'Grondwaterstand 2050 hoog'){
-          color = scaleLinear()
+          indicatorValueColorscale = scaleLinear()
             .domain([...Array(indicator.color.range.length).keys()].map(i => rangeExtent[0] + i * step))
             .range(indicator.color.range);
         }else{
-          color = scaleLinear()
+          indicatorValueColorscale = scaleLinear()
             .domain([...Array(indicator.color.range.length).keys()].map(i => rangeExtent[0] + i * step).reverse())
             .range(indicator.color.range);
         }
-
       }
     }else{
-      color = scaleOrdinal()
+      indicatorValueColorscale = scaleOrdinal()
         .domain(indicator.color.domain)
         .range(indicator.color.range)
     }
   }
 
-  const titleHeight = h*0.2
-  const bodyHeight = h*0.8
-
   let indicatorInfoPosition
   afterUpdate(() => {
     indicatorInfoPosition = (window.innerWidth - document.getElementsByClassName('indicator-info-'+indicator.attribute)[0].getBoundingClientRect().right > 180)
-    ? wGraph
+    ? graphWidth
     : 0
   })
 
@@ -85,28 +74,24 @@
   <div class='indicator-body' style='height: {bodyHeight}px'>
     {#if indicator.numerical === true}
       <div class='indicator-overview' style='height: {bodyHeight*0.2}px'>
-        <Stats {bodyHeight} {indicator} {color}/>
+        <Stats {bodyHeight} {indicator} {indicatorValueColorscale}/>
       </div>
-      <div class='indicator-graph' style='height:{bodyHeight*0.4}px' bind:clientWidth={wGraph}>
+      <div class='indicator-graph' style='height:{bodyHeight*0.4}px' bind:clientWidth={graphWidth}>
         {#if $gemeenteSelection !== null}
-          <BeeswarmPlot w={wGraph} h={bodyHeight*0.4} {indicator} {color} nodesData={structuredClone($buurtenInGemeente.features)}/>
+          <BeeswarmPlot {graphWidth} indicatorHeight={bodyHeight*0.4} {indicator} {indicatorValueColorscale} buurtenInGemeenteFeaturesClone={structuredClone($buurtenInGemeenteJSONData.features)}/>
         {:else}
-          <p style='text-align:center; padding-top:50px; font-size:18px; position:absolute; left:{wGraph/3.4}px'><em>{t("Selecteer_gemeente")}...</em></p>
+          <p style='text-align:center; padding-top:50px; font-size:18px; position:absolute; left:{graphWidth/3.4}px'><em>{t("Selecteer_gemeente")}...</em></p>
         {/if}
       </div>
     {:else}
-      <div class='indicator-graph' style='height:{bodyHeight*0.6}px' bind:clientWidth={wGraph}>
-        {#if indicator.multiline}
-          <BarPlotMulti w={wGraph} h={bodyHeight*0.4} {indicator} {color} {getClass} />
-        {:else}
-          <BarPlot w={wGraph} h={bodyHeight*0.4} {indicator} {color} {getClass} />
-        {/if}
-        <BarPlotLegend w={wGraph} style='height:{bodyHeight*0.2}px' {color} {indicator}/>
+      <div class='indicator-graph' style='height:{bodyHeight*0.6}px' bind:clientWidth={graphWidth}>
+        <BarPlot {graphWidth} indicatorHeight={bodyHeight*0.4} multi={(indicator.multiline) ? true : false} {indicator} {indicatorValueColorscale} {getClassByIndicatorValue} />
+        <BarPlotLegend {graphWidth} style='height:{bodyHeight*0.2}px' {indicatorValueColorscale} {indicator}/>
       </div>
     {/if}
-    <div class='indicator-map' style='height:{bodyHeight*0.4}px' bind:clientWidth={wMap}>
+    <div class='indicator-map' style='height:{bodyHeight*0.4}px' bind:clientWidth={mapWidth}>
       {#if $gemeenteSelection !== null}
-        <Map w={wMap} h={bodyHeight*0.4} mainMapFlag={false} {color} {indicator} {getClass} />
+        <Map mapWidth={mapWidth} mapHeight={bodyHeight*0.4} mapType={'indicator map'} {indicatorValueColorscale} {indicator} {getClassByIndicatorValue} />
       {/if}
       <span style='width:100%; position:absolute; bottom:0px; display:flex; justify-content:space-between; pointer-events:none'>
         <h5><strong>{indicator.bron}</strong></h5>
