@@ -8,5 +8,6 @@ export function getClassByIndicatorValue(indicator, value){
       kl = klasse;
     }
   });
+
   return kl;
 }
