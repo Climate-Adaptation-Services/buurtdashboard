@@ -68,7 +68,7 @@
 </script>
 
 {#if type !== 'upper_beeswarm'}
-  <XAxis {xScaleBeeswarm} height={indicatorHeight*2} {margin} {dy}/>
+  <XAxis xScale={xScaleBeeswarm} height={indicatorHeight} {margin}/>
 {/if}
 {#if type === 'upper_beeswarm'}
   <line x1={xScaleBeeswarm.range()[0]+margin.left} x2={xScaleBeeswarm.range()[1]+margin.left} y1={80} y2={80} stroke='lightgrey'></line>
@@ -86,7 +86,7 @@
     stroke={(node.properties[$buurtCodeAfkorting] === $buurtSelection) ? '#E1575A' : 'none'}
     style='filter: {(node.properties[$buurtCodeAfkorting] === $buurtSelection) ? 'drop-shadow(0 0 5px #36575A)' : 'none'}'
     cx={node.x} cy={node.y} r={(node.properties[$buurtCodeAfkorting] === $buurtSelection) ? $circleRadius+3 : $circleRadius} fill={indicatorValueColorscale(+node.properties[indicator.attribute])} stroke-width='3'
-    on:mouseover={(e) => mouseOver(e, node, indicator, 'no map', indicatorValueColorscale, null)}
+    on:mouseover={(e) => mouseOver(e, node, indicator, 'no map', indicatorValueColorscale, null, margin)}
     on:mouseout={() => mouseOut(node, indicator, 'no map')}
     on:click={() => click(node, indicator, 'no map')}
     />
