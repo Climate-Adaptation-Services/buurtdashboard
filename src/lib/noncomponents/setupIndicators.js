@@ -1,4 +1,4 @@
-import { indicatorenLijst2019 } from "$lib/stores"
+import { alleIndicatoren2019 } from "$lib/stores"
 
 export function setupIndicators(data, eff, geb, kwe){
 
@@ -15,8 +15,7 @@ export function setupIndicators(data, eff, geb, kwe){
   indicatorenLijst2019 = addIndicatorCategorie(indicatorenLijst2019, metadata.filter(d => d.Categorie === geb)).slice(5)
   // indicatorenLijst = addIndicatorCategorie(indicatorenLijst, metadata.filter(d => d.Categorie === kwe))
 
-  indicatorenLijst2019.set(indicatorenLijst2019)
-  console.log('indicatorenLijst', indicatorenLijst, indicatorenLijst2019)
+  alleIndicatoren2019.set(indicatorenLijst2019)
 
   return {'indicatorenLijst2023':indicatorenLijst, 'indicatorenLijst2019':indicatorenLijst2019}
 }

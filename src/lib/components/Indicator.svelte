@@ -1,5 +1,5 @@
 <script>
-  import { gemeenteSelection, buurtenInGemeenteJSONData } from "$lib/stores";
+  import { gemeenteSelection, buurtenInGemeenteJSONData, alleIndicatoren2019, alleBuurtenJSONData } from "$lib/stores";
   import BeeswarmPlot from "./BeeswarmPlot.svelte";
   import Stats from "./Stats.svelte";
   import { scaleLinear, extent, scaleOrdinal } from 'd3';
@@ -78,12 +78,12 @@
         {#if $gemeenteSelection !== null}
           <svg class={'beeswarm_' + indicator.attribute}>
             {#if ['Boomkroonbedekking', 'Boomkroonbedekking binnen 500 meter per pand '].includes(indicator.titel)}
-              <BeeswarmPlot {graphWidth} indicatorHeight={bodyHeight*0.2} type='upper_beeswarm' {indicator} {indicatorValueColorscale} nodesData={structuredClone($buurtenInGemeenteJSONData.features)}/>
-              <BeeswarmPlot {graphWidth} indicatorHeight={bodyHeight*0.2} type='lower_beeswarm' indicator={$indicatorenLijst2019.filter(indicator2019 => indicator2019.attribute.split('_20')[0] === indicator.attribute.split('_20')[0])[0]} {indicatorValueColorscale} buurtenInGemeenteFeaturesClone={structuredClone($buurtenInGemeenteJSONData.features)}/>
+              <BeeswarmPlot {graphWidth} indicatorHeight={bodyHeight*0.2} type='upper_beeswarm' {indicator} {indicatorValueColorscale} buurtenInGemeenteFeaturesClone={structuredClone($buurtenInGemeenteJSONData.features)}/>
+              <BeeswarmPlot {graphWidth} indicatorHeight={bodyHeight*0.2} type='lower_beeswarm' indicator={$alleIndicatoren2019.filter(indicator2019 => indicator2019.attribute.split('_20')[0] === indicator.attribute.split('_20')[0])[0]} {indicatorValueColorscale} buurtenInGemeenteFeaturesClone={structuredClone($buurtenInGemeenteJSONData.features)}/>
             {:else}
-              <BeeswarmPlot {graphWidth} indicatorHeight={bodyHeight*0.2} type='beeswarm' {indicator} {indicatorValueColorscale} nodesData={structuredClone($buurtenInGemeenteJSONData.features)}/>
+              <BeeswarmPlot {graphWidth} indicatorHeight={bodyHeight*0.2} type='beeswarm' {indicator} {indicatorValueColorscale} buurtenInGemeenteFeaturesClone={structuredClone($buurtenInGemeenteJSONData.features)}/>
             {/if}
-            <text x={wGraph/2} y={bodyHeight*0.4-18} fill='#645F5E' text-anchor='middle' font-size='14'>{indicator.plottitel} per buurt in gemeente {$gemeenteData.features.filter(gemeente => gemeente.properties['GM_CODE'] === $gemeenteSelection)[0].properties['GM_NAAM']}</text>
+            <text x={graphWidth/2} y={bodyHeight*0.4-18} fill='#645F5E' text-anchor='middle' font-size='14'>{indicator.plottitel} per buurt in gemeente {$alleBuurtenJSONData.features.filter(gemeente => gemeente.properties['GM_CODE'] === $gemeenteSelection)[0].properties['GM_NAAM']}</text>
           </svg>
         {:else}
           <p style='text-align:center; padding-top:50px; font-size:18px; position:absolute; left:{graphWidth/3.4}px'><em>{t("Selecteer_gemeente")}...</em></p>
