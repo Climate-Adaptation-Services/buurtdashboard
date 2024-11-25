@@ -21,6 +21,8 @@
   let barPlotData = []
   let regios = []
 
+  $: console.log(indicator, barPlotData)
+
   $: {
     if($buurtSelection !== null){
       if($geselecteerdeBuurtJSONData.properties[$wijktypeAfkorting]){
