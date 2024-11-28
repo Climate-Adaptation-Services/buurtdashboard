@@ -1,14 +1,14 @@
 <script>
-  import { indicatorenSelectie, URLParams } from "$lib/stores";
+  import { indicatorsSelection, URLParams } from "$lib/stores";
   import MultiSelect from 'svelte-multiselect?client'
   import { browser } from "$app/environment";
   import { selectAll } from "d3";
   import { afterUpdate } from "svelte";
   import { t } from '$lib/i18n/translate.js';
 
-  export let alleIndicatoren
+  export let allIndicators
 
-  const indicators = alleIndicatoren.map(d => d.titel)
+  const indicators = allIndicators.map(d => d.titel)
 
   function handleIndicatorFilterAdd(e){
     $URLParams.append('indicator', e.detail.option);
@@ -50,8 +50,8 @@
 
 {#if browser}
   <div class='multiselectdiv'>
-    <p style='margin-bottom:5px'>{`Filter ${t("indicatoren")}:`}</p>
-    <MultiSelect bind:value={$indicatorenSelectie} options={indicators} on:add={handleIndicatorFilterAdd} on:remove={handleIndicatorFilterRemove} on:removeAll={handleIndicatorFilterClear}/>
+    <p style='margin-bottom:5px'>{`Filter ${t("indicators")}:`}</p>
+    <MultiSelect bind:value={$indicatorsSelection} options={indicators} on:add={handleIndicatorFilterAdd} on:remove={handleIndicatorFilterRemove} on:removeAll={handleIndicatorFilterClear}/>
   </div>
 {/if}
 

@@ -5,23 +5,23 @@ export function setupIndicators(data, eff, geb, kwe){
     ? data.metadata_english
     : data.metadata
 
-  let indicatorenLijst = []
+  let indicatorsLijst = []
 
-  // let indicatorenOpCategorie = [...metadata.filter(d => d.Categorie === 'Gebiedskenmerken'), ...metadata.filter(d => d.Categorie === 'Effecten'), ...metadata.filter(d => d.Categorie === 'Kwetsbaarheid')]
-  indicatorenLijst = addIndicatorCategorie(indicatorenLijst, metadata.filter(d => d.Categorie === eff))
-  indicatorenLijst = addIndicatorCategorie(indicatorenLijst, metadata.filter(d => d.Categorie === geb))
-  indicatorenLijst = addIndicatorCategorie(indicatorenLijst, metadata.filter(d => d.Categorie === kwe))
+  // let indicatorsOpCategorie = [...metadata.filter(d => d.Categorie === 'Gebiedskenmerken'), ...metadata.filter(d => d.Categorie === 'Effecten'), ...metadata.filter(d => d.Categorie === 'Kwetsbaarheid')]
+  indicatorsLijst = addIndicatorCategorie(indicatorsLijst, metadata.filter(d => d.Categorie === eff))
+  indicatorsLijst = addIndicatorCategorie(indicatorsLijst, metadata.filter(d => d.Categorie === geb))
+  indicatorsLijst = addIndicatorCategorie(indicatorsLijst, metadata.filter(d => d.Categorie === kwe))
 
-  console.log('indicatorenLijst', indicatorenLijst)
+  console.log('indicatorsLijst', indicatorsLijst)
 
-  return indicatorenLijst
+  return indicatorsLijst
 }
 
-function addIndicatorCategorie(indicatorenLijst, indicatoren){
+function addIndicatorCategorie(indicatorsLijst, indicators){
   // dit is voor de kopjes in de filter dropdown
-  indicatorenLijst.push({titel:{'label':indicatoren[0].Categorie, 'disabled':true}})
+  indicatorsLijst.push({titel:{'label':indicators[0].Categorie, 'disabled':true}})
 
-  indicatoren.forEach(indicator => {
+  indicators.forEach(indicator => {
     let klassen = {}
     if(indicator['kwantitatief / categoraal / multiline'] !== 'categoraal'){
       indicator.Domein.split(',').forEach((d,i) => {
@@ -34,7 +34,7 @@ function addIndicatorCategorie(indicatorenLijst, indicatoren){
     }
 
     
-    indicatorenLijst.push({
+    indicatorsLijst.push({
       titel:indicator.Titel, 
       attribute:indicator.Indicatornaamtabel.split(',')[0], 
       subtitel:indicator.Subtitel, 
@@ -52,5 +52,5 @@ function addIndicatorCategorie(indicatorenLijst, indicatoren){
       omschrijving:indicator['Tekst vraagteken'],
     })
   })
-  return indicatorenLijst
+  return indicatorsLijst
 }

@@ -13,24 +13,24 @@ export function berekenPercentagesVoorElkeKlasseMultiIndicator(indicator, data, 
     })
   }
 
-  // voor elke buurt gaan we de waardes van elke klasse bij de som van die klasse toevoegen
-  data.features.forEach(buurt => {
-    let buurtOppervlakte = (indicator.titel === 'Functionele gebieden')
-      ? buurt.properties['buurt_opp_incl_agrarisch']
-      : buurt.properties['buurt_opp_zonderagr']
+  // voor elke neighbourhood gaan we de waardes van elke klasse bij de som van die klasse toevoegen
+  data.features.forEach(neighbourhood => {
+    let neighbourhoodOppervlakte = (indicator.titel === 'Functionele gebieden')
+      ? neighbourhood.properties['neighbourhood_opp_incl_agrarisch']
+      : neighbourhood.properties['neighbourhood_opp_zonderagr']
 
-    totaalOppervlakte += buurtOppervlakte
+    totaalOppervlakte += neighbourhoodOppervlakte
 
-    if(indicator.titel === t('Gevoelstemperatuur')){totaalOppervlakte -= buurtOppervlakte * buurt.properties['NDPETperc']}
+    if(indicator.titel === t('Gevoelstemperatuur')){totaalOppervlakte -= neighbourhoodOppervlakte * neighbourhood.properties['NDPETperc']}
     
-    // voor deze buurt tel de waardes van elke klasse bij de totale som op
+    // voor deze neighbourhood tel de waardes van elke klasse bij de totale som op
     Object.keys(indicator.klassen).forEach(kl => {
       // is dit goed zo of moeten we anders met no data (NaN) omgaan
-      if(buurt.properties[indicator.klassen[kl]] && !isNaN(parseFloat(buurt.properties[indicator.klassen[kl]]))){
+      if(neighbourhood.properties[indicator.klassen[kl]] && !isNaN(parseFloat(neighbourhood.properties[indicator.klassen[kl]]))){
         // pak de klasse erbij in totaleSomPerKlasse
         const tempKlasse = totaleSomPerKlasse.filter(kl2 => kl2.klasseNaam === kl)[0]
-        // we wegen ook voor het oppervlakte met buurtOppervlakte
-        tempKlasse.som += buurtOppervlakte * +buurt.properties[indicator.klassen[kl]]
+        // we wegen ook voor het oppervlakte met neighbourhoodOppervlakte
+        tempKlasse.som += neighbourhoodOppervlakte * +neighbourhood.properties[indicator.klassen[kl]]
       }
     });
   });
@@ -56,8 +56,8 @@ export function berekenPercentagesVoorElkeKlasseSingleIndicator(indicator, data,
   for(let i=0;i<Object.keys(indicator.klassen).length;i++){
     klassenTotal.push({klasseNaam: Object.keys(indicator.klassen)[i], waarde:0})
   }
-  data.features.forEach(buurtOfGemeente => {
-    klassenTotal.filter(kl => kl.klasseNaam === getClassByIndicatorValue(indicator, buurtOfGemeente.properties[indicator.attribute]))[0].waarde += 1
+  data.features.forEach(neighbourhoodOfGemeente => {
+    klassenTotal.filter(kl => kl.klasseNaam === getClassByIndicatorValue(indicator, neighbourhoodOfGemeente.properties[indicator.attribute]))[0].waarde += 1
     totalAmount += 1
   });
 

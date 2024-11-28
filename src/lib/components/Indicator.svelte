@@ -1,5 +1,5 @@
 <script>
-  import { gemeenteSelection, buurtenInGemeenteJSONData } from "$lib/stores";
+  import { municipalitySelection, neighbourhoodsInMunicipalityJSONData } from "$lib/stores";
   import BeeswarmPlot from "./BeeswarmPlot.svelte";
   import Stats from "./Stats.svelte";
   import { scaleLinear, extent, scaleOrdinal } from 'd3';
@@ -25,9 +25,9 @@
   // this code block is to set the colorscale
   $: {
     if(indicator.numerical){
-      if($gemeenteSelection !== null){
+      if($municipalitySelection !== null){
         let rangeExtent = [0,1] // default value [0,1]
-        rangeExtent = extent($buurtenInGemeenteJSONData.features, d => +d.properties[indicator.attribute])
+        rangeExtent = extent($neighbourhoodsInMunicipalityJSONData.features, d => +d.properties[indicator.attribute])
         // this can deal with any amount of colors in the scale
         const step = (rangeExtent[1] - rangeExtent[0]) / (indicator.color.range.length-1)
         if(indicator.titel !== 'Grondwaterstand 2050 hoog'){
@@ -76,20 +76,20 @@
         <Stats {bodyHeight} {indicator} {indicatorValueColorscale}/>
       </div>
       <div class='indicator-graph' style='height:{bodyHeight*0.4}px' bind:clientWidth={graphWidth}>
-        {#if $gemeenteSelection !== null}
-          <BeeswarmPlot {graphWidth} indicatorHeight={bodyHeight*0.4} {indicator} {indicatorValueColorscale} buurtenInGemeenteFeaturesClone={structuredClone($buurtenInGemeenteJSONData.features)}/>
+        {#if $municipalitySelection !== null}
+          <BeeswarmPlot {graphWidth} indicatorHeight={bodyHeight*0.4} {indicator} {indicatorValueColorscale} NeighbourhoodsInGemeenteFeaturesClone={structuredClone($neighbourhoodsInMunicipalityJSONData.features)}/>
         {:else}
-          <p style='text-align:center; padding-top:50px; font-size:18px; position:absolute; left:{graphWidth/3.4}px'><em>{t("Selecteer_gemeente")}...</em></p>
+          <p style='text-align:center; padding-top:50px; font-size:18px; position:absolute; left:{graphWidth/3.4}px'><em>{t("Selecteer_municipality")}...</em></p>
         {/if}
       </div>
     {:else}
       <div class='indicator-graph' style='height:{bodyHeight*0.6}px' bind:clientWidth={graphWidth}>
-        <BarPlot {graphWidth} indicatorHeight={bodyHeight*0.4} multi={(indicator.aggregatedIndicator) ? true : false} {indicator} {indicatorValueColorscale} {getClassByIndicatorValue} />
+        <BarPlot {graphWidth} indicatorHeight={bodyHeight*0.4} aggregated={(indicator.aggregatedIndicator) ? true : false} {indicator} {indicatorValueColorscale} {getClassByIndicatorValue} />
         <BarPlotLegend {graphWidth} style='height:{bodyHeight*0.2}px' {indicatorValueColorscale} {indicator}/>
       </div>
     {/if}
     <div class='indicator-map' style='height:{bodyHeight*0.4}px' bind:clientWidth={mapWidth}>
-      {#if $gemeenteSelection !== null}
+      {#if $municipalitySelection !== null}
         <Map mapWidth={mapWidth} mapHeight={bodyHeight*0.4} mapType={'indicator map'} {indicatorValueColorscale} {indicator} {getClassByIndicatorValue} />
       {/if}
       <span style='width:100%; position:absolute; bottom:0px; display:flex; justify-content:space-between; pointer-events:none'>

@@ -1,5 +1,5 @@
-import { getRegioNaam } from "./getRegioNaam";
-import { tooltipValues, tooltipRegion, gemeenteSelection } from "$lib/stores";
+import { getRegionName } from "./getRegionName";
+import { tooltipValues, tooltipRegion, municipalitySelection } from "$lib/stores";
 import { select } from "d3";
 import { get } from "svelte/store";
 
@@ -15,9 +15,9 @@ export function barPlotMouseOver(indicator, indicatorValueColorscale, st, stacke
   let tooltipCenter = [rectmap.left, rectmap.top]
   
   tooltipRegion.set({
-    'region': (get(gemeenteSelection) === null) ? 'Gemeente' : 'Buurt',
+    'region': (get(municipalitySelection) === null) ? 'Gemeente' : 'Buurt',
     'center': tooltipCenter,
-    'name': getRegioNaam(st.data.group)
+    'name': getRegionName(st.data.group)
   })
 }
 

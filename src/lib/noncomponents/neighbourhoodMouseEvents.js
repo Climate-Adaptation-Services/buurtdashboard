@@ -1,5 +1,5 @@
 import { getClassName } from '$lib/noncomponents/getClassName';
-import { huidigeCodeAfkorting, buurtSelection, mousePosition, circleRadius, gemeenteSelection, huidigeNaamAfkorting, URLParams, huidigOverzichtsniveau, buurtCodeAfkorting, tooltipValues, tooltipRegion } from '$lib/stores';
+import { currentCodeAbbreviation, neighbourhoodSelection, mousePosition, circleRadius, municipalitySelection, currentNameAbbreviation, URLParams, currentOverviewLevel, neighbourhoodCodeAbbreviation, tooltipValues, tooltipRegion } from '$lib/stores';
 import { get } from 'svelte/store';
 import { select, selectAll } from 'd3';
 import { getClassByIndicatorValue } from './getClassByIndicatorValue';
@@ -13,7 +13,7 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
   let tooltipCenter
 
   if(mapType === 'main map'){
-    if(feature.properties[get(huidigeCodeAfkorting)] !== get(buurtSelection)){
+    if(feature.properties[get(currentCodeAbbreviation)] !== get(neighbourhoodSelection)){
       select('.' + shapeClassName).attr('fill', '#36575A')
       mousePosition.set(window.innerHeight - e.screenY)
     }
@@ -81,9 +81,9 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
   }
   // @ts-ignore
   tooltipRegion.set({
-    'region': (get(gemeenteSelection) === null) ? t('Gemeente') : t('Buurt'),
+    'region': (get(municipalitySelection) === null) ? t('Gemeente') : t('Buurt'),
     'center': tooltipCenter,
-    'name': feature.properties[get(huidigeNaamAfkorting)]
+    'name': feature.properties[get(currentNameAbbreviation)]
   })
 }
 
@@ -91,7 +91,7 @@ export function mouseOut(feature, indicator, mapType){
   const shapeClassName = getClassName(feature, 'path', indicator, mapType)
   const circleClassName = getClassName(feature, 'node', indicator, mapType)
 
-  if(feature.properties[get(huidigeCodeAfkorting)] !== get(buurtSelection)){
+  if(feature.properties[get(currentCodeAbbreviation)] !== get(neighbourhoodSelection)){
 
     if(mapType === 'main map'){
       select('.' + shapeClassName)
@@ -118,19 +118,19 @@ export function mouseOut(feature, indicator, mapType){
 export function click(feature, indicator, mapType){
 
   mouseOut(feature, indicator, mapType)
-  selectAll('.svgelements_' + feature.properties[get(buurtCodeAfkorting)])
+  selectAll('.svgelements_' + feature.properties[get(neighbourhoodCodeAbbreviation)])
     .raise()
 
-  const newSelection = feature.properties[get(huidigeCodeAfkorting)].replaceAll(' ','').replaceAll('(','').replaceAll(')','')
-  if(get(huidigOverzichtsniveau) === 'Nederland'){
-    get(URLParams).set('gemeente', newSelection);
+  const newSelection = feature.properties[get(currentCodeAbbreviation)].replaceAll(' ','').replaceAll('(','').replaceAll(')','')
+  if(get(currentOverviewLevel) === 'Nederland'){
+    get(URLParams).set('municipality', newSelection);
     window.history.pushState(null, '', '?' + get(URLParams).toString());
 
-    gemeenteSelection.set(newSelection)
+    municipalitySelection.set(newSelection)
   }else{
-    get(URLParams).set('buurt', newSelection);
+    get(URLParams).set('neighbourhood', newSelection);
     window.history.pushState(null, '', '?' + get(URLParams).toString());
 
-    buurtSelection.set(newSelection)
+    neighbourhoodSelection.set(newSelection)
   }
 }

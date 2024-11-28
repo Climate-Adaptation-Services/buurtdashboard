@@ -1,8 +1,8 @@
 <script>
-  import { wijkTypeJSONData, wijktypeAfkorting, alleBuurtenJSONData, gemeenteSelection, buurtenInGemeenteJSONData, buurtSelection, gemeenteNaamAfkorting, alleGemeentesJSONData, geselecteerdeBuurtJSONData, tooltipRegion, tooltipValues, buurtNaamAfkorting } from "$lib/stores";
+  import { districtTypeJSONData, districtTypeAbbreviation, allNeighbourhoodsJSONData, municipalitySelection, neighbourhoodsInMunicipalityJSONData, neighbourhoodSelection, municipalityNameAbbreviation, allMunicipalitiesJSONData, selectedNeighbourhoodJSONData, tooltipRegion, tooltipValues, neighbourhoodNameAbbreviation } from "$lib/stores";
   import { scaleLinear, scaleBand, stack } from "d3";
   import { checkContrast } from "$lib/noncomponents/checkContrast";
-  import { getRegioNaam } from "$lib/noncomponents/getRegioNaam";
+  import { getRegionName } from "$lib/noncomponents/getRegionName";
   import { barPlotMouseOut, barPlotMouseOver } from "$lib/noncomponents/barPlotMouseEvents";
   import { berekenPercentagesVoorElkeKlasseMultiIndicator, berekenPercentagesVoorElkeKlasseSingleIndicator } from "$lib/noncomponents/berekenPercentagesVoorElkeKlasse";
 
@@ -11,27 +11,27 @@
   export let indicator;
   export let indicatorValueColorscale;
   export let getClassByIndicatorValue
-  export let multi
+  export let aggregated
 
   const margin = {bottom:0, top:30, left:30, right:30}
 
-  const berekenPercentagesVoorElkeKlasse = (multi) ? berekenPercentagesVoorElkeKlasseMultiIndicator : berekenPercentagesVoorElkeKlasseSingleIndicator
+  const berekenPercentagesVoorElkeKlasse = (aggregated) ? berekenPercentagesVoorElkeKlasseMultiIndicator : berekenPercentagesVoorElkeKlasseSingleIndicator
 
-  const nederlandValues = berekenPercentagesVoorElkeKlasse(indicator, $alleBuurtenJSONData, 'Nederland')
+  const nederlandValues = berekenPercentagesVoorElkeKlasse(indicator, $allNeighbourhoodsJSONData, 'Nederland')
   let barPlotData = []
   let regios = []
 
   $: {
-    if($buurtSelection !== null){
-      if($geselecteerdeBuurtJSONData.properties[$wijktypeAfkorting]){
-        barPlotData = [nederlandValues, berekenPercentagesVoorElkeKlasse(indicator, $buurtenInGemeenteJSONData, 'Gemeente'), berekenPercentagesVoorElkeKlasse(indicator, {type: 'FeatureCollection', features: [$geselecteerdeBuurtJSONData]}, 'Buurt'), berekenPercentagesVoorElkeKlasse(indicator, $wijkTypeJSONData, 'Wijktype')]
+    if($neighbourhoodSelection !== null){
+      if($selectedNeighbourhoodJSONData.properties[$districtTypeAbbreviation]){
+        barPlotData = [nederlandValues, berekenPercentagesVoorElkeKlasse(indicator, $neighbourhoodsInMunicipalityJSONData, 'Gemeente'), berekenPercentagesVoorElkeKlasse(indicator, {type: 'FeatureCollection', features: [$selectedNeighbourhoodJSONData]}, 'Buurt'), berekenPercentagesVoorElkeKlasse(indicator, $districtTypeJSONData, 'Wijktype')]
         regios = ['Nederland', 'Gemeente', 'Buurt', 'Wijktype']
       }else{
-        barPlotData = [nederlandValues, berekenPercentagesVoorElkeKlasse(indicator, $buurtenInGemeenteJSONData, 'Gemeente'), berekenPercentagesVoorElkeKlasse(indicator, {type: 'FeatureCollection', features: [$geselecteerdeBuurtJSONData]}, 'Buurt')]
+        barPlotData = [nederlandValues, berekenPercentagesVoorElkeKlasse(indicator, $neighbourhoodsInMunicipalityJSONData, 'Gemeente'), berekenPercentagesVoorElkeKlasse(indicator, {type: 'FeatureCollection', features: [$selectedNeighbourhoodJSONData]}, 'Buurt')]
         regios = ['Nederland', 'Gemeente', 'Buurt']
       }
-    }else if($gemeenteSelection !== null){
-      barPlotData = [nederlandValues, berekenPercentagesVoorElkeKlasse(indicator, $buurtenInGemeenteJSONData, 'Gemeente')]
+    }else if($municipalitySelection !== null){
+      barPlotData = [nederlandValues, berekenPercentagesVoorElkeKlasse(indicator, $neighbourhoodsInMunicipalityJSONData, 'Gemeente')]
       regios = ['Nederland', 'Gemeente']
     }else{
       barPlotData = [nederlandValues]
@@ -71,7 +71,7 @@
       </g>
     {/each}
     {#each regios as regio,i}
-      <text style='fill:#645F5E' x={graphWidth/2} text-anchor='middle' y={i*yScale.bandwidth()-5}>{getRegioNaam(regio)}</text>
+      <text style='fill:#645F5E' x={graphWidth/2} text-anchor='middle' y={i*yScale.bandwidth()-5}>{getRegionName(regio)}</text>
     {/each}
   </g>
 </svg>

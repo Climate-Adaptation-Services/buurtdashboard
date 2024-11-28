@@ -1,4 +1,4 @@
-// deze functie is nodig om de kleur te bepalen van een buurt in de aggregatedIndicator kaart
+// deze functie is nodig om de kleur te bepalen van een neighbourhood in de aggregatedIndicator kaart
 export function mostCommonClass(indicator, feature){
   let mostCommon = ''
   let highestValue = 0

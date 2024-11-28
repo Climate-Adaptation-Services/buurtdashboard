@@ -1,5 +1,5 @@
 <script>
-  import { alleGemeentesJSONData, alleBuurtenJSONData, buurtSelection, gemeenteCodeAfkorting, wijktypeAfkorting, gemeenteSelection, geselecteerdeBuurtJSONData, buurtCodeAfkorting, buurtNaamAfkorting, gemeenteNaamAfkorting, modal, URLParams, indicatorenSelectie, buurtenInGemeenteJSONData } from '$lib/stores';
+  import { allMunicipalitiesJSONData, allNeighbourhoodsJSONData, neighbourhoodSelection, municipalityCodeAbbreviation, districtTypeAbbreviation, municipalitySelection, selectedNeighbourhoodJSONData, neighbourhoodCodeAbbreviation, neighbourhoodNameAbbreviation, municipalityNameAbbreviation, modal, URLParams, indicatorsSelection, neighbourhoodsInMunicipalityJSONData } from '$lib/stores';
   import * as lo from 'lodash'
   import OverDitDashboard from '$lib/components/OverDitDashboard.svelte';
   import { bind } from 'svelte-simple-modal';
@@ -8,22 +8,22 @@
   import BuurtSelect from './BuurtSelect.svelte';
   import { t } from '$lib/i18n/translate.js';
 
-  export let alleIndicatoren
+  export let allIndicators
 
   let lijstAlleGemeentesVoorDropdown;
   let lijstAlleBuurtenInGemeenteVoorDropdown;
-  $: if($alleGemeentesJSONData !== null){
-    lijstAlleGemeentesVoorDropdown = $alleGemeentesJSONData.features.map(gemeente => {return {'value':gemeente.properties[$gemeenteCodeAfkorting], 'label':limitDropdownLabelLength(gemeente.properties[$gemeenteNaamAfkorting])}})
-    lijstAlleGemeentesVoorDropdown = lo.orderBy(lijstAlleGemeentesVoorDropdown, [gemeente => gemeente.label], ['asc']);
+  $: if($allMunicipalitiesJSONData !== null){
+    lijstAlleGemeentesVoorDropdown = $allMunicipalitiesJSONData.features.map(municipality => {return {'value':municipality.properties[$municipalityCodeAbbreviation], 'label':limitDropdownLabelLength(municipality.properties[$municipalityNameAbbreviation])}})
+    lijstAlleGemeentesVoorDropdown = lo.orderBy(lijstAlleGemeentesVoorDropdown, [municipality => municipality.label], ['asc']);
   }
-  $: if($gemeenteSelection !== null){
-    lijstAlleBuurtenInGemeenteVoorDropdown = $buurtenInGemeenteJSONData.features.map(buurt => {return {'value':buurt.properties[$buurtCodeAfkorting], 'label':limitDropdownLabelLength(buurt.properties[$buurtNaamAfkorting])}})
-    lijstAlleBuurtenInGemeenteVoorDropdown = lo.orderBy(lijstAlleBuurtenInGemeenteVoorDropdown, [buurt => buurt.label], ['asc']);
+  $: if($municipalitySelection !== null){
+    lijstAlleBuurtenInGemeenteVoorDropdown = $neighbourhoodsInMunicipalityJSONData.features.map(neighbourhood => {return {'value':neighbourhood.properties[$neighbourhoodCodeAbbreviation], 'label':limitDropdownLabelLength(neighbourhood.properties[$neighbourhoodNameAbbreviation])}})
+    lijstAlleBuurtenInGemeenteVoorDropdown = lo.orderBy(lijstAlleBuurtenInGemeenteVoorDropdown, [neighbourhood => neighbourhood.label], ['asc']);
   }
 
-  $: wijktype = ($alleBuurtenJSONData && $buurtSelection !== null && $geselecteerdeBuurtJSONData.properties[$wijktypeAfkorting]) 
-    ? $geselecteerdeBuurtJSONData.properties[$wijktypeAfkorting]
-    : 'Geen wijktype'
+  $: districtType = ($allNeighbourhoodsJSONData && $neighbourhoodSelection !== null && $selectedNeighbourhoodJSONData.properties[$districtTypeAbbreviation]) 
+    ? $selectedNeighbourhoodJSONData.properties[$districtTypeAbbreviation]
+    : 'Geen districtType'
 
   function limitDropdownLabelLength(label){
     return (label.length > 31) ? label.slice(0,29) + '...' : label
@@ -50,16 +50,16 @@
         <p class='download-and-about-text'>{t('Uitleg_grafieken')}</p>
       </div>
       <div class='download'>
-        <a href='https://github.com/Climate-Adaptation-Services/buurtdashboard-data/raw/main/BuurtdashboardDataDownload20240913.xlsx' download='BuurtdashboardDownload20240805'><img src='./download.png' width='30px'/></a>
+        <a href='https://github.com/Climate-Adaptation-Services/neighbourhooddashboard-data/raw/main/BuurtdashboardDataDownload20240913.xlsx' download='BuurtdashboardDownload20240805'><img src='./download.png' width='30px'/></a>
         <p class='download-and-about-text'>Download data</p>
       </div>
     </div>
     <GemeenteSelect {lijstAlleGemeentesVoorDropdown} />
     <BuurtSelect {lijstAlleBuurtenInGemeenteVoorDropdown} />
-    {#if $buurtSelection !== null}
-        <p style='color:white'>{t("Wijktype")}: <strong>{wijktype}</strong></p>
+    {#if $neighbourhoodSelection !== null}
+        <p style='color:white'>{t("Wijktype")}: <strong>{districtType}</strong></p>
     {/if}
-    <IndicatorFilter {alleIndicatoren} />
+    <IndicatorFilter {allIndicators} />
   </div>
 </div>
 
