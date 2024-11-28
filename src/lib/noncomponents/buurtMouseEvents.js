@@ -11,11 +11,17 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
   const shapeClassName = getClassName(feature, 'path', indicator, mapType)
   const circleClassName = getClassName(feature, 'node', indicator, mapType)
 
+  let tooltipCenter
+
   if(mapType === 'main map'){
     if(feature.properties[get(huidigeCodeAfkorting)] !== get(buurtSelection)){
       select('.' + shapeClassName).attr('fill', '#36575A')
       mousePosition.set(window.innerHeight - e.screenY)
     }
+    const mapElement = (mapType === 'main map') ? document.getElementsByClassName("main-map")[0] : document.getElementsByClassName("indicator-map-" + indicator.attribute)[0]
+    const rectmap = mapElement.getBoundingClientRect();
+    const featureCenter = projection(center(feature).geometry.coordinates)
+    tooltipCenter = [featureCenter[0] + rectmap.left, featureCenter[1] + rectmap.top]
   }else{
     select('.' + shapeClassName)
       .attr('stroke-width', 3)
@@ -29,8 +35,7 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
         .raise()
     }
 
-    let tooltipCenter
-    if(mapType === 'main map' || mapType === 'indicator map'){
+    if(mapType === 'indicator map'){
       const tooltipValueColor = (indicator.numerical) 
         ? (feature.properties[indicator.attribute])
           ? indicatorValueColorscale(feature.properties[indicator.attribute]) 
@@ -55,7 +60,7 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
         color: tooltipValueColor
       })
 
-      const mapElement = (mapType === 'main map') ? document.getElementsByClassName("main-map")[0] : document.getElementsByClassName("indicator-map-" + indicator.attribute)[0]
+      const mapElement = document.getElementsByClassName("indicator-map-" + indicator.attribute)[0]
       const rectmap = mapElement.getBoundingClientRect();
       const featureCenter = projection(center(feature).geometry.coordinates)
       tooltipCenter = [featureCenter[0] + rectmap.left, featureCenter[1] + rectmap.top]
@@ -73,14 +78,13 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
       let rectmap = elem.getBoundingClientRect();
       tooltipCenter = [feature.x + rectmap.left + beeswarmMargin.left, rectmap.top + beeswarmMargin.top + feature.y + 10]
     } 
-
-    // @ts-ignore
-    tooltipRegion.set({
-      'region': (get(gemeenteSelection) === null) ? t('Gemeente') : t('Buurt'),
-      'center': tooltipCenter,
-      'name': feature.properties[get(huidigeNaamAfkorting)]
-    })
   }
+  // @ts-ignore
+  tooltipRegion.set({
+    'region': (get(gemeenteSelection) === null) ? t('Gemeente') : t('Buurt'),
+    'center': tooltipCenter,
+    'name': feature.properties[get(huidigeNaamAfkorting)]
+  })
 }
 
 export function mouseOut(feature, indicator, mapType){
