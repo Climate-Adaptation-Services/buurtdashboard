@@ -46,7 +46,7 @@
           ? (feature.properties[indicator.attribute] !== null)
             ? indicatorValueColorscale(feature.properties[indicator.attribute])
             : '#000000'
-          : (indicator.multiline)
+          : (indicator.aggregatedIndicator)
             ? indicatorValueColorscale(mostCommonClass(indicator, feature))
             : indicatorValueColorscale(getClassByIndicatorValue(indicator, indicator, feature.properties[indicator.attribute]))
       }
@@ -62,12 +62,12 @@
       on:click={() => click(feature, indicator, mapType)}
       />
   {/each}
-  {#if indicator && indicator.multiline === true}
+  {#if indicator && indicator.aggregatedIndicator === true}
     <image href='info.png' opacity='0.7' width='20' y='5' x={mapWidth-25} on:mouseover={() => multilineMapInfo()} on:mouseout={() => multilineMapInfoOut()}/>
   {/if}
 </svg>
 
-{#if indicator && indicator.multiline === true}
+{#if indicator && indicator.aggregatedIndicator === true}
   <div class={'tooltip-multi tooltip-multi' + indicator.attribute}>
     <p>{t("multi-indicator-map-explanation")}</p>
   </div>

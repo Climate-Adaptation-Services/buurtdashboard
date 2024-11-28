@@ -47,7 +47,7 @@ function addIndicatorCategorie(indicatorenLijst, indicatoren){
       klassen:klassen,
       numerical:(indicator['kwantitatief / categoraal / multiline'] === 'Kwantitatief') ? true : false, 
       link:indicator['Link kaartverhaal'],
-      multiline:(indicator['kwantitatief / categoraal / multiline'] === 'Multiline') ? true : false,
+      aggregatedIndicator:(indicator['kwantitatief / categoraal / multiline'] === 'Multiline') ? true : false,
       bron:indicator.Bron,
       omschrijving:indicator['Tekst vraagteken'],
     })
