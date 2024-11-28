@@ -91,4 +91,8 @@
     border-radius: 20px;
     padding:0px 10px 0px 10px;
   }
+
+  path{
+    transition: all 0.5s;
+  }
 </style>

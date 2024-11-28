@@ -4,20 +4,6 @@ import * as topojson from "topojson-client";
 
 export function prepareJSONData(JSONdata){
   console.log('JSONdata', JSONdata)
-  // let gemeenteTopojson = topojsonsimplify.presimplify(JSONdata[0])
-  // gemeenteTopojson = topojson.feature(gemeenteTopojson, gemeenteTopojson.objects.GemeenteGrenzen2023)
-  // alleGemeentesJSONData.set(gemeenteTopojson)
-
-  // let buurtTopojson1 = topojsonsimplify.presimplify(JSONdata[1])
-  // buurtTopojson1 = topojson.feature(buurtTopojson1, buurtTopojson1.objects['BuurtenDataset20240913_xaaaa'])
-
-  // let buurtTopojson2 = topojsonsimplify.presimplify(JSONdata[2])
-  // buurtTopojson2 = topojson.feature(buurtTopojson2, buurtTopojson2.objects['BuurtenDataset20240913_xaaab'])
-  
-  // let buurtTopojson3 = topojsonsimplify.presimplify(JSONdata[3])
-  // buurtTopojson3 = topojson.feature(buurtTopojson3, buurtTopojson3.objects['BuurtenDataset20240913_xaaac'])
-  
-  // let combinedBuurt = [...buurtTopojson1.features, ...buurtTopojson2.features, ...buurtTopojson3.features]
 
   console.log('JSONdata', JSONdata)
   let gemeenteTopojson = topojsonsimplify.presimplify(JSONdata[0])

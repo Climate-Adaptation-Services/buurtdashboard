@@ -1,23 +1,34 @@
-import { alleIndicatoren2019 } from "$lib/stores"
+import { alleIndicatoren2019, alleIndicatoren2023, jaarSelecties } from "$lib/stores"
 
 export function setupIndicators(data, eff, geb, kwe){
 
   const metadata = (data.lang === 'en')
     ? data.metadata_dordrecht
     : data.metadata_dordrecht
+  const metadata_2019 = (data.lang === 'en')
+    ? data.metadata_dordrecht_2019
+    : data.metadata_dordrecht_2019
 
-  let indicatorenLijst = []
+  let indicatorenLijst2023 = []
   let indicatorenLijst2019 = []
 
   // let indicatorenOpCategorie = [...metadata.filter(d => d.Categorie === 'Gebiedskenmerken'), ...metadata.filter(d => d.Categorie === 'Effecten'), ...metadata.filter(d => d.Categorie === 'Kwetsbaarheid')]
   // indicatorenLijst = addIndicatorCategorie(indicatorenLijst, metadata.filter(d => d.Categorie === eff))
-  indicatorenLijst = addIndicatorCategorie(indicatorenLijst, metadata.filter(d => d.Categorie === geb)).slice(0,5)
-  indicatorenLijst2019 = addIndicatorCategorie(indicatorenLijst2019, metadata.filter(d => d.Categorie === geb)).slice(5)
+  indicatorenLijst2023 = addIndicatorCategorie(indicatorenLijst2023, metadata.filter(d => d.Categorie === geb))
+  indicatorenLijst2019 = addIndicatorCategorie(indicatorenLijst2019, metadata_2019.filter(d => d.Categorie === geb))
   // indicatorenLijst = addIndicatorCategorie(indicatorenLijst, metadata.filter(d => d.Categorie === kwe))
 
+  alleIndicatoren2023.set(indicatorenLijst2023)
   alleIndicatoren2019.set(indicatorenLijst2019)
+  let jaarSelectiesTemp = {}
+  indicatorenLijst2019.forEach(indicator => {
+    if(typeof indicator.titel === 'string'){
+      jaarSelectiesTemp[indicator.titel] = '2023'
+    }
+  });
+  jaarSelecties.set(jaarSelectiesTemp)
 
-  return {'indicatorenLijst2023':indicatorenLijst, 'indicatorenLijst2019':indicatorenLijst2019}
+  return indicatorenLijst2023;
 }
 
 function addIndicatorCategorie(indicatorenLijst, indicatoren){

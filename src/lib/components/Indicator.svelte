@@ -1,5 +1,5 @@
 <script>
-  import { gemeenteSelection, buurtenInGemeenteJSONData, alleIndicatoren2019, alleBuurtenJSONData, gemeenteCodeAfkorting, gemeenteNaamAfkorting } from "$lib/stores";
+  import { gemeenteSelection, buurtenInGemeenteJSONData, jaarSelecties, alleBuurtenJSONData, gemeenteCodeAfkorting, gemeenteNaamAfkorting, alleIndicatoren2019, alleIndicatoren2023 } from "$lib/stores";
   import BeeswarmPlot from "./BeeswarmPlot.svelte";
   import Stats from "./Stats.svelte";
   import { scaleLinear, extent, scaleOrdinal } from 'd3';
@@ -9,16 +9,25 @@
   import { afterUpdate } from "svelte";
   import { t } from '$lib/i18n/translate.js';
   import { getClassByIndicatorValue } from "$lib/noncomponents/getClassByIndicatorValue";
+  import YearSwitch from "./YearSwitch.svelte";
 
 
   export let indicatorHeight
   export let indicator
 
+  $: {
+    if($jaarSelecties[indicator.titel] === '2019'){
+      indicator = $alleIndicatoren2019.filter(ind => ind.titel === indicator.titel)[0]
+    }else{
+      indicator = $alleIndicatoren2023.filter(ind => ind.titel === indicator.titel)[0]
+    }
+  }
+
   let graphWidth;
   let mapWidth;
 
-  const titleHeight = indicatorHeight*0.2
-  const bodyHeight = indicatorHeight*0.8
+  const titleHeight = indicatorHeight*0.23
+  const bodyHeight = indicatorHeight*0.77
 
   let indicatorValueColorscale = null
 
@@ -68,6 +77,9 @@
     <h4 style='margin:0px; color:#BB9012'>{t("Categorie")}: {indicator.categorie}</h4>
     <h2 style='padding:5px 15px 5px 15px; margin:10px 0px 7px 0px; background-color:#36575B; border-radius:15px; color:white'>{indicator.titel}</h2>
     <h4 style='margin:0px; padding:0px 10px 0px 10px; font-weight:normal; color:#7e7975; text-align: center;'>{indicator.subtitel}</h4>
+    {#if indicator.titel === 'Boomkroonbedekking'}
+      <YearSwitch {indicator} />
+    {/if}
   </div>
   <div class='indicator-body' style='height: {bodyHeight}px'>
     {#if indicator.numerical === true}
@@ -77,12 +89,7 @@
       <div class='indicator-graph' style='height:{bodyHeight*0.4}px' bind:clientWidth={graphWidth}>
         {#if $gemeenteSelection !== null}
           <svg class={'beeswarm_' + indicator.attribute}>
-            {#if ['Boomkroonbedekking', 'Boomkroonbedekking binnen 500 meter per pand '].includes(indicator.titel)}
-              <BeeswarmPlot {graphWidth} indicatorHeight={bodyHeight*0.2} type='upper_beeswarm' {indicator} {indicatorValueColorscale} buurtenInGemeenteFeaturesClone={structuredClone($buurtenInGemeenteJSONData.features)}/>
-              <BeeswarmPlot {graphWidth} indicatorHeight={bodyHeight*0.2} type='lower_beeswarm' indicator={$alleIndicatoren2019.filter(indicator2019 => indicator2019.attribute.split('_20')[0] === indicator.attribute.split('_20')[0])[0]} {indicatorValueColorscale} buurtenInGemeenteFeaturesClone={structuredClone($buurtenInGemeenteJSONData.features)}/>
-            {:else}
-              <BeeswarmPlot {graphWidth} indicatorHeight={bodyHeight*0.2} type='beeswarm' {indicator} {indicatorValueColorscale} buurtenInGemeenteFeaturesClone={structuredClone($buurtenInGemeenteJSONData.features)}/>
-            {/if}
+            <BeeswarmPlot {graphWidth} indicatorHeight={bodyHeight*0.4} type='beeswarm' {indicator} {indicatorValueColorscale} buurtenInGemeenteFeaturesClone={structuredClone($buurtenInGemeenteJSONData.features)}/>
             <text x={graphWidth/2} y={bodyHeight*0.4-18} fill='#645F5E' text-anchor='middle' font-size='14'>{indicator.plottitel} per buurt in gemeente {$alleBuurtenJSONData.features.filter(gemeente => gemeente.properties[$gemeenteCodeAfkorting] === $gemeenteSelection)[0].properties[$gemeenteNaamAfkorting]}</text>
           </svg>
         {:else}
@@ -126,8 +133,9 @@
     flex-direction: column;
     background-color: whitesmoke;
     align-items: center;
-    justify-content: center;
+    justify-content: top;
     border-radius: 10px;
+    padding-top: 10px;
   }
 
   .indicator-graph{

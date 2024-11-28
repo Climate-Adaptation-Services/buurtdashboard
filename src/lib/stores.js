@@ -21,6 +21,9 @@ export const wijktypeAfkorting = readable('def_wijkty')
 
 export const indicatorenSelectie = writable([])
 export const alleIndicatoren2019 = writable([])
+export const alleIndicatoren2023 = writable([])
+export const jaarSelecties = writable({})
+export const indicatorYearChanged = writable([])
 
 export const geselecteerdeBuurtJSONData = derived(
   [alleBuurtenJSONData, buurtSelection],
