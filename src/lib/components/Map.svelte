@@ -48,7 +48,7 @@
             : '#000000'
           : (indicator.aggregatedIndicator)
             ? indicatorValueColorscale(mostCommonClass(indicator, feature))
-            : indicatorValueColorscale(getClassByIndicatorValue(indicator, indicator, feature.properties[indicator.attribute]))
+            : indicatorValueColorscale(getClassByIndicatorValue(indicator, feature.properties[indicator.attribute]))
       }
       stroke={(mapType === 'main map') 
         ? "grey" 

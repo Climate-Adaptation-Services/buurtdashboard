@@ -14,6 +14,7 @@ export const nederlands = {
   "Kwetsbaarheid": "Kwetsbaarheid",
   "Nederland": "Nederland",
   "Wijktype": "Wijktype",
+  "geen_wijktype": "Geen wijktype",
   "Geen_data": "Geen data",
   "Gevoelstemperatuur":"Gevoelstemperatuur",
   'Grondwaterstand 2050 hoog':'Grondwaterstand 2050 hoog',

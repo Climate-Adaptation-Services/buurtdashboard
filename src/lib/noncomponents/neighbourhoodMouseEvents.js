@@ -7,7 +7,7 @@ import { mostCommonClass } from './mostCommonClass';
 import center from '@turf/center'
 import { t } from '$lib/i18n/translate.js';
 
-export function mouseOver(e, feature, indicator, mapType, indicatorValueColorscale, projection){
+export function mouseOver(e, feature, indicator, mapType, indicatorValueColorscale, projection, beeswarmMargin){
   const shapeClassName = getClassName(feature, 'path', indicator, mapType)
   const circleClassName = getClassName(feature, 'node', indicator, mapType)
   let tooltipCenter
@@ -35,7 +35,7 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
         .raise()
     }
 
-    if(mapType === 'main map' || mapType === 'indicator map'){
+    if(mapType === 'indicator map'){
       const tooltipValueColor = (indicator.numerical) 
         ? (feature.properties[indicator.attribute])
           ? indicatorValueColorscale(feature.properties[indicator.attribute]) 
@@ -76,7 +76,7 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
 
       let elem = document.getElementsByClassName('beeswarm_' + indicator.attribute)[0]
       let rectmap = elem.getBoundingClientRect();
-      tooltipCenter = [feature.x + rectmap.left + margin.left, rectmap.top + margin.top + feature.y + 10]
+      tooltipCenter = [feature.x + rectmap.left + beeswarmMargin.left, rectmap.top + beeswarmMargin.top + feature.y + 10]
     } 
   }
   // @ts-ignore

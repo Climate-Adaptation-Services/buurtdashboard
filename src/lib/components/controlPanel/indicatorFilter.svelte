@@ -50,7 +50,7 @@
 
 {#if browser}
   <div class='multiselectdiv'>
-    <p style='margin-bottom:5px'>{`Filter ${t("indicators")}:`}</p>
+    <p style='margin-bottom:5px'>{`Filter ${t("indicatoren")}:`}</p>
     <MultiSelect bind:value={$indicatorsSelection} options={indicators} on:add={handleIndicatorFilterAdd} on:remove={handleIndicatorFilterRemove} on:removeAll={handleIndicatorFilterClear}/>
   </div>
 {/if}

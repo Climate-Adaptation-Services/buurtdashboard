@@ -79,7 +79,7 @@
         {#if $municipalitySelection !== null}
           <BeeswarmPlot {graphWidth} indicatorHeight={bodyHeight*0.4} {indicator} {indicatorValueColorscale} NeighbourhoodsInGemeenteFeaturesClone={structuredClone($neighbourhoodsInMunicipalityJSONData.features)}/>
         {:else}
-          <p style='text-align:center; padding-top:50px; font-size:18px; position:absolute; left:{graphWidth/3.4}px'><em>{t("Selecteer_municipality")}...</em></p>
+          <p style='text-align:center; padding-top:50px; font-size:18px; position:absolute; left:{graphWidth/3.4}px'><em>{t("Selecteer_gemeente")}...</em></p>
         {/if}
       </div>
     {:else}

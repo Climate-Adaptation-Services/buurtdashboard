@@ -12,7 +12,7 @@
   const margin = {top:30, bottom:30, left:30, right:0}
   $: legendElementWidth = (graphWidth-margin.left-margin.right) / 3
 
-  const klasseNamen = Object.keys(indicator.klassen)
+  const klasseNamen = Object.keys(indicator.classes)
 
 </script>
 

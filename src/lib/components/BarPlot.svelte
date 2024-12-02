@@ -4,7 +4,7 @@
   import { checkContrast } from "$lib/noncomponents/checkContrast";
   import { getRegionName } from "$lib/noncomponents/getRegionName";
   import { barPlotMouseOut, barPlotMouseOver } from "$lib/noncomponents/barPlotMouseEvents";
-  import { berekenPercentagesVoorElkeKlasseMultiIndicator, berekenPercentagesVoorElkeKlasseSingleIndicator } from "$lib/noncomponents/berekenPercentagesVoorElkeKlasse";
+  import { calcPercentagesForEveryClassMultiIndicator, calcPercentagesForEveryClassSingleIndicator } from "$lib/noncomponents/calcPercentagesForEveryClass";
 
   export let graphWidth;
   export let indicatorHeight;
@@ -15,7 +15,7 @@
 
   const margin = {bottom:0, top:30, left:30, right:30}
 
-  const berekenPercentagesVoorElkeKlasse = (aggregated) ? berekenPercentagesVoorElkeKlasseMultiIndicator : berekenPercentagesVoorElkeKlasseSingleIndicator
+  const berekenPercentagesVoorElkeKlasse = (aggregated) ? calcPercentagesForEveryClassMultiIndicator : calcPercentagesForEveryClassSingleIndicator
 
   const nederlandValues = berekenPercentagesVoorElkeKlasse(indicator, $allNeighbourhoodsJSONData, 'Nederland')
   let barPlotData = []
@@ -40,7 +40,7 @@
   }
 
   $: stackedData = stack()
-    .keys(Object.keys(indicator.klassen))
+    .keys(Object.keys(indicator.classes))
     (barPlotData)
   
   $: xScale = scaleLinear()

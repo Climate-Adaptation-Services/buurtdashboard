@@ -23,7 +23,7 @@
 
   $: districtType = ($allNeighbourhoodsJSONData && $neighbourhoodSelection !== null && $selectedNeighbourhoodJSONData.properties[$districtTypeAbbreviation]) 
     ? $selectedNeighbourhoodJSONData.properties[$districtTypeAbbreviation]
-    : 'Geen districtType'
+    : t('geen_wijktype')
 
   function limitDropdownLabelLength(label){
     return (label.length > 31) ? label.slice(0,29) + '...' : label

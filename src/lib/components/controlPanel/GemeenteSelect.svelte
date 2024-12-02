@@ -26,4 +26,4 @@
 </script>
 
 <p class='select-title'>{t("Gemeente")}:</p>
-<Select items={lijstAlleGemeentesVoorDropdown} placeholder={t("Zoek_municipality")} value={$municipalitySelection} on:change={handleGemeenteChange} on:clear={handleGemeenteClear}/>
+<Select items={lijstAlleGemeentesVoorDropdown} placeholder={t("Zoek_gemeente")} value={$municipalitySelection} on:change={handleGemeenteChange} on:clear={handleGemeenteClear}/>

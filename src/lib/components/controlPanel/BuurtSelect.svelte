@@ -26,5 +26,5 @@
 
 {#if $municipalitySelection !== null}
   <p class='select-title'>{t("Buurt")}:</p>
-  <Select items={lijstAlleBuurtenInGemeenteVoorDropdown} placeholder="{t("Zoek_neighbourhood")}..." value={$neighbourhoodSelection} on:change={handleBuurtChange} on:clear={handleBuurtClear}/>
+  <Select items={lijstAlleBuurtenInGemeenteVoorDropdown} placeholder="{t("Zoek_buurt")}..." value={$neighbourhoodSelection} on:change={handleBuurtChange} on:clear={handleBuurtClear}/>
 {/if}
