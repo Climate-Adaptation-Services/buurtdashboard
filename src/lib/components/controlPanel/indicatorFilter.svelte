@@ -8,7 +8,7 @@
 
   export let allIndicators
 
-  const indicators = allIndicators.map(d => d.titel)
+  const indicators = allIndicators.map(d => d.title)
 
   function handleIndicatorFilterAdd(e){
     $URLParams.append('indicator', e.detail.option);

@@ -55,7 +55,7 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
       
       // @ts-ignore
       tooltipValues.set({
-        indicator: indicator.titel, 
+        indicator: indicator.title, 
         value: tooltipValue, 
         color: tooltipValueColor
       })
@@ -69,7 +69,7 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
     }else{
       // @ts-ignore
       tooltipValues.set({
-        indicator: indicator.titel, 
+        indicator: indicator.title, 
         value: Math.round(feature.properties[indicator.attribute]*100)/100, 
         color: indicatorValueColorscale(feature.properties[indicator.attribute])
       })

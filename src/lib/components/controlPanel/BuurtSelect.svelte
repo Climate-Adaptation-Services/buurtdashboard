@@ -4,7 +4,7 @@
   import Select from 'svelte-select'
   import { t } from '$lib/i18n/translate.js';
 
-  export let lijstAlleBuurtenInGemeenteVoorDropdown
+  export let lijstAlleBuurtenInMunicipalityVoorDropdown
 
   function handleBuurtChange(e){
     $URLParams.set('neighbourhood', e.detail.value);
@@ -26,5 +26,5 @@
 
 {#if $municipalitySelection !== null}
   <p class='select-title'>{t("Buurt")}:</p>
-  <Select items={lijstAlleBuurtenInGemeenteVoorDropdown} placeholder="{t("Zoek_buurt")}..." value={$neighbourhoodSelection} on:change={handleBuurtChange} on:clear={handleBuurtClear}/>
+  <Select items={lijstAlleBuurtenInMunicipalityVoorDropdown} placeholder="{t("Zoek_buurt")}..." value={$neighbourhoodSelection} on:change={handleBuurtChange} on:clear={handleBuurtClear}/>
 {/if}

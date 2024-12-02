@@ -11,14 +11,14 @@
   export let allIndicators
 
   let lijstAlleGemeentesVoorDropdown;
-  let lijstAlleBuurtenInGemeenteVoorDropdown;
+  let lijstAlleBuurtenInMunicipalityVoorDropdown;
   $: if($allMunicipalitiesJSONData !== null){
     lijstAlleGemeentesVoorDropdown = $allMunicipalitiesJSONData.features.map(municipality => {return {'value':municipality.properties[$municipalityCodeAbbreviation], 'label':limitDropdownLabelLength(municipality.properties[$municipalityNameAbbreviation])}})
     lijstAlleGemeentesVoorDropdown = lo.orderBy(lijstAlleGemeentesVoorDropdown, [municipality => municipality.label], ['asc']);
   }
   $: if($municipalitySelection !== null){
-    lijstAlleBuurtenInGemeenteVoorDropdown = $neighbourhoodsInMunicipalityJSONData.features.map(neighbourhood => {return {'value':neighbourhood.properties[$neighbourhoodCodeAbbreviation], 'label':limitDropdownLabelLength(neighbourhood.properties[$neighbourhoodNameAbbreviation])}})
-    lijstAlleBuurtenInGemeenteVoorDropdown = lo.orderBy(lijstAlleBuurtenInGemeenteVoorDropdown, [neighbourhood => neighbourhood.label], ['asc']);
+    lijstAlleBuurtenInMunicipalityVoorDropdown = $neighbourhoodsInMunicipalityJSONData.features.map(neighbourhood => {return {'value':neighbourhood.properties[$neighbourhoodCodeAbbreviation], 'label':limitDropdownLabelLength(neighbourhood.properties[$neighbourhoodNameAbbreviation])}})
+    lijstAlleBuurtenInMunicipalityVoorDropdown = lo.orderBy(lijstAlleBuurtenInMunicipalityVoorDropdown, [neighbourhood => neighbourhood.label], ['asc']);
   }
 
   $: districtType = ($allNeighbourhoodsJSONData && $neighbourhoodSelection !== null && $selectedNeighbourhoodJSONData.properties[$districtTypeAbbreviation]) 
@@ -55,7 +55,7 @@
       </div>
     </div>
     <GemeenteSelect {lijstAlleGemeentesVoorDropdown} />
-    <BuurtSelect {lijstAlleBuurtenInGemeenteVoorDropdown} />
+    <BuurtSelect {lijstAlleBuurtenInMunicipalityVoorDropdown} />
     {#if $neighbourhoodSelection !== null}
         <p style='color:white'>{t("Wijktype")}: <strong>{districtType}</strong></p>
     {/if}

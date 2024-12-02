@@ -16,7 +16,7 @@
 
 </script>
 
-<div class='barplot-legend' style='width:{graphWidth-margin.left-margin.right}px; margin-left:{margin.left}px; margin-top:{(indicator.titel !== 'Functionele gebieden') ? margin.top : 15}px'>
+<div class='barplot-legend' style='width:{graphWidth-margin.left-margin.right}px; margin-left:{margin.left}px; margin-top:{(indicator.title !== 'Functionele gebieden') ? margin.top : 15}px'>
   {#each klasseNamen as klasse,i}
     <div class='legend-element' style='width:{legendElementWidth}px'>
       <svg>

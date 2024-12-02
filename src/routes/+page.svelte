@@ -52,7 +52,7 @@
     setTimeout(() => {
       displayedIndicators = ($indicatorsSelection.length === 0) 
         ? allIndicators
-        : allIndicators.filter(d => $indicatorsSelection.includes(d['titel']))
+        : allIndicators.filter(d => $indicatorsSelection.includes(d['title']))
     }, 1)
     setTimeout(() => {
       municipalitySelection.set(tempGemeenteSelection)

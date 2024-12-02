@@ -47,7 +47,7 @@
     xScaleMin -= 10
   }
 
-  $: xDomain = (indicator.titel !== t('Grondwaterstand 2050 hoog'))
+  $: xDomain = (indicator.title !== t('Grondwaterstand 2050 hoog'))
     ? [0, max([medianValuesDict['medianValueNederland'], medianValuesDict['medianValueGemeente'], medianValuesDict['medianValueBuurt'], medianValuesDict['medianValueWijktype']])]
     : [0, min([medianValuesDict['medianValueNederland'], medianValuesDict['medianValueGemeente'], medianValuesDict['medianValueBuurt'], medianValuesDict['medianValueWijktype']])]
 

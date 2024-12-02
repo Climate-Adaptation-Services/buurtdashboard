@@ -11,27 +11,27 @@
   export let indicatorHeight;
   export let indicator;
   export let indicatorValueColorscale;
-  export let NeighbourhoodsInGemeenteFeaturesClone
+  export let NeighbourhoodsInMunicipalityFeaturesClone
 
   const margin = {bottom:50, top:20, left:30, right:30}
 
   // filter out null values
-  NeighbourhoodsInGemeenteFeaturesClone = NeighbourhoodsInGemeenteFeaturesClone.filter(d => d.properties[indicator.attribute] !== null)
-  if(indicator.titel === 'Groen per inwoner'){
-    NeighbourhoodsInGemeenteFeaturesClone = NeighbourhoodsInGemeenteFeaturesClone.filter(d => +d.properties[indicator.attribute] > 0)
+  NeighbourhoodsInMunicipalityFeaturesClone = NeighbourhoodsInMunicipalityFeaturesClone.filter(d => d.properties[indicator.attribute] !== null)
+  if(indicator.title === 'Groen per inwoner'){
+    NeighbourhoodsInMunicipalityFeaturesClone = NeighbourhoodsInMunicipalityFeaturesClone.filter(d => +d.properties[indicator.attribute] > 0)
   }
 
-  $: xScaleBeeswarm = (indicator.titel !== 'Groen per inwoner')
+  $: xScaleBeeswarm = (indicator.title !== 'Groen per inwoner')
     ? scaleLinear()
-        .domain(extent(NeighbourhoodsInGemeenteFeaturesClone, d => +d.properties[indicator.attribute]))
+        .domain(extent(NeighbourhoodsInMunicipalityFeaturesClone, d => +d.properties[indicator.attribute]))
         .range([0, graphWidth-margin.left-margin.right])
         .nice()
     : scaleLog()
-        .domain(extent(NeighbourhoodsInGemeenteFeaturesClone, d => +d.properties[indicator.attribute]))
+        .domain(extent(NeighbourhoodsInMunicipalityFeaturesClone, d => +d.properties[indicator.attribute]))
         .range([0, graphWidth-margin.left-margin.right])
         .nice()
 
-  let simulation = forceSimulation(NeighbourhoodsInGemeenteFeaturesClone)
+  let simulation = forceSimulation(NeighbourhoodsInMunicipalityFeaturesClone)
   let nodes = []; // Create an empty array to be populated when simulation ticks
   simulation.on("tick", () => {
       nodes = simulation.nodes(); // Repopulate and update
@@ -39,7 +39,7 @@
 
   // Run the simulation whenever any of the variables inside of it change
   $: {
-    simulation = forceSimulation(NeighbourhoodsInGemeenteFeaturesClone)
+    simulation = forceSimulation(NeighbourhoodsInMunicipalityFeaturesClone)
       .force("x", forceX().x(d => xScaleBeeswarm(d.properties[indicator.attribute]))
         .strength(d => (xScaleBeeswarm(d.properties[indicator.attribute]) > 0) ? 0.1 : 1))
       .force("y", forceY().y(70)
@@ -55,7 +55,7 @@
 
 <svg class={'beeswarm_' + indicator.attribute}>
   <XAxis xScale={xScaleBeeswarm} height={indicatorHeight} {margin}/>
-  {#if indicator.titel === 'Groen per inwoner'}
+  {#if indicator.title === 'Groen per inwoner'}
     <text x={graphWidth/2} y={indicatorHeight - margin.bottom - 5} text-anchor='middle' font-size='13'>Let op logaritmische schaal</text>
   {/if}
 
@@ -71,7 +71,7 @@
       />
     {/each}
   </g>
-  <text x={graphWidth/2} y={indicatorHeight-18} fill='#645F5E' text-anchor='middle' font-size='14'>{indicator.plottitel} per neighbourhood in municipality {$allMunicipalitiesJSONData.features.filter(municipality => municipality.properties['GM_CODE'] === $municipalitySelection)[0].properties[$municipalityNameAbbreviation]}</text>
+  <text x={graphWidth/2} y={indicatorHeight-18} fill='#645F5E' text-anchor='middle' font-size='14'>{indicator.plottitle} per neighbourhood in municipality {$allMunicipalitiesJSONData.features.filter(municipality => municipality.properties['GM_CODE'] === $municipalitySelection)[0].properties[$municipalityNameAbbreviation]}</text>
 </svg>
 
 
