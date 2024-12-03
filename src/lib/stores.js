@@ -82,7 +82,7 @@ export const circleRadius = derived(
   [buurtenInGemeenteJSONData],
   ([$buurtenInGemeenteJSONData]) => {
     if($buurtenInGemeenteJSONData){
-      return ($buurtenInGemeenteJSONData.features.length > 150) ? 3 : 5
+      return ($buurtenInGemeenteJSONData.features.length > 150) ? 3 : 4
     }else{
       return 0
     }

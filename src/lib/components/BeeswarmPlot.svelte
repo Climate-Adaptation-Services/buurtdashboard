@@ -44,33 +44,35 @@
     nodes = simulation.nodes(); // Repopulate and update
   });  
 
-
+  let alpha = 0.5
   // Run the simulation whenever any of the variables inside of it change
   $: {
     simulation
-      .force("x", forceX().x(d => xScaleBeeswarm(d.properties[indicator.attribute])-10)
-        .strength(d => (xScaleBeeswarm(d.properties[indicator.attribute]) > 0) ? 0.1 : 1))
-      .force("y", forceY().y(70)
-        .strength(d => (xScaleBeeswarm(d.properties[indicator.attribute]) > 0) ? 0.05 : 0.01))
-      .force('charge', forceManyBody().strength(-0.7))
-      .force("collide", forceCollide().radius($circleRadius*1.2))
-      .alpha(0.5) // [0, 1] The rate at which the simulation finishes. You should increase this if you want a faster simulation, or decrease it if you want more "movement" in the simulation.
-      .alphaDecay(0.001) // [0, 1] The rate at which the simulation alpha approaches 0. you should decrease this if your bubbles are not completing their transitions between simulation states.    
+      .force("x", forceX().x(d => xScaleBeeswarm(d.properties[indicator.attribute])).strength(0.7))
+        // .strength(d => (xScaleBeeswarm(d.properties[indicator.attribute]) > 0) ? 0.8 : 1))
+      .force("y", forceY().y(70).strength(0.05))
+        // .strength(d => (xScaleBeeswarm(d.properties[indicator.attribute]) > 0) ? 0.03 : 0.01))
+      .force('charge', forceManyBody().strength(0.5))
+      .force("collide", forceCollide().radius($circleRadius*1.25))
+      .alpha(alpha) // [0, 1] The rate at which the simulation finishes. You should increase this if you want a faster simulation, or decrease it if you want more "movement" in the simulation.
+      .alphaDecay(0.005) // [0, 1] The rate at which the simulation alpha approaches 0. you should decrease this if your bubbles are not completing their transitions between simulation states.    
       .restart()
 
-      let maxAlpha = 0.8; // Max alpha value to accelerate the simulation
-      let currentAlpha = 0
+      alpha = 0.2
+
+      // let maxAlpha = 0.8; // Max alpha value to accelerate the simulation
+      // let currentAlpha = 0
 
       // Phase 1: Gradually increase alpha (build-up phase)
-      let buildUpInterval = setInterval(function() {
-        if (currentAlpha < maxAlpha) {
-          currentAlpha += 0.1;  // Increase alpha gradually
-          simulation.alpha(currentAlpha)
-        } else {
-          clearInterval(buildUpInterval);  // Stop when maxAlpha is reached
-          // After reaching max alpha, start the slowdown phase
-        }
-      }, 100);  // Increase alpha every 100ms (you can adjust timing here)
+      // let buildUpInterval = setInterval(function() {
+      //   if (currentAlpha < maxAlpha) {
+      //     currentAlpha += 0.1;  // Increase alpha gradually
+      //     simulation.alpha(currentAlpha)
+      //   } else {
+      //     clearInterval(buildUpInterval);  // Stop when maxAlpha is reached
+      //     // After reaching max alpha, start the slowdown phase
+      //   }
+      // }, 100);  // Increase alpha every 100ms (you can adjust timing here)
 
       // function slowDown(){
       //   // Phase 2: Gradually slow down
