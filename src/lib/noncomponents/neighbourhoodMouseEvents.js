@@ -123,12 +123,12 @@ export function click(feature, indicator, mapType){
 
   const newSelection = feature.properties[get(currentCodeAbbreviation)].replaceAll(' ','').replaceAll('(','').replaceAll(')','')
   if(get(currentOverviewLevel) === 'Nederland'){
-    get(URLParams).set('municipality', newSelection);
+    get(URLParams).set('gemeente', newSelection);
     window.history.pushState(null, '', '?' + get(URLParams).toString());
 
     municipalitySelection.set(newSelection)
   }else{
-    get(URLParams).set('neighbourhood', newSelection);
+    get(URLParams).set('buurt', newSelection);
     window.history.pushState(null, '', '?' + get(URLParams).toString());
 
     neighbourhoodSelection.set(newSelection)

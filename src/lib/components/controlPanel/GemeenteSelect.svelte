@@ -7,7 +7,7 @@
     export let lijstAlleGemeentesVoorDropdown
     
     function handleGemeenteChange(e){
-      $URLParams.set('municipality', e.detail.value);
+      $URLParams.set('gemeente', e.detail.value);
       window.history.pushState(null, '', '?' + $URLParams.toString());
 
       municipalitySelection.set(null)
@@ -16,8 +16,8 @@
     }
 
     function handleGemeenteClear(e){
-      $URLParams.delete('municipality')
-      $URLParams.delete('neighbourhood')
+      $URLParams.delete('gemeente')
+      $URLParams.delete('buurt')
       window.history.replaceState(null, '', '?' + $URLParams.toString());
 
       municipalitySelection.set(null)
