@@ -1,12 +1,11 @@
 <script>
 
-  import { alleGemeentesJSONData, gemeenteSelection, buurtSelection, buurtCodeAfkorting, gemeenteNaamAfkorting, circleRadius, indicatorYearChanged } from "$lib/stores";
+  import { alleGemeentesJSONData, gemeenteSelection, buurtSelection, buurtCodeAfkorting, gemeenteNaamAfkorting, circleRadius, indicatorYearChanged, alleIndicatoren2019 } from "$lib/stores";
   import { extent, scaleLinear, scaleLog, selectAll } from "d3";
   import XAxis from '$lib/components/XAxis.svelte';
   import { forceSimulation, forceY, forceX, forceCollide, forceManyBody } from "d3-force";
   import { getClassName } from '$lib/noncomponents/getClassName';
   import { click, mouseOut, mouseOver } from "$lib/noncomponents/buurtMouseEvents";
-    import { onMount } from "svelte";
 
   export let graphWidth;
   export let indicatorHeight;
@@ -22,13 +21,26 @@
 
   const margin = {bottom:50, top:20, left:30, right:30}
 
+
+  let xScaleExtent;
+  $: {
+    if($alleIndicatoren2019.map(d => d.titel).includes(indicator.titel)){
+      const attributeYearSliced = indicator.attribute.slice(0,-4)
+      const featuresCombined = [...buurtenInGemeenteFeaturesClone.map(d => +d.properties[attributeYearSliced + '2019']), ...buurtenInGemeenteFeaturesClone.map(d => +d.properties[attributeYearSliced + '2023'])]
+      console.log('xscale',featuresCombined, attributeYearSliced, $alleIndicatoren2019.map(d => d.titel), $alleIndicatoren2019)
+      xScaleExtent = extent(featuresCombined)
+    }else{
+      xScaleExtent = extent(buurtenInGemeenteFeaturesClone, d => +d.properties[indicator.attribute])
+    }
+  } 
+  
   $: xScaleBeeswarm = (indicator.titel !== 'Groen per inwoner')
     ? scaleLinear()
-        .domain(extent(buurtenInGemeenteFeaturesClone, d => +d.properties[indicator.attribute]))
+        .domain(xScaleExtent)
         .range([0, graphWidth-margin.left-margin.right])
         .nice()
     : scaleLog()
-        .domain(extent(buurtenInGemeenteFeaturesClone, d => +d.properties[indicator.attribute]))
+        .domain(xScaleExtent)
         .range([0, graphWidth-margin.left-margin.right])
         .nice()
 
