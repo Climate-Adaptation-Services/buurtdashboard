@@ -27,7 +27,6 @@
     if($alleIndicatoren2019.map(d => d.titel).includes(indicator.titel)){
       const attributeYearSliced = indicator.attribute.slice(0,-4)
       const featuresCombined = [...buurtenInGemeenteFeaturesClone.map(d => +d.properties[attributeYearSliced + '2019']), ...buurtenInGemeenteFeaturesClone.map(d => +d.properties[attributeYearSliced + '2023'])]
-      console.log('xscale',featuresCombined, attributeYearSliced, $alleIndicatoren2019.map(d => d.titel), $alleIndicatoren2019)
       xScaleExtent = extent(featuresCombined)
     }else{
       xScaleExtent = extent(buurtenInGemeenteFeaturesClone, d => +d.properties[indicator.attribute])
