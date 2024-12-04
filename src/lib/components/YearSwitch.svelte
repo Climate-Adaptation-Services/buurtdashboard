@@ -12,10 +12,10 @@
   function yearClick(year){
     selectedYear = year
 
-    $jaarSelecties[indicator.titel] = year
+    $jaarSelecties[indicator.title] = year
     jaarSelecties.set($jaarSelecties)
 
-    indicatorYearChanged.set([indicator.titel, year])
+    indicatorYearChanged.set([indicator.title, year])
   }
 
 </script>
