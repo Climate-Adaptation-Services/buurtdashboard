@@ -1,16 +1,16 @@
 <script>
-  import { gemeenteSelection, buurtSelection, URLParams } from "$lib/stores";
+  import { municipalitySelection, neighbourhoodSelection, URLParams } from "$lib/stores";
   import { selectAll } from 'd3';
   import Select from 'svelte-select'
   import { t } from '$lib/i18n/translate.js';
 
-  export let lijstAlleBuurtenInGemeenteVoorDropdown
+  export let lijstAlleBuurtenInMunicipalityVoorDropdown
 
   function handleBuurtChange(e){
     $URLParams.set('buurt', e.detail.value);
     window.history.pushState(null, '', '?' + $URLParams.toString());
 
-    buurtSelection.set(e.detail.value)
+    neighbourhoodSelection.set(e.detail.value)
     selectAll('.svgelements_' + e.detail.value)
       .raise()
   }
@@ -19,12 +19,12 @@
     $URLParams.delete('buurt')
     window.history.replaceState(null, '', '?' + $URLParams.toString());
 
-    buurtSelection.set(null)
+    neighbourhoodSelection.set(null)
   }
 
 </script>
 
-{#if $gemeenteSelection !== null}
+{#if $municipalitySelection !== null}
   <p class='select-title'>{t("Buurt")}:</p>
-  <Select items={lijstAlleBuurtenInGemeenteVoorDropdown} placeholder="{t("Zoek_buurt")}..." value={$buurtSelection} on:change={handleBuurtChange} on:clear={handleBuurtClear}/>
+  <Select items={lijstAlleBuurtenInMunicipalityVoorDropdown} placeholder="{t("Zoek_buurt")}..." value={$neighbourhoodSelection} on:change={handleBuurtChange} on:clear={handleBuurtClear}/>
 {/if}

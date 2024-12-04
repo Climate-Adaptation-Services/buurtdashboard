@@ -12,11 +12,11 @@
   const margin = {top:30, bottom:30, left:30, right:0}
   $: legendElementWidth = (graphWidth-margin.left-margin.right) / 3
 
-  const klasseNamen = Object.keys(indicator.klassen)
+  const klasseNamen = Object.keys(indicator.classes)
 
 </script>
 
-<div class='barplot-legend' style='width:{graphWidth-margin.left-margin.right}px; margin-left:{margin.left}px; margin-top:{(indicator.titel !== 'Functionele gebieden') ? margin.top : 15}px'>
+<div class='barplot-legend' style='width:{graphWidth-margin.left-margin.right}px; margin-left:{margin.left}px; margin-top:{(indicator.title !== 'Functionele gebieden') ? margin.top : 15}px'>
   {#each klasseNamen as klasse,i}
     <div class='legend-element' style='width:{legendElementWidth}px'>
       <svg>

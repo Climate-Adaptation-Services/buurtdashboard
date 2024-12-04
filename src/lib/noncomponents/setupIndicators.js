@@ -5,52 +5,52 @@ export function setupIndicators(data, eff, geb, kwe){
     ? data.metadata_english
     : data.metadata
 
-  let indicatorenLijst = []
+  let indicatorsList = []
 
-  // let indicatorenOpCategorie = [...metadata.filter(d => d.Categorie === 'Gebiedskenmerken'), ...metadata.filter(d => d.Categorie === 'Effecten'), ...metadata.filter(d => d.Categorie === 'Kwetsbaarheid')]
-  indicatorenLijst = addIndicatorCategorie(indicatorenLijst, metadata.filter(d => d.Categorie === eff))
-  indicatorenLijst = addIndicatorCategorie(indicatorenLijst, metadata.filter(d => d.Categorie === geb))
-  indicatorenLijst = addIndicatorCategorie(indicatorenLijst, metadata.filter(d => d.Categorie === kwe))
+  // let indicatorsOpCategory = [...metadata.filter(d => d.Category === 'Gebiedskenmerken'), ...metadata.filter(d => d.Category === 'Effecten'), ...metadata.filter(d => d.Category === 'Kwetsbaarheid')]
+  indicatorsList = addIndicatorCategory(indicatorsList, metadata.filter(d => d.Categorie === eff))
+  indicatorsList = addIndicatorCategory(indicatorsList, metadata.filter(d => d.Categorie === geb))
+  indicatorsList = addIndicatorCategory(indicatorsList, metadata.filter(d => d.Categorie === kwe))
 
-  console.log('indicatorenLijst', indicatorenLijst)
+  console.log('indicatorsList', indicatorsList)
 
-  return indicatorenLijst
+  return indicatorsList
 }
 
-function addIndicatorCategorie(indicatorenLijst, indicatoren){
+function addIndicatorCategory(indicatorsList, indicators){
   // dit is voor de kopjes in de filter dropdown
-  indicatorenLijst.push({titel:{'label':indicatoren[0].Categorie, 'disabled':true}})
+  indicatorsList.push({title:{'label':indicators[0].Categorie, 'disabled':true}})
 
-  indicatoren.forEach(indicator => {
-    let klassen = {}
+  indicators.forEach(indicator => {
+    let classes = {}
     if(indicator['kwantitatief / categoraal / multiline'] !== 'categoraal'){
       indicator.Domein.split(',').forEach((d,i) => {
-        klassen[d] = indicator.Indicatornaamtabel.split(',')[i]
+        classes[d] = indicator.Indicatornaamtabel.split(',')[i]
       });
     }else{
       indicator.Domein.split(',').forEach((d,i) => {
-        klassen[d] = indicator.klassenthresholds.split(',')[i]
+        classes[d] = indicator.klassenthresholds.split(',')[i]
       });
     }
 
     
-    indicatorenLijst.push({
-      titel:indicator.Titel, 
+    indicatorsList.push({
+      title:indicator.Titel, 
       attribute:indicator.Indicatornaamtabel.split(',')[0], 
-      subtitel:indicator.Subtitel, 
-      plottitel:indicator['Plottitel (enkel bij kwantitatief)'],
-      categorie:indicator.Categorie, 
+      subtitle:indicator.Subtitel, 
+      plottitle:indicator['Plottitel (enkel bij kwantitatief)'],
+      category:indicator.Categorie, 
       color:{
         domain:indicator.Domein.split(','), 
         range:indicator.Kleur.split(',')
       }, 
-      klassen:klassen,
+      classes:classes,
       numerical:(indicator['kwantitatief / categoraal / multiline'] === 'Kwantitatief') ? true : false, 
       link:indicator['Link kaartverhaal'],
-      multiline:(indicator['kwantitatief / categoraal / multiline'] === 'Multiline') ? true : false,
-      bron:indicator.Bron,
-      omschrijving:indicator['Tekst vraagteken'],
+      aggregatedIndicator:(indicator['kwantitatief / categoraal / multiline'] === 'Multiline') ? true : false,
+      source:indicator.Bron,
+      description:indicator['Tekst vraagteken'],
     })
   })
-  return indicatorenLijst
+  return indicatorsList
 }

@@ -14,6 +14,7 @@ export const english = {
   "Kwetsbaarheid": "Vulnerability",
   "Nederland": "Netherlands",
   "Wijktype": "District type",
+  "geen_wijktype": "No district type",
   "Geen_data": "No data",
   "Gevoelstemperatuur":"Perceived temperature",
   'Grondwaterstand 2050 hoog':'Groundwater level 2050 high',
