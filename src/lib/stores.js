@@ -82,7 +82,7 @@ export const circleRadius = derived(
   [neighbourhoodsInMunicipalityJSONData],
   ([$neighbourhoodsInMunicipalityJSONData]) => {
     if($neighbourhoodsInMunicipalityJSONData){
-      return ($neighbourhoodsInMunicipalityJSONData.features.length > 150) ? 3 : 5
+      return ($neighbourhoodsInMunicipalityJSONData.features.length > 150) ? 3 : 4.5
     }else{
       return 0
     }

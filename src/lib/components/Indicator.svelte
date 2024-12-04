@@ -1,5 +1,5 @@
 <script>
-  import { municipalitySelection, neighbourhoodsInMunicipalityJSONData, allNeighbourhoodsJSONData, alleIndicatoren2019, alleIndicatoren2023, jaarSelecties } from "$lib/stores";
+  import { municipalitySelection, neighbourhoodsInMunicipalityJSONData, allNeighbourhoodsJSONData, alleIndicatoren2019, alleIndicatoren2023, jaarSelecties, municipalityCodeAbbreviation, municipalityNameAbbreviation } from "$lib/stores";
   import BeeswarmPlot from "./BeeswarmPlot.svelte";
   import Stats from "./Stats.svelte";
   import { scaleLinear, extent, scaleOrdinal } from 'd3';
@@ -90,7 +90,7 @@
         {#if $municipalitySelection !== null}
           <svg class={'beeswarm_' + indicator.attribute}>
             <BeeswarmPlot {graphWidth} indicatorHeight={bodyHeight*0.4} {indicator} {indicatorValueColorscale} NeighbourhoodsInMunicipalityFeaturesClone={structuredClone($neighbourhoodsInMunicipalityJSONData.features)}/>
-            <text x={graphWidth/2} y={bodyHeight*0.4-18} fill='#645F5E' text-anchor='middle' font-size='14'>{indicator.plottitle} per buurt in gemeente {$allNeighbourhoodsJSONData.features.filter(gemeente => gemeente.properties[$gemeenteCodeAfkorting] === $gemeenteSelection)[0].properties[$gemeenteNaamAfkorting]}</text>
+            <text x={graphWidth/2} y={bodyHeight*0.4-18} fill='#645F5E' text-anchor='middle' font-size='14'>{indicator.plottitle} per buurt in gemeente {$allNeighbourhoodsJSONData.features.filter(municipality => municipality.properties[$municipalityCodeAbbreviation] === $municipalitySelection)[0].properties[$municipalityNameAbbreviation]}</text>
           </svg>
         {:else}
           <p style='text-align:center; padding-top:50px; font-size:18px; position:absolute; left:{graphWidth/3.4}px'><em>{t("Selecteer_gemeente")}...</em></p>

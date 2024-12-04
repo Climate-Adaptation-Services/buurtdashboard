@@ -1,6 +1,6 @@
 <script>
 
-  import { allMunicipalitiesJSONData, municipalitySelection, neighbourhoodSelection, neighbourhoodCodeAbbreviation, municipalityNameAbbreviation, circleRadius } from "$lib/stores";
+  import { allMunicipalitiesJSONData, municipalitySelection, neighbourhoodSelection, neighbourhoodCodeAbbreviation, municipalityNameAbbreviation, circleRadius, alleIndicatoren2019 } from "$lib/stores";
   import { extent, scaleLinear, scaleLog, selectAll } from "d3";
   import XAxis from '$lib/components/XAxis.svelte';
   import { forceSimulation, forceY, forceX, forceCollide, forceManyBody } from "d3-force";
@@ -14,9 +14,9 @@
   export let NeighbourhoodsInMunicipalityFeaturesClone
 
   // filter out null values
-  buurtenInGemeenteFeaturesClone = buurtenInGemeenteFeaturesClone.filter(d => d.properties[indicator.attribute] !== null)
+  NeighbourhoodsInMunicipalityFeaturesClone = NeighbourhoodsInMunicipalityFeaturesClone.filter(d => d.properties[indicator.attribute] !== null)
   if(indicator.title === 'Groen per inwoner'){
-    buurtenInGemeenteFeaturesClone = buurtenInGemeenteFeaturesClone.filter(d => +d.properties[indicator.attribute] > 0)
+    NeighbourhoodsInMunicipalityFeaturesClone = NeighbourhoodsInMunicipalityFeaturesClone.filter(d => +d.properties[indicator.attribute] > 0)
   }
 
   const margin = {bottom:50, top:20, left:30, right:30}
@@ -25,10 +25,10 @@
   $: {
     if($alleIndicatoren2019.map(d => d.title).includes(indicator.title)){
       const attributeYearSliced = indicator.attribute.slice(0,-4)
-      const featuresCombined = [...buurtenInGemeenteFeaturesClone.map(d => +d.properties[attributeYearSliced + '2019']), ...buurtenInGemeenteFeaturesClone.map(d => +d.properties[attributeYearSliced + '2023'])]
+      const featuresCombined = [...NeighbourhoodsInMunicipalityFeaturesClone.map(d => +d.properties[attributeYearSliced + '2019']), ...NeighbourhoodsInMunicipalityFeaturesClone.map(d => +d.properties[attributeYearSliced + '2023'])]
       xScaleExtent = extent(featuresCombined)
     }else{
-      xScaleExtent = extent(buurtenInGemeenteFeaturesClone, d => +d.properties[indicator.attribute])
+      xScaleExtent = extent(NeighbourhoodsInMunicipalityFeaturesClone, d => +d.properties[indicator.attribute])
     }
   } 
   
@@ -48,7 +48,7 @@
     NeighbourhoodsInMunicipalityFeaturesClone = NeighbourhoodsInMunicipalityFeaturesClone.filter(d => +d.properties[indicator.attribute] > 0)
   }
 
-  const simulation = forceSimulation(buurtenInGemeenteFeaturesClone)
+  const simulation = forceSimulation(NeighbourhoodsInMunicipalityFeaturesClone)
   let nodes = []; // Create an empty array to be populated when simulation ticks
   simulation.on("tick", () => {
     nodes = simulation.nodes(); // Repopulate and update
@@ -84,19 +84,6 @@
       //   }
       // }, 100);  // Increase alpha every 100ms (you can adjust timing here)
 
-      // function slowDown(){
-      //   // Phase 2: Gradually slow down
-      //   let slowDownInterval = setInterval(function() {
-      //     if (currentAlpha < 0) {
-      //       currentAlpha -= 0.1;  // Increase alpha gradually
-      //       simulation.alpha(currentAlpha)
-      //     } else {
-      //       clearInterval(slowDownInterval);  // Stop when maxAlpha is reached
-      //       // After reaching max alpha, start the slowdown phase
-      //       // simulation.stop()
-      //     }
-      //   }, 100);  // Increase alpha every 100ms (you can adjust timing here)
-      // }
   }
 
 </script>

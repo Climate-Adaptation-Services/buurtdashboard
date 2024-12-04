@@ -10,7 +10,7 @@ export function prepareJSONData(JSONdata){
   allMunicipalitiesJSONData.set(municipalityTopojson)
 
   let neighbourhoodTopojson = topojsonsimplify.presimplify(JSONdata[1])
-  neighbourhoodTopojson = topojson.feature(neighbourhoodTopojson, neighbourhoodTopojson.objects['Dordrecht_neighbourhooden'])
+  neighbourhoodTopojson = topojson.feature(neighbourhoodTopojson, neighbourhoodTopojson.objects['Dordrecht_buurten'])
 
   let neighbourhoodTopojson_features = neighbourhoodTopojson.features.map(neighbourhood => {
 
