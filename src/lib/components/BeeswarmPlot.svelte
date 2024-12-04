@@ -1,30 +1,29 @@
 <script>
 
-  import { alleGemeentesJSONData, gemeenteSelection, buurtSelection, buurtCodeAfkorting, gemeenteNaamAfkorting, circleRadius, indicatorYearChanged, alleIndicatoren2019 } from "$lib/stores";
+  import { allMunicipalitiesJSONData, municipalitySelection, neighbourhoodSelection, neighbourhoodCodeAbbreviation, municipalityNameAbbreviation, circleRadius } from "$lib/stores";
   import { extent, scaleLinear, scaleLog, selectAll } from "d3";
   import XAxis from '$lib/components/XAxis.svelte';
   import { forceSimulation, forceY, forceX, forceCollide, forceManyBody } from "d3-force";
   import { getClassName } from '$lib/noncomponents/getClassName';
-  import { click, mouseOut, mouseOver } from "$lib/noncomponents/buurtMouseEvents";
+  import { click, mouseOut, mouseOver } from "$lib/noncomponents/neighbourhoodMouseEvents";
 
   export let graphWidth;
   export let indicatorHeight;
   export let indicator;
   export let indicatorValueColorscale;
-  export let buurtenInGemeenteFeaturesClone
+  export let NeighbourhoodsInMunicipalityFeaturesClone
 
   // filter out null values
   buurtenInGemeenteFeaturesClone = buurtenInGemeenteFeaturesClone.filter(d => d.properties[indicator.attribute] !== null)
-  if(indicator.titel === 'Groen per inwoner'){
+  if(indicator.title === 'Groen per inwoner'){
     buurtenInGemeenteFeaturesClone = buurtenInGemeenteFeaturesClone.filter(d => +d.properties[indicator.attribute] > 0)
   }
 
   const margin = {bottom:50, top:20, left:30, right:30}
 
-
   let xScaleExtent;
   $: {
-    if($alleIndicatoren2019.map(d => d.titel).includes(indicator.titel)){
+    if($alleIndicatoren2019.map(d => d.title).includes(indicator.title)){
       const attributeYearSliced = indicator.attribute.slice(0,-4)
       const featuresCombined = [...buurtenInGemeenteFeaturesClone.map(d => +d.properties[attributeYearSliced + '2019']), ...buurtenInGemeenteFeaturesClone.map(d => +d.properties[attributeYearSliced + '2023'])]
       xScaleExtent = extent(featuresCombined)
@@ -33,7 +32,7 @@
     }
   } 
   
-  $: xScaleBeeswarm = (indicator.titel !== 'Groen per inwoner')
+  $: xScaleBeeswarm = (indicator.title !== 'Groen per inwoner')
     ? scaleLinear()
         .domain(xScaleExtent)
         .range([0, graphWidth-margin.left-margin.right])
@@ -44,9 +43,9 @@
         .nice()
 
   // filter out null values
-  buurtenInGemeenteFeaturesClone = buurtenInGemeenteFeaturesClone.filter(d => d.properties[indicator.attribute] !== null)
-  if(indicator.titel === 'Groen per inwoner'){
-    buurtenInGemeenteFeaturesClone = buurtenInGemeenteFeaturesClone.filter(d => +d.properties[indicator.attribute] > 0)
+  NeighbourhoodsInMunicipalityFeaturesClone = NeighbourhoodsInMunicipalityFeaturesClone.filter(d => d.properties[indicator.attribute] !== null)
+  if(indicator.title === 'Groen per inwoner'){
+    NeighbourhoodsInMunicipalityFeaturesClone = NeighbourhoodsInMunicipalityFeaturesClone.filter(d => +d.properties[indicator.attribute] > 0)
   }
 
   const simulation = forceSimulation(buurtenInGemeenteFeaturesClone)
@@ -102,27 +101,26 @@
 
 </script>
 
-<XAxis xScale={xScaleBeeswarm} height={indicatorHeight} {margin}/>
+<svg class={'beeswarm_' + indicator.attribute}>
+  <XAxis xScale={xScaleBeeswarm} height={indicatorHeight} {margin}/>
+  {#if indicator.title === 'Groen per inwoner'}
+    <text x={graphWidth/2} y={indicatorHeight - margin.bottom - 5} text-anchor='middle' font-size='13'>Let op logaritmische schaal</text>
+  {/if}
 
-{#if indicator.titel === 'Groen per inwoner'}
-  <text x={graphWidth/2} y={indicatorHeight - margin.bottom - 5} text-anchor='middle' font-size='13'>Let op logaritmische schaal</text>
-{/if}
-
-<g class="inner-chart" transform="translate({margin.left}, {margin.top})">
-  {#each nodes as node (node.id + indicator.attribute)}
-    <circle class={getClassName(node, 'node', indicator, '') + ' ' + 'svgelements_' + node.properties[$buurtCodeAfkorting]}
-    stroke={(node.properties[$buurtCodeAfkorting] === $buurtSelection) ? '#E1575A' : 'none'}
-    style='filter: {(node.properties[$buurtCodeAfkorting] === $buurtSelection) ? 'drop-shadow(0 0 5px #36575A)' : 'none'}'
-    cx={node.x} cy={node.y} 
-    r={(node.properties[$buurtCodeAfkorting] === $buurtSelection) ? $circleRadius+3 : $circleRadius}
-    fill={indicatorValueColorscale(+node.properties[indicator.attribute])} stroke-width='3'
-    on:mouseover={(e) => mouseOver(e, node, indicator, 'no map', indicatorValueColorscale, null, margin)}
-    on:mouseout={() => mouseOut(node, indicator, 'no map')}
-    on:click={() => click(node, indicator, 'no map')}
-    />
-  {/each}
-</g>
-<text x={graphWidth/2} y={indicatorHeight-18} fill='#645F5E' text-anchor='middle' font-size='14'>{indicator.plottitel} per buurt in gemeente {$alleGemeentesJSONData.features.filter(gemeente => gemeente.properties['GM_CODE'] === $gemeenteSelection)[0].properties[$gemeenteNaamAfkorting]}</text>
+  <g class="inner-chart" transform="translate({margin.left}, {margin.top})">
+    {#each nodes as node (node.id + indicator.attribute)}
+      <circle class={getClassName(node, 'node', indicator, '') + ' ' + 'svgelements_' + node.properties[$neighbourhoodCodeAbbreviation]}
+      stroke={(node.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection) ? '#E1575A' : 'none'}
+      style='filter: {(node.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection) ? 'drop-shadow(0 0 5px #36575A)' : 'none'}'
+      cx={node.x} cy={node.y} r={(node.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection) ? $circleRadius+3 : $circleRadius} fill={indicatorValueColorscale(+node.properties[indicator.attribute])} stroke-width='3'
+      on:mouseover={(e) => mouseOver(e, node, indicator, 'no map', indicatorValueColorscale, null, margin)}
+      on:mouseout={() => mouseOut(node, indicator, 'no map')}
+      on:click={() => click(node, indicator, 'no map')}
+      />
+    {/each}
+  </g>
+  <text x={graphWidth/2} y={indicatorHeight-18} fill='#645F5E' text-anchor='middle' font-size='14'>{indicator.plottitle} per neighbourhood in municipality {$allMunicipalitiesJSONData.features.filter(municipality => municipality.properties['GM_CODE'] === $municipalitySelection)[0].properties[$municipalityNameAbbreviation]}</text>
+</svg>
 
 
 <style>

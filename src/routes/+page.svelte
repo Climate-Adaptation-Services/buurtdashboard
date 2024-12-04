@@ -3,7 +3,7 @@
   import Indicator from '$lib/components/Indicator.svelte';
   import Map from '$lib/components/Map.svelte';
   import Tooltip from '$lib/components/Tooltip.svelte';
-  import { buurtSelection, indicatorenSelectie, gemeenteSelection, modal, URLParams, alleBuurtenJSONData } from '$lib/stores';
+  import { neighbourhoodSelection, indicatorsSelection, municipalitySelection, modal, URLParams, allNeighbourhoodsJSONData } from '$lib/stores';
   import { setupIndicators } from '$lib/noncomponents/setupIndicators.js'
   import Modal from 'svelte-simple-modal';
   import { t } from '$lib/i18n/translate.js';
@@ -23,40 +23,40 @@
 
   setLanguage(data)
 
-  let getoondeIndicatoren = []
-  let alleIndicatoren = []
+  let displayedIndicators = []
+  let allIndicators = []
 
-  alleIndicatoren = setupIndicators(data, t("Effecten"), t("Gebiedskenmerken"), t("Kwetsbaarheid"))
-  getoondeIndicatoren = alleIndicatoren
+  allIndicators = setupIndicators(data, t("Effecten"), t("Gebiedskenmerken"), t("Kwetsbaarheid"))
+  displayedIndicators = allIndicators
 
   const jsonResponse = fetchJSONdata()
 
   // de URL parameters laden
   $: if(browser){URLParams.set(new URLSearchParams(window.location.search))}
 
-  // zodra alleBuurtenJSONData geladen is, lees de url parameters
-  $: if($alleBuurtenJSONData){processURLParameters()}
+  // zodra allNeighbourhoodsJSONData geladen is, lees de url parameters
+  $: if($allNeighbourhoodsJSONData){processURLParameters()}
 
-  $: onChangeIndicatorenSelectie($indicatorenSelectie)
+  $: onChangeIndicatorenSelectie($indicatorsSelection)
 
   function onChangeIndicatorenSelectie(_){
-    getoondeIndicatoren = []
+    displayedIndicators = []
 
-    const tempGemeenteSelection = $gemeenteSelection
-    const tempBuurtSelection = $buurtSelection
-    gemeenteSelection.set(null)
-    buurtSelection.set(null)
+    const tempGemeenteSelection = $municipalitySelection
+    const tempBuurtSelection = $neighbourhoodSelection
+    municipalitySelection.set(null)
+    neighbourhoodSelection.set(null)
 
     // dit is een hacky oplossing om te zorgen dat alles even leeg is, 
-    // en vervolgens de indicatorenselectie weer toevoegen
+    // en vervolgens de indicatorsselectie weer toevoegen
     setTimeout(() => {
-      getoondeIndicatoren = ($indicatorenSelectie.length === 0) 
-        ? alleIndicatoren
-        : alleIndicatoren.filter(d => $indicatorenSelectie.includes(d['titel']))
+      displayedIndicators = ($indicatorsSelection.length === 0) 
+        ? allIndicators
+        : allIndicators.filter(d => $indicatorsSelection.includes(d['title']))
     }, 1)
     setTimeout(() => {
-      gemeenteSelection.set(tempGemeenteSelection)
-      buurtSelection.set(tempBuurtSelection)
+      municipalitySelection.set(tempGemeenteSelection)
+      neighbourhoodSelection.set(tempBuurtSelection)
     }, 1)
   }
 
@@ -68,7 +68,7 @@
 
 <div class='container' style='justify-content:{screenWidth < 800 ? 'center' : 'left'}'>
   <div class='sidebar' style='position:{screenWidth > 800 ? "fixed" : "relative"}'>
-    <div class='control-panel'><ControlPanel {indicatorenSelectie} {alleIndicatoren} /></div>
+    <div class='control-panel'><ControlPanel {indicatorsSelection} {allIndicators} /></div>
     <div class='map' bind:clientWidth={mapWidth} bind:clientHeight={mapHeight}>
       {#await jsonResponse}
         <pre style='color:white'>Kaart laden...</pre>
@@ -82,7 +82,7 @@
     {#await jsonResponse}
       <LoadingIcon />
     {:then res}
-      {#each getoondeIndicatoren as indicator}
+      {#each displayedIndicators as indicator}
         {#if indicator.attribute}
             <div class='indicator' style='height:{indicatorHeight}px'>
               <Indicator {indicatorHeight} {indicator}/>
