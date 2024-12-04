@@ -88,26 +88,23 @@
 
 </script>
 
-<svg class={'beeswarm_' + indicator.attribute}>
-  <XAxis xScale={xScaleBeeswarm} height={indicatorHeight} {margin}/>
-  {#if indicator.title === 'Groen per inwoner'}
-    <text x={graphWidth/2} y={indicatorHeight - margin.bottom - 5} text-anchor='middle' font-size='13'>Let op logaritmische schaal</text>
-  {/if}
+<XAxis xScale={xScaleBeeswarm} height={indicatorHeight} {margin}/>
+{#if indicator.title === 'Groen per inwoner'}
+  <text x={graphWidth/2} y={indicatorHeight - margin.bottom - 5} text-anchor='middle' font-size='13'>Let op logaritmische schaal</text>
+{/if}
 
-  <g class="inner-chart" transform="translate({margin.left}, {margin.top})">
-    {#each nodes as node (node.id + indicator.attribute)}
-      <circle class={getClassName(node, 'node', indicator, '') + ' ' + 'svgelements_' + node.properties[$neighbourhoodCodeAbbreviation]}
-      stroke={(node.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection) ? '#E1575A' : 'none'}
-      style='filter: {(node.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection) ? 'drop-shadow(0 0 5px #36575A)' : 'none'}'
-      cx={node.x} cy={node.y} r={(node.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection) ? $circleRadius+3 : $circleRadius} fill={indicatorValueColorscale(+node.properties[indicator.attribute])} stroke-width='3'
-      on:mouseover={(e) => mouseOver(e, node, indicator, 'no map', indicatorValueColorscale, null, margin)}
-      on:mouseout={() => mouseOut(node, indicator, 'no map')}
-      on:click={() => click(node, indicator, 'no map')}
-      />
-    {/each}
-  </g>
-  <text x={graphWidth/2} y={indicatorHeight-18} fill='#645F5E' text-anchor='middle' font-size='14'>{indicator.plottitle} per neighbourhood in municipality {$allMunicipalitiesJSONData.features.filter(municipality => municipality.properties['GM_CODE'] === $municipalitySelection)[0].properties[$municipalityNameAbbreviation]}</text>
-</svg>
+<g class="inner-chart" transform="translate({margin.left}, {margin.top})">
+  {#each nodes as node (node.id + indicator.attribute)}
+    <circle class={getClassName(node, 'node', indicator, '') + ' ' + 'svgelements_' + node.properties[$neighbourhoodCodeAbbreviation]}
+    stroke={(node.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection) ? '#E1575A' : 'none'}
+    style='filter: {(node.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection) ? 'drop-shadow(0 0 5px #36575A)' : 'none'}'
+    cx={node.x} cy={node.y} r={(node.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection) ? $circleRadius+3 : $circleRadius} fill={indicatorValueColorscale(+node.properties[indicator.attribute])} stroke-width='3'
+    on:mouseover={(e) => mouseOver(e, node, indicator, 'no map', indicatorValueColorscale, null, margin)}
+    on:mouseout={() => mouseOut(node, indicator, 'no map')}
+    on:click={() => click(node, indicator, 'no map')}
+    />
+  {/each}
+</g>
 
 
 <style>
