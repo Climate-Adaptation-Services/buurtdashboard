@@ -12,8 +12,6 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
   const circleClassName = getClassName(feature, 'node', indicator, mapType)
   let tooltipCenter
 
-  let tooltipCenter
-
   if(mapType === 'main map'){
     if(feature.properties[get(currentCodeAbbreviation)] !== get(neighbourhoodSelection)){
       select('.' + shapeClassName).attr('fill', '#36575A')
