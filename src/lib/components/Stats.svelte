@@ -11,6 +11,8 @@
   export let indicator
   export let indicatorValueColorscale
 
+  $: isThereOtherYear = $alleIndicatoren2019.map(d => d.title).includes(indicator.title)
+
   let statsWidth;
 
   let medianValuesDict = {
@@ -20,12 +22,34 @@
     'medianValueWijktype':0
   };
 
+  $: otherYear = ($jaarSelecties[indicator.title] === '2019')
+    ? '2023'
+    : '2019'
+  $: attributeYearSliced = indicator.attribute.slice(0,-4)
+  $: otherYearAttribute = attributeYearSliced + otherYear
+
+  let medianValuesDictOtherYear = {
+    'medianValueNederland':0,
+    'medianValueGemeente':0,
+    'medianValueBuurt':0,
+    'medianValueWijktype':0
+  };
+  $: if(isThereOtherYear){
+    medianValuesDict['medianValueNederland'] = calcMedian($allNeighbourhoodsJSONData.features.map(neighbourhood => neighbourhood.properties[otherYearAttribute]))
+  }
+
   $: if($municipalitySelection !== null){
     // Neighbourhoods binnen municipality
     const municipalityFilter = $allNeighbourhoodsJSONData.features.filter(neighbourhood => neighbourhood.properties[$municipalityCodeAbbreviation] === $municipalitySelection)
     medianValuesDict['medianValueGemeente'] = calcMedian(municipalityFilter.map(neighbourhood => neighbourhood.properties[indicator.attribute]))
+    if(isThereOtherYear){
+      medianValuesDictOtherYear['medianValueGemeente'] = calcMedian(municipalityFilter.map(neighbourhood => neighbourhood.properties[otherYearAttribute]))
+    }
   }else{
     medianValuesDict['medianValueGemeente'] = 0
+    if(isThereOtherYear){
+      medianValuesDictOtherYear['medianValueGemeente'] = 0
+    }
   }
   $: if($neighbourhoodSelection !== null){
     // deze filter is 1 neighbourhood
@@ -33,12 +57,21 @@
     medianValuesDict['medianValueBuurt'] = (neighbourhoodFilter[0].properties[indicator.attribute] !== null)
       ? Math.round(neighbourhoodFilter[0].properties[indicator.attribute]*100)/100
       : 'Geen data'
+    
+    if(isThereOtherYear){
+      medianValuesDictOtherYear['medianValueBuurt'] = (neighbourhoodFilter[0].properties[otherYearAttribute] !== null)
+        ? Math.round(neighbourhoodFilter[0].properties[otherYearAttribute]*100)/100
+        : 'Geen data'
+    }
 
     medianValuesDict['medianValueWijktype'] = calcMedian($districtTypeJSONData.features.map(neighbourhood => neighbourhood.properties[indicator.attribute]))
+    medianValuesDictOtherYear['medianValueWijktype'] = calcMedian($districtTypeJSONData.features.map(neighbourhood => neighbourhood.properties[otherYearAttribute]))
 
   }else{
     medianValuesDict['medianValueBuurt'] = 0
     medianValuesDict['medianValueWijktype'] = 0
+    medianValuesDictOtherYear['medianValueBuurt'] = 0
+    medianValuesDictOtherYear['medianValueWijktype'] = 0
   }
 
   $: xScaleMin = min([0, medianValuesDict['medianValueNederland'], medianValuesDict['medianValueGemeente'], medianValuesDict['medianValueBuurt'], medianValuesDict['medianValueWijktype']])
@@ -47,35 +80,14 @@
     xScaleMin -= 10
   }
 
+
   let xDomain;
   $:{
     let medianValues = [medianValuesDict['medianValueNederland'], medianValuesDict['medianValueGemeente'], medianValuesDict['medianValueBuurt'], medianValuesDict['medianValueWijktype']]
-    console.log(indicator.title, medianValues)
     if(indicator.title !== t('Grondwaterstand 2050 hoog')){
-      // ingewikkelde code kan verbeterd
       if($alleIndicatoren2019.map(d => d.title).includes(indicator.title)){
-        const otherYear = ($jaarSelecties[indicator.title] === '2019')
-          ? '2023'
-          : '2019'
-        const attributeYearSliced = indicator.attribute.slice(0,-4)
-        const otherYearAttribute = attributeYearSliced + otherYear
-        console.log(otherYearAttribute, indicator.attribute)
-        medianValues.push(calcMedian($allNeighbourhoodsJSONData.features.map(neighbourhood => neighbourhood.properties[otherYearAttribute])))
-        if($municipalitySelection !== null){
-          const municipalityFilter = $allNeighbourhoodsJSONData.features.filter(neighbourhood => neighbourhood.properties[$municipalityCodeAbbreviation] === $municipalitySelection)
-          medianValues.push(calcMedian(municipalityFilter.map(neighbourhood => neighbourhood.properties[otherYearAttribute])))
-        }
-        if($neighbourhoodSelection !== null){
-          const neighbourhoodFilter = $allNeighbourhoodsJSONData.features.filter(neighbourhood => neighbourhood.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection)
-          const medianValueBuurt = (neighbourhoodFilter[0].properties[otherYearAttribute] !== null)
-            ? Math.round(neighbourhoodFilter[0].properties[otherYearAttribute]*100)/100
-            : 'Geen data'
-          if(medianValueBuurt !== 'Geen data'){medianValues.push(medianValueBuurt)}
-          
-          medianValues.push(calcMedian($districtTypeJSONData.features.map(neighbourhood => neighbourhood.properties[otherYearAttribute])))
-        }
+        medianValues = [...medianValues, medianValuesDictOtherYear['medianValueNederland'], medianValuesDictOtherYear['medianValueGemeente'], medianValuesDictOtherYear['medianValueBuurt'], medianValuesDictOtherYear['medianValueWijktype']]
       }
-      console.log(medianValues)
       xDomain = [0, max(medianValues)]
     }else{
       xDomain = [0, min(medianValues)]
@@ -88,14 +100,14 @@
 
 </script>
 
-<div class='indicator-stats' style='visibility:hidden; height: {bodyHeight*0.2*0.25}px' bind:clientWidth={statsWidth}><Stat {indicatorValueColorscale} graphWidth={statsWidth} indicatorHeight={bodyHeight*0.2*0.25} regio='Nederland' medianValue={medianValuesDict['medianValueNederland']} {xScaleStats}/></div>
+<div class='indicator-stats' style='visibility:hidden; height: {bodyHeight*0.2*0.25}px' bind:clientWidth={statsWidth}><Stat {indicatorValueColorscale} {indicator} medianValueOtherYear={medianValuesDictOtherYear['medianValueNederland']} graphWidth={statsWidth} indicatorHeight={bodyHeight*0.2*0.25} regio='Nederland' medianValue={medianValuesDict['medianValueNederland']} {xScaleStats}/></div>
 {#if $municipalitySelection !== null}
-  <div class='indicator-stats' style='height: {bodyHeight*0.2*0.25}px'><Stat {indicatorValueColorscale} graphWidth={statsWidth} indicatorHeight={bodyHeight*0.2*0.25} regio='Gemeente' medianValue={medianValuesDict['medianValueGemeente']} {xScaleStats}/></div>
+  <div class='indicator-stats' style='height: {bodyHeight*0.2*0.25}px'><Stat {indicatorValueColorscale} {indicator} medianValueOtherYear={medianValuesDictOtherYear['medianValueGemeente']} graphWidth={statsWidth} indicatorHeight={bodyHeight*0.2*0.25} regio='Gemeente' medianValue={medianValuesDict['medianValueGemeente']} {xScaleStats}/></div>
 {/if}
 {#if $neighbourhoodSelection !== null}
-  <div class='indicator-stats' style='height: {bodyHeight*0.2*0.25}px'><Stat {indicatorValueColorscale} graphWidth={statsWidth} indicatorHeight={bodyHeight*0.2*0.25} regio='Buurt' medianValue={medianValuesDict['medianValueBuurt']} {xScaleStats}/></div>
+  <div class='indicator-stats' style='height: {bodyHeight*0.2*0.25}px'><Stat {indicatorValueColorscale} {indicator} medianValueOtherYear={medianValuesDictOtherYear['medianValueBuurt']} graphWidth={statsWidth} indicatorHeight={bodyHeight*0.2*0.25} regio='Buurt' medianValue={medianValuesDict['medianValueBuurt']} {xScaleStats}/></div>
   {#if $selectedNeighbourhoodJSONData.properties[$districtTypeAbbreviation]}
-    <div class='indicator-stats' style='height: {bodyHeight*0.2*0.25}px'><Stat {indicatorValueColorscale} graphWidth={statsWidth} indicatorHeight={bodyHeight*0.2*0.25} regio='Wijktype' medianValue={medianValuesDict['medianValueWijktype']} {xScaleStats}/></div>
+    <div class='indicator-stats' style='height: {bodyHeight*0.2*0.25}px'><Stat {indicatorValueColorscale} {indicator} medianValueOtherYear={medianValuesDictOtherYear['medianValueWijktype']} graphWidth={statsWidth} indicatorHeight={bodyHeight*0.2*0.25} regio='Wijktype' medianValue={medianValuesDict['medianValueWijktype']} {xScaleStats}/></div>
   {/if}
 {/if}
 
