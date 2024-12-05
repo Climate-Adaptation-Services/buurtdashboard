@@ -1,7 +1,5 @@
 <script>
-  import { municipalitySelection, allMunicipalitiesJSONData, selectedNeighbourhoodJSONData, neighbourhoodNameAbbreviation, municipalityNameAbbreviation, districtTypeAbbreviation } from "$lib/stores";
-  import { t } from '$lib/i18n/translate.js';
-    import { getRegionName } from "$lib/noncomponents/getRegionName";
+  import { getRegionName } from "$lib/noncomponents/getRegionName";
 
   export let graphWidth;
   export let indicatorHeight;
@@ -42,6 +40,7 @@
 
   text{
     fill:#645F5E;
+    transition: all 2s;
   }
   
 </style>

@@ -1,6 +1,6 @@
 <script>
 
-  import { allNeighbourhoodsJSONData, districtTypeJSONData, districtTypeAbbreviation, municipalitySelection, neighbourhoodSelection, neighbourhoodCodeAbbreviation, municipalityCodeAbbreviation, selectedNeighbourhoodJSONData } from "$lib/stores";
+  import { allNeighbourhoodsJSONData, districtTypeJSONData, districtTypeAbbreviation, municipalitySelection, neighbourhoodSelection, neighbourhoodCodeAbbreviation, municipalityCodeAbbreviation, selectedNeighbourhoodJSONData, alleIndicatoren2019, jaarSelecties } from "$lib/stores";
   import Stat from "./Stat.svelte";
   import * as _ from 'lodash';
   import { scaleLinear, max, min } from 'd3';
@@ -47,9 +47,40 @@
     xScaleMin -= 10
   }
 
-  $: xDomain = (indicator.title !== t('Grondwaterstand 2050 hoog'))
-    ? [0, max([medianValuesDict['medianValueNederland'], medianValuesDict['medianValueGemeente'], medianValuesDict['medianValueBuurt'], medianValuesDict['medianValueWijktype']])]
-    : [0, min([medianValuesDict['medianValueNederland'], medianValuesDict['medianValueGemeente'], medianValuesDict['medianValueBuurt'], medianValuesDict['medianValueWijktype']])]
+  let xDomain;
+  $:{
+    let medianValues = [medianValuesDict['medianValueNederland'], medianValuesDict['medianValueGemeente'], medianValuesDict['medianValueBuurt'], medianValuesDict['medianValueWijktype']]
+    console.log(indicator.title, medianValues)
+    if(indicator.title !== t('Grondwaterstand 2050 hoog')){
+      // ingewikkelde code kan verbeterd
+      if($alleIndicatoren2019.map(d => d.title).includes(indicator.title)){
+        const otherYear = ($jaarSelecties[indicator.title] === '2019')
+          ? '2023'
+          : '2019'
+        const attributeYearSliced = indicator.attribute.slice(0,-4)
+        const otherYearAttribute = attributeYearSliced + otherYear
+        console.log(otherYearAttribute, indicator.attribute)
+        medianValues.push(calcMedian($allNeighbourhoodsJSONData.features.map(neighbourhood => neighbourhood.properties[otherYearAttribute])))
+        if($municipalitySelection !== null){
+          const municipalityFilter = $allNeighbourhoodsJSONData.features.filter(neighbourhood => neighbourhood.properties[$municipalityCodeAbbreviation] === $municipalitySelection)
+          medianValues.push(calcMedian(municipalityFilter.map(neighbourhood => neighbourhood.properties[otherYearAttribute])))
+        }
+        if($neighbourhoodSelection !== null){
+          const neighbourhoodFilter = $allNeighbourhoodsJSONData.features.filter(neighbourhood => neighbourhood.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection)
+          const medianValueBuurt = (neighbourhoodFilter[0].properties[otherYearAttribute] !== null)
+            ? Math.round(neighbourhoodFilter[0].properties[otherYearAttribute]*100)/100
+            : 'Geen data'
+          if(medianValueBuurt !== 'Geen data'){medianValues.push(medianValueBuurt)}
+          
+          medianValues.push(calcMedian($districtTypeJSONData.features.map(neighbourhood => neighbourhood.properties[otherYearAttribute])))
+        }
+      }
+      console.log(medianValues)
+      xDomain = [0, max(medianValues)]
+    }else{
+      xDomain = [0, min(medianValues)]
+    }
+  }
 
   $: xScaleStats = scaleLinear()
     .domain(xDomain)
