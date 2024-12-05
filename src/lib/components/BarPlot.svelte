@@ -15,23 +15,23 @@
 
   const margin = {bottom:0, top:30, left:30, right:30}
 
-  const berekenPercentagesVoorElkeKlasse = (aggregated) ? calcPercentagesForEveryClassMultiIndicator : calcPercentagesForEveryClassSingleIndicator
+  const calcPercentagesForEveryClass = (aggregated) ? calcPercentagesForEveryClassMultiIndicator : calcPercentagesForEveryClassSingleIndicator
 
-  const nederlandValues = berekenPercentagesVoorElkeKlasse(indicator, $allNeighbourhoodsJSONData, 'Nederland')
+  const nederlandValues = calcPercentagesForEveryClass(indicator, $allNeighbourhoodsJSONData, 'Nederland')
   let barPlotData = []
   let regios = []
 
   $: {
     if($neighbourhoodSelection !== null){
       if($selectedNeighbourhoodJSONData.properties[$districtTypeAbbreviation]){
-        barPlotData = [nederlandValues, berekenPercentagesVoorElkeKlasse(indicator, $neighbourhoodsInMunicipalityJSONData, 'Gemeente'), berekenPercentagesVoorElkeKlasse(indicator, {type: 'FeatureCollection', features: [$selectedNeighbourhoodJSONData]}, 'Buurt'), berekenPercentagesVoorElkeKlasse(indicator, $districtTypeJSONData, 'Wijktype')]
+        barPlotData = [nederlandValues, calcPercentagesForEveryClass(indicator, $neighbourhoodsInMunicipalityJSONData, 'Gemeente'), calcPercentagesForEveryClass(indicator, {type: 'FeatureCollection', features: [$selectedNeighbourhoodJSONData]}, 'Buurt'), calcPercentagesForEveryClass(indicator, $districtTypeJSONData, 'Wijktype')]
         regios = ['Nederland', 'Gemeente', 'Buurt', 'Wijktype']
       }else{
-        barPlotData = [nederlandValues, berekenPercentagesVoorElkeKlasse(indicator, $neighbourhoodsInMunicipalityJSONData, 'Gemeente'), berekenPercentagesVoorElkeKlasse(indicator, {type: 'FeatureCollection', features: [$selectedNeighbourhoodJSONData]}, 'Buurt')]
+        barPlotData = [nederlandValues, calcPercentagesForEveryClass(indicator, $neighbourhoodsInMunicipalityJSONData, 'Gemeente'), calcPercentagesForEveryClass(indicator, {type: 'FeatureCollection', features: [$selectedNeighbourhoodJSONData]}, 'Buurt')]
         regios = ['Nederland', 'Gemeente', 'Buurt']
       }
     }else if($municipalitySelection !== null){
-      barPlotData = [nederlandValues, berekenPercentagesVoorElkeKlasse(indicator, $neighbourhoodsInMunicipalityJSONData, 'Gemeente')]
+      barPlotData = [nederlandValues, calcPercentagesForEveryClass(indicator, $neighbourhoodsInMunicipalityJSONData, 'Gemeente')]
       regios = ['Nederland', 'Gemeente']
     }else{
       barPlotData = [nederlandValues]

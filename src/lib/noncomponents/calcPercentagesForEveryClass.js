@@ -17,7 +17,7 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
   data.features.forEach(neighbourhood => {
     let neighbourhoodOppervlakte = (indicator.title === 'Functionele gebieden')
       ? neighbourhood.properties['buurt_opp_incl_agrarisch']
-      : neighbourhood.properties['buurt_opp_zonderagr']
+      : neighbourhood.properties['Shape_Area']
 
     totalSurfaceArea += neighbourhoodOppervlakte
 
