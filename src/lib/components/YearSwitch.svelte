@@ -22,13 +22,13 @@
 
   function yearMouseOver(year){
     if(year !== selectedYear){
-      selectAll('.hoveryear_' + indicator.title)
+      selectAll('.hoveryear_' + indicator.title.replaceAll(' ', ''))
         .style('visibility', 'visible')
     }
   }
 
   function yearMouseOut(){
-    selectAll('.hoveryear_'+ indicator.title)
+    selectAll('.hoveryear_'+ indicator.title.replaceAll(' ', ''))
       .style('visibility', 'hidden')
   }
 
