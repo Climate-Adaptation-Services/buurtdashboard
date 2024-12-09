@@ -13,7 +13,7 @@
   export let getClassByIndicatorValue
   export let aggregated
 
-  const margin = {bottom:0, top:30, left:30, right:30}
+  const margin = {bottom:50, top:30, left:30, right:30}
 
   const calcPercentagesForEveryClass = (aggregated) ? calcPercentagesForEveryClassMultiIndicator : calcPercentagesForEveryClassSingleIndicator
 
@@ -42,7 +42,7 @@
   $: if(indicator.title === 'Groen/Grijs/Blauw'){console.log(indicator.title, barPlotData)}
 
   $: stackedData = stack()
-    .keys(Object.keys(indicator.classes))
+    .keys(Object.keys(indicator.classes).slice(1))
     (barPlotData)
   
   $: xScale = scaleLinear()
@@ -50,8 +50,8 @@
     .range([ margin.left, graphWidth-margin.right ])
   
   $: yScale = scaleBand()
-    .domain(regios)
-    .range([0, (indicatorHeight - margin.top - margin.bottom) * (barPlotData.length/3.5) ])
+    .domain(regios.slice(1))
+    .range([0, (indicatorHeight - margin.top - margin.bottom) * (barPlotData.length/2) ])
 
 
 </script>
@@ -67,7 +67,7 @@
             x={xScale(st[0])} y={yScale(st.data.group)} width={xScale(st[1]) - xScale(st[0])} height={yScale.bandwidth()/2} stroke-width='4'>
           </rect>
           {#if xScale(st[1]) - xScale(st[0]) > 40}
-            <text text-anchor='middle' x={xScale(st[0]) + (xScale(st[1]) - xScale(st[0]))/2} y={yScale(st.data.group)} fill={(checkContrast(indicatorValueColorscale(stacked.key))) ? 'white' : 'black'} dy='1.3em' font-size='14px' pointer-events='none'>{Math.round(st.data[stacked.key]*10)/10}%</text>
+            <text text-anchor='middle' x={xScale(st[0]) + (xScale(st[1]) - xScale(st[0]))/2} y={yScale(st.data.group)+2} fill={(checkContrast(indicatorValueColorscale(stacked.key))) ? 'white' : 'black'} dy='1.3em' font-size='14px' pointer-events='none'>{Math.round(st.data[stacked.key]*10)/10}%</text>
           {/if}
         {/each}
       </g>
