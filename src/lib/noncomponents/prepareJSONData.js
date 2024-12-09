@@ -1,8 +1,8 @@
-import { allMunicipalitiesJSONData, allNeighbourhoodsJSONData } from "$lib/stores"
+import { allMunicipalitiesJSONData, allNeighbourhoodsJSONData, neighbourhoodCodeAbbreviation } from "$lib/stores"
 import * as topojsonsimplify from "topojson-simplify";
 import * as topojson from "topojson-client";
 
-export function prepareJSONData(JSONdata){
+export function prepareJSONData(JSONdata, dordrechtData){
   console.log('JSONdata', JSONdata)
 
   let municipalityTopojson = topojsonsimplify.presimplify(JSONdata[0])
@@ -13,6 +13,7 @@ export function prepareJSONData(JSONdata){
   neighbourhoodTopojson = topojson.feature(neighbourhoodTopojson, neighbourhoodTopojson.objects['Dordrecht_buurten'])
 
   let neighbourhoodTopojson_features = neighbourhoodTopojson.features.map(neighbourhood => {
+    neighbourhood.properties = dordrechtData.filter(nbh => nbh['BU_CODE'] === neighbourhood.properties['BU_CODE'])[0]
 
     // Dordrecht pilot
     neighbourhood.properties['GM_CODE'] = 'GM0505'

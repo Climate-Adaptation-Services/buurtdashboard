@@ -24,20 +24,22 @@
   $: {
     if($neighbourhoodSelection !== null){
       if($selectedNeighbourhoodJSONData.properties[$districtTypeAbbreviation]){
-        barPlotData = [nederlandValues, calcPercentagesForEveryClass(indicator, $neighbourhoodsInMunicipalityJSONData, 'Gemeente'), calcPercentagesForEveryClass(indicator, {type: 'FeatureCollection', features: [$selectedNeighbourhoodJSONData]}, 'Buurt'), calcPercentagesForEveryClass(indicator, $districtTypeJSONData, 'Wijktype')]
+        barPlotData = [calcPercentagesForEveryClass(indicator, $neighbourhoodsInMunicipalityJSONData, 'Gemeente'), calcPercentagesForEveryClass(indicator, {type: 'FeatureCollection', features: [$selectedNeighbourhoodJSONData]}, 'Buurt'), calcPercentagesForEveryClass(indicator, $districtTypeJSONData, 'Wijktype')]
         regios = ['Nederland', 'Gemeente', 'Buurt', 'Wijktype']
       }else{
-        barPlotData = [nederlandValues, calcPercentagesForEveryClass(indicator, $neighbourhoodsInMunicipalityJSONData, 'Gemeente'), calcPercentagesForEveryClass(indicator, {type: 'FeatureCollection', features: [$selectedNeighbourhoodJSONData]}, 'Buurt')]
+        barPlotData = [calcPercentagesForEveryClass(indicator, $neighbourhoodsInMunicipalityJSONData, 'Gemeente'), calcPercentagesForEveryClass(indicator, {type: 'FeatureCollection', features: [$selectedNeighbourhoodJSONData]}, 'Buurt')]
         regios = ['Nederland', 'Gemeente', 'Buurt']
       }
     }else if($municipalitySelection !== null){
-      barPlotData = [nederlandValues, calcPercentagesForEveryClass(indicator, $neighbourhoodsInMunicipalityJSONData, 'Gemeente')]
+      barPlotData = [calcPercentagesForEveryClass(indicator, $neighbourhoodsInMunicipalityJSONData, 'Gemeente')]
       regios = ['Nederland', 'Gemeente']
     }else{
-      barPlotData = [nederlandValues]
+      barPlotData = []
       regios = ['Nederland']
     }
   }
+
+  $: if(indicator.title === 'Groen/Grijs/Blauw'){console.log(indicator.title, barPlotData)}
 
   $: stackedData = stack()
     .keys(Object.keys(indicator.classes))
@@ -70,7 +72,7 @@
         {/each}
       </g>
     {/each}
-    {#each regios as regio,i}
+    {#each regios.slice(1) as regio,i}
       <text style='fill:#645F5E' x={graphWidth/2} text-anchor='middle' y={i*yScale.bandwidth()-5}>{getRegionName(regio)}</text>
     {/each}
   </g>

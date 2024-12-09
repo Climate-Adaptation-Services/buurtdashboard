@@ -13,10 +13,10 @@ export function setupIndicators(data, eff, geb, kwe){
   let indicatorenLijst2019 = []
 
   // let indicatorenOpCategorie = [...metadata.filter(d => d.Categorie === 'Gebiedskenmerken'), ...metadata.filter(d => d.Categorie === 'Effecten'), ...metadata.filter(d => d.Categorie === 'Kwetsbaarheid')]
-  // indicatorenLijst = addIndicatorCategorie(indicatorenLijst, metadata.filter(d => d.Categorie === eff))
+  indicatorenLijst2023 = addIndicatorCategory(indicatorenLijst2023, metadata.filter(d => d.Categorie === eff))
   indicatorenLijst2023 = addIndicatorCategory(indicatorenLijst2023, metadata.filter(d => d.Categorie === geb))
+  indicatorenLijst2023 = addIndicatorCategory(indicatorenLijst2023, metadata.filter(d => d.Categorie === kwe))
   indicatorenLijst2019 = addIndicatorCategory(indicatorenLijst2019, metadata_2019.filter(d => d.Categorie === geb))
-  // indicatorenLijst = addIndicatorCategorie(indicatorenLijst, metadata.filter(d => d.Categorie === kwe))
 
   alleIndicatoren2023.set(indicatorenLijst2023)
   alleIndicatoren2019.set(indicatorenLijst2019)
@@ -28,6 +28,8 @@ export function setupIndicators(data, eff, geb, kwe){
   });
   jaarSelecties.set(jaarSelectiesTemp)
 
+  console.log('indicatorenLijst', indicatorenLijst2019, indicatorenLijst2023)
+
   return indicatorenLijst2023;
 }
 
@@ -36,6 +38,7 @@ function addIndicatorCategory(indicatorsList, indicators){
   indicatorsList.push({title:{'label':indicators[0].Categorie, 'disabled':true}})
 
   indicators.forEach(indicator => {
+    if(indicator.Titel === 'Oppervlakte openbaar / niet openbaar'){return}
     let classes = {}
     if(indicator['kwantitatief / categoraal / multiline'] !== 'categoraal'){
       indicator.Domein.split(',').forEach((d,i) => {
@@ -58,9 +61,9 @@ function addIndicatorCategory(indicatorsList, indicators){
         range:indicator.Kleur.split(',')
       }, 
       classes:classes,
-      numerical:(indicator['kwantitatief / categoraal / multiline'] === 'Kwantitatief') ? true : false, 
+      numerical:(indicator['kwantitatief / categoraal / multiline'] === 'kwantitatief') ? true : false, 
       link:indicator['Link kaartverhaal'],
-      aggregatedIndicator:(indicator['kwantitatief / categoraal / multiline'] === 'Multiline') ? true : false,
+      aggregatedIndicator:(indicator['kwantitatief / categoraal / multiline'] === 'multiline') ? true : false,
       source:indicator.Bron,
       description:indicator['Tekst vraagteken'],
     })

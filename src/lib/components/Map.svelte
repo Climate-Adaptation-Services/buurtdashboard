@@ -14,8 +14,9 @@
   export let indicatorValueColorscale
   export let indicator
   export let getClassByIndicatorValue
+  export let dordrechtData
 
-  if(mapType === 'main map'){prepareJSONData(JSONdata)}
+  if(mapType === 'main map'){prepareJSONData(JSONdata, dordrechtData)}
 
   $: projection = geoMercator().fitExtent([[10,10],[mapWidth-10,mapHeight-20]], $currentJSONData)
   $: path = geoPath(projection);

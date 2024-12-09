@@ -16,7 +16,7 @@
   let statsWidth;
 
   let medianValuesDict = {
-    'medianValueNederland':calcMedian($allNeighbourhoodsJSONData.features.map(neighbourhood => neighbourhood.properties[indicator.attribute])),
+    'medianValueNederland':calcMedian($allNeighbourhoodsJSONData.features.map(neighbourhood => +neighbourhood.properties[indicator.attribute])),
     'medianValueGemeente':0,
     'medianValueBuurt':0,
     'medianValueWijktype':0

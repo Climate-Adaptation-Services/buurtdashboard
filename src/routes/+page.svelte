@@ -73,7 +73,7 @@
       {#await jsonResponse}
         <pre style='color:white'>Kaart laden...</pre>
       {:then response}
-        <Map JSONdata={response} {mapWidth} {mapHeight} mapType={'main map'}/>
+        <Map JSONdata={response} dordrechtData={data.data_dordrecht} {mapWidth} {mapHeight} mapType={'main map'}/>
       {/await}
     </div>
   </div>

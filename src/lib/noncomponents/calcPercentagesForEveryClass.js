@@ -15,13 +15,13 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
 
   // voor elke neighbourhood gaan we de waardes van elke klasse bij de som van die klasse toevoegen
   data.features.forEach(neighbourhood => {
-    let neighbourhoodOppervlakte = (indicator.title === 'Functionele gebieden')
+    let neighbourhoodShapeArea = (indicator.title === 'Functionele gebieden')
       ? neighbourhood.properties['buurt_opp_incl_agrarisch']
       : neighbourhood.properties['Shape_Area']
 
-    totalSurfaceArea += neighbourhoodOppervlakte
+    totalSurfaceArea += +neighbourhoodShapeArea
 
-    if(indicator.title === t('Gevoelstemperatuur')){totalSurfaceArea -= neighbourhoodOppervlakte * neighbourhood.properties['NDPETperc']}
+    if(indicator.title === t('Gevoelstemperatuur')){totalSurfaceArea -= neighbourhoodShapeArea * neighbourhood.properties['NDPETperc']}
     
     // voor deze neighbourhood tel de waardes van elke klasse bij de totale som op
     Object.keys(indicator.classes).forEach(kl => {
@@ -29,17 +29,21 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
       if(neighbourhood.properties[indicator.classes[kl]] && !isNaN(parseFloat(neighbourhood.properties[indicator.classes[kl]]))){
         // pak de klasse erbij in totalSumPerClass
         const tempKlasse = totalSumPerClass.filter(kl2 => kl2.className === kl)[0]
-        // we wegen ook voor het oppervlakte met neighbourhoodOppervlakte
-        tempKlasse.som += neighbourhoodOppervlakte * +neighbourhood.properties[indicator.classes[kl]]
+        // we wegen ook voor het oppervlakte met neighbourhoodShapeArea
+        tempKlasse.som += neighbourhoodShapeArea * +neighbourhood.properties[indicator.classes[kl]]
       }
     });
   });
+
+
 
   // Nu delen we elke som door het totalSurfaceArea om tot percentages te komen
   totalSumPerClass.forEach(kl => {
     kl.som = (kl.som/totalSurfaceArea)
     if(indicator.title === t('Gevoelstemperatuur')){kl.som *= 100}
   })
+
+
 
   // we stoppen het resultaat per klasse in een dictionary
   let result = {'group':regio}
@@ -57,7 +61,9 @@ export function calcPercentagesForEveryClassSingleIndicator(indicator, data, reg
     classesTotal.push({className: Object.keys(indicator.classes)[i], waarde:0})
   }
   data.features.forEach(neighbourhoodOrMunicipality => {
-    classesTotal.filter(kl => kl.className === getClassByIndicatorValue(indicator, neighbourhoodOrMunicipality.properties[indicator.attribute]))[0].waarde += 1
+    if(neighbourhoodOrMunicipality[indicator.attribute]){
+      classesTotal.filter(kl => kl.className === getClassByIndicatorValue(indicator, neighbourhoodOrMunicipality.properties[indicator.attribute]))[0].waarde += 1
+    }
     totalAmount += 1
   });
 
