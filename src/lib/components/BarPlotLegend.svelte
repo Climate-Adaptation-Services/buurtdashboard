@@ -10,7 +10,7 @@
   // $: innerwidth2 = (graphWidth - 2*padding2) / 2
 
   const margin = {top:30, bottom:30, left:30, right:0}
-  $: legendElementWidth = (graphWidth-margin.left-margin.right) / 3
+  $: legendElementWidth = (graphWidth-margin.left-margin.right) / 2
 
   const klasseNamen = Object.keys(indicator.classes)
 
@@ -47,7 +47,7 @@
   .legend-element{
     float: left;
     height:30px;
-    width:33%;
+    width:50%;
   }
 
 </style>
