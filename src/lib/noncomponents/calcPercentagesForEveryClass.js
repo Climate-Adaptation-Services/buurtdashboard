@@ -61,11 +61,13 @@ export function calcPercentagesForEveryClassSingleIndicator(indicator, data, reg
     classesTotal.push({className: Object.keys(indicator.classes)[i], waarde:0})
   }
   data.features.forEach(neighbourhoodOrMunicipality => {
-    if(neighbourhoodOrMunicipality[indicator.attribute]){
+    console.log(indicator.title, neighbourhoodOrMunicipality)
+    if(neighbourhoodOrMunicipality.properties[indicator.attribute]){
       classesTotal.filter(kl => kl.className === getClassByIndicatorValue(indicator, neighbourhoodOrMunicipality.properties[indicator.attribute]))[0].waarde += 1
     }
     totalAmount += 1
   });
+  if(indicator.title === 'Groennorm'){console.log(classesTotal)}
 
   classesTotal.forEach(kl => {
     kl.waarde = (kl.waarde/totalAmount) * 100

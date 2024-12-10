@@ -2,7 +2,7 @@ import { t } from "$lib/i18n/translate";
 
 export function getClassByIndicatorValue(indicator, value){
   if(value === null){return t("Geen_data")}
-  if(indicator.title === 'Groennorm ' || indicator.title === 'Boomkroonnorm ' ){
+  if(indicator.title === 'Groennorm' || indicator.title === 'Boomkroonnorm' ){
     return value
   }
   let kl = ''

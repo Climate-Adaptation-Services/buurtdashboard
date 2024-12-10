@@ -40,7 +40,7 @@ function addIndicatorCategory(indicatorsList, indicators){
   indicators.forEach(indicator => {
     if(indicator.Titel === 'Oppervlakte openbaar / niet openbaar'){return}
     let classes = {}
-    if(indicator['kwantitatief / categoraal / multiline'] !== 'categoraal'){
+    if(indicator['kwantitatief / categoraal / aggregated'] !== 'categoraal'){
       indicator.Domein.split(',').forEach((d,i) => {
         classes[d] = indicator.Indicatornaamtabel.split(',')[i]
       });
@@ -61,9 +61,9 @@ function addIndicatorCategory(indicatorsList, indicators){
         range:indicator.Kleur.split(',')
       }, 
       classes:classes,
-      numerical:(indicator['kwantitatief / categoraal / multiline'] === 'kwantitatief') ? true : false, 
+      numerical:(indicator['kwantitatief / categoraal / aggregated'] === 'kwantitatief') ? true : false, 
       link:indicator['Link kaartverhaal'],
-      aggregatedIndicator:(indicator['kwantitatief / categoraal / multiline'] === 'multiline') ? true : false,
+      aggregatedIndicator:(indicator['kwantitatief / categoraal / aggregated'] === 'aggregated') ? true : false,
       source:indicator.Bron,
       description:indicator['Tekst vraagteken'],
     })

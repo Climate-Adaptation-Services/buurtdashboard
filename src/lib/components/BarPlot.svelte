@@ -25,24 +25,22 @@
     if($neighbourhoodSelection !== null){
       if($selectedNeighbourhoodJSONData.properties[$districtTypeAbbreviation]){
         barPlotData = [calcPercentagesForEveryClass(indicator, $neighbourhoodsInMunicipalityJSONData, 'Gemeente'), calcPercentagesForEveryClass(indicator, {type: 'FeatureCollection', features: [$selectedNeighbourhoodJSONData]}, 'Buurt'), calcPercentagesForEveryClass(indicator, $districtTypeJSONData, 'Wijktype')]
-        regios = ['Nederland', 'Gemeente', 'Buurt', 'Wijktype']
+        regios = ['Gemeente', 'Buurt', 'Wijktype']
       }else{
         barPlotData = [calcPercentagesForEveryClass(indicator, $neighbourhoodsInMunicipalityJSONData, 'Gemeente'), calcPercentagesForEveryClass(indicator, {type: 'FeatureCollection', features: [$selectedNeighbourhoodJSONData]}, 'Buurt')]
-        regios = ['Nederland', 'Gemeente', 'Buurt']
+        regios = ['Gemeente', 'Buurt']
       }
     }else if($municipalitySelection !== null){
       barPlotData = [calcPercentagesForEveryClass(indicator, $neighbourhoodsInMunicipalityJSONData, 'Gemeente')]
-      regios = ['Nederland', 'Gemeente']
+      regios = ['Gemeente']
     }else{
       barPlotData = []
-      regios = ['Nederland']
+      regios = []
     }
   }
 
-  $: if(indicator.title === 'Groen/Grijs/Blauw'){console.log(indicator.title, barPlotData)}
-
   $: stackedData = stack()
-    .keys(Object.keys(indicator.classes).slice(1))
+    .keys(Object.keys(indicator.classes))
     (barPlotData)
   
   $: xScale = scaleLinear()
@@ -50,7 +48,7 @@
     .range([ margin.left, graphWidth-margin.right ])
   
   $: yScale = scaleBand()
-    .domain(regios.slice(1))
+    .domain(regios)
     .range([0, (indicatorHeight - margin.top - margin.bottom) * (barPlotData.length/2) ])
 
 
@@ -72,7 +70,7 @@
         {/each}
       </g>
     {/each}
-    {#each regios.slice(1) as regio,i}
+    {#each regios as regio,i}
       <text style='fill:#645F5E' x={graphWidth/2} text-anchor='middle' y={i*yScale.bandwidth()-5}>{getRegionName(regio)}</text>
     {/each}
   </g>

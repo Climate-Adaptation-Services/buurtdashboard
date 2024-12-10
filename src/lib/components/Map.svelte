@@ -5,7 +5,7 @@
   import { t } from '$lib/i18n/translate.js';
   import { getClassName } from '$lib/noncomponents/getClassName';
   import { click, mouseOver, mouseOut } from '$lib/noncomponents/neighbourhoodMouseEvents';
-  import { mostCommonClass } from "$lib/noncomponents/mostCommonClass";
+  import { getMostCommonClass } from "$lib/noncomponents/getMostCommonClass";
 
   export let JSONdata
   export let mapWidth
@@ -21,9 +21,9 @@
   $: projection = geoMercator().fitExtent([[10,10],[mapWidth-10,mapHeight-20]], $currentJSONData)
   $: path = geoPath(projection);
 
-  function multilineMapInfo(){select('.tooltip-multi' + indicator.attribute).style('visibility', 'visible')}
+  function aggregatedMapInfo(){select('.tooltip-multi' + indicator.attribute).style('visibility', 'visible')}
 
-  function multilineMapInfoOut(){select('.tooltip-multi' + indicator.attribute).style('visibility', 'hidden')}
+  function aggregatedMapInfoOut(){select('.tooltip-multi' + indicator.attribute).style('visibility', 'hidden')}
 
 </script>
 
@@ -48,7 +48,7 @@
             ? indicatorValueColorscale(feature.properties[indicator.attribute])
             : '#000000'
           : (indicator.aggregatedIndicator)
-            ? indicatorValueColorscale(mostCommonClass(indicator, feature))
+            ? indicatorValueColorscale(getMostCommonClass(indicator, feature))
             : indicatorValueColorscale(getClassByIndicatorValue(indicator, feature.properties[indicator.attribute]))
       }
       stroke={(mapType === 'main map') 
@@ -64,7 +64,7 @@
       />
   {/each}
   {#if indicator && indicator.aggregatedIndicator === true}
-    <image href='info.png' opacity='0.7' width='20' y='5' x={mapWidth-25} on:mouseover={() => multilineMapInfo()} on:mouseout={() => multilineMapInfoOut()}/>
+    <image href='info.png' opacity='0.7' width='20' y='5' x={mapWidth-25} on:mouseover={() => aggregatedMapInfo()} on:mouseout={() => aggregatedMapInfoOut()}/>
   {/if}
 </svg>
 

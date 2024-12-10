@@ -3,7 +3,7 @@ import { currentCodeAbbreviation, neighbourhoodSelection, mousePosition, circleR
 import { get } from 'svelte/store';
 import { select, selectAll } from 'd3';
 import { getClassByIndicatorValue } from './getClassByIndicatorValue';
-import { mostCommonClass } from './mostCommonClass';
+import { getMostCommonClass } from './getMostCommonClass';
 import center from '@turf/center'
 import { t } from '$lib/i18n/translate.js';
 
@@ -41,8 +41,8 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
           ? indicatorValueColorscale(feature.properties[indicator.attribute]) 
           : '#000000'
         : (indicator.aggregatedIndicator)
-          ? indicatorValueColorscale(mostCommonClass(indicator, feature))
-          : indicatorValueColorscale(getClassByIndicatorValue(indicator, indicator, feature.properties[indicator.attribute]))
+          ? indicatorValueColorscale(getMostCommonClass(indicator, feature))
+          : indicatorValueColorscale(getClassByIndicatorValue(indicator, feature.properties[indicator.attribute]))
       
       const tooltipValue = (indicator.numerical)
         // check of dit iets is
@@ -50,8 +50,8 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
           ? Math.round(+feature.properties[indicator.attribute]*100)/100
           : 'Geen data'
         : (indicator.aggregatedIndicator)
-          ? mostCommonClass(indicator, feature)
-          : getClassByIndicatorValue(indicator, +feature.properties[indicator.attribute])
+          ? getMostCommonClass(indicator, feature)
+          : getClassByIndicatorValue(indicator, feature.properties[indicator.attribute])
       
       // @ts-ignore
       tooltipValues.set({
