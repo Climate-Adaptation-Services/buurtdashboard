@@ -16,7 +16,6 @@
     if(regioNaam && regioNaam.length > 25){
       regioNaam = regioNaam.slice(0, 23) + '...'
     }
-    console.log(regioNaam)
   }
 
 </script>
