@@ -44,7 +44,7 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
           : '#000000'
         : (indicator.aggregatedIndicator)
           ? indicatorValueColorscale(mostCommonClass(indicator, feature))
-          : indicatorValueColorscale(getClassByIndicatorValue(indicator, indicator, feature.properties[indicator.attribute]))
+          : indicatorValueColorscale(getClassByIndicatorValue(indicator, feature.properties[indicator.attribute]))
       
       const tooltipValue = (indicator.numerical)
         // check of dit iets is
@@ -53,7 +53,7 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
           : 'Geen data'
         : (indicator.aggregatedIndicator)
           ? mostCommonClass(indicator, feature)
-          : getClassByIndicatorValue(indicator, +feature.properties[indicator.attribute])
+          : getClassByIndicatorValue(indicator, feature.properties[indicator.attribute])
       
       // @ts-ignore
       tooltipValues.set({

@@ -56,6 +56,7 @@ export function calcPercentagesForEveryClassSingleIndicator(indicator, data, reg
   for(let i=0;i<Object.keys(indicator.classes).length;i++){
     classesTotal.push({className: Object.keys(indicator.classes)[i], waarde:0})
   }
+
   data.features.forEach(neighbourhoodOrMunicipality => {
     classesTotal.filter(kl => kl.className === getClassByIndicatorValue(indicator, neighbourhoodOrMunicipality.properties[indicator.attribute]))[0].waarde += 1
     totalAmount += 1

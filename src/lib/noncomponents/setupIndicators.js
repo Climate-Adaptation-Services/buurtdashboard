@@ -7,7 +7,6 @@ export function setupIndicators(data, eff, geb, kwe){
 
   let indicatorsList = []
 
-  // let indicatorsOpCategory = [...metadata.filter(d => d.Category === 'Gebiedskenmerken'), ...metadata.filter(d => d.Category === 'Effecten'), ...metadata.filter(d => d.Category === 'Kwetsbaarheid')]
   indicatorsList = addIndicatorCategory(indicatorsList, metadata.filter(d => d.Categorie === eff))
   indicatorsList = addIndicatorCategory(indicatorsList, metadata.filter(d => d.Categorie === geb))
   indicatorsList = addIndicatorCategory(indicatorsList, metadata.filter(d => d.Categorie === kwe))
@@ -22,13 +21,23 @@ function addIndicatorCategory(indicatorsList, indicators){
   indicatorsList.push({title:{'label':indicators[0].Categorie, 'disabled':true}})
 
   indicators.forEach(indicator => {
-    let classes = {}
+
+    let classes = {'No data':'-10'}
+    // add no data class
+    const indicatorDomein = ['No data', ...indicator.Domein.split(',')]
+    const noDataColor = '#333333'
+    const indicatorColors = (indicator['kwantitatief / categoraal / multiline'] !== 'Kwantitatief')
+      ? [noDataColor, ...indicator.Kleur.split(',')]
+      : indicator.Kleur.split(',')
+    
+    console.log(indicator.Titel, indicatorColors)
+
     if(indicator['kwantitatief / categoraal / multiline'] !== 'categoraal'){
-      indicator.Domein.split(',').forEach((d,i) => {
+      indicatorDomein.slice(1).forEach((d,i) => {
         classes[d] = indicator.Indicatornaamtabel.split(',')[i]
       });
     }else{
-      indicator.Domein.split(',').forEach((d,i) => {
+      indicatorDomein.slice(1).forEach((d,i) => {
         classes[d] = indicator.klassenthresholds.split(',')[i]
       });
     }
@@ -41,8 +50,8 @@ function addIndicatorCategory(indicatorsList, indicators){
       plottitle:indicator['Plottitel (enkel bij kwantitatief)'],
       category:indicator.Categorie, 
       color:{
-        domain:indicator.Domein.split(','), 
-        range:indicator.Kleur.split(',')
+        domain:indicatorDomein, 
+        range:indicatorColors
       }, 
       classes:classes,
       numerical:(indicator['kwantitatief / categoraal / multiline'] === 'Kwantitatief') ? true : false, 

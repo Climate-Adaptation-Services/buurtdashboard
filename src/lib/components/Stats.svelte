@@ -28,6 +28,7 @@
     medianValuesDict['medianValueGemeente'] = 0
   }
   $: if($neighbourhoodSelection !== null){
+    console.log($neighbourhoodSelection)
     // deze filter is 1 neighbourhood
     const neighbourhoodFilter = $allNeighbourhoodsJSONData.features.filter(neighbourhood => neighbourhood.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection)
     medianValuesDict['medianValueBuurt'] = (neighbourhoodFilter[0].properties[indicator.attribute] !== null)

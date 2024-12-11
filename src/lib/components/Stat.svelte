@@ -1,7 +1,6 @@
 <script>
-  import { municipalitySelection, allMunicipalitiesJSONData, selectedNeighbourhoodJSONData, neighbourhoodNameAbbreviation, municipalityNameAbbreviation, districtTypeAbbreviation } from "$lib/stores";
-  import { t } from '$lib/i18n/translate.js';
-    import { getRegionName } from "$lib/noncomponents/getRegionName";
+  import { municipalitySelection, neighbourhoodSelection } from "$lib/stores";
+  import { getRegionName } from "$lib/noncomponents/getRegionName";
 
   export let graphWidth;
   export let indicatorHeight;
@@ -11,10 +10,13 @@
   export let medianValue;
   export let indicatorValueColorscale;
 
-  $: regioNaam = getRegionName(regio)
-  
-  $: if(regioNaam && regioNaam.length > 25){
-    regioNaam = regioNaam.slice(0, 23) + '...'
+  let regioNaam = ''
+  $: if($neighbourhoodSelection || $municipalitySelection){
+    regioNaam = getRegionName(regio)
+    if(regioNaam && regioNaam.length > 25){
+      regioNaam = regioNaam.slice(0, 23) + '...'
+    }
+    console.log(regioNaam)
   }
 
 </script>
