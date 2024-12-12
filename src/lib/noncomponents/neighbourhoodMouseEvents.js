@@ -28,11 +28,14 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
       .style('filter', 'drop-shadow(0 0 15px black)')
       .raise()
     if(indicator.numerical === true){
-      select('.' + circleClassName)
-        .attr('stroke', 'white')
-        .attr('r', get(circleRadius) + 3)
-        .style('filter', 'drop-shadow(0 0 5px black)')
-        .raise()
+      if(feature.properties[get(currentCodeAbbreviation)] !== get(neighbourhoodSelection)){
+
+        select('.' + circleClassName)
+          .attr('stroke', 'white')
+          .attr('r', get(circleRadius) + 3)
+          .style('filter', 'drop-shadow(0 0 5px black)')
+          .raise()
+      }
     }
 
     if(mapType === 'indicator map'){
