@@ -6,6 +6,7 @@
   import { forceSimulation, forceY, forceX, forceCollide, forceManyBody } from "d3-force";
   import { getClassName } from '$lib/noncomponents/getClassName';
   import { click, mouseOut, mouseOver } from "$lib/noncomponents/neighbourhoodMouseEvents";
+  import { t } from "$lib/i18n/translate";
 
   export let graphWidth;
   export let indicatorHeight;
@@ -71,7 +72,7 @@
       />
     {/each}
   </g>
-  <text x={graphWidth/2} y={indicatorHeight-18} fill='#645F5E' text-anchor='middle' font-size='14'>{indicator.plottitle} per neighbourhood in municipality {$allMunicipalitiesJSONData.features.filter(municipality => municipality.properties['GM_CODE'] === $municipalitySelection)[0].properties[$municipalityNameAbbreviation]}</text>
+  <text x={graphWidth/2} y={indicatorHeight-18} fill='#645F5E' text-anchor='middle' font-size='14'>{indicator.plottitle} per {t('Buurt').toLowerCase()} in {t('Gemeente').toLowerCase() + ' '} {$allMunicipalitiesJSONData.features.filter(municipality => municipality.properties['GM_CODE'] === $municipalitySelection)[0].properties[$municipalityNameAbbreviation]}</text>
 </svg>
 
 
