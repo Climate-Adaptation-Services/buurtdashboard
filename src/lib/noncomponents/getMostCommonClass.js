@@ -9,5 +9,9 @@ export function getMostCommonClass(indicator, feature){
     }
   });
 
+  if(mostCommon === ''){
+    return 'No data'
+  }
+
   return mostCommon
 }
