@@ -1,5 +1,5 @@
 <script>
-  import { municipalitySelection, neighbourhoodSelection } from "$lib/stores";
+  import { municipalitySelection, neighbourhoodSelection, allNeighbourhoodsJSONData } from "$lib/stores";
   import { getRegionName } from "$lib/noncomponents/getRegionName";
 
   export let graphWidth;
@@ -11,7 +11,7 @@
   export let indicatorValueColorscale;
 
   let regioNaam = ''
-  $: if($neighbourhoodSelection || $municipalitySelection){
+  $: if($neighbourhoodSelection || $municipalitySelection || $allNeighbourhoodsJSONData){
     regioNaam = getRegionName(regio)
     if(regioNaam && regioNaam.length > 25){
       regioNaam = regioNaam.slice(0, 23) + '...'
