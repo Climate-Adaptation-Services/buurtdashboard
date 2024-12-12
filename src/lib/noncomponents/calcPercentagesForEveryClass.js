@@ -26,7 +26,6 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
     // voor deze neighbourhood tel de waardes van elke klasse bij de totale som op
     let noData = true
     Object.keys(indicator.classes).forEach(kl => {
-      // is dit goed zo of moeten we anders met no data (NaN) omgaan
       if(neighbourhood.properties[indicator.classes[kl]] && !isNaN(parseFloat(neighbourhood.properties[indicator.classes[kl]]))){
         noData = false
         // pak de klasse erbij in totalSumPerClass
@@ -36,7 +35,7 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
       }
     });
     if(noData){
-      totalSumPerClass.filter(kl => kl.className === 'No data')[0] += 100
+      totalSumPerClass.filter(kl => kl.className === 'No data')[0].som += 100
     }
   });
 
