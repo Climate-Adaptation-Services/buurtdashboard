@@ -41,7 +41,7 @@
   // Run the simulation whenever any of the variables inside of it change
   $: {
     simulation = forceSimulation(NeighbourhoodsInMunicipalityFeaturesClone)
-      .force("x", forceX().x(d => xScaleBeeswarm(d.properties[indicator.attribute]))
+      .force("x", forceX().x(d => xScaleBeeswarm(d.properties[indicator.attribute])-5)
         .strength(d => (xScaleBeeswarm(d.properties[indicator.attribute]) > 0) ? 0.1 : 1))
       .force("y", forceY().y(70)
         .strength(d => (xScaleBeeswarm(d.properties[indicator.attribute]) > 0) ? 0.04 : 0.01))
