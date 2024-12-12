@@ -55,6 +55,7 @@
   $: xScaleStats = scaleLinear()
     .domain(xDomain)
     .range([0, statsWidth-240])
+    
 
 </script>
 
