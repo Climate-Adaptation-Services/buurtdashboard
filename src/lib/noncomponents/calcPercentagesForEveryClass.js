@@ -24,32 +24,34 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
     // if(indicator.title === t('Gevoelstemperatuur')){totalSurfaceArea -= neighbourhoodShapeArea * neighbourhood.properties['NDPETperc']}
     
     // voor deze neighbourhood tel de waardes van elke klasse bij de totale som op
+    let noData = true
     Object.keys(indicator.classes).forEach(kl => {
       // is dit goed zo of moeten we anders met no data (NaN) omgaan
       if(neighbourhood.properties[indicator.classes[kl]] && !isNaN(parseFloat(neighbourhood.properties[indicator.classes[kl]]))){
+        noData = false
         // pak de klasse erbij in totalSumPerClass
         const tempKlasse = totalSumPerClass.filter(kl2 => kl2.className === kl)[0]
         // we wegen ook voor het oppervlakte met neighbourhoodShapeArea
         tempKlasse.som += +neighbourhood.properties[indicator.classes[kl]]
       }
     });
+    if(noData){
+      totalSumPerClass.filter(kl => kl.className === 'No data')[0] += 100
+    }
   });
 
-
-
-  // Nu delen we elke som door het totalSurfaceArea om tot percentages te komen
   totalSumPerClass.forEach(kl => {
     // kl.som = (kl.som/totalSurfaceArea)
     kl.som = (kl.som/data.features.length)
-    // if(indicator.title === t('Gevoelstemperatuur')){kl.som *= 100}
   })
 
+  if(indicator.title === 'Groen/Grijs/Blauw'){console.log('classesTotal', totalSumPerClass)}
 
 
   // we stoppen het resultaat per klasse in een dictionary
   let result = {'group':regio}
-  Object.keys(indicator.classes).forEach(_class => {
-    result[_class] = totalSumPerClass.filter(kl => kl.className === _class)[0].som
+  Object.keys(indicator.classes).forEach(indicatorClass => {
+    result[indicatorClass] = totalSumPerClass.filter(kl => kl.className === indicatorClass)[0].som
   });  
 
   return result
@@ -62,12 +64,9 @@ export function calcPercentagesForEveryClassSingleIndicator(indicator, data, reg
     classesTotal.push({className: Object.keys(indicator.classes)[i], waarde:0})
   }
   data.features.forEach(neighbourhoodOrMunicipality => {
-    if(neighbourhoodOrMunicipality.properties[indicator.attribute]){
-      classesTotal.filter(kl => kl.className === getClassByIndicatorValue(indicator, neighbourhoodOrMunicipality.properties[indicator.attribute]))[0].waarde += 1
-    }
+    classesTotal.filter(kl => kl.className === getClassByIndicatorValue(indicator, neighbourhoodOrMunicipality.properties[indicator.attribute]))[0].waarde += 1
     totalAmount += 1
   });
-  if(indicator.title === 'Groennorm'){console.log(classesTotal)}
 
   classesTotal.forEach(kl => {
     kl.waarde = (kl.waarde/totalAmount) * 100
