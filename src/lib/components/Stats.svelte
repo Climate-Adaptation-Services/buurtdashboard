@@ -56,6 +56,7 @@
     .domain(xDomain)
     .range([0, statsWidth-240])
     
+  console.log('test')
 
 </script>
 
