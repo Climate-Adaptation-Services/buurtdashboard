@@ -39,16 +39,27 @@ function addIndicatorCategory(indicatorsList, indicators){
 
   indicators.forEach(indicator => {
     if(indicator.Titel === 'Oppervlakte openbaar / niet openbaar'){return}
-    let classes = {}
-    if(indicator['kwantitatief / categoraal / aggregated'] !== 'categoraal'){
-      indicator.Domein.split(',').forEach((d,i) => {
-        classes[d] = indicator.Indicatornaamtabel.split(',')[i]
-      });
-    }else{
-      indicator.Domein.split(',').forEach((d,i) => {
-        classes[d] = indicator.klassenthresholds.split(',')[i]
-      });
-    }
+      
+    let classes = {'No data':'-10'}
+      // add no data class
+      const indicatorDomein = ['No data', ...indicator.Domein.split(',')]
+      const noDataColor = '#333333'
+      const indicatorColors = (indicator['kwantitatief / categoraal / aggregated'] !== 'kwantitatief')
+        ? [noDataColor, ...indicator.Kleur.split(',')]
+        : indicator.Kleur.split(',')
+      
+      console.log(indicator.Titel, indicatorColors)
+
+      if(indicator['kwantitatief / categoraal / aggregated'] !== 'categoraal'){
+        indicatorDomein.slice(1).forEach((d,i) => {
+          classes[d] = indicator.Indicatornaamtabel.split(',')[i]
+        });
+      }else{
+        indicatorDomein.slice(1).forEach((d,i) => {
+          classes[d] = indicator.klassenthresholds.split(',')[i]
+        });
+      }
+
     
     indicatorsList.push({
       title:indicator.Titel, 
@@ -57,8 +68,8 @@ function addIndicatorCategory(indicatorsList, indicators){
       plottitle:indicator['Plottitel (enkel bij kwantitatief)'],
       category:indicator.Categorie, 
       color:{
-        domain:indicator.Domein.split(','), 
-        range:indicator.Kleur.split(',')
+        domain:indicatorDomein, 
+        range:indicatorColors
       }, 
       classes:classes,
       numerical:(indicator['kwantitatief / categoraal / aggregated'] === 'kwantitatief') ? true : false, 
@@ -67,6 +78,7 @@ function addIndicatorCategory(indicatorsList, indicators){
       source:indicator.Bron,
       description:indicator['Tekst vraagteken'],
     })
+    
   })
   return indicatorsList
 }
