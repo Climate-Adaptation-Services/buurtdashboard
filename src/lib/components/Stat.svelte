@@ -1,4 +1,5 @@
 <script>
+  import { neighbourhoodSelection, municipalitySelection, allNeighbourhoodsJSONData } from "$lib/stores";
   import { getRegionName } from "$lib/noncomponents/getRegionName";
 
   export let graphWidth;
@@ -11,10 +12,12 @@
   export let medianValue;
   export let indicatorValueColorscale;
 
-  $: regioNaam = getRegionName(regio)
-  
-  $: if(regioNaam && regioNaam.length > 25){
-    regioNaam = regioNaam.slice(0, 23) + '...'
+  let regioNaam = ''
+  $: if($neighbourhoodSelection || $municipalitySelection || $allNeighbourhoodsJSONData){
+    regioNaam = getRegionName(regio)
+    if(regioNaam && regioNaam.length > 25){
+      regioNaam = regioNaam.slice(0, 23) + '...'
+    }
   }
 
 </script>
