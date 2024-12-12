@@ -1,4 +1,3 @@
-import { t } from "$lib/i18n/translate";
 
 export function getClassByIndicatorValue(indicator, value){
   if(value === null || value === ''){return 'No data'}
