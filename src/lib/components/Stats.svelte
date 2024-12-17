@@ -65,7 +65,9 @@
     }
 
     medianValuesDict['medianValueWijktype'] = calcMedian($districtTypeJSONData.features.map(neighbourhood => neighbourhood.properties[indicator.attribute]))
-    medianValuesDictOtherYear['medianValueWijktype'] = calcMedian($districtTypeJSONData.features.map(neighbourhood => neighbourhood.properties[otherYearAttribute]))
+    if(isThereOtherYear){
+      medianValuesDictOtherYear['medianValueWijktype'] = calcMedian($districtTypeJSONData.features.map(neighbourhood => neighbourhood.properties[otherYearAttribute]))
+    }
 
   }else{
     medianValuesDict['medianValueBuurt'] = 0
