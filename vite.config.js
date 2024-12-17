@@ -9,7 +9,7 @@ export default defineConfig({
   },
   build: {
     rollupOptions: {
-      external: [],  // Ensure this is NOT marked as external
+      external: ['d3-force'],  // Ensure this is NOT marked as external
     }
   }
 });
