@@ -31,8 +31,6 @@ function addIndicatorCategory(indicatorsList, indicators){
       ? [noDataColor, ...indicator.Kleur.split(',')]
       : indicator.Kleur.split(',')
     
-    console.log(indicator.Titel, indicatorColors)
-
     if(indicator['kwantitatief / categoraal / multiline'] !== 'categoraal'){
       indicatorDomein.slice(1).forEach((d,i) => {
         classes[d] = indicator.Indicatornaamtabel.split(',')[i]

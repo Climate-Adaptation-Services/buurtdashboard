@@ -2,7 +2,7 @@ import { getClassByIndicatorValue } from "./getClassByIndicatorValue";
 import { t } from "$lib/i18n/translate";
 
 export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regio){
-  let totalSurfaceArea = 0
+  // let totalSurfaceArea = 0
   let totalSumPerClass = []
 
   // object om totale som van elke klasse in op te tellen
@@ -15,30 +15,35 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
 
   // voor elke neighbourhood gaan we de waardes van elke klasse bij de som van die klasse toevoegen
   data.features.forEach(neighbourhood => {
-    let neighbourhoodOppervlakte = (indicator.title === 'Functionele gebieden')
-      ? neighbourhood.properties['buurt_opp_incl_agrarisch']
-      : neighbourhood.properties['buurt_opp_zonderagr']
+    // let neighbourhoodOppervlakte = (indicator.title === 'Functionele gebieden')
+    //   ? neighbourhood.properties['buurt_opp_incl_agrarisch']
+    //   : neighbourhood.properties['buurt_opp_zonderagr']
 
-    totalSurfaceArea += neighbourhoodOppervlakte
+    // totalSurfaceArea += neighbourhoodOppervlakte
 
-    if(indicator.title === t('Gevoelstemperatuur')){totalSurfaceArea -= neighbourhoodOppervlakte * neighbourhood.properties['NDPETperc']}
+    // if(indicator.title === t('Gevoelstemperatuur')){totalSurfaceArea -= neighbourhoodOppervlakte * neighbourhood.properties['NDPETperc']}
     
     // voor deze neighbourhood tel de waardes van elke klasse bij de totale som op
+    let noData = true
     Object.keys(indicator.classes).forEach(kl => {
-      // is dit goed zo of moeten we anders met no data (NaN) omgaan
       if(neighbourhood.properties[indicator.classes[kl]] && !isNaN(parseFloat(neighbourhood.properties[indicator.classes[kl]]))){
+        noData = false
         // pak de klasse erbij in totalSumPerClass
         const tempKlasse = totalSumPerClass.filter(kl2 => kl2.className === kl)[0]
-        // we wegen ook voor het oppervlakte met neighbourhoodOppervlakte
-        tempKlasse.som += neighbourhoodOppervlakte * +neighbourhood.properties[indicator.classes[kl]]
+        // we wegen ook voor het oppervlakte met neighbourhoodShapeArea
+        tempKlasse.som += +neighbourhood.properties[indicator.classes[kl]]
       }
-    });
+    }); 
+    if(noData){
+      totalSumPerClass.filter(kl => kl.className === 'No data')[0].som += 100
+    }
   });
 
   // Nu delen we elke som door het totalSurfaceArea om tot percentages te komen
   totalSumPerClass.forEach(kl => {
-    kl.som = (kl.som/totalSurfaceArea)
-    if(indicator.title === t('Gevoelstemperatuur')){kl.som *= 100}
+    // kl.som = (kl.som/totalSurfaceArea)
+    kl.som = (kl.som/data.features.length)
+    // if(indicator.title === t('Gevoelstemperatuur')){kl.som *= 100}
   })
 
   // we stoppen het resultaat per klasse in een dictionary
