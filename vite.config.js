@@ -7,9 +7,9 @@ export default defineConfig({
 	optimizeDeps: {
     include: ['lodash.get', 'lodash.isequal', 'lodash.clonedeep', 'd3-force']
   },
-  build: {
-    rollupOptions: {
-      external: ['d3-force'],  // Ensure this is NOT marked as external
-    }
-  }
+  // build: {
+  //   rollupOptions: {
+  //     external: ['d3-force'],  // Ensure this is NOT marked as external
+  //   }
+  // }
 });
