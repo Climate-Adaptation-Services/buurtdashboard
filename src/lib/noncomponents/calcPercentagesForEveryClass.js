@@ -33,7 +33,7 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
         // we wegen ook voor het oppervlakte met neighbourhoodShapeArea
         tempKlasse.som += +neighbourhood.properties[indicator.classes[kl]]
       }
-    });
+    }); 
     if(noData){
       totalSumPerClass.filter(kl => kl.className === 'No data')[0].som += 100
     }
