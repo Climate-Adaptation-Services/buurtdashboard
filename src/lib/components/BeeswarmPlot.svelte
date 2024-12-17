@@ -3,7 +3,7 @@
   import { allMunicipalitiesJSONData, municipalitySelection, neighbourhoodSelection, neighbourhoodCodeAbbreviation, municipalityNameAbbreviation, circleRadius } from "$lib/stores";
   import { extent, scaleLinear, scaleLog } from "d3";
   import XAxis from '$lib/components/XAxis.svelte';
-  import { forceSimulation, forceY, forceX, forceCollide, forceManyBody } from "d3-force";
+  import { forceSimulation, forceY, forceX, forceCollide, forceManyBody } from "d3";
   import { getClassName } from '$lib/noncomponents/getClassName';
   import { click, mouseOut, mouseOver } from "$lib/noncomponents/neighbourhoodMouseEvents";
   import { t } from "$lib/i18n/translate";
