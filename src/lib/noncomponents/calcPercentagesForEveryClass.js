@@ -41,7 +41,8 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
 
   // Nu delen we elke som door het totalSurfaceArea om tot percentages te komen
   totalSumPerClass.forEach(kl => {
-    kl.som = (kl.som/totalSurfaceArea)
+    // kl.som = (kl.som/totalSurfaceArea)
+    kl.som = (kl.som/data.features.length)
     // if(indicator.title === t('Gevoelstemperatuur')){kl.som *= 100}
   })
 
