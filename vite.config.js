@@ -6,10 +6,5 @@ export default defineConfig({
 	plugins: [sveltekit(), isoImport()],
 	optimizeDeps: {
     include: ['lodash.get', 'lodash.isequal', 'lodash.clonedeep']
-  },
-  build: {
-    rollupOptions: {
-      external: ['d3-force'],  // Ensure this is NOT marked as external
-    }
   }
 });
