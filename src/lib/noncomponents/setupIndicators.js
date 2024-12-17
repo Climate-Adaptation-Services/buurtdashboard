@@ -21,6 +21,7 @@ function addIndicatorCategory(indicatorsList, indicators){
   indicatorsList.push({title:{'label':indicators[0].Categorie, 'disabled':true}})
 
   indicators.forEach(indicator => {
+    if(indicator.Titel === 'Gevoelstemperatuur'){return}
 
     let classes = {'No data':'-10'}
     // add no data class
@@ -30,8 +31,6 @@ function addIndicatorCategory(indicatorsList, indicators){
       ? [noDataColor, ...indicator.Kleur.split(',')]
       : indicator.Kleur.split(',')
     
-    console.log(indicator.Titel, indicatorColors)
-
     if(indicator['kwantitatief / categoraal / multiline'] !== 'categoraal'){
       indicatorDomein.slice(1).forEach((d,i) => {
         classes[d] = indicator.Indicatornaamtabel.split(',')[i]
