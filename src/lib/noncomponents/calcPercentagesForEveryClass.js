@@ -24,7 +24,7 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
 
     // totalSurfaceArea += neighbourhoodOppervlakte
 
-    if(indicator.title === t('Gevoelstemperatuur')){noOfFeatures -= neighbourhood.properties['PET_NDp']}
+    // if(indicator.title === t('Gevoelstemperatuur')){noOfFeatures -= neighbourhood.properties['PET_NDp']}
     
     // voor deze neighbourhood tel de waardes van elke klasse bij de totale som op
     let noData = true
@@ -38,7 +38,9 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
       }
     }); 
     if(noData){
-      totalSumPerClass.filter(kl => kl.className === 'No data')[0].som += 100
+      if(indicator.title !== 'Gevoelstemperatuur'){
+        totalSumPerClass.filter(kl => kl.className === 'No data')[0].som += 100
+      }
     }
   });
 
