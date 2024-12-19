@@ -1,4 +1,4 @@
-
+import { t } from "$lib/i18n/translate"
 export function setupIndicators(data, eff, geb, kwe){
 
   const metadata = (data.lang === 'en')
@@ -21,7 +21,7 @@ function addIndicatorCategory(indicatorsList, indicators){
   indicatorsList.push({title:{'label':indicators[0].Categorie, 'disabled':true}})
 
   indicators.forEach(indicator => {
-    if(indicator.Titel === 'Gevoelstemperatuur'){return}
+    if(indicator.Titel === t('Gevoelstemperatuur')){return}
 
     let classes = {'No data':'-10'}
     // add no data class
