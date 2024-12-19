@@ -1,5 +1,5 @@
 <script>
-  import { municipalitySelection, neighbourhoodsInMunicipalityJSONData, allNeighbourhoodsJSONData, alleIndicatoren2019, alleIndicatoren2023, jaarSelecties, municipalityCodeAbbreviation, municipalityNameAbbreviation } from "$lib/stores";
+  import { municipalitySelection, neighbourhoodsInMunicipalityJSONData, allNeighbourhoodsJSONData, alleIndicatoren2019, alleIndicatoren2023, jaarSelecties, municipalityCodeAbbreviation, municipalityNameAbbreviation, backgroundColor } from "$lib/stores";
   import BeeswarmPlot from "./BeeswarmPlot.svelte";
   import Stats from "./Stats.svelte";
   import { scaleLinear, extent, scaleOrdinal } from 'd3';
@@ -66,16 +66,16 @@
 </script>
 
 <div class='indicator-div'>
-  <h3 class='question-mark' style='padding:3px 10px 3px 10px; margin:0; position:absolute; border-radius:50px; right:5px; top:5px; color:white;background-color:#36575B; cursor:default'>?</h3>
+  <h3 class='question-mark' style='padding:3px 10px 3px 10px; margin:0; position:absolute; border-radius:50px; right:5px; top:5px; color:white;background-color:{$backgroundColor}; cursor:default'>?</h3>
   <div class={'indicator-info indicator-info-'+indicator.attribute} style='left:{indicatorInfoPosition}px'>
-    <p style='padding:3px 10px 3px 10px; border-radius:50px; color:white;background-color:#36575B; float:left'><strong>{indicator.title}</strong></p>
+    <p style='padding:3px 10px 3px 10px; border-radius:50px; color:white;background-color:{$backgroundColor}; float:left'><strong>{indicator.title}</strong></p>
     <hr width='100%'>
     <p>{indicator.description}</p>
   </div>
 
   <div class='indicator-title' style='height: {titleHeight}px'>
     <h4 style='margin:0px; color:#BB9012'>{t("Categorie")}: {indicator.category}</h4>
-    <h2 style='padding:5px 15px 5px 15px; margin:10px 0px 7px 0px; background-color:#36575B; border-radius:15px; color:white'>{indicator.title}</h2>
+    <h2 style='padding:5px 15px 5px 15px; margin:10px 0px 7px 0px; background-color:{$backgroundColor}; border-radius:15px; color:white'>{indicator.title}</h2>
     <h4 style='margin:0px; padding:0px 10px 0px 10px; font-weight:normal; color:#7e7975; text-align: center;'>{indicator.subtitle}</h4>
     {#if indicator.title === 'Boomkroonbedekking' || indicator.title === 'Boomkroonbedekking 500m'}
       <YearSwitch {indicator} />
@@ -108,7 +108,9 @@
       {/if}
       <span style='width:100%; position:absolute; bottom:0px; display:flex; justify-content:space-between; pointer-events:none'>
         <h5><strong>{indicator.source}</strong></h5>
-        <h5 style='pointer-events:auto'><a target='_blank' href={indicator.link}>{t("Meer_info")}</a></h5>
+        {#if indicator.link}
+          <h5 style='pointer-events:auto'><a target='_blank' href={indicator.link}>{t("Meer_info")}</a></h5>
+        {/if}
       </span>
     </div>
   </div>

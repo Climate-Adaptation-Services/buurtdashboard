@@ -1,5 +1,5 @@
 <script>
-  import { indicatorYearChanged, jaarSelecties } from "$lib/stores";
+  import { indicatorYearChanged, jaarSelecties, backgroundColor } from "$lib/stores";
     import { selectAll } from "d3";
 
   export let indicator
@@ -36,13 +36,13 @@
 
 <svg>
   <g transform='translate(0,12)' font-size='18'>
-    <rect class={(selectedYear === '2019') ? '' : 'passive'} stroke='lightgrey' stroke-width='2' width={rectWidth} height={rectHeight} rx='12' fill={(selectedYear === '2019') ? '#36575B' : 'lightgrey'}
+    <rect class={(selectedYear === '2019') ? '' : 'passive'} stroke='lightgrey' stroke-width='2' width={rectWidth} height={rectHeight} rx='12' fill={(selectedYear === '2019') ? $backgroundColor : 'lightgrey'}
     on:click={() => {yearClick('2019')}}
     on:mouseover={() => {yearMouseOver('2019')}}
     on:mouseout={() => {yearMouseOut('2019')}}/>
     <text x={11} y={rectHeight/2 + 6} fill={(selectedYear === '2019') ? 'white' : 'grey'}>2019</text>
 
-    <rect class={(selectedYear === '2023') ? '' : 'passive'} stroke='lightgrey' stroke-width='2' x={rectWidth+spaceBetween} width={rectWidth} height={rectHeight} rx='12' fill={(selectedYear === '2023') ? '#36575B' : 'lightgrey'}
+    <rect class={(selectedYear === '2023') ? '' : 'passive'} stroke='lightgrey' stroke-width='2' x={rectWidth+spaceBetween} width={rectWidth} height={rectHeight} rx='12' fill={(selectedYear === '2023') ? $backgroundColor : 'lightgrey'}
     on:click={() => {yearClick('2023')}}
     on:mouseover={() => {yearMouseOver('2023')}}
     on:mouseout={() => {yearMouseOut('2023')}}/>

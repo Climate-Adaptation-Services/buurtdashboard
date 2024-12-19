@@ -40,6 +40,7 @@
 
 <div class='search'>
   <div>
+    <!-- <img src='./dordrecht-icon2.png' class='dord-icon'/> -->
     <div class='download-and-about'>
       <div class='about' on:click={() => laatMeerInfoPanelZien('intro')}>
         <img src='./about.png' width='30px'/>
@@ -50,8 +51,8 @@
         <p class='download-and-about-text'>{t('Uitleg_grafieken')}</p>
       </div>
       <div class='download'>
-        <a href='https://github.com/Climate-Adaptation-Services/buurtdashboard-data/raw/main/BuurtdashboardDataDownload20240913.xlsx' download='BuurtdashboardDownload20240805'><img src='./download.png' width='30px'/></a>
-        <p class='download-and-about-text'>Download data</p>
+        <!-- <a href='https://github.com/Climate-Adaptation-Services/buurtdashboard-data/raw/main/BuurtdashboardDataDownload20240913.xlsx' download='BuurtdashboardDownload20240805'><img src='./download.png' width='30px'/></a> -->
+        <!-- <p class='download-and-about-text'>Download data</p> -->
       </div>
     </div>
     <GemeenteSelect {lijstAlleGemeentesVoorDropdown} />
@@ -97,5 +98,13 @@
   }
   .about:hover .download-and-about-text{
     visibility: visible; 
+  }
+
+  .dord-icon{
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    z-index: -1000;
   }
 </style>

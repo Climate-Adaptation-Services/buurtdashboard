@@ -25,6 +25,8 @@ export const alleIndicatoren2023 = writable([])
 export const jaarSelecties = writable({})
 export const indicatorYearChanged = writable([])
 
+export const backgroundColor = readable('#0064af')
+
 export const selectedNeighbourhoodJSONData = derived(
   [allNeighbourhoodsJSONData, neighbourhoodSelection],
   ([$allNeighbourhoodsJSONData, $neighbourhoodSelection]) => {
