@@ -8,18 +8,18 @@ export function prepareJSONData(JSONdata){
   municipalityTopojson = topojson.feature(municipalityTopojson, municipalityTopojson.objects.GemeenteGrenzen2023)
   allMunicipalitiesJSONData.set(municipalityTopojson)
 
-  let neighbourhoodTopojson1 = topojsonsimplify.presimplify(JSONdata[1])
-  neighbourhoodTopojson1 = topojson.feature(neighbourhoodTopojson1, neighbourhoodTopojson1.objects['BuurtenDataset20240913_xaaaa'])
-
-  let neighbourhoodTopojson2 = topojsonsimplify.presimplify(JSONdata[2])
-  neighbourhoodTopojson2 = topojson.feature(neighbourhoodTopojson2, neighbourhoodTopojson2.objects['BuurtenDataset20240913_xaaab'])
+  let neighbourhoodTopojson = topojsonsimplify.presimplify(JSONdata[1])
+  neighbourhoodTopojson = topojson.feature(neighbourhoodTopojson, neighbourhoodTopojson.objects['BuurtenDataset20241218'])
+  let neighbourhoodTopojsonFeatures = neighbourhoodTopojson.features
+  // let neighbourhoodTopojson2 = topojsonsimplify.presimplify(JSONdata[2])
+  // neighbourhoodTopojson2 = topojson.feature(neighbourhoodTopojson2, neighbourhoodTopojson2.objects['BuurtenDataset20240913_xaaab'])
   
-  let neighbourhoodTopojson3 = topojsonsimplify.presimplify(JSONdata[3])
-  neighbourhoodTopojson3 = topojson.feature(neighbourhoodTopojson3, neighbourhoodTopojson3.objects['BuurtenDataset20240913_xaaac'])
+  // let neighbourhoodTopojson3 = topojsonsimplify.presimplify(JSONdata[3])
+  // neighbourhoodTopojson3 = topojson.feature(neighbourhoodTopojson3, neighbourhoodTopojson3.objects['BuurtenDataset20240913_xaaac'])
   
-  let combinedBuurt = [...neighbourhoodTopojson1.features, ...neighbourhoodTopojson2.features, ...neighbourhoodTopojson3.features]
+  // let combinedBuurt = [...neighbourhoodTopojson1.features, ...neighbourhoodTopojson2.features, ...neighbourhoodTopojson3.features]
 
-  combinedBuurt = combinedBuurt.map(neighbourhood => {
+  neighbourhoodTopojsonFeatures = neighbourhoodTopojsonFeatures.map(neighbourhood => {
 
     neighbourhood.properties['m2GroenPI'] = (isNaN(parseFloat(neighbourhood.properties['m2GroenPI']))) ? null : parseFloat(neighbourhood.properties['m2GroenPI'])
 
@@ -38,6 +38,6 @@ export function prepareJSONData(JSONdata){
     return neighbourhood
   })
 
-  console.log('allNeighbourhoodsJSONData', {type: 'FeatureCollection', features: combinedBuurt})
-  allNeighbourhoodsJSONData.set({type: 'FeatureCollection', features: combinedBuurt})
+  console.log('allNeighbourhoodsJSONData', {type: 'FeatureCollection', features: neighbourhoodTopojsonFeatures})
+  allNeighbourhoodsJSONData.set({type: 'FeatureCollection', features: neighbourhoodTopojsonFeatures})
 }

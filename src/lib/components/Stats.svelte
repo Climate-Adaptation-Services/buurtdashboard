@@ -56,8 +56,6 @@
     .domain(xDomain)
     .range([0, statsWidth-240])
     
-  console.log('test')
-
 </script>
 
 <div class='indicator-stats' style='height: {bodyHeight*0.2*0.25}px' bind:clientWidth={statsWidth}><Stat {indicatorValueColorscale} graphWidth={statsWidth} indicatorHeight={bodyHeight*0.2*0.25} regio='Nederland' medianValue={medianValuesDict['medianValueNederland']} {xScaleStats}/></div>

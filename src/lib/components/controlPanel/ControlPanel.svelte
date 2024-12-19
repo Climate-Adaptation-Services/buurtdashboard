@@ -50,7 +50,7 @@
         <p class='download-and-about-text'>{t('Uitleg_grafieken')}</p>
       </div>
       <div class='download'>
-        <a href='https://github.com/Climate-Adaptation-Services/buurtdashboard-data/raw/main/BuurtdashboardDataDownload20240913.xlsx' download='BuurtdashboardDownload20240805'><img src='./download.png' width='30px'/></a>
+        <a href='https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/data-download/BuurtdashboardDataDownload20241218.xlsx' download='BuurtdashboardDownload20241218'><img src='./download.png' width='30px'/></a>
         <p class='download-and-about-text'>Download data</p>
       </div>
     </div>
