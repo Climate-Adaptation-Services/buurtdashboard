@@ -18,14 +18,16 @@
 
 <div class='barplot-legend' style='width:{graphWidth-margin.left-margin.right}px; margin-left:{margin.left}px; margin-top:{(indicator.title !== 'Functionele gebieden') ? margin.top : 15}px'>
   {#each klasseNamen as klasse,i}
-    <div class='legend-element' style='width:{legendElementWidth}px'>
-      <svg>
-        <g>
-          <rect x={0} y={0} width={12} height={12} fill={indicatorValueColorscale(klasse)}></rect>
-          <text style='fill:#645F5E' dx='20px' dy='0.74em'>{klasse}</text>
-        </g>
-      </svg>
-    </div>
+    {#if !(['Waterdiepte bij hevige bui', 'Gevoelstemperatuur'].includes(indicator.title) && klasse === 'No data')}
+      <div class='legend-element' style='width:{legendElementWidth}px'>
+        <svg>
+          <g>
+            <rect x={0} y={0} width={12} height={12} fill={indicatorValueColorscale(klasse)}></rect>
+            <text style='fill:#645F5E' dx='20px' dy='0.74em'>{klasse}</text>
+          </g>
+        </svg>
+      </div>
+    {/if}
   {/each}
 </div>
 
