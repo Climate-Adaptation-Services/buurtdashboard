@@ -21,7 +21,7 @@ function addIndicatorCategory(indicatorsList, indicators){
   indicatorsList.push({title:{'label':indicators[0].Categorie, 'disabled':true}})
 
   indicators.forEach(indicator => {
-    if(indicator.Titel === t('Gevoelstemperatuur')){return}
+    // if(indicator.Titel === t('Gevoelstemperatuur')){return}
 
     let classes = {'No data':'-10'}
     // add no data class
@@ -40,7 +40,6 @@ function addIndicatorCategory(indicatorsList, indicators){
         classes[d] = indicator.klassenthresholds.split(',')[i]
       });
     }
-
     
     indicatorsList.push({
       title:indicator.Titel, 
