@@ -1,4 +1,5 @@
 <script>
+  import { t } from "$lib/i18n/translate"
 
   export let indicatorValueColorscale
   export let graphWidth;
@@ -18,7 +19,7 @@
 
 <div class='barplot-legend' style='width:{graphWidth-margin.left-margin.right}px; margin-left:{margin.left}px; margin-top:{(indicator.title !== 'Functionele gebieden') ? margin.top : 15}px'>
   {#each klasseNamen as klasse,i}
-    {#if !(['Waterdiepte bij hevige bui', 'Gevoelstemperatuur'].includes(indicator.title) && klasse === 'No data')}
+    {#if !(['Waterdiepte bij hevige bui', t('Gevoelstemperatuur')].includes(indicator.title) && klasse === 'No data')}
       <div class='legend-element' style='width:{legendElementWidth}px'>
         <svg>
           <g>

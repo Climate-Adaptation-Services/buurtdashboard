@@ -38,7 +38,7 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
       }
     }); 
     if(noData){
-      if(indicator.title !== 'Gevoelstemperatuur'){
+      if(indicator.title !== t('Gevoelstemperatuur')){
         totalSumPerClass.filter(kl => kl.className === 'No data')[0].som += 100
       }
     }
