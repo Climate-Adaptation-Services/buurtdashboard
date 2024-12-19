@@ -47,14 +47,16 @@
         <p class='download-and-about-text'>Intro dashboard</p>
       </div>
       <div class='about' on:click={() => laatMeerInfoPanelZien('graphs')}>
-        <img src='./chart.png' width='30px'/>
+        <img src='./uitleg-grafieken.png' width='40px'/>
         <p class='download-and-about-text'>{t('Uitleg_grafieken')}</p>
       </div>
-      <div class='download'>
+      <!-- <div class='download'> -->
         <!-- <a href='https://github.com/Climate-Adaptation-Services/buurtdashboard-data/raw/main/BuurtdashboardDataDownload20240913.xlsx' download='BuurtdashboardDownload20240805'><img src='./download.png' width='30px'/></a> -->
         <!-- <p class='download-and-about-text'>Download data</p> -->
-      </div>
+      <!-- </div> -->
     </div>
+    <br>
+
     <GemeenteSelect {lijstAlleGemeentesVoorDropdown} />
     <BuurtSelect {lijstAlleBuurtenInMunicipalityVoorDropdown} />
     {#if $neighbourhoodSelection !== null}
