@@ -1,7 +1,7 @@
 <script>
 
-  import { allMunicipalitiesJSONData, municipalitySelection, neighbourhoodSelection, neighbourhoodCodeAbbreviation, municipalityNameAbbreviation, circleRadius } from "$lib/stores";
-  import { extent, scaleLinear, scaleLog } from "d3";
+  import { allMunicipalitiesJSONData, municipalitySelection, neighbourhoodSelection, neighbourhoodCodeAbbreviation, municipalityNameAbbreviation, circleRadius, selectedNeighbourhoodJSONData } from "$lib/stores";
+  import { extent, scaleLinear, scaleLog, select } from "d3";
   import XAxis from '$lib/components/XAxis.svelte';
   import { forceSimulation, forceY, forceX, forceCollide, forceManyBody } from "d3";
   import { getClassName } from '$lib/noncomponents/getClassName';
@@ -51,6 +51,9 @@
       .alphaDecay(0.001) // [0, 1] The rate at which the simulation alpha approaches 0. you should decrease this if your bubbles are not completing their transitions between simulation states.
       .restart(); // Restart the simulation
   }
+
+  // raise node on mount, hacky solution could be better
+  $: if($selectedNeighbourhoodJSONData){setTimeout(() => {select('.' + getClassName($selectedNeighbourhoodJSONData, 'node', indicator, 'indicator map')).raise()}, 1000)}
 
 </script>
 
