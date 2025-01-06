@@ -1,7 +1,7 @@
 <script>
 
-  import { allMunicipalitiesJSONData, municipalitySelection, neighbourhoodSelection, neighbourhoodCodeAbbreviation, municipalityNameAbbreviation, circleRadius, alleIndicatoren2019 } from "$lib/stores";
-  import { extent, scaleLinear, scaleLog, selectAll } from "d3";
+  import { allMunicipalitiesJSONData, municipalitySelection, neighbourhoodSelection, neighbourhoodCodeAbbreviation, municipalityNameAbbreviation, circleRadius, alleIndicatoren2019, selectedNeighbourhoodJSONData } from "$lib/stores";
+  import { extent, scaleLinear, scaleLog, select } from "d3";
   import XAxis from '$lib/components/XAxis.svelte';
   import { forceSimulation, forceY, forceX, forceCollide, forceManyBody } from "d3-force";
   import { getClassName } from '$lib/noncomponents/getClassName';
@@ -85,6 +85,10 @@
       // }, 100);  // Increase alpha every 100ms (you can adjust timing here)
 
   }
+
+  // raise node on mount, hacky solution could be better
+  $: if($selectedNeighbourhoodJSONData){setTimeout(() => {select('.' + getClassName($selectedNeighbourhoodJSONData, 'node', indicator, 'indicator map')).raise()}, 1000)}
+
 
 </script>
 

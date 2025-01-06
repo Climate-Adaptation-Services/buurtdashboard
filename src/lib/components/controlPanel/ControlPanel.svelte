@@ -40,7 +40,7 @@
 
 <div class='search'>
   <div>
-    <!-- <img src='./dordrecht-icon2.png' class='dord-icon'/> -->
+    <img src='./dord3.png' class='dord-icon'/>
     <div class='download-and-about'>
       <div class='about' on:click={() => laatMeerInfoPanelZien('intro')}>
         <img src='./about.png' width='30px'/>
@@ -107,6 +107,7 @@
     top:0;
     left:0;
     width:100%;
+    height:65%;
     z-index: -1000;
   }
 </style>
