@@ -21,6 +21,8 @@ function addIndicatorCategory(indicatorsList, indicators){
   indicatorsList.push({title:{'label':indicators[0].Categorie, 'disabled':true}})
 
   indicators.forEach(indicator => {
+    if(indicator.Titel === 'Perceived temperature'){return}
+
     let classes = {'No data':'-10'}
     // add no data class
     const indicatorDomein = ['No data', ...indicator.Domein.split(',')]
