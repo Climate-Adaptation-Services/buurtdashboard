@@ -7,7 +7,7 @@ export async function load({ url }) {
   // Get individual query parameters
   const lang = searchParams.get('lang');
 
-  const metadata = await dsv(';', "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/metadata/buurtdashboard-metadata-060125-01.csv")
+  const metadata = await dsv(';', "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/metadata/buurtdashboard-metadata-060125-02.csv")
   const metadata_english = await dsv(';', "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/metadata/buurtdashboard-engels-metadata-060125-03.csv")
 
   return {
