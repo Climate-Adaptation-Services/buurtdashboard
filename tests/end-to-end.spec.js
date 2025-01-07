@@ -3,7 +3,7 @@ import { test } from '@playwright/test';
 
 test('end to end', async ({ page }) => {
   test.slow()
-  await page.goto('http://localhost:5173/');
+  await page.goto('https://buurtdashboard-dev.vercel.app');
   await page.locator('.GM1969_path').click();
   await page.locator('.BU19691609_path_perc5_10mm').click();
   await page.getByLabel('selected options').getByRole('textbox').click();
