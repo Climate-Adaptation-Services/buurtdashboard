@@ -7,7 +7,7 @@
   import GemeenteSelect from './GemeenteSelect.svelte';
   import BuurtSelect from './BuurtSelect.svelte';
   import { t } from '$lib/i18n/translate.js';
-
+ 
   export let allIndicators
 
   let lijstAlleGemeentesVoorDropdown;
