@@ -7,7 +7,7 @@ jobs:
   run-e2es:
     if: github.event_name == 'deployment_status' && github.event.deployment_status.state == 'success'
     runs-on: ubuntu-latest
-    timeout-minutes: 3  # Timeout set to 3 minutes
+    timeout-minutes: 0.5
     steps:
       # Notify Slack that tests have started
       - name: Notify Slack that tests have started
@@ -45,17 +45,12 @@ jobs:
         env:
           BASE_URL: ${{ github.event.deployment_status.environment_url }}
 
-      - name: Capture Timeout or Failure
+      - name: Capture Test Result (Failure or Success)
         id: result
         run: |
-          if [[ $GITHUB_RUN_ATTEMPT -gt 1 ]]; then
-            echo "Tests timed out or failed due to job timeout."
-            echo "::set-output name=test-status::timeout"
-          elif [ $? -ne 0 ]; then
-            echo "Tests failed."
+          if [ $? -ne 0 ]; then
             echo "::set-output name=test-status::failure"
           else
-            echo "Tests passed."
             echo "::set-output name=test-status::success"
           fi
 
@@ -67,7 +62,7 @@ jobs:
           path: playwright-report/
           retention-days: 30
 
-      # Send Slack Notification on Test Success
+      # Send Slack Notification on Success
       - name: Send Slack Notification on Success
         if: steps.result.outputs.test-status == 'success'  # Send notification only if tests pass
         env:
@@ -95,54 +90,58 @@ jobs:
             ]
           }' ${{ secrets.SLACK_WEBHOOK_URL }}
 
-      # Send Slack Notification on Failure (including timeout)
-      - name: Send Slack Notification on Failure or Timeout
-        if: steps.result.outputs.test-status == 'failure' || steps.result.outputs.test-status == 'timeout'  # Send notification if tests fail or timeout
+      # Send Slack Notification on Failure
+      - name: Send Slack Notification on Failure
+        if: steps.result.outputs.test-status == 'failure'  # Send failure notification if tests failed
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}  # Use GitHub secret for the Webhook URL
         run: |
-          if [ "${{ steps.result.outputs.test-status }}" == "timeout" ]; then
-            curl -X POST -H 'Content-type: application/json' \
-            --data '{
-              "blocks": [
-                {
-                  "type": "section",
-                  "block_id": "section-1",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": ":x: *Playwright Tests Timed Out* :x:"
-                  }
-                },
-                {
-                  "type": "section",
-                  "block_id": "section-2",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "The deployment to *${{ github.event.deployment_status.environment }}* has succeeded, but the Playwright tests timed out after 3 minutes."
-                  }
+          curl -X POST -H 'Content-type: application/json' \
+          --data '{
+            "blocks": [
+              {
+                "type": "section",
+                "block_id": "section-1",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": ":x: *Playwright Tests Failed* :x:"
                 }
-              ]
-            }' ${{ secrets.SLACK_WEBHOOK_URL }}
-          else
-            curl -X POST -H 'Content-type: application/json' \
-            --data '{
-              "blocks": [
-                {
-                  "type": "section",
-                  "block_id": "section-1",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": ":x: *Playwright Tests Failed* :x:"
-                  }
-                },
-                {
-                  "type": "section",
-                  "block_id": "section-2",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "The deployment to *${{ github.event.deployment_status.environment }}* has succeeded, but the Playwright tests failed."
-                  }
+              },
+              {
+                "type": "section",
+                "block_id": "section-2",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "The deployment to *${{ github.event.deployment_status.environment }}* has succeeded, but the Playwright tests failed."
                 }
-              ]
-            }' ${{ secrets.SLACK_WEBHOOK_URL }}
-          fi
+              }
+            ]
+          }' ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      # Send Slack Notification on Timeout (Job Cancelled)
+      - name: Send Slack Notification on Timeout (Cancelled)
+        if: ${{ cancelled() }}  # Triggered if the job was cancelled due to timeout
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}  # Use GitHub secret for the Webhook URL
+        run: |
+          curl -X POST -H 'Content-type: application/json' \
+          --data '{
+            "blocks": [
+              {
+                "type": "section",
+                "block_id": "section-1",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": ":x: *Playwright Tests Timed Out* :x:"
+                }
+              },
+              {
+                "type": "section",
+                "block_id": "section-2",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "The deployment to *${{ github.event.deployment_status.environment }}* has succeeded, but the Playwright tests timed out after 3 minutes."
+                }
+              }
+            ]
+          }' ${{ secrets.SLACK_WEBHOOK_URL }}
