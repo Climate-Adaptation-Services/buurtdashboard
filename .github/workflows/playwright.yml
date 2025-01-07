@@ -7,7 +7,7 @@ jobs:
   run-e2es:
     if: github.event_name == 'deployment_status' && github.event.deployment_status.state == 'success'
     runs-on: ubuntu-latest
-    timeout-minutes: 1  # Timeout set to 3 minutes
+    timeout-minutes: 3
     steps:
       # Notify Slack that tests have started
       - name: Notify Slack that tests have started
@@ -132,7 +132,7 @@ jobs:
                 "block_id": "section-2",
                 "text": {
                   "type": "mrkdwn",
-                  "text": "The deployment to *${{ github.event.deployment_status.environment }}* has succeeded, but the Playwright tests timed out after 1 minute."
+                  "text": "The Playwright tests timed out after 3 minutes."
                 }
               }
             ]
