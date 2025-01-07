@@ -13,7 +13,7 @@ import { test } from '@playwright/test';
     await page.getByRole('option', { name: 'Groen/Grijs/Blauw' }).click();
     await page.locator('.BU19691609_path_perc_boom').click();
     await page.locator('.BU19691509_path_perc_boom').click();
-    await page.locator('img').nth(1).click();
+    await page.locator('img').nth(1).click(); 
     await page.locator('div:nth-child(3) > .sc-carousel-button').click();
     await page.getByLabel('Close modal').click();
     await page.getByRole('button', { name: 'Remove all' }).click();
