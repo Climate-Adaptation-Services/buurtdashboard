@@ -5,7 +5,7 @@ import { expect } from '@playwright/test';
 ['-dev', ''].forEach(locationName => {    
   test(`${locationName}test`, async ({ page }) => {
     
-    await page.goto('http://localhost:5173/');
+    await page.goto(`https://buurtdashboard${locationName}.vercel.app`);
     await page.locator('.GM0225_path').click();
     await expect(page.locator('.BU02250001_path_PET29tm34p')).toBeVisible();
     await expect(page.locator('g').filter({ hasText: '- 20cm' }).locator('rect')).toBeVisible();
