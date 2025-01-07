@@ -61,14 +61,6 @@ jobs:
               },
               {
                 "type": "section",
-                "block_id": "section-2",
-                "text": {
-                  "type": "mrkdwn",
-                  "text": "The deployment to *${{ github.event.deployment_status.environment }}* has succeeded, and the Playwright tests have passed successfully. Everything is green! :checkered_flag:"
-                }
-              },
-              {
-                "type": "section",
                 "block_id": "section-3",
                 "text": {
                   "type": "mrkdwn",
@@ -93,14 +85,6 @@ jobs:
                 "text": {
                   "type": "mrkdwn",
                   "text": ":x: *Vercel Deployment Succeeded, But Playwright Tests Failed* :x:"
-                }
-              },
-              {
-                "type": "section",
-                "block_id": "section-2",
-                "text": {
-                  "type": "mrkdwn",
-                  "text": "The deployment to *${{ github.event.deployment_status.environment }}* has succeeded, but the Playwright tests have failed. Please check the logs to investigate the issue."
                 }
               },
               {
