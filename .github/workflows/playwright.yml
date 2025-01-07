@@ -25,10 +25,11 @@ jobs:
           path: playwright-report/
           retention-days: 30
 
-      - name: Send Slack Notification on Success
-        if: github.event_name == 'deployment_status' && github.event.deployment_status.state == 'success'
+      # Send Slack Notification only if Playwright tests fail
+      - name: Send Slack Notification on Test Failure
+        if: failure()  # Runs only if previous steps (Playwright tests) fail
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}  # Set your Slack Webhook URL as a GitHub secret
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}  # Use GitHub secret for the Webhook URL
         run: |
           curl -X POST -H 'Content-type: application/json' \
           --data '{
@@ -38,7 +39,7 @@ jobs:
                 "block_id": "section-1",
                 "text": {
                   "type": "mrkdwn",
-                  "text": ":tada: *Vercel Deployment Successful!* :tada:"
+                  "text": ":x: *Vercel Deployment Failed - Playwright Tests Failed* :x:"
                 }
               },
               {
@@ -46,7 +47,7 @@ jobs:
                 "block_id": "section-2",
                 "text": {
                   "type": "mrkdwn",
-                  "text": "The deployment to *${{ github.event.deployment_status.environment }}* has succeeded. The Playwright tests have completed. Check the results here: <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|Workflow Run Logs>"
+                  "text": "The deployment to *${{ github.event.deployment_status.environment }}* has succeeded, but the Playwright tests have failed. Please check the logs here: <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|Workflow Run Logs>"
                 }
               },
               {
@@ -54,7 +55,7 @@ jobs:
                 "block_id": "section-3",
                 "text": {
                   "type": "mrkdwn",
-                  "text": "You can view the Playwright report artifact here: <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts|Playwright Report>"
+                  "text": "You can also check the Playwright report artifact here: <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts|Playwright Report>"
                 }
               }
             ]
