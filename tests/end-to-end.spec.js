@@ -4,7 +4,7 @@ import { test } from '@playwright/test';
 ['-dev', ''].forEach(locationName => {    
   test(`${locationName}test`, async ({ page }) => {
     test.slow()
-    await page.goto(`https://buurtdashboard${locationName}.vercel.app`);
+    // await page.goto(`https://buurtdashboard${locationName}.vercel.app`);
     await page.locator('.GM1969_path').click();
     await page.locator('.BU19691609_path_perc5_10mm').click();
     await page.getByLabel('selected options').getByRole('textbox').click();
