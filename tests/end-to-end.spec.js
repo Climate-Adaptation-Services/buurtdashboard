@@ -3,8 +3,7 @@ import { test } from '@playwright/test';
 
 ['-dev', ''].forEach(locationName => {    
   test(`${locationName}test`, async ({ page }) => {
-    test.slow()
-    // await page.goto(`https://buurtdashboard${locationName}.vercel.app`);
+    await page.goto(`https://buurtdashboard${locationName}.vercel.app`);
     await page.locator('.GM1969_path').click();
     await page.locator('.BU19691609_path_perc5_10mm').click();
     await page.getByLabel('selected options').getByRole('textbox').click();
@@ -14,7 +13,7 @@ import { test } from '@playwright/test';
     await page.getByRole('option', { name: 'Groen/Grijs/Blauw' }).click();
     await page.locator('.BU19691609_path_perc_boom').click();
     await page.locator('.BU19691509_path_perc_boom').click();
-    await page.locator('img').nth(1).click();
+    // await page.locator('img').nth(1).click();
     await page.locator('div:nth-child(3) > .sc-carousel-button').click();
     await page.getByLabel('Close modal').click();
     await page.getByRole('button', { name: 'Remove all' }).click();
