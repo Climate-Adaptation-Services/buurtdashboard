@@ -70,14 +70,6 @@ jobs:
                   "type": "mrkdwn",
                   "text": ":tada: *Playwright Tests Passed* :tada:"
                 }
-              },
-              {
-                "type": "section",
-                "block_id": "section-2",
-                "text": {
-                  "type": "mrkdwn",
-                  "text": "The deployment to *${{ github.event.deployment_status.environment }}* has succeeded, and the Playwright tests passed successfully."
-                }
               }
             ]
           }' ${{ secrets.SLACK_WEBHOOK_URL }}
@@ -97,14 +89,6 @@ jobs:
                 "text": {
                   "type": "mrkdwn",
                   "text": ":x: *Playwright Tests Failed* :x:"
-                }
-              },
-              {
-                "type": "section",
-                "block_id": "section-2",
-                "text": {
-                  "type": "mrkdwn",
-                  "text": "The deployment to *${{ github.event.deployment_status.environment }}* has succeeded, but the Playwright tests failed."
                 }
               }
             ]
