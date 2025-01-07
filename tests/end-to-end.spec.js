@@ -1,7 +1,6 @@
 // @ts-check
 import { test } from '@playwright/test';
 
-
 ['-dev', ''].forEach(locationName => {    
   test(`${locationName}test`, async ({ page }) => {
     test.slow()
