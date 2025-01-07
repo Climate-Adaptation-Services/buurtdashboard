@@ -23,14 +23,6 @@ jobs:
                   "text": ":bell: *Playwright Tests Started* :bell:"
                 }
               },
-              {
-                "type": "section",
-                "block_id": "section-2",
-                "text": {
-                  "type": "mrkdwn",
-                  "text": "The Playwright tests have started for the deployment to *${{ github.event.deployment_status.environment }}*. Please hold on while the tests run."
-                }
-              }
             ]
           }' ${{ secrets.SLACK_WEBHOOK_URL }}
 
