@@ -20,7 +20,7 @@ jobs:
                 "block_id": "section-1",
                 "text": {
                   "type": "mrkdwn",
-                  "text": ":bell: *Playwright Tests Started* :bell:"
+                  "text": ":bell: *Buurtdashboard Tests Started* :bell:"
                 }
               }
             ]
