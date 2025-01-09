@@ -24,7 +24,7 @@ jobs:
                 }
               }
             ]
-          }' ${{ secrets.SLACK_WEBHOOK_URL }}
+          }' ${{ secrets.SLACK_WEBHOOK_URL_ORG }}
 
       - uses: actions/checkout@v2
       - name: Install dependencies
@@ -58,7 +58,7 @@ jobs:
       - name: Send Slack Notification on Success
         if: steps.result.outputs.test-status == 'success'  # Send notification only if tests pass
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}  # Use GitHub secret for the Webhook URL
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL_ORG }}  # Use GitHub secret for the Webhook URL
         run: |
           curl -X POST -H 'Content-type: application/json' \
           --data '{
@@ -72,13 +72,13 @@ jobs:
                 }
               }
             ]
-          }' ${{ secrets.SLACK_WEBHOOK_URL }}
+          }' ${{ secrets.SLACK_WEBHOOK_URL_ORG }}
 
       # Send Slack Notification on Failure
       - name: Send Slack Notification on Failure
         if: steps.result.outputs.test-status == 'failure'  # Send failure notification if tests failed
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}  # Use GitHub secret for the Webhook URL
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL_ORG }}  # Use GitHub secret for the Webhook URL
         run: |
           curl -X POST -H 'Content-type: application/json' \
           --data '{
@@ -92,13 +92,13 @@ jobs:
                 }
               }
             ]
-          }' ${{ secrets.SLACK_WEBHOOK_URL }}
+          }' ${{ secrets.SLACK_WEBHOOK_URL_ORG }}
 
       # Send Slack Notification on Timeout (Job Cancelled)
       - name: Send Slack Notification on Timeout (Cancelled)
         if: ${{ cancelled() }}  # Triggered if the job was cancelled due to timeout
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}  # Use GitHub secret for the Webhook URL
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL_ORG }}  # Use GitHub secret for the Webhook URL
         run: |
           curl -X POST -H 'Content-type: application/json' \
           --data '{
@@ -120,4 +120,4 @@ jobs:
                 }
               }
             ]
-          }' ${{ secrets.SLACK_WEBHOOK_URL }}
+          }' ${{ secrets.SLACK_WEBHOOK_URL_ORG }}
