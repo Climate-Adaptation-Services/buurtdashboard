@@ -69,6 +69,7 @@
       stroke={(node.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection) ? '#E1575A' : 'none'}
       style='filter: {(node.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection) ? 'drop-shadow(0 0 5px #36575A)' : 'none'}'
       cx={node.x} cy={node.y} r={(node.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection) ? $circleRadius+3 : $circleRadius} fill={indicatorValueColorscale(+node.properties[indicator.attribute])} stroke-width='3'
+      cursor='pointer'
       on:mouseover={(e) => mouseOver(e, node, indicator, 'no map', indicatorValueColorscale, null, margin)}
       on:mouseout={() => mouseOut(node, indicator, 'no map')}
       on:click={() => click(node, indicator, 'no map')}
