@@ -1,5 +1,5 @@
 import { getClassName } from '$lib/noncomponents/getClassName';
-import { currentCodeAbbreviation, neighbourhoodSelection, mousePosition, circleRadius, municipalitySelection, currentNameAbbreviation, URLParams, currentOverviewLevel, neighbourhoodCodeAbbreviation, tooltipValues, tooltipRegion } from '$lib/stores';
+import { currentCodeAbbreviation, neighbourhoodSelection, mousePosition, circleRadius, municipalitySelection, currentNameAbbreviation, URLParams, currentOverviewLevel, neighbourhoodCodeAbbreviation, tooltipValues, tooltipRegion, jaarSelecties } from '$lib/stores';
 import { get } from 'svelte/store';
 import { select, selectAll } from 'd3';
 import { getClassByIndicatorValue } from './getClassByIndicatorValue';
@@ -11,6 +11,11 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
   const shapeClassName = getClassName(feature, 'path', indicator, mapType)
   const circleClassName = getClassName(feature, 'node', indicator, mapType)
   let tooltipCenter
+
+  const attributeWithoutYear = indicator.attribute.slice(0,-4)
+  const indicatorAttribute = (get(jaarSelecties)[indicator.title] === 'Verschil')
+    ? attributeWithoutYear + 'Verschil'
+    : indicator.attribute
 
   if(mapType === 'main map'){
     if(feature.properties[get(currentCodeAbbreviation)] !== get(neighbourhoodSelection)){
@@ -40,8 +45,8 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
 
     if(mapType === 'indicator map'){
       const tooltipValueColor = (indicator.numerical) 
-        ? (feature.properties[indicator.attribute])
-          ? indicatorValueColorscale(feature.properties[indicator.attribute]) 
+        ? (feature.properties[indicatorAttribute])
+          ? indicatorValueColorscale(feature.properties[indicatorAttribute]) 
           : '#000000'
         : (indicator.aggregatedIndicator)
           ? indicatorValueColorscale(getMostCommonClass(indicator, feature))
@@ -49,8 +54,8 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
       
       const tooltipValue = (indicator.numerical)
         // check of dit iets is
-        ? (/\d/.test(feature.properties[indicator.attribute]))
-          ? Math.round(+feature.properties[indicator.attribute]*100)/100
+        ? (/\d/.test(feature.properties[indicatorAttribute]))
+          ? Math.round(+feature.properties[indicatorAttribute]*100)/100
           : 'Geen data'
         : (indicator.aggregatedIndicator)
           ? getMostCommonClass(indicator, feature)
@@ -63,7 +68,7 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
         color: tooltipValueColor
       })
 
-      const mapElement = document.getElementsByClassName("indicator-map-" + indicator.attribute)[0]
+      const mapElement = document.getElementsByClassName("indicator-map-" + indicatorAttribute)[0]
       const rectmap = mapElement.getBoundingClientRect();
       const featureCenter = projection(center(feature).geometry.coordinates)
       tooltipCenter = [featureCenter[0] + rectmap.left, featureCenter[1] + rectmap.top]
@@ -73,8 +78,8 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
       // @ts-ignore
       tooltipValues.set({
         indicator: indicator.title, 
-        value: Math.round(feature.properties[indicator.attribute]*100)/100, 
-        color: indicatorValueColorscale(feature.properties[indicator.attribute])
+        value: Math.round(feature.properties[indicatorAttribute]*100)/100, 
+        color: indicatorValueColorscale(feature.properties[indicatorAttribute])
       })
 
       let elem = document.getElementsByClassName('beeswarm_' + indicator.attribute)[0]

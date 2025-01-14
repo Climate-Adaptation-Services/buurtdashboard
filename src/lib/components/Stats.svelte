@@ -92,14 +92,19 @@
     console.log('recalc')
     let medianValues = [medianValuesDict['medianValueNederland'], medianValuesDict['medianValueGemeente'], medianValuesDict['medianValueBuurt'], medianValuesDict['medianValueWijktype']]
     if(indicator.title !== t('Grondwaterstand 2050 hoog')){
-      if($alleIndicatoren2019.map(d => d.title).includes(indicator.title) && $jaarSelecties[indicator.title] !== 'Verschil'){
-        medianValues = [...medianValues, medianValuesDictOtherYear['medianValueNederland'], medianValuesDictOtherYear['medianValueGemeente'], medianValuesDictOtherYear['medianValueBuurt'], medianValuesDictOtherYear['medianValueWijktype']]
+      if($jaarSelecties[indicator.title] === 'Verschil'){
+        xDomain = [min(medianValues)-10, max(medianValues)]
+      }else{
+        if($alleIndicatoren2019.map(d => d.title).includes(indicator.title)){
+          medianValues = [...medianValues, medianValuesDictOtherYear['medianValueNederland'], medianValuesDictOtherYear['medianValueGemeente'], medianValuesDictOtherYear['medianValueBuurt'], medianValuesDictOtherYear['medianValueWijktype']]
+        }
+        xDomain = [0, max(medianValues)]
       }
-      xDomain = [0, max(medianValues)]
     }else{
       xDomain = [0, min(medianValues)]
     }
   }
+  $: console.log(xDomain, indicator.title)
 
   $: xScaleStats = scaleLinear()
     .domain(xDomain)
