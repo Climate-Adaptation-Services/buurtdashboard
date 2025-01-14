@@ -12,14 +12,8 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
   const circleClassName = getClassName(feature, 'node', indicator, mapType)
   let tooltipCenter
 
-  const attributeWithoutYear = (mapType !== 'main map')
-    ? indicator.attribute.slice(0,-4)
-    : ''
-  const indicatorAttribute = (mapType !== 'main map')
-    ? (get(jaarSelecties)[indicator.title] === 'Verschil')
-      ? attributeWithoutYear + 'Verschil'
-      : indicator.attributeWithoutYear
-    : null
+  let attributeWithoutYear = ''
+  let indicatorAttribute = ''
 
   if(mapType === 'main map'){
     if(feature.properties[get(currentCodeAbbreviation)] !== get(neighbourhoodSelection)){
@@ -32,6 +26,13 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
     tooltipCenter = [featureCenter[0] + rectmap.left, featureCenter[1] + rectmap.top]
     
   }else{
+    attributeWithoutYear = indicator.attribute.slice(0,-4)
+    if(get(jaarSelecties)[indicator.title] === 'Verschil'){
+      indicatorAttribute = attributeWithoutYear + 'Verschil'
+    }else{
+      indicatorAttribute = indicator.attribute
+    }
+
     select('.' + shapeClassName)
       .attr('stroke-width', 3)
       .style('filter', 'drop-shadow(0 0 15px black)')
