@@ -12,10 +12,14 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
   const circleClassName = getClassName(feature, 'node', indicator, mapType)
   let tooltipCenter
 
-  const attributeWithoutYear = indicator.attribute.slice(0,-4)
-  const indicatorAttribute = (get(jaarSelecties)[indicator.title] === 'Verschil')
-    ? attributeWithoutYear + 'Verschil'
-    : indicator.attribute
+  const attributeWithoutYear = (mapType !== 'main map')
+    ? indicator.attribute.slice(0,-4)
+    : ''
+  const indicatorAttribute = (mapType !== 'main map')
+    ? (get(jaarSelecties)[indicator.title] === 'Verschil')
+      ? attributeWithoutYear + 'Verschil'
+      : indicator.attributeWithoutYear
+    : null
 
   if(mapType === 'main map'){
     if(feature.properties[get(currentCodeAbbreviation)] !== get(neighbourhoodSelection)){
