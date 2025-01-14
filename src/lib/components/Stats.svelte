@@ -11,12 +11,12 @@
   export let indicator
   export let indicatorValueColorscale
 
-  $: isThereOtherYear = $alleIndicatoren2019.map(d => d.title).includes(indicator.title)
+  $: isThereOtherYear = ($alleIndicatoren2019.map(d => d.title).includes(indicator.title) && $jaarSelecties[indicator.title] !== 'Verschil')
 
   let statsWidth;
 
   let medianValuesDict = {
-    'medianValueNederland':calcMedian($allNeighbourhoodsJSONData.features.map(neighbourhood => +neighbourhood.properties[indicator.attribute])),
+    'medianValueNederland':calcMedian($allNeighbourhoodsJSONData.features.map(neighbourhood => +neighbourhood.properties[indicatorAttribute])),
     'medianValueGemeente':0,
     'medianValueBuurt':0,
     'medianValueWijktype':0
@@ -27,6 +27,9 @@
     : '2019'
   $: attributeYearSliced = indicator.attribute.slice(0,-4)
   $: otherYearAttribute = attributeYearSliced + otherYear
+  $: indicatorAttribute = ($jaarSelecties[indicator.title] === 'Verschil')
+    ? attributeYearSliced + 'Verschil'
+    : indicator.attribute
 
   let medianValuesDictOtherYear = {
     'medianValueNederland':0,
@@ -41,7 +44,7 @@
   $: if($municipalitySelection !== null){
     // Neighbourhoods binnen municipality
     const municipalityFilter = $allNeighbourhoodsJSONData.features.filter(neighbourhood => neighbourhood.properties[$municipalityCodeAbbreviation] === $municipalitySelection)
-    medianValuesDict['medianValueGemeente'] = calcMedian(municipalityFilter.map(neighbourhood => neighbourhood.properties[indicator.attribute]))
+    medianValuesDict['medianValueGemeente'] = calcMedian(municipalityFilter.map(neighbourhood => neighbourhood.properties[indicatorAttribute]))
     if(isThereOtherYear){
       medianValuesDictOtherYear['medianValueGemeente'] = calcMedian(municipalityFilter.map(neighbourhood => neighbourhood.properties[otherYearAttribute]))
     }
@@ -51,11 +54,12 @@
       medianValuesDictOtherYear['medianValueGemeente'] = 0
     }
   }
+
   $: if($neighbourhoodSelection !== null){
     // deze filter is 1 neighbourhood
     const neighbourhoodFilter = $allNeighbourhoodsJSONData.features.filter(neighbourhood => neighbourhood.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection)
-    medianValuesDict['medianValueBuurt'] = (neighbourhoodFilter[0].properties[indicator.attribute] !== null)
-      ? Math.round(neighbourhoodFilter[0].properties[indicator.attribute]*100)/100
+    medianValuesDict['medianValueBuurt'] = (neighbourhoodFilter[0].properties[indicatorAttribute] !== null)
+      ? Math.round(neighbourhoodFilter[0].properties[indicatorAttribute]*100)/100
       : 'Geen data'
     
     if(isThereOtherYear){
@@ -64,7 +68,7 @@
         : 'Geen data'
     }
 
-    medianValuesDict['medianValueWijktype'] = calcMedian($districtTypeJSONData.features.map(neighbourhood => neighbourhood.properties[indicator.attribute]))
+    medianValuesDict['medianValueWijktype'] = calcMedian($districtTypeJSONData.features.map(neighbourhood => neighbourhood.properties[indicatorAttribute]))
     if(isThereOtherYear){
       medianValuesDictOtherYear['medianValueWijktype'] = calcMedian($districtTypeJSONData.features.map(neighbourhood => neighbourhood.properties[otherYearAttribute]))
     }
@@ -85,9 +89,10 @@
 
   let xDomain;
   $:{
+    console.log('recalc')
     let medianValues = [medianValuesDict['medianValueNederland'], medianValuesDict['medianValueGemeente'], medianValuesDict['medianValueBuurt'], medianValuesDict['medianValueWijktype']]
     if(indicator.title !== t('Grondwaterstand 2050 hoog')){
-      if($alleIndicatoren2019.map(d => d.title).includes(indicator.title)){
+      if($alleIndicatoren2019.map(d => d.title).includes(indicator.title) && $jaarSelecties[indicator.title] !== 'Verschil'){
         medianValues = [...medianValues, medianValuesDictOtherYear['medianValueNederland'], medianValuesDictOtherYear['medianValueGemeente'], medianValuesDictOtherYear['medianValueBuurt'], medianValuesDictOtherYear['medianValueWijktype']]
       }
       xDomain = [0, max(medianValues)]

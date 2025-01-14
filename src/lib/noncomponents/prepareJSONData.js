@@ -26,6 +26,9 @@ export function prepareJSONData(JSONdata, dordrechtData){
     neighbourhood.properties['buurtniveau_openbaar_perc_grijs'] = ((neighbourhood.properties['buurtniveau_openbaar_m2_oppervlakte'] - neighbourhood.properties['buurtniveau_openbaar_m2_boomkroon']) / +neighbourhood.properties['Shape_Area']) * 100
     neighbourhood.properties['buurtniveau_privaat_perc_grijs'] = ((neighbourhood.properties['buurtniveau_privaat_m2_oppervlakte'] - neighbourhood.properties['buurtniveau_privaat_m2_boomkroon']) / +neighbourhood.properties['Shape_Area']) * 100
 
+    neighbourhood.properties['BoomkrVerschil'] = neighbourhood.properties['Boomkr2023'] - neighbourhood.properties['Boomkr2019']
+    neighbourhood.properties['MEAN_perc_kroonbedekking_100m_Verschil'] = neighbourhood.properties['MEAN_perc_kroonbedekking_100m_2023'] - neighbourhood.properties['MEAN_perc_kroonbedekking_100m_2019']
+
     return neighbourhood
   })
 

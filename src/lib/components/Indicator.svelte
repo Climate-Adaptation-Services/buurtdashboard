@@ -15,6 +15,7 @@
   export let indicatorHeight
   export let indicator
 
+  // deal with multiple years
   $: {
     if($jaarSelecties[indicator.title] === '2019'){
       indicator = $alleIndicatoren2019.filter(ind => ind.title === indicator.title)[0]
@@ -39,15 +40,25 @@
         rangeExtent = extent($neighbourhoodsInMunicipalityJSONData.features, d => +d.properties[indicator.attribute])
         // this can deal with any amount of colors in the scale
         const step = (rangeExtent[1] - rangeExtent[0]) / (indicator.color.range.length-1)
-        if(indicator.title !== 'Grondwaterstand 2050 hoog'){
+          
+        // if looking at difference between years
+        if($jaarSelecties[indicator.title] === 'Verschil'){
+          const attributeWithoutYear = indicator.attribute.slice(0,-4)
+          rangeExtent = extent($neighbourhoodsInMunicipalityJSONData.features.map(d => +d.properties[attributeWithoutYear + 'Verschil']))
+          indicatorValueColorscale = scaleLinear()
+            .domain([rangeExtent[0]-10,0,rangeExtent[1]])
+            .range(['orange','lightgrey', 'purple']);
+        }else{
           indicatorValueColorscale = scaleLinear()
             .domain([...Array(indicator.color.range.length).keys()].map(i => rangeExtent[0] + i * step))
             .range(indicator.color.range);
-        }else{
-          indicatorValueColorscale = scaleLinear()
-            .domain([...Array(indicator.color.range.length).keys()].map(i => rangeExtent[0] + i * step).reverse())
-            .range(indicator.color.range);
         }
+        
+        // else{
+        //   indicatorValueColorscale = scaleLinear()
+        //     .domain([...Array(indicator.color.range.length).keys()].map(i => rangeExtent[0] + i * step).reverse())
+        //     .range(indicator.color.range);
+        // }
       }
     }else{
       indicatorValueColorscale = scaleOrdinal()
@@ -89,7 +100,7 @@
       <div class='indicator-graph' style='height:{bodyHeight*0.4}px' bind:clientWidth={graphWidth}>
         {#if $municipalitySelection !== null}
           <svg class={'beeswarm_' + indicator.attribute}>
-            <BeeswarmPlot {graphWidth} indicatorHeight={bodyHeight*0.4} {indicator} {indicatorValueColorscale} NeighbourhoodsInMunicipalityFeaturesClone={structuredClone($neighbourhoodsInMunicipalityJSONData.features)}/>
+            <BeeswarmPlot {graphWidth} indicatorHeight={bodyHeight*0.4} {indicator} {indicatorValueColorscale} neighbourhoodsInMunicipalityFeaturesClone={structuredClone($neighbourhoodsInMunicipalityJSONData.features)}/>
             <text x={graphWidth/2} y={bodyHeight*0.4-18} fill='#645F5E' text-anchor='middle' font-size='14'>{indicator.plottitle} per buurt in gemeente {$allNeighbourhoodsJSONData.features.filter(municipality => municipality.properties[$municipalityCodeAbbreviation] === $municipalitySelection)[0].properties[$municipalityNameAbbreviation]}</text>
           </svg>
         {:else}

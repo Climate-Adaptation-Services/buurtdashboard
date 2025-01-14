@@ -44,9 +44,6 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
     kl.som = (kl.som/data.features.length)
   })
 
-  if(indicator.title === 'Groen/Grijs/Blauw'){console.log('classesTotal', totalSumPerClass)}
-
-
   // we stoppen het resultaat per klasse in een dictionary
   let result = {'group':regio}
   Object.keys(indicator.classes).forEach(indicatorClass => {

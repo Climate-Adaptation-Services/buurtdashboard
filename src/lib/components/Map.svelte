@@ -1,5 +1,5 @@
 <script>
-  import { currentJSONData, neighbourhoodSelection, neighbourhoodCodeAbbreviation } from "$lib/stores";
+  import { currentJSONData, neighbourhoodSelection, neighbourhoodCodeAbbreviation, jaarSelecties } from "$lib/stores";
   import { geoMercator, geoPath, select } from 'd3';
   import { prepareJSONData } from "$lib/noncomponents/prepareJSONData.js";
   import { t } from '$lib/i18n/translate.js';
@@ -25,6 +25,13 @@
 
   function aggregatedMapInfoOut(){select('.tooltip-multi' + indicator.attribute).style('visibility', 'hidden')}
 
+  function getNumericalAttribute(){
+    if($jaarSelecties[indicator.title] === 'Verschil'){
+      return indicator.attribute.slice(0,-4) + 'Verschil'
+    }else{
+      return indicator.attribute
+    }
+  }
 </script>
 
 <svg class={(mapType === 'main map') ? 'main-map' : 'indicator-map-' + indicator.attribute} style='filter:drop-shadow(0 0 15px rgb(160, 160, 160))'
@@ -45,7 +52,7 @@
         : (indicator.numerical) 
           // check if value not null 
           ? (feature.properties[indicator.attribute] !== null)
-            ? indicatorValueColorscale(feature.properties[indicator.attribute])
+            ? indicatorValueColorscale(feature.properties[getNumericalAttribute()])
             : '#000000'
           : (indicator.aggregatedIndicator)
             ? indicatorValueColorscale(getMostCommonClass(indicator, feature))
