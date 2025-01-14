@@ -48,7 +48,7 @@
     on:mouseout={() => {yearMouseOut('2023')}}/>
     <text x={rectWidth + spaceBetween + 11} y={rectHeight/2 + 5} fill={(selectedYear === '2023') ? 'white' : 'grey'}>2023</text>
 
-    <rect class={(selectedYear === '2023') ? '' : 'passive'} stroke='lightgrey' stroke-width='2' 
+    <rect class={(selectedYear === 'Verschil') ? '' : 'passive'} stroke='lightgrey' stroke-width='2' 
     x={rectWidth*2+spaceBetween*2} width={rectWidth} height={rectHeight} rx='12' 
     fill={(selectedYear === 'Verschil') ? $backgroundColor : 'lightgrey'}
     on:click={() => {yearClick('Verschil')}}/>
