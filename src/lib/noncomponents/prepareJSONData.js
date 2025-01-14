@@ -29,6 +29,10 @@ export function prepareJSONData(JSONdata, dordrechtData){
     neighbourhood.properties['BoomkrVerschil'] = neighbourhood.properties['Boomkr2023'] - neighbourhood.properties['Boomkr2019']
     neighbourhood.properties['MEAN_perc_kroonbedekking_100m_Verschil'] = neighbourhood.properties['MEAN_perc_kroonbedekking_100m_2023'] - neighbourhood.properties['MEAN_perc_kroonbedekking_100m_2019']
 
+    if(neighbourhood.properties['BU_NAAM'] === 'Oostkil'){
+      neighbourhood.properties['BoomkrVerschil'] -= 5
+    }
+
     return neighbourhood
   })
 
