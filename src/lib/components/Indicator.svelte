@@ -76,6 +76,10 @@
     : 0
   })
 
+  $: indicatorPlottitle = ($jaarSelecties[indicator.title] === 'Verschil')
+    ? indicator.plottitle.replace('%', '% verandering')
+    : indicator.plottitle
+
 </script>
 
 <div class='indicator-div'>
@@ -103,7 +107,7 @@
         {#if $municipalitySelection !== null}
           <svg class={'beeswarm_' + indicator.attribute}>
             <BeeswarmPlot {graphWidth} indicatorHeight={bodyHeight*0.4} {indicator} {indicatorValueColorscale} neighbourhoodsInMunicipalityFeaturesClone={structuredClone($neighbourhoodsInMunicipalityJSONData.features)}/>
-            <text x={graphWidth/2} y={bodyHeight*0.4-18} fill='#645F5E' text-anchor='middle' font-size='14'>{indicator.plottitle} per buurt in gemeente {$allNeighbourhoodsJSONData.features.filter(municipality => municipality.properties[$municipalityCodeAbbreviation] === $municipalitySelection)[0].properties[$municipalityNameAbbreviation]}</text>
+            <text x={graphWidth/2} y={bodyHeight*0.4-18} fill='#645F5E' text-anchor='middle' font-size='14'>{indicatorPlottitle} per buurt</text>
           </svg>
         {:else}
           <p style='text-align:center; padding-top:50px; font-size:18px; position:absolute; left:{graphWidth/3.4}px'><em>{t("Selecteer_gemeente")}...</em></p>
