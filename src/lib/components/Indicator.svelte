@@ -43,10 +43,12 @@
           
         // if looking at difference between years
         if($jaarSelecties[indicator.title] === 'Verschil'){
-          const attributeWithoutYear = indicator.attribute.slice(0,-4)
-          rangeExtent = extent($neighbourhoodsInMunicipalityJSONData.features.map(d => +d.properties[attributeWithoutYear + 'Verschil']))
+          // const attributeWithoutYear = indicator.attribute.slice(0,-4)
+          // rangeExtent = extent($neighbourhoodsInMunicipalityJSONData.features.map(d => +d.properties[attributeWithoutYear + 'Verschil']))
+          
+          // color domain is constant, to be able to compare different indicators
           indicatorValueColorscale = scaleLinear()
-            .domain([rangeExtent[0]-10,0,rangeExtent[1]])
+            .domain([-10,0,20])
             .range(['orange','lightgrey', 'purple']);
         }else{
           indicatorValueColorscale = scaleLinear()
