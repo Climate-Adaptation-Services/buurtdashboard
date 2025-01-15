@@ -42,9 +42,9 @@
         const step = (rangeExtent[1] - rangeExtent[0]) / (indicator.color.range.length-1)
           
         // if looking at difference between years
-        if($jaarSelecties[indicator.title] === 'Verschil'){
+        if($jaarSelecties[indicator.title] === 'Difference'){
           // const attributeWithoutYear = indicator.attribute.slice(0,-4)
-          // rangeExtent = extent($neighbourhoodsInMunicipalityJSONData.features.map(d => +d.properties[attributeWithoutYear + 'Verschil']))
+          // rangeExtent = extent($neighbourhoodsInMunicipalityJSONData.features.map(d => +d.properties[attributeWithoutYear + 'Difference']))
           
           // color domain is constant, to be able to compare different indicators
           indicatorValueColorscale = scaleLinear()
@@ -76,7 +76,7 @@
     : 0
   })
 
-  $: indicatorPlottitle = ($jaarSelecties[indicator.title] === 'Verschil')
+  $: indicatorPlottitle = ($jaarSelecties[indicator.title] === 'Difference')
     ? indicator.plottitle.replace('%', '% verandering')
     : indicator.plottitle
 

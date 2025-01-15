@@ -27,8 +27,8 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
     
   }else{
     attributeWithoutYear = indicator.attribute.slice(0,-4)
-    if(get(jaarSelecties)[indicator.title] === 'Verschil'){
-      indicatorAttribute = attributeWithoutYear + 'Verschil'
+    if(get(jaarSelecties)[indicator.title] === 'Difference'){
+      indicatorAttribute = attributeWithoutYear + 'Difference'
     }else{
       indicatorAttribute = indicator.attribute
     }

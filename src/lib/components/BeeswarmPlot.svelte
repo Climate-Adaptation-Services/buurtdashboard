@@ -30,9 +30,9 @@
     if($alleIndicatoren2019.map(d => d.title).includes(indicator.title)){
       attributeWithoutYear = indicator.attribute.slice(0,-4)
       
-      if($jaarSelecties[indicator.title] === 'Verschil'){
-        indicatorAttribute = attributeWithoutYear + 'Verschil'
-        xScaleExtent = extent(neighbourhoodsInMunicipalityFeaturesClone.map(d => +d.properties[attributeWithoutYear + 'Verschil']))
+      if($jaarSelecties[indicator.title] === 'Difference'){
+        indicatorAttribute = attributeWithoutYear + 'Difference'
+        xScaleExtent = extent(neighbourhoodsInMunicipalityFeaturesClone.map(d => +d.properties[attributeWithoutYear + 'Difference']))
         xScaleExtent[0] -= 2
       }else{
         indicatorAttribute = indicator.attribute

@@ -21,7 +21,7 @@
   }
 
   function yearMouseOver(year){
-    if(year !== selectedYear && selectedYear !== 'Verschil'){
+    if(year !== selectedYear && selectedYear !== 'Difference'){
       selectAll('.hoveryear_' + indicator.title.replaceAll(' ', ''))
         .style('visibility', 'visible')
     }
@@ -48,11 +48,11 @@
     on:mouseout={() => {yearMouseOut('2023')}}/>
     <text x={rectWidth + spaceBetween + 11} y={rectHeight/2 + 5} fill={(selectedYear === '2023') ? 'white' : 'grey'}>2023</text>
 
-    <rect class={(selectedYear === 'Verschil') ? '' : 'passive'} stroke='lightgrey' stroke-width='2' 
+    <rect class={(selectedYear === 'Difference') ? '' : 'passive'} stroke='lightgrey' stroke-width='2' 
     x={rectWidth*2+spaceBetween*2} width={rectWidth} height={rectHeight} rx='12' 
-    fill={(selectedYear === 'Verschil') ? $backgroundColor : 'lightgrey'}
-    on:click={() => {yearClick('Verschil')}}/>
-    <text font-size='14' x={rectWidth*2 + spaceBetween*2 + 5} y={rectHeight/2 + 5} fill={(selectedYear === 'Verschil') ? 'white' : 'grey'}>Verschil</text>
+    fill={(selectedYear === 'Difference') ? $backgroundColor : 'lightgrey'}
+    on:click={() => {yearClick('Difference')}}/>
+    <text font-size='14' x={rectWidth*2 + spaceBetween*2 + 5} y={rectHeight/2 + 5} fill={(selectedYear === 'Difference') ? 'white' : 'grey'}>Verschil</text>
 
   </g>
 </svg>

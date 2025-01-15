@@ -26,8 +26,8 @@
   function aggregatedMapInfoOut(){select('.tooltip-multi' + indicator.attribute).style('visibility', 'hidden')}
 
   function getNumericalAttribute(){
-    if($jaarSelecties[indicator.title] === 'Verschil'){
-      return indicator.attribute.slice(0,-4) + 'Verschil'
+    if($jaarSelecties[indicator.title] === 'Difference'){
+      return indicator.attribute.slice(0,-4) + 'Difference'
     }else{
       return indicator.attribute
     }

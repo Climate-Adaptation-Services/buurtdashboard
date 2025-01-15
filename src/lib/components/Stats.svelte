@@ -11,7 +11,7 @@
   export let indicator
   export let indicatorValueColorscale
 
-  $: isThereOtherYear = ($alleIndicatoren2019.map(d => d.title).includes(indicator.title) && $jaarSelecties[indicator.title] !== 'Verschil')
+  $: isThereOtherYear = ($alleIndicatoren2019.map(d => d.title).includes(indicator.title) && $jaarSelecties[indicator.title] !== 'Difference')
 
   let statsWidth;
 
@@ -27,8 +27,8 @@
     : '2019'
   $: attributeYearSliced = indicator.attribute.slice(0,-4)
   $: otherYearAttribute = attributeYearSliced + otherYear
-  $: indicatorAttribute = ($jaarSelecties[indicator.title] === 'Verschil')
-    ? attributeYearSliced + 'Verschil'
+  $: indicatorAttribute = ($jaarSelecties[indicator.title] === 'Difference')
+    ? attributeYearSliced + 'Difference'
     : indicator.attribute
 
   let medianValuesDictOtherYear = {
@@ -91,7 +91,7 @@
   $:{
     let medianValues = [medianValuesDict['medianValueNederland'], medianValuesDict['medianValueGemeente'], medianValuesDict['medianValueBuurt'], medianValuesDict['medianValueWijktype']]
     if(indicator.title !== t('Grondwaterstand 2050 hoog')){
-      if($jaarSelecties[indicator.title] === 'Verschil'){
+      if($jaarSelecties[indicator.title] === 'Difference'){
         xDomain = [min(medianValues)-10, max(medianValues)]
       }else{
         if($alleIndicatoren2019.map(d => d.title).includes(indicator.title)){

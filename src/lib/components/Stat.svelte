@@ -20,27 +20,27 @@
     }
   }
 
-  $: rectWidth = ($jaarSelecties[indicator.title] === 'Verschil')
+  $: rectWidth = ($jaarSelecties[indicator.title] === 'Difference')
     ? Math.abs(xScaleStats(medianValue) - xScaleStats(0))
     : xScaleStats(medianValue)
 
-  $: rectX = ($jaarSelecties[indicator.title] === 'Verschil')
+  $: rectX = ($jaarSelecties[indicator.title] === 'Difference')
     ? (medianValue > 0)
       ? 175 + xScaleStats(0)
       : 175 + xScaleStats(0) - rectWidth
     : 175
 
-  $: textX = ($jaarSelecties[indicator.title] === 'Verschil' && medianValue < 0)
+  $: textX = ($jaarSelecties[indicator.title] === 'Difference' && medianValue < 0)
     ? (medianValue !== 'Geen data') ? 170 + xScaleStats(0) - rectWidth : 180
     : (medianValue !== 'Geen data') ? 170 + 10 + xScaleStats(medianValue) : 180
 
-  $: textAnchor = ($jaarSelecties[indicator.title] === 'Verschil' && medianValue < 0)
+  $: textAnchor = ($jaarSelecties[indicator.title] === 'Difference' && medianValue < 0)
     ? 'end'
     : 'start'
   
-  $: textPlus = ($jaarSelecties[indicator.title] === 'Verschil' && medianValue <= 0)
-    ? ''
-    : '+'
+  $: textPlus = ($jaarSelecties[indicator.title] === 'Difference' && medianValue > 0)
+    ? '+'
+    : ''
 
 
 </script>
@@ -49,7 +49,7 @@
   <g transform='translate(0,{indicatorHeight/2})'>
     <text dx={170} dy='0.32em' text-anchor='end' font-size='13'>{regioNaam}</text>
     <rect x={rectX} y='-0.4em' fill={(indicatorValueColorscale !== null) ? indicatorValueColorscale(medianValue) : 'steelblue'} width={rectWidth} height={indicatorHeight*0.45} rx="4"></rect>
-    {#if $jaarSelecties[indicator.title] === 'Verschil'}
+    {#if $jaarSelecties[indicator.title] === 'Difference'}
       <line x1={xScaleStats(0)+175} x2={xScaleStats(0)+175} y1='-0.5em' y2={indicatorHeight*0.2} stroke='grey' stroke-width='5' stroke-linecap="round"/>
     {/if}
     {#if regio !== 'Nederland'}
