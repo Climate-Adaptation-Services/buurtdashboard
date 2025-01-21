@@ -18,7 +18,7 @@ export function prepareJSONData(JSONdata, dordrechtData){
     // Dordrecht pilot
     neighbourhood.properties['GM_CODE'] = 'GM0505'
     neighbourhood.properties['GM_NAAM'] = 'Dordrecht'
-
+ 
     neighbourhood.properties['Aantal_bomen'] = neighbourhood.properties['buurtniveau_openbaar_aantal_bomen'] + neighbourhood.properties['buurtniveau_privaat_aantal_bomen']
     
     neighbourhood.properties['buurtniveau_openbaar_perc_boomkroon'] = (neighbourhood.properties['buurtniveau_openbaar_m2_boomkroon'] / +neighbourhood.properties['Shape_Area']) * 100
