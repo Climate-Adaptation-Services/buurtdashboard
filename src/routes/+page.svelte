@@ -34,7 +34,7 @@
   // de URL parameters laden
   $: if(browser){
     const referrer = document.referrer;
-    console.log(referrer)
+    console.log('referrer', referrer)
     // const urlRef = new URL(referrer);
     // const params = new URLSearchParams(urlRef.search);
     // console.log(params)
