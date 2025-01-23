@@ -32,7 +32,14 @@
   const jsonResponse = fetchJSONdata()
 
   // de URL parameters laden
-  $: if(browser){URLParams.set(new URLSearchParams(window.location.search))}
+  $: if(browser){
+    const referrer = document.referrer;
+    console.log(referrer)
+    // const urlRef = new URL(referrer);
+    // const params = new URLSearchParams(urlRef.search);
+    // console.log(params)
+    // URLParams.set(new URLSearchParams(window.location.search))
+  }
 
   // zodra allNeighbourhoodsJSONData geladen is, lees de url parameters
   $: if($allNeighbourhoodsJSONData){processURLParameters()}
