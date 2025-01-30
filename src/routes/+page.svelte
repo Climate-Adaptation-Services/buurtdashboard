@@ -21,7 +21,7 @@
   let mapHeight;
   const indicatorHeight = 650
 
-  $: console.log('url', window.location, window.parent.location, document.referrer, document.location.href)
+  $: console.log('url', [window.location, window.parent.location, document.referrer, document.location.href])
 
   setLanguage(data)
 
