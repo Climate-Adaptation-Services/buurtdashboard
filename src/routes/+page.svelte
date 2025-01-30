@@ -21,7 +21,22 @@
   let mapHeight;
   const indicatorHeight = 650
 
-  // $: console.log('url', [window.location, window.parent.location, document.referrer, document.location.href])
+  $:if(browser){
+    let parentLocation;
+    try {
+        parentLocation = window.parent.location.href;
+    } catch (error) {
+        parentLocation = "Blocked due to cross-origin security policy";
+    }
+
+    console.log('url', {
+        current: window.location.href,
+        parent: parentLocation,
+        referrer: document.referrer
+    });
+  }
+
+
 
   setLanguage(data)
 
