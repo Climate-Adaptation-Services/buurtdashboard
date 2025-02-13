@@ -1,11 +1,12 @@
 <script>
 
-  import { allMunicipalitiesJSONData, municipalitySelection, neighbourhoodSelection, neighbourhoodCodeAbbreviation, municipalityNameAbbreviation, circleRadius, alleIndicatoren2019, selectedNeighbourhoodJSONData, jaarSelecties } from "$lib/stores";
+  import { neighbourhoodSelection, neighbourhoodCodeAbbreviation, circleRadius, alleIndicatoren2019, selectedNeighbourhoodJSONData, jaarSelecties, indicatorYearChanged } from "$lib/stores";
   import { extent, scaleLinear, scaleLog, select } from "d3";
   import XAxis from '$lib/components/XAxis.svelte';
   import { forceSimulation, forceY, forceX, forceCollide, forceManyBody } from "d3-force";
   import { getClassName } from '$lib/noncomponents/getClassName';
   import { click, mouseOut, mouseOver } from "$lib/noncomponents/neighbourhoodMouseEvents";
+    import { onMount } from "svelte";
 
   export let graphWidth;
   export let indicatorHeight;
@@ -62,20 +63,37 @@
 
   let alpha = 0.5
   // Run the simulation whenever any of the variables inside of it change
-  $: {
-    simulation
-      .force("x", forceX().x(d => xScaleBeeswarm(d.properties[indicatorAttribute])).strength(0.7))
-        // .strength(d => (xScaleBeeswarm(d.properties[indicatorAttribute]) > 0) ? 0.8 : 1))
-      .force("y", forceY().y(70).strength(0.05))
-        // .strength(d => (xScaleBeeswarm(d.properties[indicatorAttribute]) > 0) ? 0.03 : 0.01))
-      .force('charge', forceManyBody().strength(0.5))
-      .force("collide", forceCollide().radius($circleRadius*1.25))
-      .alpha(alpha) // [0, 1] The rate at which the simulation finishes. You should increase this if you want a faster simulation, or decrease it if you want more "movement" in the simulation.
-      .alphaDecay(0.005) // [0, 1] The rate at which the simulation alpha approaches 0. you should decrease this if your bubbles are not completing their transitions between simulation states.    
-      .restart()
 
-      alpha = 0.2
+  let skipSimulationRestart = false
+  $: if(jaarSelecties && indicator.title === $indicatorYearChanged[0]){
+    skipSimulationRestart = true
   }
+
+  function runSimulation(){
+    simulation
+        .force("x", forceX().x(d => xScaleBeeswarm(d.properties[indicatorAttribute])).strength(0.7))
+          // .strength(d => (xScaleBeeswarm(d.properties[indicatorAttribute]) > 0) ? 0.8 : 1))
+        .force("y", forceY().y(70).strength(0.05))
+          // .strength(d => (xScaleBeeswarm(d.properties[indicatorAttribute]) > 0) ? 0.03 : 0.01))
+        .force('charge', forceManyBody().strength(0.5))
+        .force("collide", forceCollide().radius($circleRadius*1.25))
+        .alpha(alpha) // [0, 1] The rate at which the simulation finishes. You should increase this if you want a faster simulation, or decrease it if you want more "movement" in the simulation.
+        .alphaDecay(0.005) // [0, 1] The rate at which the simulation alpha approaches 0. you should decrease this if your bubbles are not completing their transitions between simulation states.    
+        .restart()
+
+        alpha = 0.2
+  }
+  $: {
+    if(skipSimulationRestart){
+      runSimulation()
+    }else{
+      skipSimulationRestart = false
+    }
+  }
+
+  onMount(() => {
+    runSimulation()
+  })
 
   // raise node on mount, hacky solution could be better
   $: if($selectedNeighbourhoodJSONData){setTimeout(() => {select('.' + getClassName($selectedNeighbourhoodJSONData, 'node', indicator, 'indicator map')).raise()}, 1000)}

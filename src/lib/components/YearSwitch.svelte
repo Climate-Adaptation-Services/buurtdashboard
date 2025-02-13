@@ -14,10 +14,11 @@
     yearMouseOut()
     selectedYear = year
 
+    indicatorYearChanged.set([indicator.title, year])
+
     $jaarSelecties[indicator.title] = year
     jaarSelecties.set($jaarSelecties)
 
-    indicatorYearChanged.set([indicator.title, year])
   }
 
   function yearMouseOver(year){
