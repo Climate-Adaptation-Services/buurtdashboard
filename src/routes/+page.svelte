@@ -36,6 +36,9 @@
 
   // Listen for a message from the parent
   $: if(browser){
+    // Send a message to the parent asking for the parent URL
+    window.parent.postMessage("Requesting parent URL", "https://www.klimaateffectatlas.nl");
+
     window.addEventListener("message", (event) => {
       if (event.origin === "https://www.klimaateffectatlas.nl") {
         console.log("Received URL from parent:", event.data.parentURL);
