@@ -5,6 +5,7 @@
   import { selectAll } from "d3";
   import { afterUpdate } from "svelte";
   import { t } from '$lib/i18n/translate.js';
+    import { addURLParameter, removeURLParameter } from "$lib/noncomponents/updateURLParams";
 
   export let allIndicators
 
@@ -12,20 +13,17 @@
 
   function handleIndicatorFilterAdd(e){
     $URLParams.append('indicator', e.detail.option);
-    console.log($URLParams)
-    window.history.pushState(null, '', '?' + $URLParams.toString());
+    addURLParameter()
   }
 
   function handleIndicatorFilterRemove(e){
-    console.log(e.detail.option, $URLParams)
     $URLParams.delete('indicator', e.detail.option)
-    console.log($URLParams)
-    window.history.replaceState(null, '', '?' + $URLParams.toString());
+    removeURLParameter()
   }
 
   function handleIndicatorFilterClear(){
     $URLParams.delete('indicator')
-    window.history.replaceState(null, '', '?' + $URLParams.toString());
+    removeURLParameter()
   }
 
   // deze styling gebeurt hier, omdat het via css niet lukte

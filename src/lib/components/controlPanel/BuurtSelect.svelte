@@ -3,12 +3,13 @@
   import { selectAll } from 'd3';
   import Select from 'svelte-select'
   import { t } from '$lib/i18n/translate.js';
+  import { addURLParameter, removeURLParameter } from "$lib/noncomponents/updateURLParams";
 
   export let lijstAlleBuurtenInMunicipalityVoorDropdown
 
   function handleBuurtChange(e){
     $URLParams.set('buurt', e.detail.value);
-    window.history.pushState(null, '', '?' + $URLParams.toString());
+    addURLParameter()
 
     neighbourhoodSelection.set(e.detail.value)
     selectAll('.svgelements_' + e.detail.value)
@@ -17,8 +18,8 @@
 
   function handleBuurtClear(e){
     $URLParams.delete('buurt')
-    window.history.replaceState(null, '', '?' + $URLParams.toString());
-
+    removeURLParameter()
+    
     neighbourhoodSelection.set(null)
   }
 
