@@ -10,7 +10,7 @@ export async function load({ url }) {
   // const metadata = await dsv(';', "https://raw.githubusercontent.com/Climate-Adaptation-Services/buurtdashboard-data/main/metadata.csv")
   // const metadata_english = await dsv(';', "https://raw.githubusercontent.com/Climate-Adaptation-Services/buurtdashboard-data/main/metadata-english.csv")
 
-  const metadata_dordrecht = await dsv(';', "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/dordrecht/metadata/metadata_120225_2023_2.csv")
+  const metadata_dordrecht = await dsv(';', "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/dordrecht/metadata/metadata_170225_2023_1.csv")
   const metadata_dordrecht_2019 = await dsv(';', "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/dordrecht/metadata/metadata_101224_2019_1.csv")
   const data_dordrecht = await dsv(';', "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/dordrecht/csvdata/Dordrecht_dashboard_120225_2.csv")
   
