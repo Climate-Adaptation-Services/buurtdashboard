@@ -36,14 +36,15 @@
 
   // Listen for a message from the parent
   $: if(browser){
-    // Send a message to the parent asking for the parent URL
-    window.parent.postMessage("Requesting parent URL", "https://www.klimaateffectatlas.nl");
+    setTimeout(() => {
+      window.addEventListener("message", (event) => {
+        if (event.origin === "https://www.klimaateffectatlas.nl") {
+          console.log("Received URL from parent:", event.data.parentURL);
+        }
+      });
 
-    window.addEventListener("message", (event) => {
-      if (event.origin === "https://www.klimaateffectatlas.nl") {
-        console.log("Received URL from parent:", event.data.parentURL);
-      }
-    });
+      window.parent.postMessage("Requesting parent URL", "https://www.klimaateffectatlas.nl");
+    }, 10000)
   }
 
   // zodra allNeighbourhoodsJSONData geladen is, lees de url parameters
