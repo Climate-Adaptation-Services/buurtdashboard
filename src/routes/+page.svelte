@@ -12,6 +12,7 @@
   import { setLanguage } from '$lib/noncomponents/setLanguage.js';
   import { fetchJSONdata } from '$lib/noncomponents/fetchJSONdata.js';
   import { processURLParameters } from '$lib/noncomponents/processURLParameters.js';
+  import { loadURLParamsFromPostMessage } from '$lib/noncomponents/loadURLParamsFromPostMessage.js';
 
   export let data
   console.log('data',data)
@@ -31,26 +32,12 @@
 
   const jsonResponse = fetchJSONdata()
 
-  // de URL parameters laden
+  // load URL params if standalone page
   $: if(browser){URLParams.set(new URLSearchParams(window.location.search))}
+  // Listen for a postmessage from the parent if iframe
+  $: if(browser){loadURLParamsFromPostMessage()}
 
-  // Listen for a message from the parent
-  $: if(browser){
-    // Send a message to the parent window asking for the parent URL
-    window.parent.postMessage("Requesting parent URL", "https://www.klimaateffectatlas.nl");
-
-    // Listen for a message from the parent with the parent's URL
-    window.addEventListener("message", (event) => {
-      if (event.origin === "https://www.klimaateffectatlas.nl") {
-        console.log("Received URL from parent:", event.data.parentURL);
-        URLParams.set(new URLSearchParams('?' + event.data.parentURL.split('?')[1]))
-      } else {
-        console.error("Received message from an untrusted origin:", event.origin);
-      }
-    });
-  }
-
-  // zodra allNeighbourhoodsJSONData geladen is, lees de url parameters
+  // after allNeighbourhoodsJSONData is loaded, process the url params
   $: if($allNeighbourhoodsJSONData){processURLParameters()}
 
   $: onChangeIndicatorenSelectie($indicatorsSelection)
