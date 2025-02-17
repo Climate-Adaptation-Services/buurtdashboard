@@ -39,6 +39,7 @@
     setTimeout(() => {
       console.log('ello', window.parent)
       window.addEventListener("message", (event) => {
+        console.log(event.origin)
         if (event.origin === "https://www.klimaateffectatlas.nl") {
           console.log("Received URL from parent:", event.data.parentURL);
         }
