@@ -15,7 +15,7 @@
   export let neighbourhoodsInMunicipalityFeaturesClone;
 
   // filter out null values
-  neighbourhoodsInMunicipalityFeaturesClone = neighbourhoodsInMunicipalityFeaturesClone.filter(d => d.properties[indicator.attribute] !== null)
+  neighbourhoodsInMunicipalityFeaturesClone = neighbourhoodsInMunicipalityFeaturesClone.filter(d => d.properties[indicator.attribute] !== null && d.properties[indicator.attribute] !== "")
   if(indicator.title === 'Groen per inwoner'){
     neighbourhoodsInMunicipalityFeaturesClone = neighbourhoodsInMunicipalityFeaturesClone.filter(d => +d.properties[indicator.attribute] > 0)
   }

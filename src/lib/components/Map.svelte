@@ -32,6 +32,13 @@
       return indicator.attribute
     }
   }
+
+  $: if($currentJSONData){
+    $currentJSONData.features.forEach(feature => {
+      console.log(feature.properties['afs_sp_0_6'])
+    })
+  }
+
 </script>
 
 <svg class={(mapType === 'main map') ? 'main-map' : 'indicator-map-' + indicator.attribute} style='filter:drop-shadow(0 0 15px rgb(160, 160, 160))'
@@ -51,7 +58,7 @@
           : 'whitesmoke' 
         : (indicator.numerical) 
           // check if value not null 
-          ? (feature.properties[indicator.attribute] !== null)
+          ? (feature.properties[indicator.attribute] !== null && feature.properties[indicator.attribute] !== "")
             ? indicatorValueColorscale(feature.properties[getNumericalAttribute()])
             : '#000000'
           : (indicator.aggregatedIndicator)
