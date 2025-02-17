@@ -37,6 +37,7 @@
   // Listen for a message from the parent
   $: if(browser){
     setTimeout(() => {
+      console.log('ello', window.parent)
       window.addEventListener("message", (event) => {
         if (event.origin === "https://www.klimaateffectatlas.nl") {
           console.log("Received URL from parent:", event.data.parentURL);
@@ -44,7 +45,7 @@
       });
 
       window.parent.postMessage("Requesting parent URL", "https://www.klimaateffectatlas.nl");
-    }, 10000)
+    }, 3000)
   }
 
   // zodra allNeighbourhoodsJSONData geladen is, lees de url parameters
