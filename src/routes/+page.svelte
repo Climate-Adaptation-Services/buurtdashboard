@@ -21,23 +21,6 @@
   let mapHeight;
   const indicatorHeight = 650
 
-  $:if(browser){
-    let parentLocation;
-    try {
-        parentLocation = window.parent.location.href;
-    } catch (error) {
-        parentLocation = "Blocked due to cross-origin security policy";
-    }
-
-    console.log('url', {
-        current: window.location.href,
-        parent: parentLocation,
-        referrer: document.referrer
-    });
-  }
-
-
-
   setLanguage(data)
 
   let displayedIndicators = []
@@ -54,7 +37,7 @@
   // Listen for a message from the parent
   $: if(browser){
     window.addEventListener("message", (event) => {
-      if (event.origin === "https://www.klimaateffectatlas.nl/") {
+      if (event.origin === "https://www.klimaateffectatlas.nl") {
         console.log("Received URL from parent:", event.data.parentURL);
       }
     });
