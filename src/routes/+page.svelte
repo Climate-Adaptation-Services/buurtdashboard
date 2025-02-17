@@ -51,6 +51,15 @@
   // de URL parameters laden
   $: if(browser){URLParams.set(new URLSearchParams(window.location.search))}
 
+  // Listen for a message from the parent
+  $: if(browser){
+    window.addEventListener("message", (event) => {
+      if (event.origin === "https://www.klimaateffectatlas.nl/") {
+        console.log("Received URL from parent:", event.data.parentURL);
+      }
+    });
+  }
+
   // zodra allNeighbourhoodsJSONData geladen is, lees de url parameters
   $: if($allNeighbourhoodsJSONData){processURLParameters()}
 
