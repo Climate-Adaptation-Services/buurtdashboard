@@ -6,6 +6,7 @@ import { getClassByIndicatorValue } from './getClassByIndicatorValue';
 import { mostCommonClass } from './mostCommonClass';
 import center from '@turf/center'
 import { t } from '$lib/i18n/translate.js';
+import { addURLParameter } from './updateURLParams';
 
 export function mouseOver(e, feature, indicator, mapType, indicatorValueColorscale, projection, beeswarmMargin){
   const shapeClassName = getClassName(feature, 'path', indicator, mapType)
@@ -126,12 +127,12 @@ export function click(feature, indicator, mapType){
   const newSelection = feature.properties[get(currentCodeAbbreviation)].replaceAll(' ','').replaceAll('(','').replaceAll(')','')
   if(get(currentOverviewLevel) === 'Nederland'){
     get(URLParams).set('gemeente', newSelection);
-    window.history.pushState(null, '', '?' + get(URLParams).toString());
+    addURLParameter()
 
     municipalitySelection.set(newSelection)
   }else{
     get(URLParams).set('buurt', newSelection);
-    window.history.pushState(null, '', '?' + get(URLParams).toString());
+    addURLParameter()
 
     neighbourhoodSelection.set(newSelection)
   }
