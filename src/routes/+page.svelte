@@ -36,17 +36,17 @@
 
   // Listen for a message from the parent
   $: if(browser){
-    setTimeout(() => {
-      console.log('ello', window.parent, window.parent.postMessage("Requesting parent URL", "https://www.klimaateffectatlas.nl"))
-      window.addEventListener("message", (event) => {
-        console.log(event.origin)
-        if (event.origin === "https://www.klimaateffectatlas.nl") {
-          console.log("Received URL from parent:", event.data.parentURL);
-        }
-      });
+    // Send a message to the parent window asking for the parent URL
+    window.parent.postMessage("Requesting parent URL", "https://www.klimaateffectatlas.nl");
 
-      window.parent.postMessage("Requesting parent URL", "https://www.klimaateffectatlas.nl");
-    }, 3000)
+    // Listen for a message from the parent with the parent's URL
+    window.addEventListener("message", (event) => {
+      if (event.origin === "https://www.klimaateffectatlas.nl") {
+        console.log("Received URL from parent:", event.data.parentURL);
+      } else {
+        console.error("Received message from an untrusted origin:", event.origin);
+      }
+    });
   }
 
   // zodra allNeighbourhoodsJSONData geladen is, lees de url parameters
