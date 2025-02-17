@@ -37,7 +37,7 @@
   // Listen for a message from the parent
   $: if(browser){
     setTimeout(() => {
-      console.log('ello', window.parent)
+      console.log('ello', window.parent, window.parent.postMessage("Requesting parent URL", "https://www.klimaateffectatlas.nl"))
       window.addEventListener("message", (event) => {
         console.log(event.origin)
         if (event.origin === "https://www.klimaateffectatlas.nl") {
