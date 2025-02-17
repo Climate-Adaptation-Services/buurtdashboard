@@ -43,6 +43,7 @@
     window.addEventListener("message", (event) => {
       if (event.origin === "https://www.klimaateffectatlas.nl") {
         console.log("Received URL from parent:", event.data.parentURL);
+        URLParams.set(new URLSearchParams('?' + event.data.parentURL.split('?')[1]))
       } else {
         console.error("Received message from an untrusted origin:", event.origin);
       }
