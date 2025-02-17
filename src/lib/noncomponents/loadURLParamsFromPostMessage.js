@@ -2,7 +2,7 @@ import { URLParams } from "$lib/stores";
 
 export function loadURLParamsFromPostMessage(){
   // Send a message to the parent window asking for the parent URL
-  window.parent.postMessage("Requesting parent URL", "https://www.klimaateffectatlas.nl");
+  window.parent.postMessage({message:"Requesting parent URL"}, "https://www.klimaateffectatlas.nl");
 
   // Listen for a message from the parent with the parent's URL
   window.addEventListener("message", (event) => {
