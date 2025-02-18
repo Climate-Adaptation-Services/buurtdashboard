@@ -39,7 +39,8 @@ function addIndicatorCategory(indicatorsList, indicators){
 
   indicators.forEach(indicator => {
     if(indicator.Titel === 'Oppervlakte openbaar / niet openbaar'){return}
-      
+    if(indicator.Titel === 'Afstand tot koelte'){return}
+    
     let classes = {'No data':'-10'}
       // add no data class
       const indicatorDomein = ['No data', ...indicator.Domein.split(',')]
