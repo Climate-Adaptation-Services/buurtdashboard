@@ -14,6 +14,11 @@
       ? $tooltipRegion.center[0] - 180
       : $tooltipRegion.center[0]
   }
+
+  // afstand tot spelen should be >1000
+  $: if($tooltipValues && ['Afstand tot spelen | 0-6 jaar', 'Afstand tot spelen | 6-13 jaar', 'Afstand tot spelen | 13-18 jaar', 'Afstand tot spelen | alle toestellen'].includes($tooltipValues.indicator) && $tooltipValues.value === 1000){
+    $tooltipValues.value = '>1000'
+  }
   
 </script>
 
