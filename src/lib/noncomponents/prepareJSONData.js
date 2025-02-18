@@ -29,6 +29,19 @@ export function prepareJSONData(JSONdata, dordrechtData){
     neighbourhood.properties['BoomkrDifference'] = neighbourhood.properties['Boomkr2023'] - neighbourhood.properties['Boomkr2019']
     neighbourhood.properties['MEAN_perc_kroonbedekking_100m_Difference'] = neighbourhood.properties['MEAN_perc_kroonbedekking_100m_2023'] - neighbourhood.properties['MEAN_perc_kroonbedekking_100m_2019']
 
+    neighbourhood.properties['afs_sp_0_6'] = (neighbourhood.properties['afs_sp_0_6'])
+      ? Math.min(1000, neighbourhood.properties['afs_sp_0_6'])
+      : neighbourhood.properties['afs_sp_0_6']
+    neighbourhood.properties['afs_sp_6_12'] = (neighbourhood.properties['afs_sp_6_12'])
+      ? Math.min(1000, neighbourhood.properties['afs_sp_6_12'])
+      : neighbourhood.properties['afs_sp_6_12']
+    neighbourhood.properties['afs_sp_12pl'] = (neighbourhood.properties['afs_sp_12pl'])
+      ? Math.min(1000, neighbourhood.properties['afs_sp_12pl'])
+      : neighbourhood.properties['afs_sp_12pl']
+    neighbourhood.properties['afs_sp_all'] = (neighbourhood.properties['afs_sp_all'])
+      ? Math.min(1000, neighbourhood.properties['afs_sp_all'])
+      : neighbourhood.properties['afs_sp_all']
+
     // if(neighbourhood.properties['BU_NAAM'] === 'Oostkil'){
     //   neighbourhood.properties['BoomkrDifference'] -= 5
     // }
