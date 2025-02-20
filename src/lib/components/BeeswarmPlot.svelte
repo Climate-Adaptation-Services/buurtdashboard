@@ -62,15 +62,20 @@
   });  
 
   let alpha = 0.5
+
   // Run the simulation whenever any of the variables inside of it change
-
   // let skipSimulationRestart = false
-  // $: if(jaarSelecties && indicator.title === $indicatorYearChanged[0]){
-  //   skipSimulationRestart = true
-  // }
-
-  // function runSimulation(){
   $: {
+    if(jaarSelecties && indicator.title === $indicatorYearChanged[0]){
+      runSimulation()
+    }
+    else{
+      console.log('skip')
+    }
+  }
+
+  function runSimulation(){
+  // $: {
     simulation
         .force("x", forceX().x(d => xScaleBeeswarm(d.properties[indicatorAttribute])).strength(0.7))
           // .strength(d => (xScaleBeeswarm(d.properties[indicatorAttribute]) > 0) ? 0.8 : 1))
@@ -84,18 +89,10 @@
 
         alpha = 0.2
   }
-  
-  // $: {
-  //   if(skipSimulationRestart){
-  //     runSimulation()
-  //   }else{
-  //     skipSimulationRestart = false
-  //   }
-  // }
 
-  // onMount(() => {
-  //   runSimulation()
-  // })
+  onMount(() => {
+    runSimulation()
+  })
 
   // raise node on mount, hacky solution could be better
   $: if($selectedNeighbourhoodJSONData){setTimeout(() => {select('.' + getClassName($selectedNeighbourhoodJSONData, 'node', indicator, 'indicator map')).raise()}, 1000)}
