@@ -33,12 +33,6 @@
     }
   }
 
-  $: if($currentJSONData){
-    $currentJSONData.features.forEach(feature => {
-      console.log(feature.properties['afs_sp_0_6'])
-    })
-  }
-
 </script>
 
 <svg class={(mapType === 'main map') ? 'main-map' : 'indicator-map-' + indicator.attribute} style='filter:drop-shadow(0 0 15px rgb(160, 160, 160))'
