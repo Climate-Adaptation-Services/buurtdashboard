@@ -20,6 +20,12 @@ export const municipalityNameAbbreviation = readable('GM_NAAM')
 export const districtTypeAbbreviation = readable('def_wijkty')
 
 export const indicatorsSelection = writable([])
+export const alleIndicatoren2019 = writable([])
+export const alleIndicatoren2023 = writable([])
+export const jaarSelecties = writable({})
+export const indicatorYearChanged = writable([])
+
+export const backgroundColor = readable('#0064af')
 
 export const selectedNeighbourhoodJSONData = derived(
   [allNeighbourhoodsJSONData, neighbourhoodSelection],
@@ -78,7 +84,7 @@ export const circleRadius = derived(
   [neighbourhoodsInMunicipalityJSONData],
   ([$neighbourhoodsInMunicipalityJSONData]) => {
     if($neighbourhoodsInMunicipalityJSONData){
-      return ($neighbourhoodsInMunicipalityJSONData.features.length > 150) ? 3 : 5
+      return ($neighbourhoodsInMunicipalityJSONData.features.length > 150) ? 3 : 4.5
     }else{
       return 0
     }
