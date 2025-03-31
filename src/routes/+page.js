@@ -12,7 +12,7 @@ export async function load({ url }) {
 
   const metadata_dordrecht = await dsv(';', "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/dordrecht/metadata/metadata_180325_2023_5.csv")
   const metadata_dordrecht_2019 = await dsv(';', "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/dordrecht/metadata/metadata_101224_2019_1.csv")
-  const data_dordrecht = await dsv(';', "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/dordrecht/csvdata/Dordrecht_dashboard_180325_1.csv")
+  const data_dordrecht = await dsv(';', "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/dordrecht/csvdata/Dordrecht_dashboard_310325_1.csv")
 
   return {
     lang,
