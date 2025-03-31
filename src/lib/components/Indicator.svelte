@@ -135,13 +135,13 @@
       <div class="indicator-graph" style="height:{bodyHeight * 0.6}px" bind:clientWidth={graphWidth}>
         <BarPlot
           {graphWidth}
-          indicatorHeight={bodyHeight * 0.4}
+          indicatorHeight={bodyHeight * 0.45}
           aggregated={indicator.aggregatedIndicator ? true : false}
           {indicator}
           {indicatorValueColorscale}
           {getClassByIndicatorValue}
         />
-        <BarPlotLegend {graphWidth} style="height:{bodyHeight * 0.2}px" {indicatorValueColorscale} {indicator} />
+        <BarPlotLegend {graphWidth} style="height:{bodyHeight * 0.15}px" {indicatorValueColorscale} {indicator} />
       </div>
     {/if}
     <div class="indicator-map" style="height:{bodyHeight * 0.4}px" bind:clientWidth={mapWidth}>

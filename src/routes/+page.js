@@ -12,10 +12,10 @@ export async function load({ url }) {
 
   return {
     lang,
-    // metadata,
-    // metadata_english,
-    metadata_dordrecht,
-    metadata_dordrecht_2019,
-    data_dordrecht
+    metadata,
+    metadata_english,
+    // metadata_dordrecht,
+    // metadata_dordrecht_2019,
+    // data_dordrecht
   };
 }

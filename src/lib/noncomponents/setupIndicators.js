@@ -11,7 +11,7 @@ export function setupIndicators(data, eff, geb, kwe) {
 
   let indicatorenLijst2023 = []
   let indicatorenLijst2019 = []
-
+  let indicatorsList = []
   indicatorsList = addIndicatorCategory(indicatorsList, metadata.filter(d => d.Categorie === eff))
   indicatorsList = addIndicatorCategory(indicatorsList, metadata.filter(d => d.Categorie === geb))
   indicatorsList = addIndicatorCategory(indicatorsList, metadata.filter(d => d.Categorie === kwe))
@@ -28,7 +28,7 @@ export function setupIndicators(data, eff, geb, kwe) {
 
   console.log('indicatorenLijst', indicatorenLijst2019, indicatorenLijst2023)
 
-  return indicatorenLijst2023;
+  return indicatorsList;
 }
 
 function addIndicatorCategory(indicatorsList, indicators) {

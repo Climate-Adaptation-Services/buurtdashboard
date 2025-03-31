@@ -24,7 +24,7 @@
   export let getClassByIndicatorValue
   export let aggregated
 
-  const margin = { bottom: 50, top: 30, left: 30, right: 30 }
+  const margin = { bottom: 100, top: 30, left: 30, right: 30 }
 
   const calcPercentagesForEveryClass = aggregated ? calcPercentagesForEveryClassMultiIndicator : calcPercentagesForEveryClassSingleIndicator
 
@@ -36,24 +36,26 @@
     if ($neighbourhoodSelection !== null) {
       if ($selectedNeighbourhoodJSONData.properties[$districtTypeAbbreviation]) {
         barPlotData = [
+          nederlandValues,
           calcPercentagesForEveryClass(indicator, $neighbourhoodsInMunicipalityJSONData, "Gemeente"),
           calcPercentagesForEveryClass(indicator, { type: "FeatureCollection", features: [$selectedNeighbourhoodJSONData] }, "Buurt"),
           calcPercentagesForEveryClass(indicator, $districtTypeJSONData, "Wijktype"),
         ]
-        regios = ["Gemeente", "Buurt", "Wijktype"]
+        regios = ["Nederland", "Gemeente", "Buurt", "Wijktype"]
       } else {
         barPlotData = [
+          nederlandValues,
           calcPercentagesForEveryClass(indicator, $neighbourhoodsInMunicipalityJSONData, "Gemeente"),
           calcPercentagesForEveryClass(indicator, { type: "FeatureCollection", features: [$selectedNeighbourhoodJSONData] }, "Buurt"),
         ]
-        regios = ["Gemeente", "Buurt"]
+        regios = ["Nederland", "Gemeente", "Buurt"]
       }
     } else if ($municipalitySelection !== null) {
-      barPlotData = [calcPercentagesForEveryClass(indicator, $neighbourhoodsInMunicipalityJSONData, "Gemeente")]
-      regios = ["Gemeente"]
+      barPlotData = [nederlandValues, calcPercentagesForEveryClass(indicator, $neighbourhoodsInMunicipalityJSONData, "Gemeente")]
+      regios = ["Nederland", "Gemeente"]
     } else {
-      barPlotData = []
-      regios = []
+      barPlotData = [nederlandValues]
+      regios = ["Nederland"]
     }
   }
 
@@ -68,7 +70,7 @@
     .range([0, (indicatorHeight - margin.top - margin.bottom) * (barPlotData.length / 2)])
 </script>
 
-<svg class={"barplot_" + indicator.attribute} style="height:66.66%">
+<svg class={"barplot_" + indicator.attribute} style="height:70%">
   <g class="inner-chart-bar" transform="translate(0, {margin.top})">
     {#each stackedData as stacked, i}
       <g class="stack" fill={indicatorValueColorscale(stacked.key)}>
@@ -80,7 +82,7 @@
             x={xScale(st[0])}
             y={yScale(st.data.group)}
             width={xScale(st[1]) - xScale(st[0])}
-            height={yScale.bandwidth() / 2.1}
+            height={yScale.bandwidth() / 2}
             stroke-width="4"
           >
           </rect>

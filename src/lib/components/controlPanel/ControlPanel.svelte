@@ -68,7 +68,7 @@
 
 <div class="search">
   <div>
-    <img src="./dord3.png" class="dord-icon" />
+    <!-- <img src="./dord3.png" class="dord-icon" /> -->
     <div class="download-and-about">
       <div class="about" on:click={() => laatMeerInfoPanelZien("intro")}>
         <img src="./about.png" width="30px" />

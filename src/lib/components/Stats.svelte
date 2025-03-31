@@ -25,7 +25,7 @@
 
   let statsWidth
 
-  let medianValuesDict = {
+  $: medianValuesDict = {
     medianValueNederland: calcMedian($allNeighbourhoodsJSONData.features.map((neighbourhood) => +neighbourhood.properties[indicatorAttribute])),
     medianValueGemeente: 0,
     medianValueBuurt: 0,
@@ -44,7 +44,7 @@
     medianValueWijktype: 0,
   }
   $: if (isThereOtherYear) {
-    medianValuesDict["medianValueNederland"] = calcMedian(
+    medianValuesDictOtherYear["medianValueNederland"] = calcMedian(
       $allNeighbourhoodsJSONData.features.map((neighbourhood) => neighbourhood.properties[otherYearAttribute]),
     )
   }
@@ -144,7 +144,7 @@
     .range([0, statsWidth - 240])
 </script>
 
-<div class="indicator-stats" style="visibility:hidden; height: {bodyHeight * 0.2 * 0.25}px" bind:clientWidth={statsWidth}>
+<div class="indicator-stats" style="height: {bodyHeight * 0.2 * 0.25}px" bind:clientWidth={statsWidth}>
   <Stat
     {indicatorValueColorscale}
     {indicator}

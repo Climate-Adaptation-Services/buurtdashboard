@@ -25,23 +25,11 @@
     municipalitySelection.set(null)
     neighbourhoodSelection.set(null)
   }
-
-  onMount(() => {
-    $URLParams.set("gemeente", "GM0505")
-    window.history.pushState(null, "", "?" + $URLParams.toString())
-
-    municipalitySelection.set(null)
-    neighbourhoodSelection.set(null)
-    setTimeout(() => {
-      municipalitySelection.set("GM0505")
-    }, 3000)
-  })
 </script>
 
 <p class="select-title">{t("Gemeente")}:</p>
 <Select
   items={lijstAlleGemeentesVoorDropdown}
-  disabled
   placeholder={t("Zoek_gemeente")}
   value={$municipalitySelection}
   on:change={handleGemeenteChange}

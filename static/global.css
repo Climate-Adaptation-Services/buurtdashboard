@@ -1,10 +1,10 @@
-body{
-  width:99vw;
-  height:97vh;
-  margin:0;
+body {
+  width: 99vw;
+  height: 97vh;
+  margin: 0;
   font-family: Roboto;
   /* background-color: #fefffa; */
-  background-color: rgb(196, 196, 196);
+  background-color: #36575B;
   color: #645F5E
 }
 
@@ -13,11 +13,11 @@ body{
   src: url(https://fonts.googleapis.com/css?family=Roboto);
 }
 
-.options{
-  color:#645F5E;
+.options {
+  color: #645F5E;
 }
 
-.select-title{
-  color:white;
-  margin:5px;
+.select-title {
+  color: white;
+  margin: 5px;
 }

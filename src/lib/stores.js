@@ -25,14 +25,14 @@ export const alleIndicatoren2023 = writable([])
 export const jaarSelecties = writable({})
 export const indicatorYearChanged = writable([])
 
-export const backgroundColor = readable('#0064af')
+export const backgroundColor = readable('#36575B')
 
 export const selectedNeighbourhoodJSONData = derived(
   [allNeighbourhoodsJSONData, neighbourhoodSelection],
   ([$allNeighbourhoodsJSONData, $neighbourhoodSelection]) => {
-    if($allNeighbourhoodsJSONData !== null){
+    if ($allNeighbourhoodsJSONData !== null) {
       return $allNeighbourhoodsJSONData.features.filter(neighbourhood => neighbourhood.properties['BU_CODE'] === $neighbourhoodSelection)[0]
-    }else{
+    } else {
       return null
     }
   }
@@ -54,14 +54,14 @@ export const currentOverviewLevel = derived(
 export const currentJSONData = derived(
   [currentOverviewLevel, allMunicipalitiesJSONData, allNeighbourhoodsJSONData, municipalitySelection, neighbourhoodSelection],
   ([$currentOverviewLevel, $allMunicipalitiesJSONData, $allNeighbourhoodsJSONData, $municipalitySelection, $neighbourhoodSelection]) => {
-    if($currentOverviewLevel === 'Nederland'){
+    if ($currentOverviewLevel === 'Nederland') {
       return $allMunicipalitiesJSONData
-    }else if($currentOverviewLevel === 'Gemeente'){
+    } else if ($currentOverviewLevel === 'Gemeente') {
       const newFeatures = $allNeighbourhoodsJSONData.features.filter(neighbourhood => neighbourhood.properties['GM_CODE'] === $municipalitySelection)
-      return {type: 'FeatureCollection', features: newFeatures}
-    }else{
+      return { type: 'FeatureCollection', features: newFeatures }
+    } else {
       const newFeatures = $allNeighbourhoodsJSONData.features.filter(neighbourhood => neighbourhood.properties['GM_CODE'] === $municipalitySelection)
-      return {type: 'FeatureCollection', features: newFeatures}
+      return { type: 'FeatureCollection', features: newFeatures }
       // const newFeatures = $allNeighbourhoodsJSONData.features.filter(neighbourhood => neighbourhood.properties['bu_code'] === $neighbourhoodSelection)
       // return {type: 'FeatureCollection', features: newFeatures}
     }
@@ -71,10 +71,10 @@ export const currentJSONData = derived(
 export const neighbourhoodsInMunicipalityJSONData = derived(
   [municipalitySelection, allNeighbourhoodsJSONData],
   ([$municipalitySelection, $allNeighbourhoodsJSONData]) => {
-    if($municipalitySelection !== null && $allNeighbourhoodsJSONData){
+    if ($municipalitySelection !== null && $allNeighbourhoodsJSONData) {
       const newFeatures = $allNeighbourhoodsJSONData.features.filter(neighbourhood => neighbourhood.properties['GM_CODE'] === $municipalitySelection)
-      return {type: 'FeatureCollection', features: newFeatures}
-    }else{
+      return { type: 'FeatureCollection', features: newFeatures }
+    } else {
       return null
     }
   }
@@ -83,9 +83,9 @@ export const neighbourhoodsInMunicipalityJSONData = derived(
 export const circleRadius = derived(
   [neighbourhoodsInMunicipalityJSONData],
   ([$neighbourhoodsInMunicipalityJSONData]) => {
-    if($neighbourhoodsInMunicipalityJSONData){
+    if ($neighbourhoodsInMunicipalityJSONData) {
       return ($neighbourhoodsInMunicipalityJSONData.features.length > 150) ? 3 : 4.5
-    }else{
+    } else {
       return 0
     }
   }
@@ -94,9 +94,9 @@ export const circleRadius = derived(
 export const districtTypeJSONData = derived(
   [neighbourhoodSelection, allNeighbourhoodsJSONData, selectedNeighbourhoodJSONData, districtTypeAbbreviation],
   ([$neighbourhoodSelection, $allNeighbourhoodsJSONData, $selectedNeighbourhoodJSONData, $districtTypeAbbreviation]) => {
-    if($neighbourhoodSelection !== null){
-      return {type: 'FeatureCollection', features: $allNeighbourhoodsJSONData.features.filter(neighbourhood => neighbourhood.properties[$districtTypeAbbreviation] === $selectedNeighbourhoodJSONData.properties[$districtTypeAbbreviation])}
-    }else{
+    if ($neighbourhoodSelection !== null) {
+      return { type: 'FeatureCollection', features: $allNeighbourhoodsJSONData.features.filter(neighbourhood => neighbourhood.properties[$districtTypeAbbreviation] === $selectedNeighbourhoodJSONData.properties[$districtTypeAbbreviation]) }
+    } else {
       return null
     }
   }
