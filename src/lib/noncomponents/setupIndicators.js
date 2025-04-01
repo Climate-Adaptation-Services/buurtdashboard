@@ -13,9 +13,9 @@ export function setupIndicators(data, eff, geb, kwe) {
   let indicatorenLijst2019 = []
 
   // let indicatorenOpCategorie = [...metadata.filter(d => d.Categorie === 'Gebiedskenmerken'), ...metadata.filter(d => d.Categorie === 'Effecten'), ...metadata.filter(d => d.Categorie === 'Kwetsbaarheid')]
-  indicatorenLijst2023 = addIndicatorCategory(indicatorenLijst2023, metadata.filter(d => d.Categorie === geb))
-  indicatorenLijst2023 = addIndicatorCategory(indicatorenLijst2023, metadata.filter(d => d.Categorie === eff))
   indicatorenLijst2023 = addIndicatorCategory(indicatorenLijst2023, metadata.filter(d => d.Categorie === kwe))
+  indicatorenLijst2023 = addIndicatorCategory(indicatorenLijst2023, metadata.filter(d => d.Categorie === eff))
+  indicatorenLijst2023 = addIndicatorCategory(indicatorenLijst2023, metadata.filter(d => d.Categorie === geb))
   indicatorenLijst2019 = addIndicatorCategory(indicatorenLijst2019, metadata_2019.filter(d => d.Categorie === geb))
 
   alleIndicatoren2023.set(indicatorenLijst2023)
