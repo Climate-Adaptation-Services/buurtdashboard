@@ -5,18 +5,12 @@
     alleIndicatoren2019,
     alleIndicatoren2023,
     jaarSelecties,
-    backgroundColor,
   } from "$lib/stores"
-  import BeeswarmPlot from "./BeeswarmPlot.svelte"
-  import Stats from "./Stats.svelte"
   import { scaleLinear, extent, scaleOrdinal } from "d3"
-  import Map from "./Map.svelte"
-  import BarPlot from "./BarPlot.svelte"
-  import BarPlotLegend from "./BarPlotLegend.svelte"
   import { afterUpdate } from "svelte"
-  import { t } from "$lib/i18n/translate.js"
-  import { getClassByIndicatorValue } from "$lib/noncomponents/getClassByIndicatorValue"
-  import YearSwitch from "./YearSwitch.svelte"
+  import IndicatorInfo from "./IndicatorInfo.svelte"
+  import IndicatorTitle from "./IndicatorTitle.svelte"
+  import IndicatorBody from "./IndicatorBody.svelte"
 
   export let indicatorHeight
   export let indicator
@@ -31,7 +25,6 @@
   }
 
   let graphWidth
-  let mapWidth
 
   const titleHeight = indicatorHeight * 0.23
   const bodyHeight = indicatorHeight * 0.77
@@ -49,167 +42,33 @@
 
         // if looking at difference between years
         if ($jaarSelecties[indicator.title] === "Difference") {
-          // const attributeWithoutYear = indicator.attribute.slice(0,-4)
-          // rangeExtent = extent($neighbourhoodsInMunicipalityJSONData.features.map(d => +d.properties[attributeWithoutYear + 'Difference']))
-
-          // color domain is constant, to be able to compare different indicators
           indicatorValueColorscale = scaleLinear().domain([-10, 0, 20]).range(["orange", "lightgrey", "purple"])
         } else {
           indicatorValueColorscale = scaleLinear()
             .domain([...Array(indicator.color.range.length).keys()].map((i) => rangeExtent[0] + i * step))
             .range(indicator.color.range)
         }
-
-        // else{
-        //   indicatorValueColorscale = scaleLinear()
-        //     .domain([...Array(indicator.color.range.length).keys()].map(i => rangeExtent[0] + i * step).reverse())
-        //     .range(indicator.color.range);
-        // }
       }
     } else {
       indicatorValueColorscale = scaleOrdinal().domain(indicator.color.domain).range(indicator.color.range)
     }
   }
 
-  let indicatorInfoPosition
-  afterUpdate(() => {
-    indicatorInfoPosition =
-      window.innerWidth - document.getElementsByClassName("indicator-info-" + indicator.attribute)[0].getBoundingClientRect().right > 180
-        ? graphWidth
-        : 0
-  })
-
   $: indicatorPlottitle = $jaarSelecties[indicator.title] === "Difference" ? indicator.plottitle.replace("%", "% verandering") : indicator.plottitle
 </script>
 
 <div class="indicator-div">
-  <h3
-    class="question-mark"
-    style="padding:3px 10px 3px 10px; margin:0; position:absolute; border-radius:50px; right:5px; top:5px; color:white;background-color:{$backgroundColor}; cursor:default"
-  >
-    ?
-  </h3>
-  <div class={"indicator-info indicator-info-" + indicator.attribute} style="left:{indicatorInfoPosition}px">
-    <p style="padding:3px 10px 3px 10px; border-radius:50px; color:white;background-color:{$backgroundColor}; float:left">
-      <strong>{indicator.title}</strong>
-    </p>
-    <hr width="100%" />
-    <p>{indicator.description}</p>
-  </div>
-
-  <div class="indicator-title" style="height: {titleHeight}px">
-    <h4 style="margin:0px; color:#BB9012">{t("Categorie")}: {indicator.category}</h4>
-    <h2 style="padding:5px 15px 5px 15px; margin:10px 0px 7px 0px; background-color:{$backgroundColor}; border-radius:15px; color:white">
-      {indicator.title}
-    </h2>
-    <h4 style="margin:0px; padding:0px 10px 0px 10px; font-weight:normal; color:#7e7975; text-align: center;">{indicator.subtitle}</h4>
-    {#if indicator.title === "Boomkroonbedekking" || indicator.title === "Boomkroonbedekking 500m"}
-      <YearSwitch {indicator} />
-    {/if}
-  </div>
-  <div class="indicator-body" style="height: {bodyHeight}px">
-    {#if indicator.numerical === true}
-      <div class="indicator-overview" style="height: {bodyHeight * 0.2}px">
-        <Stats {bodyHeight} {indicator} {indicatorValueColorscale} />
-      </div>
-      <div class="indicator-graph" style="height:{bodyHeight * 0.4}px" bind:clientWidth={graphWidth}>
-        {#if $municipalitySelection !== null}
-          <svg class={"beeswarm_" + indicator.attribute}>
-            <BeeswarmPlot
-              {graphWidth}
-              indicatorHeight={bodyHeight * 0.4}
-              {indicator}
-              {indicatorValueColorscale}
-              neighbourhoodsInMunicipalityFeaturesClone={structuredClone($neighbourhoodsInMunicipalityJSONData.features)}
-            />
-            <text x={graphWidth / 2} y={bodyHeight * 0.4 - 18} fill="#645F5E" text-anchor="middle" font-size="14">{indicatorPlottitle} per buurt</text
-            >
-          </svg>
-        {:else}
-          <p style="text-align:center; padding-top:50px; font-size:18px; position:absolute; left:{graphWidth / 3.4}px">
-            <em>{t("Selecteer_gemeente")}...</em>
-          </p>
-        {/if}
-      </div>
-    {:else}
-      <div class="indicator-graph" style="height:{bodyHeight * 0.6}px" bind:clientWidth={graphWidth}>
-        <BarPlot
-          {graphWidth}
-          indicatorHeight={bodyHeight * 0.45}
-          aggregated={indicator.aggregatedIndicator ? true : false}
-          {indicator}
-          {indicatorValueColorscale}
-          {getClassByIndicatorValue}
-        />
-        <BarPlotLegend {graphWidth} style="height:{bodyHeight * 0.15}px" {indicatorValueColorscale} {indicator} />
-      </div>
-    {/if}
-    <div class="indicator-map" style="height:{bodyHeight * 0.4}px" bind:clientWidth={mapWidth}>
-      {#if $municipalitySelection !== null}
-        <Map {mapWidth} mapHeight={bodyHeight * 0.4} mapType={"indicator map"} {indicatorValueColorscale} {indicator} {getClassByIndicatorValue} />
-      {/if}
-      <span style="width:100%; position:absolute; bottom:0px; display:flex; justify-content:space-between; pointer-events:none">
-        <h5><strong>{indicator.source}</strong></h5>
-        {#if indicator.link}
-          <h5 style="pointer-events:auto"><a target="_blank" href={indicator.link}>{t("Meer_info")}</a></h5>
-        {/if}
-      </span>
-    </div>
-  </div>
+  <IndicatorInfo {indicator} {graphWidth} />
+  <IndicatorTitle {indicator} {titleHeight} />
+  <IndicatorBody {indicator} {bodyHeight} {indicatorValueColorscale} {indicatorPlottitle} />
 </div>
 
 <style>
-  svg {
-    width: 100%;
-    height: 100%;
-  }
-
   .indicator-div {
     height: 100%;
     display: flex;
     flex-direction: column;
     box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
     position: relative;
-  }
-  .indicator-title {
-    display: flex;
-    flex-direction: column;
-    background-color: whitesmoke;
-    align-items: center;
-    justify-content: top;
-    border-radius: 10px;
-    padding-top: 10px;
-  }
-
-  .indicator-graph {
-    background-color: rgb(253, 249, 234);
-  }
-
-  .indicator-map {
-    /* background-color: #f5fdff;     */
-  }
-
-  h5 {
-    padding: 10px;
-    margin: 0px;
-  }
-  a {
-    color: black;
-  }
-
-  .indicator-info {
-    visibility: hidden;
-    position: absolute;
-    width: 300px;
-    background-color: white;
-    top: 0px;
-    z-index: 1000;
-    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
-    border-radius: 20px;
-    padding: 10px 20px 10px 20px;
-  }
-
-  .question-mark:hover ~ .indicator-info {
-    visibility: visible;
   }
 </style>
