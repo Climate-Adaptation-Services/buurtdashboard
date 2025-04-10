@@ -15,6 +15,7 @@
 </script>
 
 <h3 class="question-mark" style="background-color:{$backgroundColor}">?</h3>
+<h3 class="category" style="background-color:{$backgroundColor}">C</h3>
 
 <div class={"indicator-info indicator-info-" + indicator.attribute} style="left:{indicatorInfoPosition}px">
   <p class="title" style="background-color:{$backgroundColor}">
@@ -26,11 +27,18 @@
 
 <style>
   .question-mark {
+    right: 5px;
+  }
+
+  .category {
+    left: 5px;
+  }
+
+  h3 {
     padding: 3px 10px;
     margin: 0;
     position: absolute;
     border-radius: 50px;
-    right: 5px;
     top: 5px;
     color: white;
     cursor: default;

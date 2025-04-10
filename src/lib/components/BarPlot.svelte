@@ -92,7 +92,7 @@
               x={xScale(st[0]) + (xScale(st[1]) - xScale(st[0])) / 2}
               y={yScale(st.data.group) + 1.5}
               fill={checkContrast(indicatorValueColorscale(stacked.key)) ? "white" : "black"}
-              dy="1.15em"
+              dy="1.1em"
               font-size="14px"
               pointer-events="none">{Math.round(st.data[stacked.key] * 10) / 10}%</text
             >
