@@ -22,14 +22,14 @@
     flex-direction: column;
     background-color: whitesmoke;
     align-items: center;
-    justify-content: top;
+    justify-content: center;
     border-radius: 10px;
-    padding-top: 10px;
+    /* padding-top: 10px; */
   }
 
   .category {
     margin: 0;
-    color: #BB9012;
+    color: #bb9012;
   }
 
   .title {

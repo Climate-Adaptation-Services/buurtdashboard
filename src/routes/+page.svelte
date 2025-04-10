@@ -19,7 +19,7 @@
   let screenWidth = 1000 //default value
   let mapWidth
   let mapHeight
-  const indicatorHeight = 670
+  const indicatorHeight = 650
 
   setLanguage(data)
 

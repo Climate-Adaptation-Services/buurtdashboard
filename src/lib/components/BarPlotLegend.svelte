@@ -13,7 +13,7 @@
   const klasseNamen = Object.keys(indicator.classes)
   const marginTop = klasseNamen.length > 4 ? 10 : 20
   const margin = { top: marginTop, bottom: 30, left: 30, right: 0 }
-  $: legendElementWidth = (graphWidth - margin.left - margin.right) / 2
+  $: legendElementWidth = (graphWidth - margin.left - margin.right) / 3
 </script>
 
 <div
@@ -28,7 +28,7 @@
         <svg>
           <g>
             <rect x={0} y={0} width={12} height={12} fill={indicatorValueColorscale(klasse)}></rect>
-            <text style="fill:#645F5E" dx="20px" dy="0.74em">{klasse}</text>
+            <text style="fill:#645F5E" dx="20px" dy="0.74em" font-size="12px">{klasse}</text>
           </g>
         </svg>
       </div>

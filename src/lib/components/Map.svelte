@@ -6,6 +6,7 @@
   import { getClassName } from "$lib/noncomponents/getClassName"
   import { click, mouseOver, mouseOut } from "$lib/noncomponents/neighbourhoodMouseEvents"
   import { getMostCommonClass } from "$lib/noncomponents/getMostCommonClass"
+  import { getClassByIndicatorValue } from "$lib/noncomponents/getClassByIndicatorValue"
 
   export let JSONdata
   export let mapWidth
@@ -13,14 +14,13 @@
   export let mapType
   export let indicatorValueColorscale
   export let indicator
-  export let getClassByIndicatorValue
   export let dordrechtData
 
   if (mapType === "main map") {
     prepareJSONData(JSONdata, dordrechtData)
   }
 
-  $: topYPosition = mapType === "main map" ? 20 : 0
+  $: topYPosition = mapType === "main map" ? 20 : 10
 
   $: projection = geoMercator().fitExtent(
     [

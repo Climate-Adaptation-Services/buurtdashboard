@@ -1,13 +1,6 @@
 <script>
-  import {
-    municipalitySelection,
-    neighbourhoodsInMunicipalityJSONData,
-    alleIndicatoren2019,
-    alleIndicatoren2023,
-    jaarSelecties,
-  } from "$lib/stores"
+  import { municipalitySelection, neighbourhoodsInMunicipalityJSONData, alleIndicatoren2019, alleIndicatoren2023, jaarSelecties } from "$lib/stores"
   import { scaleLinear, extent, scaleOrdinal } from "d3"
-  import { afterUpdate } from "svelte"
   import IndicatorInfo from "./IndicatorInfo.svelte"
   import IndicatorTitle from "./IndicatorTitle.svelte"
   import IndicatorBody from "./IndicatorBody.svelte"
@@ -25,7 +18,6 @@
   }
 
   let graphWidth
-
   const titleHeight = indicatorHeight * 0.23
   const bodyHeight = indicatorHeight * 0.77
 
@@ -53,14 +45,12 @@
       indicatorValueColorscale = scaleOrdinal().domain(indicator.color.domain).range(indicator.color.range)
     }
   }
-
-  $: indicatorPlottitle = $jaarSelecties[indicator.title] === "Difference" ? indicator.plottitle.replace("%", "% verandering") : indicator.plottitle
 </script>
 
 <div class="indicator-div">
   <IndicatorInfo {indicator} {graphWidth} />
   <IndicatorTitle {indicator} {titleHeight} />
-  <IndicatorBody {indicator} {bodyHeight} {indicatorValueColorscale} {indicatorPlottitle} />
+  <IndicatorBody {indicator} {graphWidth} {bodyHeight} {indicatorValueColorscale} />
 </div>
 
 <style>
