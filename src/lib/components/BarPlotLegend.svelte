@@ -26,7 +26,7 @@
         <svg>
           <g>
             <rect x={0} y={0} width={12} height={12} fill={indicatorValueColorscale(klasse)}></rect>
-            <text style="fill:#645F5E" dx="20px" dy="0.74em" font-size="12px">{klasse}</text>
+            <text style="fill:#645F5E" dx="20px" dy="0.74em" font-size="13px">{klasse}</text>
           </g>
         </svg>
       </div>

@@ -101,7 +101,7 @@
       </g>
     {/each}
     {#each regios as regio, i}
-      <text style="fill:#645F5E" x={graphWidth / 2} text-anchor="middle" y={i * yScale.bandwidth() - 5}>{getRegionName(regio)}</text>
+      <text style="fill:#645F5E" x={graphWidth / 2} text-anchor="middle" font-size="15px" y={i * yScale.bandwidth() - 5}>{getRegionName(regio)}</text>
     {/each}
   </g>
 </svg>

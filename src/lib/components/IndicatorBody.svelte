@@ -46,11 +46,14 @@
     display: flex;
     justify-content: space-between;
     pointer-events: none;
+    color: #7e7975 !important;
   }
 
   h5 {
     padding: 10px;
+    padding-bottom: 5px;
     margin: 0;
+    font-weight: 200;
   }
 
   .info-link {
@@ -58,6 +61,6 @@
   }
 
   a {
-    color: black;
+    color: #7e7975;
   }
 </style>
