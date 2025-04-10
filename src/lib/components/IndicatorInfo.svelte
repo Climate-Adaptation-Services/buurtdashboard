@@ -54,6 +54,7 @@
     color: white;
     float: left;
     margin: 0;
+    margin-bottom: 1rem;
   }
 
   hr {

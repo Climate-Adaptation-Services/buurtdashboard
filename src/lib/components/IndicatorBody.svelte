@@ -1,5 +1,5 @@
 <script>
-  import { municipalitySelection } from "$lib/stores"
+  import { backgroundColor, municipalitySelection } from "$lib/stores"
 
   import Map from "./Map.svelte"
 
@@ -32,7 +32,7 @@
     <div class="footer">
       <h5 class="source"><strong>{indicator.source}</strong></h5>
       {#if indicator.link}
-        <h5 class="info-link"><a href={indicator.link} target="_blank">{t("Meer_info")}</a></h5>
+        <h5 class="info-link"><a href={indicator.link} target="_blank" color={$backgroundColor}>{t("Meer_info")}</a></h5>
       {/if}
     </div>
   </div>
@@ -47,13 +47,13 @@
     justify-content: space-between;
     pointer-events: none;
     color: #7e7975 !important;
+    font-weight: 300;
   }
 
   h5 {
     padding: 10px;
     padding-bottom: 5px;
     margin: 0;
-    font-weight: 200;
   }
 
   .info-link {
@@ -61,6 +61,6 @@
   }
 
   a {
-    color: #7e7975;
+    color: #36575b;
   }
 </style>
