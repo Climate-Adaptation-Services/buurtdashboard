@@ -20,7 +20,7 @@
     prepareJSONData(JSONdata, dordrechtData)
   }
 
-  $: topYPosition = mapType === "main map" ? 20 : 10
+  $: topYPosition = mapType === "main map" ? 20 : 5
 
   $: projection = geoMercator().fitExtent(
     [

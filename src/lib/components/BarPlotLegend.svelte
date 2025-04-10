@@ -11,16 +11,14 @@
   // $: innerwidth2 = (graphWidth - 2*padding2) / 2
 
   const klasseNamen = Object.keys(indicator.classes)
-  const marginTop = klasseNamen.length > 4 ? 10 : 20
+  const marginTop = klasseNamen.length > 6 ? 0 : 15
   const margin = { top: marginTop, bottom: 30, left: 30, right: 0 }
   $: legendElementWidth = (graphWidth - margin.left - margin.right) / 3
 </script>
 
 <div
   class="barplot-legend"
-  style="width:{graphWidth - margin.left - margin.right}px; margin-left:{margin.left}px; margin-top:{indicator.title !== 'Functionele gebieden'
-    ? margin.top
-    : 15}px"
+  style="height:26%; width:{graphWidth - margin.left - margin.right}px; margin-left:{margin.left}px; margin-top:{margin.top}px"
 >
   {#each klasseNamen as klasse, i}
     {#if !(["Waterdiepte bij hevige bui", t("Gevoelstemperatuur")].includes(indicator.title) && klasse === "No data")}

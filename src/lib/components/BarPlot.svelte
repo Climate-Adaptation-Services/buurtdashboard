@@ -70,7 +70,7 @@
     .range([0, (indicatorHeight - margin.top - margin.bottom) * (barPlotData.length / 2)])
 </script>
 
-<svg class={"barplot_" + indicator.attribute} style="height:70%">
+<svg class={"barplot_" + indicator.attribute} style="height:74%">
   <g class="inner-chart-bar" transform="translate(0, {margin.top})">
     {#each stackedData as stacked, i}
       <g class="stack" fill={indicatorValueColorscale(stacked.key)}>
@@ -82,7 +82,7 @@
             x={xScale(st[0])}
             y={yScale(st.data.group)}
             width={xScale(st[1]) - xScale(st[0])}
-            height={yScale.bandwidth() / 2}
+            height={yScale.bandwidth() / 2.0}
             stroke-width="4"
           >
           </rect>
@@ -92,7 +92,7 @@
               x={xScale(st[0]) + (xScale(st[1]) - xScale(st[0])) / 2}
               y={yScale(st.data.group) + 1.5}
               fill={checkContrast(indicatorValueColorscale(stacked.key)) ? "white" : "black"}
-              dy="1.3em"
+              dy="1.15em"
               font-size="14px"
               pointer-events="none">{Math.round(st.data[stacked.key] * 10) / 10}%</text
             >

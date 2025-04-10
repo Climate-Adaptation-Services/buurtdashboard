@@ -17,7 +17,7 @@
     {indicator}
     {indicatorValueColorscale}
   />
-  <BarPlotLegend {graphWidth} style="height:{graphHeight * 0.25}px" {indicatorValueColorscale} {indicator} />
+  <BarPlotLegend {graphWidth} {indicatorValueColorscale} {indicator} />
 </div>
 
 <style>
