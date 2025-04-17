@@ -2,7 +2,7 @@ import { allMunicipalitiesJSONData, allNeighbourhoodsJSONData, neighbourhoodCode
 import * as topojsonsimplify from "topojson-simplify";
 import * as topojson from "topojson-client";
 
-export function prepareJSONData(JSONdata, csvData) {
+export function prepareJSONData(JSONdata) {
   console.log('JSONdata', JSONdata)
 
   let municipalityTopojson = topojsonsimplify.presimplify(JSONdata[0])
@@ -10,7 +10,7 @@ export function prepareJSONData(JSONdata, csvData) {
   allMunicipalitiesJSONData.set(municipalityTopojson)
 
   let neighbourhoodTopojson = topojsonsimplify.presimplify(JSONdata[1])
-  neighbourhoodTopojson = topojson.feature(neighbourhoodTopojson, neighbourhoodTopojson.objects['BuurtenDataset20241218'])
+  neighbourhoodTopojson = topojson.feature(neighbourhoodTopojson, neighbourhoodTopojson.objects['Buurt2024BuurtdashboardDataset20250416'])
   let neighbourhoodTopojsonFeatures = neighbourhoodTopojson.features
   // let neighbourhoodTopojson2 = topojsonsimplify.presimplify(JSONdata[2])
   // neighbourhoodTopojson2 = topojson.feature(neighbourhoodTopojson2, neighbourhoodTopojson2.objects['BuurtenDataset20240913_xaaab'])
@@ -21,7 +21,6 @@ export function prepareJSONData(JSONdata, csvData) {
   // let combinedBuurt = [...neighbourhoodTopojson1.features, ...neighbourhoodTopojson2.features, ...neighbourhoodTopojson3.features]
 
   neighbourhoodTopojsonFeatures = neighbourhoodTopojsonFeatures.map(neighbourhood => {
-
 
     neighbourhood.properties['m2GroenPI'] = (isNaN(parseFloat(neighbourhood.properties['m2GroenPI']))) ? null : parseFloat(neighbourhood.properties['m2GroenPI'])
 
