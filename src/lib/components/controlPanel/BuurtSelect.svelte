@@ -6,6 +6,8 @@
 
   export let lijstAlleBuurtenInMunicipalityVoorDropdown
 
+  console.log(lijstAlleBuurtenInMunicipalityVoorDropdown)
+
   function handleBuurtChange(e) {
     $URLParams.set("buurt", e.detail.value)
     window.history.pushState(null, "", "?" + $URLParams.toString())

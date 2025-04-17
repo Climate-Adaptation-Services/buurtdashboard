@@ -11,8 +11,6 @@
     neighbourhoodNameAbbreviation,
     municipalityNameAbbreviation,
     modal,
-    URLParams,
-    indicatorsSelection,
     neighbourhoodsInMunicipalityJSONData,
   } from "$lib/stores"
   import * as lo from "lodash"
@@ -30,8 +28,8 @@
   $: if ($allMunicipalitiesJSONData !== null) {
     lijstAlleGemeentesVoorDropdown = $allMunicipalitiesJSONData.features.map((municipality) => {
       return {
-        value: municipality.properties[$municipalityCodeAbbreviation],
-        label: limitDropdownLabelLength(municipality.properties[$municipalityNameAbbreviation]),
+        value: municipality.properties["GM_CODE"],
+        label: limitDropdownLabelLength(municipality.properties["GM_NAAM"]),
       }
     })
     lijstAlleGemeentesVoorDropdown = lo.orderBy(lijstAlleGemeentesVoorDropdown, [(municipality) => municipality.label], ["asc"])

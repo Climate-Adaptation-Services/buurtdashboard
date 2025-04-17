@@ -12,17 +12,17 @@ export function prepareJSONData(JSONdata) {
   let neighbourhoodTopojson = topojsonsimplify.presimplify(JSONdata[1])
   neighbourhoodTopojson = topojson.feature(neighbourhoodTopojson, neighbourhoodTopojson.objects['Buurt2024BuurtdashboardDataset20250416'])
   let neighbourhoodTopojsonFeatures = neighbourhoodTopojson.features
-  // let neighbourhoodTopojson2 = topojsonsimplify.presimplify(JSONdata[2])
-  // neighbourhoodTopojson2 = topojson.feature(neighbourhoodTopojson2, neighbourhoodTopojson2.objects['BuurtenDataset20240913_xaaab'])
-
-  // let neighbourhoodTopojson3 = topojsonsimplify.presimplify(JSONdata[3])
-  // neighbourhoodTopojson3 = topojson.feature(neighbourhoodTopojson3, neighbourhoodTopojson3.objects['BuurtenDataset20240913_xaaac'])
-
-  // let combinedBuurt = [...neighbourhoodTopojson1.features, ...neighbourhoodTopojson2.features, ...neighbourhoodTopojson3.features]
 
   neighbourhoodTopojsonFeatures = neighbourhoodTopojsonFeatures.map(neighbourhood => {
 
     neighbourhood.properties['m2GroenPI'] = (isNaN(parseFloat(neighbourhood.properties['m2GroenPI']))) ? null : parseFloat(neighbourhood.properties['m2GroenPI'])
+
+    neighbourhood.properties['perc5_10mm'] = neighbourhood.properties['perc5_10mm'] * 100
+    neighbourhood.properties['perc10_15mm'] = neighbourhood.properties['perc10_15mm'] * 100
+    neighbourhood.properties['perc15_20mm'] = neighbourhood.properties['perc15_20mm'] * 100
+    neighbourhood.properties['perc20_30mm'] = neighbourhood.properties['perc20_30mm'] * 100
+    neighbourhood.properties['perc30mmME'] = neighbourhood.properties['perc30mmME'] * 100
+    neighbourhood.properties['percNODATA'] = neighbourhood.properties['percNODATA'] * 100
 
     // verschillende variabelen van string naar num
     neighbourhood.properties['F1865ErnsOv'] = (isNaN(parseFloat(neighbourhood.properties['F1865ErnsOv']))) ? null : parseFloat(neighbourhood.properties['F1865ErnsOv'])

@@ -13,10 +13,10 @@ export const lang = writable('')
 
 export const URLParams = writable(new URLSearchParams("foo=1"))
 
-export const neighbourhoodCodeAbbreviation = readable('BU_CODE')
-export const municipalityCodeAbbreviation = readable('GM_CODE')
-export const neighbourhoodNameAbbreviation = readable('BU_NAAM')
-export const municipalityNameAbbreviation = readable('GM_NAAM')
+export const neighbourhoodCodeAbbreviation = readable('buurtcode2024')
+export const municipalityCodeAbbreviation = readable('gemeentecode')
+export const neighbourhoodNameAbbreviation = readable('buurtnaam')
+export const municipalityNameAbbreviation = readable('gemeentenaam')
 export const districtTypeAbbreviation = readable('def_wijkty')
 
 export const indicatorsSelection = writable([])
@@ -28,10 +28,10 @@ export const indicatorYearChanged = writable([])
 export const backgroundColor = readable('#36575B')
 
 export const selectedNeighbourhoodJSONData = derived(
-  [allNeighbourhoodsJSONData, neighbourhoodSelection],
-  ([$allNeighbourhoodsJSONData, $neighbourhoodSelection]) => {
+  [allNeighbourhoodsJSONData, neighbourhoodSelection, neighbourhoodCodeAbbreviation],
+  ([$allNeighbourhoodsJSONData, $neighbourhoodSelection, $neighbourhoodCodeAbbreviation]) => {
     if ($allNeighbourhoodsJSONData !== null) {
-      return $allNeighbourhoodsJSONData.features.filter(neighbourhood => neighbourhood.properties['BU_CODE'] === $neighbourhoodSelection)[0]
+      return $allNeighbourhoodsJSONData.features.filter(neighbourhood => neighbourhood.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection)[0]
     } else {
       return null
     }
@@ -52,15 +52,15 @@ export const currentOverviewLevel = derived(
 
 // filter the current data for the map, based on the currentOverviewLevel
 export const currentJSONData = derived(
-  [currentOverviewLevel, allMunicipalitiesJSONData, allNeighbourhoodsJSONData, municipalitySelection, neighbourhoodSelection],
-  ([$currentOverviewLevel, $allMunicipalitiesJSONData, $allNeighbourhoodsJSONData, $municipalitySelection, $neighbourhoodSelection]) => {
+  [currentOverviewLevel, allMunicipalitiesJSONData, allNeighbourhoodsJSONData, municipalitySelection, neighbourhoodSelection, municipalityCodeAbbreviation],
+  ([$currentOverviewLevel, $allMunicipalitiesJSONData, $allNeighbourhoodsJSONData, $municipalitySelection, $neighbourhoodSelection, $municipalityCodeAbbreviation]) => {
     if ($currentOverviewLevel === 'Nederland') {
       return $allMunicipalitiesJSONData
     } else if ($currentOverviewLevel === 'Gemeente') {
-      const newFeatures = $allNeighbourhoodsJSONData.features.filter(neighbourhood => neighbourhood.properties['GM_CODE'] === $municipalitySelection)
+      const newFeatures = $allNeighbourhoodsJSONData.features.filter(neighbourhood => neighbourhood.properties[$municipalityCodeAbbreviation] === $municipalitySelection)
       return { type: 'FeatureCollection', features: newFeatures }
     } else {
-      const newFeatures = $allNeighbourhoodsJSONData.features.filter(neighbourhood => neighbourhood.properties['GM_CODE'] === $municipalitySelection)
+      const newFeatures = $allNeighbourhoodsJSONData.features.filter(neighbourhood => neighbourhood.properties[$municipalityCodeAbbreviation] === $municipalitySelection)
       return { type: 'FeatureCollection', features: newFeatures }
       // const newFeatures = $allNeighbourhoodsJSONData.features.filter(neighbourhood => neighbourhood.properties['bu_code'] === $neighbourhoodSelection)
       // return {type: 'FeatureCollection', features: newFeatures}
@@ -69,10 +69,10 @@ export const currentJSONData = derived(
 )
 
 export const neighbourhoodsInMunicipalityJSONData = derived(
-  [municipalitySelection, allNeighbourhoodsJSONData],
-  ([$municipalitySelection, $allNeighbourhoodsJSONData]) => {
+  [municipalitySelection, allNeighbourhoodsJSONData, municipalityCodeAbbreviation],
+  ([$municipalitySelection, $allNeighbourhoodsJSONData, $municipalityCodeAbbreviation]) => {
     if ($municipalitySelection !== null && $allNeighbourhoodsJSONData) {
-      const newFeatures = $allNeighbourhoodsJSONData.features.filter(neighbourhood => neighbourhood.properties['GM_CODE'] === $municipalitySelection)
+      const newFeatures = $allNeighbourhoodsJSONData.features.filter(neighbourhood => neighbourhood.properties[$municipalityCodeAbbreviation] === $municipalitySelection)
       return { type: 'FeatureCollection', features: newFeatures }
     } else {
       return null
