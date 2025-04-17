@@ -2,7 +2,7 @@ import { allMunicipalitiesJSONData, allNeighbourhoodsJSONData, neighbourhoodCode
 import * as topojsonsimplify from "topojson-simplify";
 import * as topojson from "topojson-client";
 
-export function prepareJSONData(JSONdata, dordrechtData) {
+export function prepareJSONData(JSONdata, csvData) {
   console.log('JSONdata', JSONdata)
 
   let municipalityTopojson = topojsonsimplify.presimplify(JSONdata[0])

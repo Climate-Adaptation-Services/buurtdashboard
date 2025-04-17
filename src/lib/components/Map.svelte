@@ -14,10 +14,10 @@
   export let mapType
   export let indicatorValueColorscale
   export let indicator
-  export let dordrechtData
+  export let csvData
 
   if (mapType === "main map") {
-    prepareJSONData(JSONdata, dordrechtData)
+    prepareJSONData(JSONdata, csvData)
   }
 
   $: topYPosition = mapType === "main map" ? 20 : 15

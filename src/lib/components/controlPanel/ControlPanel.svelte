@@ -80,7 +80,7 @@
       </div>
       <div class="download">
         <a
-          href="https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/data-download/BuurtdashboardDataDownload20241218.xlsx"
+          href="https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/data-download/Buurt2024BuurtdashboardDataset20250416.xlsx"
           download="BuurtdashboardDownload20241218"><img src="./download.png" width="30px" /></a
         >
         <p class="download-and-about-text">Download data</p>
