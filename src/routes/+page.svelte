@@ -31,7 +31,7 @@
   allIndicators = setupIndicators(data, t("Effecten"), t("Gebiedskenmerken"), t("Kwetsbaarheid"))
   displayedIndicators = allIndicators
 
-  console.log("allIndicators", allIndicators)
+  $: console.log("allIndicators", allIndicators)
 
   const jsonResponse = fetchJSONdata()
 

@@ -63,6 +63,7 @@ function addIndicatorCategory(indicatorsList, indicators) {
       aggregatedIndicator: (indicator['kwantitatief / categoraal / multiline'] === 'Multiline') ? true : false,
       source: indicator.Bron,
       description: indicator['Tekst vraagteken'],
+      AHNversie: indicator['AHNversie'],
     })
 
   })

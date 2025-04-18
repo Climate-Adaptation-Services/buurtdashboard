@@ -1,32 +1,60 @@
 <script>
-  import { indicatorYearChanged, jaarSelecties, backgroundColor } from "$lib/stores"
+  import { indicatorYearChanged, jaarSelecties, selectedNeighbourhoodJSONData } from "$lib/stores"
 
   export let indicator
 
-  let selectedYear = "2023"
+  let options
+  let selectedAHN
 
-  function yearClick(year) {
-    selectedYear = year
+  $: console.log(selectedAHN, options)
 
-    indicatorYearChanged.set([indicator.title, year])
+  $: {
+    options = $selectedNeighbourhoodJSONData
+      ? indicator.AHNversie.split(",").map((ahn) => {
+          return { AHN: ahn, Jaar: $selectedNeighbourhoodJSONData.properties["Jaar" + ahn] }
+        })
+      : []
+  }
 
-    $jaarSelecties[indicator.title] = year
+  selectedNeighbourhoodJSONData.subscribe(() => {
+    if ($selectedNeighbourhoodJSONData) {
+      selectedAHN = $jaarSelecties[indicator.title]
+    }
+  })
+
+  let selectedDifference = "Difference"
+
+  function yearClick(change) {
+    const newAHN = change.target.value
+    for (const key in indicator.classes) {
+      if (indicator.classes.hasOwnProperty(key)) {
+        indicator.classes[key] = indicator.classes[key].slice(0, -4) + newAHN
+      }
+    }
+    indicator.attribute = indicator.attribute.slice(0, -4) + newAHN
+
+    indicatorYearChanged.set([indicator.title, newAHN])
+    $jaarSelecties[indicator.title] = newAHN
     jaarSelecties.set($jaarSelecties)
+    selectedAHN = newAHN
   }
 </script>
 
 <!-- Replacing SVG year switch with two dropdowns -->
 <div class="year-switch-dropdowns">
-  <select class="year-dropdown" bind:value={selectedYear} on:change={() => yearClick(selectedYear)}>
-    <option value="2019">2019</option>
-    <option value="2023">2023</option>
-    <option value="Difference">Verschil</option>
-  </select>
-  <select class="year-dropdown" bind:value={selectedYear} on:change={() => yearClick(selectedYear)}>
-    <option value="2019">2019</option>
-    <option value="2023">2023</option>
-    <option value="Difference">Verschil</option>
-  </select>
+  {#if selectedAHN}
+    <select class="year-dropdown" bind:value={selectedAHN} on:change={yearClick}>
+      {#each options as option}
+        <option value={option.AHN} selected={option.AHN == selectedAHN}>{option.Jaar}</option>
+      {/each}
+    </select>
+    <select class="year-dropdown {selectedAHN === 'Difference' ? 'disabled-dropdown' : ''}" bind:value={selectedDifference}>
+      <option value="Difference">Verschil</option>
+      {#each options as option}
+        <option value={option.AHN} selected={option.Jaar === selectedDifference}>{option.Jaar}</option>
+      {/each}
+    </select>
+  {/if}
 </div>
 
 <style>
@@ -41,12 +69,14 @@
     height: 36px;
     border: 2px solid lightgrey;
     border-radius: 12px;
-    background: var(--year-dropdown-bg, lightgrey);
-    color: var(--year-dropdown-color, #333);
+    background: lightgrey;
+    color: #333;
     font-size: 18px;
     padding: 3px 10px;
-    transition: border 0.3s, background 0.3s;
-    box-shadow: 0 0 8px rgba(160,160,160,0.08);
+    transition:
+      border 0.3s,
+      background 0.3s;
+    box-shadow: 0 0 8px rgba(160, 160, 160, 0.08);
   }
   .year-dropdown:focus {
     outline: none;
@@ -54,14 +84,26 @@
     background: #ededed;
   }
   .year-dropdown option {
-    background: var(--year-dropdown-bg, lightgrey);
-    color: var(--year-dropdown-color, #333);
+    background: lightgrey;
+    color: #333;
   }
   .year-dropdown option:hover {
     background: #ededed;
   }
   .year-dropdown option[selected] {
-    background: var(--year-dropdown-bg, lightgrey);
+    background: lightgrey;
     color: white;
+  }
+  .disabled-dropdown {
+    background: #e0e0e0;
+    color: #999;
+    cursor: not-allowed;
+    border-color: #ccc;
+    opacity: 0.7;
+  }
+  .disabled-dropdown:focus {
+    background: #e0e0e0;
+    color: #999;
+    border-color: #ccc;
   }
 </style>
