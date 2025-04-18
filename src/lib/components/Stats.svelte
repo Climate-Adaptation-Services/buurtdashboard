@@ -8,7 +8,6 @@
     neighbourhoodCodeAbbreviation,
     municipalityCodeAbbreviation,
     selectedNeighbourhoodJSONData,
-    alleIndicatoren2019,
     jaarSelecties,
   } from "$lib/stores"
   import Stat from "./Stat.svelte"
@@ -21,7 +20,7 @@
   export let indicator
   export let indicatorValueColorscale
 
-  $: isThereOtherYear = $alleIndicatoren2019.map((d) => d.title).includes(indicator.title) && $jaarSelecties[indicator.title] !== "Difference"
+  // $: isThereOtherYear = $alleIndicatoren2019.map((d) => d.title).includes(indicator.title) && $jaarSelecties[indicator.title] !== "Difference"
 
   let statsWidth
 
@@ -43,11 +42,11 @@
     medianValueBuurt: 0,
     medianValueWijktype: 0,
   }
-  $: if (isThereOtherYear) {
-    medianValuesDictOtherYear["medianValueNederland"] = calcMedian(
-      $allNeighbourhoodsJSONData.features.map((neighbourhood) => neighbourhood.properties[otherYearAttribute]),
-    )
-  }
+  // $: if (isThereOtherYear) {
+  //   medianValuesDictOtherYear["medianValueNederland"] = calcMedian(
+  //     $allNeighbourhoodsJSONData.features.map((neighbourhood) => neighbourhood.properties[otherYearAttribute]),
+  //   )
+  // }
 
   $: if ($municipalitySelection !== null) {
     // Neighbourhoods binnen municipality
@@ -55,16 +54,16 @@
       (neighbourhood) => neighbourhood.properties[$municipalityCodeAbbreviation] === $municipalitySelection,
     )
     medianValuesDict["medianValueGemeente"] = calcMedian(municipalityFilter.map((neighbourhood) => neighbourhood.properties[indicatorAttribute]))
-    if (isThereOtherYear) {
-      medianValuesDictOtherYear["medianValueGemeente"] = calcMedian(
-        municipalityFilter.map((neighbourhood) => neighbourhood.properties[otherYearAttribute]),
-      )
-    }
+    // if (isThereOtherYear) {
+    //   medianValuesDictOtherYear["medianValueGemeente"] = calcMedian(
+    //     municipalityFilter.map((neighbourhood) => neighbourhood.properties[otherYearAttribute]),
+    //   )
+    // }
   } else {
     medianValuesDict["medianValueGemeente"] = 0
-    if (isThereOtherYear) {
-      medianValuesDictOtherYear["medianValueGemeente"] = 0
-    }
+    // if (isThereOtherYear) {
+    //   medianValuesDictOtherYear["medianValueGemeente"] = 0
+    // }
   }
 
   $: if ($neighbourhoodSelection !== null) {
@@ -77,21 +76,21 @@
         ? Math.round(neighbourhoodFilter[0].properties[indicatorAttribute] * 100) / 100
         : "Geen data"
 
-    if (isThereOtherYear) {
-      medianValuesDictOtherYear["medianValueBuurt"] =
-        neighbourhoodFilter[0].properties[otherYearAttribute] !== null
-          ? Math.round(neighbourhoodFilter[0].properties[otherYearAttribute] * 100) / 100
-          : "Geen data"
-    }
+    // if (isThereOtherYear) {
+    //   medianValuesDictOtherYear["medianValueBuurt"] =
+    //     neighbourhoodFilter[0].properties[otherYearAttribute] !== null
+    //       ? Math.round(neighbourhoodFilter[0].properties[otherYearAttribute] * 100) / 100
+    //       : "Geen data"
+    // }
 
     medianValuesDict["medianValueWijktype"] = calcMedian(
       $districtTypeJSONData.features.map((neighbourhood) => neighbourhood.properties[indicatorAttribute]),
     )
-    if (isThereOtherYear) {
-      medianValuesDictOtherYear["medianValueWijktype"] = calcMedian(
-        $districtTypeJSONData.features.map((neighbourhood) => neighbourhood.properties[otherYearAttribute]),
-      )
-    }
+    // if (isThereOtherYear) {
+    //   medianValuesDictOtherYear["medianValueWijktype"] = calcMedian(
+    //     $districtTypeJSONData.features.map((neighbourhood) => neighbourhood.properties[otherYearAttribute]),
+    //   )
+    // }
   } else {
     medianValuesDict["medianValueBuurt"] = 0
     medianValuesDict["medianValueWijktype"] = 0
@@ -119,24 +118,24 @@
       medianValuesDict["medianValueBuurt"],
       medianValuesDict["medianValueWijktype"],
     ]
-    if (indicator.title !== t("Grondwaterstand 2050 hoog")) {
-      if ($jaarSelecties[indicator.title] === "Difference") {
-        xDomain = [min(medianValues) - 10, max(medianValues)]
-      } else {
-        if ($alleIndicatoren2019.map((d) => d.title).includes(indicator.title)) {
-          medianValues = [
-            ...medianValues,
-            medianValuesDictOtherYear["medianValueNederland"],
-            medianValuesDictOtherYear["medianValueGemeente"],
-            medianValuesDictOtherYear["medianValueBuurt"],
-            medianValuesDictOtherYear["medianValueWijktype"],
-          ]
-        }
-        xDomain = [0, max(medianValues)]
-      }
-    } else {
-      xDomain = [0, min(medianValues)]
-    }
+    // if (indicator.title !== t("Grondwaterstand 2050 hoog")) {
+    //   if ($jaarSelecties[indicator.title] === "Difference") {
+    //     xDomain = [min(medianValues) - 10, max(medianValues)]
+    //   } else {
+    //     if ($alleIndicatoren2019.map((d) => d.title).includes(indicator.title)) {
+    //       medianValues = [
+    //         ...medianValues,
+    //         medianValuesDictOtherYear["medianValueNederland"],
+    //         medianValuesDictOtherYear["medianValueGemeente"],
+    //         medianValuesDictOtherYear["medianValueBuurt"],
+    //         medianValuesDictOtherYear["medianValueWijktype"],
+    //       ]
+    //     }
+    //     xDomain = [0, max(medianValues)]
+    //   }
+    // } else {
+    xDomain = [0, min(medianValues)]
+    // }
   }
 
   $: xScaleStats = scaleLinear()

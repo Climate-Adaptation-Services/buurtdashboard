@@ -1,5 +1,5 @@
 <script>
-  import { municipalitySelection, neighbourhoodsInMunicipalityJSONData, alleIndicatoren2019, alleIndicatoren2023, jaarSelecties } from "$lib/stores"
+  import { municipalitySelection, neighbourhoodsInMunicipalityJSONData, jaarSelecties } from "$lib/stores"
   import { scaleLinear, extent, scaleOrdinal } from "d3"
   import IndicatorInfo from "./IndicatorInfo.svelte"
   import IndicatorTitle from "./IndicatorTitle.svelte"
@@ -7,15 +7,6 @@
 
   export let indicatorHeight
   export let indicator
-
-  // deal with multiple years
-  $: {
-    if ($jaarSelecties[indicator.title] === "2019") {
-      indicator = $alleIndicatoren2019.filter((ind) => ind.title === indicator.title)[0]
-    } else {
-      indicator = $alleIndicatoren2023.filter((ind) => ind.title === indicator.title)[0]
-    }
-  }
 
   let graphWidth
   const titleHeight = indicatorHeight * 0.23

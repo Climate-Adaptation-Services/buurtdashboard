@@ -11,7 +11,7 @@
   <!-- <h4 class="category">{t("Categorie")}: {indicator.category}</h4> -->
   <h2 class="title" style="background-color:{$backgroundColor}">{indicator.title}</h2>
   <h4 class="subtitle">{indicator.subtitle}</h4>
-  {#if indicator.title === "Boomkroonbedekking" || indicator.title === "Boomkroonbedekking 500m"}
+  {#if indicator.title === "Gevoelstemperatuur"}
     <YearSwitch {indicator} />
   {/if}
 </div>

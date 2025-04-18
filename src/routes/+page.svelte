@@ -12,6 +12,7 @@
   import { setLanguage } from "$lib/noncomponents/setLanguage.js"
   import { fetchJSONdata } from "$lib/noncomponents/fetchJSONdata.js"
   import { processURLParameters } from "$lib/noncomponents/processURLParameters.js"
+  import { setupJaarSelecties } from "$lib/noncomponents/setupJaarSelecties.js"
 
   export let data
   console.log("data", data)
@@ -22,6 +23,7 @@
   const indicatorHeight = 650
 
   setLanguage(data)
+  setupJaarSelecties(data)
 
   let displayedIndicators = []
   let allIndicators = []

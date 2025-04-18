@@ -20,8 +20,7 @@ export const municipalityNameAbbreviation = readable('gemeentenaam')
 export const districtTypeAbbreviation = readable('def_wijkty')
 
 export const indicatorsSelection = writable([])
-export const alleIndicatoren2019 = writable([])
-export const alleIndicatoren2023 = writable([])
+export const alleIndicatoren = writable([])
 export const jaarSelecties = writable({})
 export const indicatorYearChanged = writable([])
 

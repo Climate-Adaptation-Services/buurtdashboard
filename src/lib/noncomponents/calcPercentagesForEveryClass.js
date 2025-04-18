@@ -1,4 +1,4 @@
-import { getClassByIndicatorValue } from "./getClassByIndicatorValue";
+import { getClassByIndicatorValue } from "./getClassByIndicatorValue.js";
 import { t } from "$lib/i18n/translate.js"
 
 export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regio) {

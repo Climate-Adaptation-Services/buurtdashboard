@@ -3,7 +3,6 @@
     neighbourhoodSelection,
     neighbourhoodCodeAbbreviation,
     circleRadius,
-    alleIndicatoren2019,
     selectedNeighbourhoodJSONData,
     jaarSelecties,
     indicatorYearChanged,
@@ -37,24 +36,24 @@
   let xScaleExtent
   $: {
     // if the indicator also exists in the 2019 metadata
-    if ($alleIndicatoren2019.map((d) => d.title).includes(indicator.title)) {
-      attributeWithoutYear = indicator.attribute.slice(0, -4)
+    // if ($alleIndicatoren2019.map((d) => d.title).includes(indicator.title)) {
+    //   attributeWithoutYear = indicator.attribute.slice(0, -4)
 
-      if ($jaarSelecties[indicator.title] === "Difference") {
-        indicatorAttribute = attributeWithoutYear + "Difference"
-        xScaleExtent = extent(neighbourhoodsInMunicipalityFeaturesClone.map((d) => +d.properties[attributeWithoutYear + "Difference"]))
-        xScaleExtent[0] -= 2
-      } else {
-        indicatorAttribute = indicator.attribute
-        const featuresCombined = [
-          ...neighbourhoodsInMunicipalityFeaturesClone.map((d) => +d.properties[attributeWithoutYear + "2019"]),
-          ...neighbourhoodsInMunicipalityFeaturesClone.map((d) => +d.properties[attributeWithoutYear + "2023"]),
-        ]
-        xScaleExtent = extent(featuresCombined)
-      }
-    } else {
-      xScaleExtent = extent(neighbourhoodsInMunicipalityFeaturesClone, (d) => +d.properties[indicator.attribute])
-    }
+    //   if ($jaarSelecties[indicator.title] === "Difference") {
+    //     indicatorAttribute = attributeWithoutYear + "Difference"
+    //     xScaleExtent = extent(neighbourhoodsInMunicipalityFeaturesClone.map((d) => +d.properties[attributeWithoutYear + "Difference"]))
+    //     xScaleExtent[0] -= 2
+    //   } else {
+    //     indicatorAttribute = indicator.attribute
+    //     const featuresCombined = [
+    //       ...neighbourhoodsInMunicipalityFeaturesClone.map((d) => +d.properties[attributeWithoutYear + "2019"]),
+    //       ...neighbourhoodsInMunicipalityFeaturesClone.map((d) => +d.properties[attributeWithoutYear + "2023"]),
+    //     ]
+    //     xScaleExtent = extent(featuresCombined)
+    //   }
+    // } else {
+    xScaleExtent = extent(neighbourhoodsInMunicipalityFeaturesClone, (d) => +d.properties[indicator.attribute])
+    // }
   }
 
   $: xScaleBeeswarm =
