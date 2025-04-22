@@ -7,6 +7,7 @@
     neighbourhoodsInMunicipalityJSONData,
     neighbourhoodSelection,
     selectedNeighbourhoodJSONData,
+    jaarSelecties,
   } from "$lib/stores"
   import { scaleLinear, scaleBand, stack } from "d3"
   import { checkContrast } from "$lib/noncomponents/checkContrast"
@@ -16,7 +17,6 @@
     calcPercentagesForEveryClassMultiIndicator,
     calcPercentagesForEveryClassSingleIndicator,
   } from "$lib/noncomponents/calcPercentagesForEveryClass"
-  import { getIndicatorAttribute } from "$lib/noncomponents/getIndicatorAttribute"
 
   export let graphWidth
   export let indicatorHeight
@@ -29,12 +29,17 @@
 
   const calcPercentagesForEveryClass = aggregated ? calcPercentagesForEveryClassMultiIndicator : calcPercentagesForEveryClassSingleIndicator
 
-  const nederlandValues = calcPercentagesForEveryClass(indicator, $allNeighbourhoodsJSONData, "Nederland")
+  let nederlandValues
+  $: if ($jaarSelecties) {
+    nederlandValues = calcPercentagesForEveryClass(indicator, $allNeighbourhoodsJSONData, "Nederland")
+  }
   let barPlotData = []
   let regios = []
 
+  $: console.log(barPlotData)
+
   $: {
-    if ($neighbourhoodSelection !== null) {
+    if ($neighbourhoodSelection !== null && $jaarSelecties) {
       if ($selectedNeighbourhoodJSONData.properties[$districtTypeAbbreviation]) {
         barPlotData = [
           nederlandValues,
@@ -59,7 +64,6 @@
       regios = ["Nederland"]
     }
   }
-
   $: stackedData = stack().keys(Object.keys(indicator.classes))(barPlotData)
 
   $: xScale = scaleLinear()
@@ -71,7 +75,7 @@
     .range([0, (indicatorHeight - margin.top - margin.bottom) * (barPlotData.length / 2)])
 </script>
 
-<svg class={"barplot_" + getIndicatorAttribute(indicator, indicator.attribute)} style="height:74%">
+<svg class={"barplot_" + indicator.attribute} style="height:74%">
   <g class="inner-chart-bar" transform="translate(0, {margin.top})">
     {#each stackedData as stacked, i}
       <g class="stack" fill={indicatorValueColorscale(stacked.key)}>
@@ -79,10 +83,7 @@
           <rect
             on:mouseover={() => barPlotMouseOver(indicator, indicatorValueColorscale, st, stacked)}
             on:mouseout={barPlotMouseOut(indicator, st, stacked)}
-            class={"barplot_rect" +
-              getIndicatorAttribute(indicator, indicator.attribute) +
-              stacked.key.replaceAll(" ", "").replaceAll(">", "") +
-              st.data.group}
+            class={"barplot_rect" + indicator.attribute + stacked.key.replaceAll(" ", "").replaceAll(">", "") + st.data.group}
             x={xScale(st[0])}
             y={yScale(st.data.group)}
             width={xScale(st[1]) - xScale(st[0])}

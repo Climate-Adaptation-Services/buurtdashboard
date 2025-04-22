@@ -1,12 +1,10 @@
 <script>
-  import { indicatorYearChanged, jaarSelecties, selectedNeighbourhoodJSONData, alleIndicatoren } from "$lib/stores"
+  import { indicatorYearChanged, jaarSelecties, selectedNeighbourhoodJSONData, alleIndicatoren, backgroundColor } from "$lib/stores"
 
   export let indicator
 
   let options
   let selectedAHN
-
-  $: console.log(selectedAHN, options)
 
   $: {
     options = $selectedNeighbourhoodJSONData
@@ -34,69 +32,101 @@
 </script>
 
 <!-- Replacing SVG year switch with two dropdowns -->
-<div class="year-switch-dropdowns">
+<div class="year-switch-dropdowns {selectedDifference === 'Difference' ? 'less-gap' : ''}">
   {#if selectedAHN}
-    <select class="year-dropdown" bind:value={selectedAHN} on:change={yearClick}>
-      {#each options as option}
-        <option value={option.AHN} selected={option.AHN == selectedAHN}>{option.Jaar}</option>
-      {/each}
-    </select>
-    <select class="year-dropdown {selectedAHN === 'Difference' ? 'disabled-dropdown' : ''}" bind:value={selectedDifference}>
-      <option value="Difference">Verschil</option>
-      {#each options as option}
-        <option value={option.AHN} selected={option.Jaar === selectedDifference}>{option.Jaar}</option>
-      {/each}
-    </select>
+    <div class="dropdown-wrapper">
+      <select class="year-dropdown" bind:value={selectedAHN} on:change={yearClick} style="border: 2px solid {$backgroundColor};">
+        {#each options as option}
+          <option value={option.AHN} selected={option.AHN == selectedAHN}>{option.Jaar}</option>
+        {/each}
+      </select>
+      <span class="dropdown-arrow">&#9662;</span>
+    </div>
+    {#if selectedDifference !== "Difference"}
+      <span class="arrow-between">&#8594;</span>
+    {/if}
+    <div class="dropdown-wrapper">
+      <select
+        class="year-dropdown {selectedDifference === 'Difference' ? 'pseudo-disabled' : ''}"
+        bind:value={selectedDifference}
+        style="border: 2px solid {$backgroundColor};"
+      >
+        <option value="Difference">Vergelijk jaren</option>
+        {#each options as option}
+          <option value={option.AHN} selected={option.Jaar === selectedDifference}>{option.Jaar}</option>
+        {/each}
+      </select>
+      {#if selectedDifference !== "Difference"}
+        <span class="dropdown-arrow">&#9662;</span>
+      {/if}
+    </div>
   {/if}
 </div>
 
 <style>
+  .dropdown-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 140px;
+  }
+  .dropdown-wrapper:last-child .year-dropdown {
+    padding-right: 12px;
+  }
+  .dropdown-wrapper:last-child .year-dropdown:not(.pseudo-disabled) {
+    padding-right: 32px;
+  }
+  .dropdown-arrow {
+    pointer-events: none;
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 18px;
+    color: #36575b;
+    z-index: 2;
+  }
+  .year-dropdown {
+    width: 140px;
+    height: 40px;
+    border-radius: 12px;
+    font-size: 18px;
+    padding: 6px 32px 6px 12px;
+    color: #333;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(54, 87, 91, 0.08);
+    transition:
+      border 0.3s,
+      background 0.3s,
+      color 0.3s;
+    appearance: none;
+    cursor: pointer;
+    outline: none;
+    border: 2px solid #36575b;
+  }
   .year-switch-dropdowns {
     display: flex;
     gap: 20px;
     margin-top: 12px;
     align-items: center;
   }
-  .year-dropdown {
-    width: 110px;
-    height: 36px;
-    border: 2px solid lightgrey;
-    border-radius: 12px;
-    background: lightgrey;
-    color: #333;
-    font-size: 18px;
-    padding: 3px 10px;
-    transition:
-      border 0.3s,
-      background 0.3s;
-    box-shadow: 0 0 8px rgba(160, 160, 160, 0.08);
-  }
-  .year-dropdown:focus {
-    outline: none;
-    border-color: #b0b0b0;
-    background: #ededed;
+  .year-switch-dropdowns.less-gap {
+    gap: 8px;
   }
   .year-dropdown option {
-    background: lightgrey;
     color: #333;
+    background: #f8f8f8;
   }
-  .year-dropdown option:hover {
-    background: #ededed;
+  .pseudo-disabled {
+    background: #f2f2f2 !important;
+    color: #8d8d8d !important;
+    border-style: dashed !important;
+    opacity: 0.8;
   }
-  .year-dropdown option[selected] {
-    background: lightgrey;
-    color: white;
-  }
-  .disabled-dropdown {
-    background: #e0e0e0;
-    color: #999;
-    cursor: not-allowed;
-    border-color: #ccc;
-    opacity: 0.7;
-  }
-  .disabled-dropdown:focus {
-    background: #e0e0e0;
-    color: #999;
-    border-color: #ccc;
+  .arrow-between {
+    font-size: 28px;
+    color: #36575b;
+    margin: 0;
+    user-select: none;
+    line-height: 1;
   }
 </style>

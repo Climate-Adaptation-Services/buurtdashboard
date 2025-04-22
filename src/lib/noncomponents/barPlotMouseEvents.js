@@ -11,7 +11,7 @@ export function barPlotMouseOver(indicator, indicatorValueColorscale, st, stacke
     color: indicatorValueColorscale(stacked.key)
   })
 
-  let elem = document.getElementsByClassName('barplot_rect' + getIndicatorAttribute(indicator, indicator.attribute) + stacked.key.replaceAll(' ', '').replaceAll('>', '') + st.data.group)[0]
+  let elem = document.getElementsByClassName('barplot_rect' + indicator.attribute + stacked.key.replaceAll(' ', '').replaceAll('>', '') + st.data.group)[0]
   let rectmap = elem.getBoundingClientRect();
   let tooltipCenter = [rectmap.left, rectmap.top]
 
@@ -23,7 +23,7 @@ export function barPlotMouseOver(indicator, indicatorValueColorscale, st, stacke
 }
 
 export function barPlotMouseOut(indicator, st, stacked) {
-  select('.' + 'barplot_rect' + getIndicatorAttribute(indicator, indicator.attribute) + stacked.key.replaceAll(' ', '').replaceAll('>', '') + st.data.group)
+  select('.' + 'barplot_rect' + indicator.attribute + stacked.key.replaceAll(' ', '').replaceAll('>', '') + st.data.group)
     .attr('stroke', 'none')
 
   tooltipValues.set(null)
