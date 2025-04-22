@@ -1,5 +1,4 @@
-import { alleIndicatoren, jaarSelecties } from "$lib/stores"
-import { get } from "svelte/store"
+import { alleIndicatoren } from "$lib/stores"
 export function setupIndicators(data, eff, geb, kwe) {
 
   const metadata = (data.lang === 'en')
@@ -39,17 +38,17 @@ function addIndicatorCategory(indicatorsList, indicators) {
 
     if (indicator['kwantitatief / categoraal / multiline'] !== 'categoraal') {
       indicatorDomein.slice(1).forEach((d, i) => {
-        classes[d] = indicator.Indicatornaamtabel.split(',')[i] + get(jaarSelecties)[indicator.Titel]
+        classes[d] = indicator.Indicatornaamtabel.split(',')[i]
       });
     } else {
       indicatorDomein.slice(1).forEach((d, i) => {
-        classes[d] = indicator.klassenthresholds.split(',')[i] + get(jaarSelecties)[indicator.Titel]
+        classes[d] = indicator.klassenthresholds.split(',')[i]
       });
     }
 
     indicatorsList.push({
       title: indicator.Titel,
-      attribute: indicator.Indicatornaamtabel.split(',')[0] + get(jaarSelecties)[indicator.Titel],
+      attribute: indicator.Indicatornaamtabel.split(',')[0],
       subtitle: indicator.Subtitel,
       plottitle: indicator['Plottitel (enkel bij kwantitatief)'],
       category: indicator.Categorie,

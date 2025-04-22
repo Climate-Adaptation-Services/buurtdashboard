@@ -4,6 +4,7 @@
   import IndicatorInfo from "./IndicatorInfo.svelte"
   import IndicatorTitle from "./IndicatorTitle.svelte"
   import IndicatorBody from "./IndicatorBody.svelte"
+  import { getIndicatorAttribute } from "$lib/noncomponents/getIndicatorAttribute"
 
   export let indicatorHeight
   export let indicator
@@ -19,7 +20,10 @@
     if (indicator.numerical) {
       if ($municipalitySelection !== null) {
         let rangeExtent = [0, 1] // default value [0,1]
-        rangeExtent = extent($neighbourhoodsInMunicipalityJSONData.features, (d) => +d.properties[indicator.attribute])
+        rangeExtent = extent(
+          $neighbourhoodsInMunicipalityJSONData.features,
+          (d) => +d.properties[getIndicatorAttribute(indicator, indicator.attribute)],
+        )
         // this can deal with any amount of colors in the scale
         const step = (rangeExtent[1] - rangeExtent[0]) / (indicator.color.range.length - 1)
 

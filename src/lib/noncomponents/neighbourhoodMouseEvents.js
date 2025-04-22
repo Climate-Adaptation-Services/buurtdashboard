@@ -6,6 +6,7 @@ import { getClassByIndicatorValue } from './getClassByIndicatorValue.js';
 import { getMostCommonClass } from './getMostCommonClass.js';
 import center from '@turf/center'
 import { t } from '$lib/i18n/translate.js';
+import { getIndicatorAttribute } from './getIndicatorAttribute.js';
 
 export function mouseOver(e, feature, indicator, mapType, indicatorValueColorscale, projection, beeswarmMargin) {
   const shapeClassName = getClassName(feature, 'path', indicator, mapType)
@@ -26,11 +27,11 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
     tooltipCenter = [featureCenter[0] + rectmap.left, featureCenter[1] + rectmap.top]
 
   } else {
-    attributeWithoutYear = indicator.attribute.slice(0, -4)
+    attributeWithoutYear = getIndicatorAttribute(indicator, indicator.attribute).slice(0, -4)
     if (get(jaarSelecties)[indicator.title] === 'Difference') {
       indicatorAttribute = attributeWithoutYear + 'Difference'
     } else {
-      indicatorAttribute = indicator.attribute
+      indicatorAttribute = getIndicatorAttribute(indicator, indicator.attribute)
     }
 
     select('.' + shapeClassName)
@@ -54,7 +55,7 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
           : '#000000'
         : (indicator.aggregatedIndicator)
           ? indicatorValueColorscale(getMostCommonClass(indicator, feature))
-          : indicatorValueColorscale(getClassByIndicatorValue(indicator, feature.properties[indicator.attribute]))
+          : indicatorValueColorscale(getClassByIndicatorValue(indicator, feature.properties[getIndicatorAttribute(indicator, indicator.attribute)]))
 
       const tooltipValue = (indicator.numerical)
         // check of dit iets is
@@ -63,7 +64,7 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
           : 'Geen data'
         : (indicator.aggregatedIndicator)
           ? getMostCommonClass(indicator, feature)
-          : getClassByIndicatorValue(indicator, feature.properties[indicator.attribute])
+          : getClassByIndicatorValue(indicator, feature.properties[getIndicatorAttribute(indicator, indicator.attribute)])
 
       // @ts-ignore
       tooltipValues.set({

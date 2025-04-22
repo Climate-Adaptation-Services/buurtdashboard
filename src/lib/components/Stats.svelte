@@ -15,6 +15,7 @@
   import { scaleLinear, max, min } from "d3"
   import { t } from "$lib/i18n/translate.js"
   import { calcMedian } from "$lib/noncomponents/calcMedian"
+  import { getIndicatorAttribute } from "$lib/noncomponents/getIndicatorAttribute"
 
   export let bodyHeight
   export let indicator
@@ -32,9 +33,10 @@
   }
 
   $: otherYear = $jaarSelecties[indicator.title] === "2019" ? "2023" : "2019"
-  $: attributeYearSliced = indicator.attribute.slice(0, -4)
+  $: attributeYearSliced = getIndicatorAttribute(indicator, indicator.attribute).slice(0, -4)
   $: otherYearAttribute = attributeYearSliced + otherYear
-  $: indicatorAttribute = $jaarSelecties[indicator.title] === "Difference" ? attributeYearSliced + "Difference" : indicator.attribute
+  $: indicatorAttribute =
+    $jaarSelecties[indicator.title] === "Difference" ? attributeYearSliced + "Difference" : getIndicatorAttribute(indicator, indicator.attribute)
 
   let medianValuesDictOtherYear = {
     medianValueNederland: 0,

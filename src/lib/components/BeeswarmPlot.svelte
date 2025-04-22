@@ -13,6 +13,7 @@
   import { getClassName } from "$lib/noncomponents/getClassName"
   import { click, mouseOut, mouseOver } from "$lib/noncomponents/neighbourhoodMouseEvents"
   import { onMount } from "svelte"
+  import { getIndicatorAttribute } from "$lib/noncomponents/getIndicatorAttribute"
 
   export let graphWidth
   export let indicatorHeight
@@ -22,29 +23,33 @@
 
   // filter out null values
   neighbourhoodsInMunicipalityFeaturesClone = neighbourhoodsInMunicipalityFeaturesClone.filter(
-    (d) => d.properties[indicator.attribute] !== null && d.properties[indicator.attribute] !== "",
+    (d) =>
+      d.properties[getIndicatorAttribute(indicator, indicator.attribute)] !== null &&
+      d.properties[getIndicatorAttribute(indicator, indicator.attribute)] !== "",
   )
   if (indicator.title === "Groen per inwoner") {
-    neighbourhoodsInMunicipalityFeaturesClone = neighbourhoodsInMunicipalityFeaturesClone.filter((d) => +d.properties[indicator.attribute] > 0)
+    neighbourhoodsInMunicipalityFeaturesClone = neighbourhoodsInMunicipalityFeaturesClone.filter(
+      (d) => +d.properties[getIndicatorAttribute(indicator, indicator.attribute)] > 0,
+    )
   }
 
   const margin = { bottom: 50, top: 20, left: 30, right: 30 }
 
-  let indicatorAttribute = indicator.attribute
+  let indicatorAttribute = getIndicatorAttribute(indicator, indicator.attribute)
   let attributeWithoutYear = ""
 
   let xScaleExtent
   $: {
     // if the indicator also exists in the 2019 metadata
     // if ($alleIndicatoren2019.map((d) => d.title).includes(indicator.title)) {
-    //   attributeWithoutYear = indicator.attribute.slice(0, -4)
+    //   attributeWithoutYear = getIndicatorAttribute(indicator, indicator.attribute).slice(0, -4)
 
     //   if ($jaarSelecties[indicator.title] === "Difference") {
     //     indicatorAttribute = attributeWithoutYear + "Difference"
     //     xScaleExtent = extent(neighbourhoodsInMunicipalityFeaturesClone.map((d) => +d.properties[attributeWithoutYear + "Difference"]))
     //     xScaleExtent[0] -= 2
     //   } else {
-    //     indicatorAttribute = indicator.attribute
+    //     indicatorAttribute = getIndicatorAttribute(indicator, indicator.attribute)
     //     const featuresCombined = [
     //       ...neighbourhoodsInMunicipalityFeaturesClone.map((d) => +d.properties[attributeWithoutYear + "2019"]),
     //       ...neighbourhoodsInMunicipalityFeaturesClone.map((d) => +d.properties[attributeWithoutYear + "2023"]),
@@ -52,7 +57,7 @@
     //     xScaleExtent = extent(featuresCombined)
     //   }
     // } else {
-    xScaleExtent = extent(neighbourhoodsInMunicipalityFeaturesClone, (d) => +d.properties[indicator.attribute])
+    xScaleExtent = extent(neighbourhoodsInMunicipalityFeaturesClone, (d) => +d.properties[getIndicatorAttribute(indicator, indicator.attribute)])
     // }
   }
 

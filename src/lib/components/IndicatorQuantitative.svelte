@@ -3,6 +3,7 @@
   import Stats from "./Stats.svelte"
   import { neighbourhoodsInMunicipalityJSONData, jaarSelecties, municipalitySelection } from "$lib/stores"
   import { t } from "$lib/i18n/translate.js"
+  import { getIndicatorAttribute } from "$lib/noncomponents/getIndicatorAttribute"
 
   export let indicator
   export let bodyHeight
@@ -10,6 +11,7 @@
   export let graphWidth
   export let graphHeight
   export let overviewHeight
+  export let indicatorAttribute = getIndicatorAttribute(indicator, indicator.attribute)
 
   $: indicatorPlottitle = $jaarSelecties[indicator.title] === "Difference" ? indicator.plottitle.replace("%", "% verandering") : indicator.plottitle
 </script>
@@ -19,7 +21,7 @@
 </div>
 <div class="indicator-graph" style="height:{graphHeight}px" bind:clientWidth={graphWidth}>
   {#if $municipalitySelection !== null}
-    <svg class={"beeswarm_" + indicator.attribute}>
+    <svg class={"beeswarm_" + getIndicatorAttribute(indicator, indicator.attribute)}>
       <BeeswarmPlot
         {graphWidth}
         indicatorHeight={graphHeight}

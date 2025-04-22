@@ -1,6 +1,9 @@
+import { jaarSelecties } from "$lib/stores"
+import { get } from "svelte/store"
+
 export function getIndicatorAttribute(indicator, attribute) {
-  if (indicator.AHNversie) {
-    return attribute + 'AHN4'
+  if (get(jaarSelecties)[indicator.title]) {
+    return attribute + get(jaarSelecties)[indicator.title]
   } else {
     return attribute
   }

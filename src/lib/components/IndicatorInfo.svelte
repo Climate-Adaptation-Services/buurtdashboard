@@ -1,6 +1,7 @@
 <script>
   import { backgroundColor } from "$lib/stores"
   import { afterUpdate } from "svelte"
+  import { getIndicatorAttribute } from "$lib/noncomponents/getIndicatorAttribute"
 
   export let indicator
   export let graphWidth
@@ -8,7 +9,9 @@
   let indicatorInfoPosition
   afterUpdate(() => {
     indicatorInfoPosition =
-      window.innerWidth - document.getElementsByClassName("indicator-info-" + indicator.attribute)[0].getBoundingClientRect().right > 180
+      window.innerWidth -
+        document.getElementsByClassName("indicator-info-" + getIndicatorAttribute(indicator, indicator.attribute))[0].getBoundingClientRect().right >
+      180
         ? graphWidth
         : 0
   })
@@ -17,7 +20,7 @@
 <h3 class="question-mark" style="background-color:{$backgroundColor}">?</h3>
 <h3 class="category" style="background-color:{$backgroundColor}">C</h3>
 
-<div class={"indicator-info indicator-info-" + indicator.attribute} style="left:{indicatorInfoPosition}px">
+<div class={"indicator-info indicator-info-" + getIndicatorAttribute(indicator, indicator.attribute)} style="left:{indicatorInfoPosition}px">
   <p class="title" style="background-color:{$backgroundColor}">
     <strong>{indicator.title}</strong>
   </p>

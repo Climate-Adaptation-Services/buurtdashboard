@@ -7,6 +7,7 @@
   import { click, mouseOver, mouseOut } from "$lib/noncomponents/neighbourhoodMouseEvents"
   import { getMostCommonClass } from "$lib/noncomponents/getMostCommonClass"
   import { getClassByIndicatorValue } from "$lib/noncomponents/getClassByIndicatorValue"
+  import { getIndicatorAttribute } from "$lib/noncomponents/getIndicatorAttribute"
 
   export let JSONdata
   export let mapWidth
@@ -40,9 +41,9 @@
 
   function getNumericalAttribute() {
     if ($jaarSelecties[indicator.title] === "Difference") {
-      return indicator.attribute.slice(0, -4) + "Difference"
+      return getIndicatorAttribute(indicator, indicator.attribute).slice(0, -4) + "Difference"
     } else {
-      return indicator.attribute
+      return getIndicatorAttribute(indicator, indicator.attribute)
     }
   }
 </script>
@@ -62,12 +63,15 @@
           : "whitesmoke"
         : indicator.numerical
           ? // check if value not null
-            feature.properties[indicator.attribute] !== null && feature.properties[indicator.attribute] !== ""
+            feature.properties[getIndicatorAttribute(indicator, indicator.attribute)] !== null &&
+            feature.properties[getIndicatorAttribute(indicator, indicator.attribute)] !== ""
             ? indicatorValueColorscale(feature.properties[getNumericalAttribute()])
             : "#000000"
           : indicator.aggregatedIndicator
             ? indicatorValueColorscale(getMostCommonClass(indicator, feature))
-            : indicatorValueColorscale(getClassByIndicatorValue(indicator, feature.properties[indicator.attribute]))}
+            : indicatorValueColorscale(
+                getClassByIndicatorValue(indicator, feature.properties[getIndicatorAttribute(indicator, indicator.attribute)]),
+              )}
       stroke={mapType === "main map" ? "grey" : feature.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection ? "#E1575A" : "white"}
       style="filter:{feature.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection ? 'drop-shadow(0 0 15px black)' : 'none'}"
       stroke-width={mapType === "main map" ? "1" : feature.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection ? "3" : "0.5"}

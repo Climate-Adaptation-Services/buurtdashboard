@@ -13,6 +13,7 @@
   import { fetchJSONdata } from "$lib/noncomponents/fetchJSONdata.js"
   import { processURLParameters } from "$lib/noncomponents/processURLParameters.js"
   import { setupJaarSelecties } from "$lib/noncomponents/setupJaarSelecties.js"
+  import { getIndicatorAttribute } from "$lib/noncomponents/getIndicatorAttribute.js"
 
   export let data
   console.log("data", data)
@@ -88,7 +89,7 @@
       <LoadingIcon />
     {:then res}
       {#each displayedIndicators as indicator}
-        {#if indicator.attribute}
+        {#if getIndicatorAttribute(indicator, indicator.attribute)}
           <div class="indicator" style="height:{indicatorHeight}px">
             <Indicator {indicatorHeight} {indicator} />
           </div>

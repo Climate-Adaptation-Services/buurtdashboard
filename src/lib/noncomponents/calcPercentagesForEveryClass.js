@@ -1,5 +1,6 @@
 import { getClassByIndicatorValue } from "./getClassByIndicatorValue.js";
 import { t } from "$lib/i18n/translate.js"
+import { getIndicatorAttribute } from "./getIndicatorAttribute.js";
 
 export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regio) {
   // let totalSurfaceArea = 0
@@ -26,12 +27,12 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
     // voor deze neighbourhood tel de waardes van elke klasse bij de totale som op
     let noData = true
     Object.keys(indicator.classes).forEach(kl => {
-      if (neighbourhood.properties[indicator.classes[kl]] && !isNaN(parseFloat(neighbourhood.properties[indicator.classes[kl]]))) {
+      if (getIndicatorAttribute(indicator, neighbourhood.properties[indicator.classes[kl]]) && !isNaN(parseFloat(getIndicatorAttribute(indicator, neighbourhood.properties[indicator.classes[kl]])))) {
         noData = false
         // pak de klasse erbij in totalSumPerClass
         const tempKlasse = totalSumPerClass.filter(kl2 => kl2.className === kl)[0]
         // we wegen ook voor het oppervlakte met neighbourhoodShapeArea
-        tempKlasse.som += +neighbourhood.properties[indicator.classes[kl]]
+        tempKlasse.som += +getIndicatorAttribute(indicator, neighbourhood.properties[indicator.classes[kl]])
       }
     });
     if (noData) {
@@ -63,7 +64,7 @@ export function calcPercentagesForEveryClassSingleIndicator(indicator, data, reg
     classesTotal.push({ className: Object.keys(indicator.classes)[i], waarde: 0 })
   }
   data.features.forEach(neighbourhoodOrMunicipality => {
-    classesTotal.filter(kl => kl.className === getClassByIndicatorValue(indicator, neighbourhoodOrMunicipality.properties[indicator.attribute]))[0].waarde += 1
+    classesTotal.filter(kl => kl.className === getClassByIndicatorValue(indicator, neighbourhoodOrMunicipality.properties[getIndicatorAttribute(indicator, indicator.attribute)]))[0].waarde += 1
     totalAmount += 1
   });
 

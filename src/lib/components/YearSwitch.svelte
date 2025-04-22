@@ -1,5 +1,5 @@
 <script>
-  import { indicatorYearChanged, jaarSelecties, selectedNeighbourhoodJSONData } from "$lib/stores"
+  import { indicatorYearChanged, jaarSelecties, selectedNeighbourhoodJSONData, alleIndicatoren } from "$lib/stores"
 
   export let indicator
 
@@ -26,13 +26,6 @@
 
   function yearClick(change) {
     const newAHN = change.target.value
-    for (const key in indicator.classes) {
-      if (indicator.classes.hasOwnProperty(key)) {
-        indicator.classes[key] = indicator.classes[key].slice(0, -4) + newAHN
-      }
-    }
-    indicator.attribute = indicator.attribute.slice(0, -4) + newAHN
-
     indicatorYearChanged.set([indicator.title, newAHN])
     $jaarSelecties[indicator.title] = newAHN
     jaarSelecties.set($jaarSelecties)
