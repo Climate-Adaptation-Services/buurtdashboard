@@ -1,5 +1,5 @@
 <script>
-  import { neighbourhoodSelection, municipalitySelection, allNeighbourhoodsJSONData, jaarSelecties } from "$lib/stores"
+  import { neighbourhoodSelection, municipalitySelection, allNeighbourhoodsJSONData, AHNSelecties } from "$lib/stores"
   import { getRegionName } from "$lib/noncomponents/getRegionName"
 
   export let graphWidth
@@ -20,12 +20,12 @@
     }
   }
 
-  $: rectWidth = $jaarSelecties[indicator.title] === "Difference" ? Math.abs(xScaleStats(medianValue) - xScaleStats(0)) : xScaleStats(medianValue)
+  $: rectWidth = $AHNSelecties[indicator.title] === "Difference" ? Math.abs(xScaleStats(medianValue) - xScaleStats(0)) : xScaleStats(medianValue)
 
-  $: rectX = $jaarSelecties[indicator.title] === "Difference" ? (medianValue > 0 ? 175 + xScaleStats(0) : 175 + xScaleStats(0) - rectWidth) : 175
+  $: rectX = $AHNSelecties[indicator.title] === "Difference" ? (medianValue > 0 ? 175 + xScaleStats(0) : 175 + xScaleStats(0) - rectWidth) : 175
 
   $: textX =
-    $jaarSelecties[indicator.title] === "Difference" && medianValue < 0
+    $AHNSelecties[indicator.title] === "Difference" && medianValue < 0
       ? medianValue !== "Geen data"
         ? 170 + xScaleStats(0) - rectWidth
         : 180
@@ -33,9 +33,9 @@
         ? 170 + 10 + xScaleStats(medianValue)
         : 180
 
-  $: textAnchor = $jaarSelecties[indicator.title] === "Difference" && medianValue < 0 ? "end" : "start"
+  $: textAnchor = $AHNSelecties[indicator.title] === "Difference" && medianValue < 0 ? "end" : "start"
 
-  $: textPlus = $jaarSelecties[indicator.title] === "Difference" && medianValue > 0 ? "+" : ""
+  $: textPlus = $AHNSelecties[indicator.title] === "Difference" && medianValue > 0 ? "+" : ""
 </script>
 
 <svg>
@@ -49,7 +49,7 @@
       height={indicatorHeight * 0.45}
       rx="4"
     ></rect>
-    {#if $jaarSelecties[indicator.title] === "Difference"}
+    {#if $AHNSelecties[indicator.title] === "Difference"}
       <line
         x1={xScaleStats(0) + 175}
         x2={xScaleStats(0) + 175}

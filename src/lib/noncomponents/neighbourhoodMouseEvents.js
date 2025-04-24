@@ -1,5 +1,5 @@
 import { getClassName } from '$lib/noncomponents/getClassName';
-import { currentCodeAbbreviation, neighbourhoodSelection, mousePosition, circleRadius, municipalitySelection, currentNameAbbreviation, URLParams, currentOverviewLevel, neighbourhoodCodeAbbreviation, tooltipValues, tooltipRegion, jaarSelecties } from '$lib/stores';
+import { currentCodeAbbreviation, neighbourhoodSelection, mousePosition, circleRadius, municipalitySelection, currentNameAbbreviation, URLParams, currentOverviewLevel, neighbourhoodCodeAbbreviation, tooltipValues, tooltipRegion, AHNSelecties } from '$lib/stores';
 import { get } from 'svelte/store';
 import { select, selectAll } from 'd3';
 import { getClassByIndicatorValue } from './getClassByIndicatorValue.js';
@@ -28,7 +28,7 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
 
   } else {
     attributeWithoutYear = getIndicatorAttribute(indicator, indicator.attribute).slice(0, -4)
-    if (get(jaarSelecties)[indicator.title] === 'Difference') {
+    if (get(AHNSelecties)[indicator.title] === 'Difference') {
       indicatorAttribute = attributeWithoutYear + 'Difference'
     } else {
       indicatorAttribute = getIndicatorAttribute(indicator, indicator.attribute)

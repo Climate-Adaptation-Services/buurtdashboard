@@ -4,7 +4,7 @@
     neighbourhoodCodeAbbreviation,
     circleRadius,
     selectedNeighbourhoodJSONData,
-    jaarSelecties,
+    AHNSelecties,
     indicatorYearChanged,
   } from "$lib/stores"
   import { extent, scaleLinear, scaleLog, select } from "d3"
@@ -44,7 +44,7 @@
     // if ($alleIndicatoren2019.map((d) => d.title).includes(indicator.title)) {
     //   attributeWithoutYear = getIndicatorAttribute(indicator, indicator.attribute).slice(0, -4)
 
-    //   if ($jaarSelecties[indicator.title] === "Difference") {
+    //   if ($AHNSelecties[indicator.title] === "Difference") {
     //     indicatorAttribute = attributeWithoutYear + "Difference"
     //     xScaleExtent = extent(neighbourhoodsInMunicipalityFeaturesClone.map((d) => +d.properties[attributeWithoutYear + "Difference"]))
     //     xScaleExtent[0] -= 2
@@ -83,10 +83,8 @@
   // Run the simulation whenever any of the variables inside of it change
   // let skipSimulationRestart = false
   $: {
-    if (jaarSelecties && indicator.title === $indicatorYearChanged[0]) {
+    if (AHNSelecties && indicator.title === $indicatorYearChanged[0]) {
       runSimulation()
-    } else {
-      console.log("skip")
     }
   }
 

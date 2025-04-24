@@ -1,5 +1,5 @@
 <script>
-  import { currentJSONData, neighbourhoodSelection, neighbourhoodCodeAbbreviation, jaarSelecties } from "$lib/stores"
+  import { currentJSONData, neighbourhoodSelection, neighbourhoodCodeAbbreviation, AHNSelecties } from "$lib/stores"
   import { geoMercator, geoPath, select } from "d3"
   import { prepareJSONData } from "$lib/noncomponents/prepareJSONData.js"
   import { t } from "$lib/i18n/translate.js"
@@ -40,7 +40,7 @@
   }
 
   function getNumericalAttribute() {
-    if ($jaarSelecties[indicator.title] === "Difference") {
+    if ($AHNSelecties[indicator.title] === "Difference") {
       return getIndicatorAttribute(indicator, indicator.attribute).slice(0, -4) + "Difference"
     } else {
       return getIndicatorAttribute(indicator, indicator.attribute)

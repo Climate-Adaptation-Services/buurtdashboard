@@ -2,7 +2,6 @@ import { getRegionName } from "./getRegionName.js";
 import { tooltipValues, tooltipRegion, municipalitySelection } from "$lib/stores";
 import { select } from "d3";
 import { get } from "svelte/store";
-import { getIndicatorAttribute } from "./getIndicatorAttribute.js";
 
 export function barPlotMouseOver(indicator, indicatorValueColorscale, st, stacked) {
   tooltipValues.set({

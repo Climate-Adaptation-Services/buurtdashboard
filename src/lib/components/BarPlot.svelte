@@ -7,7 +7,7 @@
     neighbourhoodsInMunicipalityJSONData,
     neighbourhoodSelection,
     selectedNeighbourhoodJSONData,
-    jaarSelecties,
+    AHNSelecties,
   } from "$lib/stores"
   import { scaleLinear, scaleBand, stack } from "d3"
   import { checkContrast } from "$lib/noncomponents/checkContrast"
@@ -30,16 +30,14 @@
   const calcPercentagesForEveryClass = aggregated ? calcPercentagesForEveryClassMultiIndicator : calcPercentagesForEveryClassSingleIndicator
 
   let nederlandValues
-  $: if ($jaarSelecties) {
+  $: if ($AHNSelecties) {
     nederlandValues = calcPercentagesForEveryClass(indicator, $allNeighbourhoodsJSONData, "Nederland")
   }
   let barPlotData = []
   let regios = []
 
-  $: console.log(barPlotData)
-
   $: {
-    if ($neighbourhoodSelection !== null && $jaarSelecties) {
+    if ($neighbourhoodSelection !== null && $AHNSelecties) {
       if ($selectedNeighbourhoodJSONData.properties[$districtTypeAbbreviation]) {
         barPlotData = [
           nederlandValues,

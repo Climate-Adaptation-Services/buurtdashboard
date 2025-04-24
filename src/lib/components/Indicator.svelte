@@ -1,5 +1,5 @@
 <script>
-  import { municipalitySelection, neighbourhoodsInMunicipalityJSONData, jaarSelecties } from "$lib/stores"
+  import { municipalitySelection, neighbourhoodsInMunicipalityJSONData, AHNSelecties } from "$lib/stores"
   import { scaleLinear, extent, scaleOrdinal } from "d3"
   import IndicatorInfo from "./IndicatorInfo.svelte"
   import IndicatorTitle from "./IndicatorTitle.svelte"
@@ -28,7 +28,7 @@
         const step = (rangeExtent[1] - rangeExtent[0]) / (indicator.color.range.length - 1)
 
         // if looking at difference between years
-        if ($jaarSelecties[indicator.title] === "Difference") {
+        if ($AHNSelecties[indicator.title] === "Difference") {
           indicatorValueColorscale = scaleLinear().domain([-10, 0, 20]).range(["orange", "lightgrey", "purple"])
         } else {
           indicatorValueColorscale = scaleLinear()

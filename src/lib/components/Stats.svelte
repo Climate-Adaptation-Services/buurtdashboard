@@ -8,7 +8,7 @@
     neighbourhoodCodeAbbreviation,
     municipalityCodeAbbreviation,
     selectedNeighbourhoodJSONData,
-    jaarSelecties,
+    AHNSelecties,
   } from "$lib/stores"
   import Stat from "./Stat.svelte"
   import * as _ from "lodash"
@@ -21,7 +21,7 @@
   export let indicator
   export let indicatorValueColorscale
 
-  // $: isThereOtherYear = $alleIndicatoren2019.map((d) => d.title).includes(indicator.title) && $jaarSelecties[indicator.title] !== "Difference"
+  // $: isThereOtherYear = $alleIndicatoren2019.map((d) => d.title).includes(indicator.title) && $AHNSelecties[indicator.title] !== "Difference"
 
   let statsWidth
 
@@ -32,11 +32,11 @@
     medianValueWijktype: 0,
   }
 
-  $: otherYear = $jaarSelecties[indicator.title] === "2019" ? "2023" : "2019"
+  $: otherYear = $AHNSelecties[indicator.title] === "2019" ? "2023" : "2019"
   $: attributeYearSliced = getIndicatorAttribute(indicator, indicator.attribute).slice(0, -4)
   $: otherYearAttribute = attributeYearSliced + otherYear
   $: indicatorAttribute =
-    $jaarSelecties[indicator.title] === "Difference" ? attributeYearSliced + "Difference" : getIndicatorAttribute(indicator, indicator.attribute)
+    $AHNSelecties[indicator.title] === "Difference" ? attributeYearSliced + "Difference" : getIndicatorAttribute(indicator, indicator.attribute)
 
   let medianValuesDictOtherYear = {
     medianValueNederland: 0,
@@ -121,7 +121,7 @@
       medianValuesDict["medianValueWijktype"],
     ]
     // if (indicator.title !== t("Grondwaterstand 2050 hoog")) {
-    //   if ($jaarSelecties[indicator.title] === "Difference") {
+    //   if ($AHNSelecties[indicator.title] === "Difference") {
     //     xDomain = [min(medianValues) - 10, max(medianValues)]
     //   } else {
     //     if ($alleIndicatoren2019.map((d) => d.title).includes(indicator.title)) {

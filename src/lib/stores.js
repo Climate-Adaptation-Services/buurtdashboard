@@ -21,7 +21,7 @@ export const districtTypeAbbreviation = readable('def_wijkty')
 
 export const indicatorsSelection = writable([])
 export const alleIndicatoren = writable([])
-export const jaarSelecties = writable({})
+export const AHNSelecties = writable({})
 export const indicatorYearChanged = writable([])
 
 export const backgroundColor = readable('#36575B')

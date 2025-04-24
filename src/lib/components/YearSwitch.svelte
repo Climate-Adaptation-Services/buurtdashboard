@@ -1,22 +1,48 @@
 <script>
-  import { indicatorYearChanged, jaarSelecties, selectedNeighbourhoodJSONData, alleIndicatoren, backgroundColor } from "$lib/stores"
+  import {
+    indicatorYearChanged,
+    AHNSelecties,
+    selectedNeighbourhoodJSONData,
+    backgroundColor,
+    neighbourhoodsInMunicipalityJSONData,
+  } from "$lib/stores"
 
   export let indicator
 
   let options
   let selectedAHN
 
+  const ahnVersions = indicator.AHNversie.split(",")
+
+  $: console.log(options, "options")
+
   $: {
-    options = $selectedNeighbourhoodJSONData
-      ? indicator.AHNversie.split(",").map((ahn) => {
-          return { AHN: ahn, Jaar: $selectedNeighbourhoodJSONData.properties["Jaar" + ahn] }
+    if ($selectedNeighbourhoodJSONData) {
+      options = ahnVersions.map((ahn) => {
+        return { AHN: ahn, Jaar: $selectedNeighbourhoodJSONData.properties["Jaar" + ahn] }
+      })
+    } else if ($neighbourhoodsInMunicipalityJSONData) {
+      options = ahnVersions.map((ahn) => {
+        return { AHN: ahn, Jaar: [] }
+      })
+      $neighbourhoodsInMunicipalityJSONData.features.forEach((nh) => {
+        ahnVersions.forEach((ahn) => {
+          if (!options.find((j) => j.AHN === ahn).Jaar.includes(nh.properties["Jaar" + ahn])) {
+            options.find((j) => j.AHN === ahn).Jaar += nh.properties["Jaar" + ahn]
+          }
         })
-      : []
+      })
+    } else {
+      options = [
+        { AHN: "AHN2", Jaar: "2006 - 2012" },
+        { AHN: "AHN4", Jaar: "2018 - 2020" },
+      ]
+    }
   }
 
   selectedNeighbourhoodJSONData.subscribe(() => {
     if ($selectedNeighbourhoodJSONData) {
-      selectedAHN = $jaarSelecties[indicator.title]
+      selectedAHN = $AHNSelecties[indicator.title]
     }
   })
 
@@ -25,42 +51,53 @@
   function yearClick(change) {
     const newAHN = change.target.value
     indicatorYearChanged.set([indicator.title, newAHN])
-    $jaarSelecties[indicator.title] = newAHN
-    jaarSelecties.set($jaarSelecties)
+    $AHNSelecties[indicator.title] = newAHN
+    AHNSelecties.set($AHNSelecties)
     selectedAHN = newAHN
+  }
+
+  function yearClickDifference(change) {
+    const differenceAHN = change.target.value
+    indicatorYearChanged.set([indicator.title, "AHN2"])
+    $AHNSelecties[indicator.title] = ["AHN2", "AHN4"]
+    AHNSelecties.set($AHNSelecties)
+    selectedAHN = "AHN2"
   }
 </script>
 
 <!-- Replacing SVG year switch with two dropdowns -->
 <div class="year-switch-dropdowns {selectedDifference === 'Difference' ? 'less-gap' : ''}">
-  {#if selectedAHN}
-    <div class="dropdown-wrapper">
-      <select class="year-dropdown" bind:value={selectedAHN} on:change={yearClick} style="border: 2px solid {$backgroundColor};">
-        {#each options as option}
-          <option value={option.AHN} selected={option.AHN == selectedAHN}>{option.Jaar}</option>
-        {/each}
-      </select>
-      <span class="dropdown-arrow">&#9662;</span>
-    </div>
-    {#if selectedDifference !== "Difference"}
-      <span class="arrow-between">&#8594;</span>
-    {/if}
-    <div class="dropdown-wrapper">
-      <select
-        class="year-dropdown {selectedDifference === 'Difference' ? 'pseudo-disabled' : ''}"
-        bind:value={selectedDifference}
-        style="border: 2px solid {$backgroundColor};"
-      >
-        <option value="Difference">Vergelijk jaren</option>
-        {#each options as option}
-          <option value={option.AHN} selected={option.Jaar === selectedDifference}>{option.Jaar}</option>
-        {/each}
-      </select>
-      {#if selectedDifference !== "Difference"}
-        <span class="dropdown-arrow">&#9662;</span>
-      {/if}
-    </div>
+  <div class="dropdown-wrapper">
+    <select class="year-dropdown" bind:value={selectedAHN} on:change={yearClick} style="border: 2px solid {$backgroundColor};">
+      {#each options as option}
+        <option value={option.AHN} selected={option.AHN == selectedAHN}>{option.Jaar}</option>
+      {/each}
+    </select>
+    <span class="dropdown-arrow">&#9662;</span>
+  </div>
+  {#if selectedDifference !== "Difference"}
+    <span class="arrow-between">&#8594;</span>
   {/if}
+  <div class="dropdown-wrapper">
+    <select
+      class="year-dropdown {selectedDifference === 'Difference' ? 'pseudo-disabled' : ''}"
+      bind:value={selectedDifference}
+      on:change={yearClickDifference}
+      style="border: 2px solid {$backgroundColor};"
+    >
+      {#if selectedDifference === "Difference"}
+        <option value="Difference">Vergelijk jaren</option>
+      {:else}
+        <option value="Difference">Stop vergelijken</option>
+      {/if}
+      {#each options.slice(1) as option}
+        <option value={option.AHN} selected={option.Jaar === selectedDifference}>{option.Jaar}</option>
+      {/each}
+    </select>
+    {#if selectedDifference !== "Difference"}
+      <span class="dropdown-arrow">&#9662;</span>
+    {/if}
+  </div>
 </div>
 
 <style>

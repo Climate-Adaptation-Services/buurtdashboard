@@ -1,7 +1,7 @@
 <script>
   import BeeswarmPlot from "./BeeswarmPlot.svelte"
   import Stats from "./Stats.svelte"
-  import { neighbourhoodsInMunicipalityJSONData, jaarSelecties, municipalitySelection } from "$lib/stores"
+  import { neighbourhoodsInMunicipalityJSONData, AHNSelecties, municipalitySelection } from "$lib/stores"
   import { t } from "$lib/i18n/translate.js"
   import { getIndicatorAttribute } from "$lib/noncomponents/getIndicatorAttribute"
 
@@ -13,7 +13,7 @@
   export let overviewHeight
   export let indicatorAttribute = getIndicatorAttribute(indicator, indicator.attribute)
 
-  $: indicatorPlottitle = $jaarSelecties[indicator.title] === "Difference" ? indicator.plottitle.replace("%", "% verandering") : indicator.plottitle
+  $: indicatorPlottitle = $AHNSelecties[indicator.title] === "Difference" ? indicator.plottitle.replace("%", "% verandering") : indicator.plottitle
 </script>
 
 <div class="indicator-overview" style="height: {overviewHeight}px">

@@ -12,7 +12,7 @@
   import { setLanguage } from "$lib/noncomponents/setLanguage.js"
   import { fetchJSONdata } from "$lib/noncomponents/fetchJSONdata.js"
   import { processURLParameters } from "$lib/noncomponents/processURLParameters.js"
-  import { setupJaarSelecties } from "$lib/noncomponents/setupJaarSelecties.js"
+  import { setupAHNSelecties } from "$lib/noncomponents/setupAHNSelecties.js"
   import { getIndicatorAttribute } from "$lib/noncomponents/getIndicatorAttribute.js"
 
   export let data
@@ -24,7 +24,7 @@
   const indicatorHeight = 650
 
   setLanguage(data)
-  setupJaarSelecties(data)
+  setupAHNSelecties(data)
 
   let displayedIndicators = []
   let allIndicators = []
