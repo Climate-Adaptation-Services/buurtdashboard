@@ -78,33 +78,35 @@
   {#if selectedDifference !== "Difference"}
     <span class="arrow-between">&#8594;</span>
   {/if}
-  <div class="dropdown-wrapper">
-    <select
-      class="year-dropdown {selectedDifference === 'Difference' ? 'pseudo-disabled' : ''}"
-      bind:value={selectedDifference}
-      on:change={yearClickDifference}
-      style="border: 2px solid {$backgroundColor};"
-    >
-      {#if selectedDifference === "Difference"}
-        <option value="Difference">Vergelijk jaren</option>
-      {:else}
-        <option value="Difference">Stop vergelijken</option>
+  {#if indicator.numerical}
+    <div class="dropdown-wrapper">
+      <select
+        class="year-dropdown {selectedDifference === 'Difference' ? 'pseudo-disabled' : ''}"
+        bind:value={selectedDifference}
+        on:change={yearClickDifference}
+        style="border: 2px solid {$backgroundColor};"
+      >
+        {#if selectedDifference === "Difference"}
+          <option value="Difference">Vergelijk jaren</option>
+        {:else}
+          <option value="Difference">Stop vergelijken</option>
+        {/if}
+        {#each options.slice(1) as option}
+          <option value={option.AHN} selected={option.Jaar === selectedDifference}>{option.Jaar}</option>
+        {/each}
+      </select>
+      {#if selectedDifference !== "Difference"}
+        <span class="dropdown-arrow">&#9662;</span>
       {/if}
-      {#each options.slice(1) as option}
-        <option value={option.AHN} selected={option.Jaar === selectedDifference}>{option.Jaar}</option>
-      {/each}
-    </select>
-    {#if selectedDifference !== "Difference"}
-      <span class="dropdown-arrow">&#9662;</span>
-    {/if}
-  </div>
+    </div>
+  {/if}
 </div>
 
 <style>
   .dropdown-wrapper {
     position: relative;
     display: inline-block;
-    width: 140px;
+    width: 150px;
   }
   .dropdown-wrapper:last-child .year-dropdown {
     padding-right: 12px;
@@ -123,7 +125,7 @@
     z-index: 2;
   }
   .year-dropdown {
-    width: 140px;
+    width: 150px;
     height: 40px;
     border-radius: 12px;
     font-size: 18px;
