@@ -1,10 +1,14 @@
+:root {
+  --background-color: #36575B;
+}
+
 body {
   width: 99vw;
   height: 97vh;
   margin: 0;
   font-family: Roboto;
   /* background-color: #fefffa; */
-  background-color: #36575B;
+  background-color: var(--background-color);
   color: #645F5E
 }
 

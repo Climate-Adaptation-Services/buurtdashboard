@@ -3,8 +3,8 @@
     indicatorYearChanged,
     AHNSelecties,
     selectedNeighbourhoodJSONData,
-    backgroundColor,
     neighbourhoodsInMunicipalityJSONData,
+    configStore
   } from "$lib/stores"
 
   export let indicator
@@ -68,7 +68,7 @@
 <!-- Replacing SVG year switch with two dropdowns -->
 <div class="year-switch-dropdowns {selectedDifference === 'Difference' ? 'less-gap' : ''}">
   <div class="dropdown-wrapper">
-    <select class="year-dropdown" bind:value={selectedAHN} on:change={yearClick} style="border: 2px solid {$backgroundColor};">
+    <select class="year-dropdown" bind:value={selectedAHN} on:change={yearClick} style="border: 2px solid {$configStore.backgroundColor};">
       {#each options as option}
         <option value={option.AHN} selected={option.AHN == selectedAHN}>{option.Jaar}</option>
       {/each}
@@ -84,7 +84,7 @@
         class="year-dropdown {selectedDifference === 'Difference' ? 'pseudo-disabled' : ''}"
         bind:value={selectedDifference}
         on:change={yearClickDifference}
-        style="border: 2px solid {$backgroundColor};"
+        style="border: 2px solid {$configStore.backgroundColor};"
       >
         {#if selectedDifference === "Difference"}
           <option value="Difference">Vergelijk jaren</option>
@@ -121,7 +121,7 @@
     top: 50%;
     transform: translateY(-50%);
     font-size: 18px;
-    color: #36575b;
+    color: var(--background-color);
     z-index: 2;
   }
   .year-dropdown {
@@ -140,7 +140,7 @@
     appearance: none;
     cursor: pointer;
     outline: none;
-    border: 2px solid #36575b;
+    border: 2px solid var(--background-color);
   }
   .year-switch-dropdowns {
     display: flex;
@@ -163,7 +163,7 @@
   }
   .arrow-between {
     font-size: 28px;
-    color: #36575b;
+    color: var(--background-color);
     margin: 0;
     user-select: none;
     line-height: 1;

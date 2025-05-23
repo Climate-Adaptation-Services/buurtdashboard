@@ -12,6 +12,7 @@
     municipalityNameAbbreviation,
     modal,
     neighbourhoodsInMunicipalityJSONData,
+    configStore,
   } from "$lib/stores"
   import * as lo from "lodash"
   import OverDitDashboard from "$lib/components/OverDitDashboard.svelte"
@@ -66,7 +67,9 @@
 
 <div class="search">
   <div>
-    <!-- <img src="./dord3.png" class="dord-icon" /> -->
+    {#if $configStore.sidebarImage}
+      <img src={$configStore.sidebarImage} class="dord-icon" alt="Sidebar background" />
+    {/if}
     <div class="download-and-about">
       <div class="about" on:click={() => laatMeerInfoPanelZien("intro")}>
         <img src="./about.png" width="30px" />

@@ -1,9 +1,13 @@
 import { unzipSync, strFromU8 } from 'fflate';
+import { get } from 'svelte/store';
+import { configStore } from '$lib/stores';
 
 export const fetchJSONdata = async () => {
+  const currentConfig = get(configStore);
+  
   const response = await Promise.all([
-    fetch('https://raw.githubusercontent.com/Climate-Adaptation-Services/buurtdashboard-data/main/GemeenteGrenzen2023-small.json'),
-    fetch('https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/geojsondata/Buurt2024BuurtdashboardDataset20250425.json.zip'),
+    fetch(currentConfig.municipalityJSONdataLocation),
+    fetch(currentConfig.neighbourhoodJSONdataLocation),
     // fetch('https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/geojsondata/Buurt2024BuurtdashboardDataset20250425.fgb'),
 
   ]);

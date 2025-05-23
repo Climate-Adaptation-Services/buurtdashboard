@@ -3,7 +3,15 @@
   import Indicator from "$lib/components/Indicator.svelte"
   import Map from "$lib/components/Map.svelte"
   import Tooltip from "$lib/components/Tooltip.svelte"
-  import { neighbourhoodSelection, indicatorsSelection, municipalitySelection, modal, URLParams, allNeighbourhoodsJSONData } from "$lib/stores"
+  import {
+    neighbourhoodSelection,
+    indicatorsSelection,
+    municipalitySelection,
+    modal,
+    URLParams,
+    allNeighbourhoodsJSONData,
+    configStore,
+  } from "$lib/stores"
   import { setupIndicators } from "$lib/noncomponents/setupIndicators.js"
   import Modal from "svelte-simple-modal"
   import { t } from "$lib/i18n/translate.js"
@@ -17,6 +25,8 @@
 
   export let data
   console.log("data", data)
+
+  $: console.log("config", $configStore)
 
   let screenWidth = 1000 //default value
   let mapWidth

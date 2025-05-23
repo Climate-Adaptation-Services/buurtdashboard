@@ -1,5 +1,5 @@
 <script>
-  import { backgroundColor, neighbourhoodSelection } from "$lib/stores"
+  import { neighbourhoodSelection, configStore } from "$lib/stores"
   import YearSwitch from "./YearSwitch.svelte"
   import { t } from "$lib/i18n/translate.js"
 
@@ -9,7 +9,7 @@
 
 <div class="indicator-title" style="height: {titleHeight}px">
   <!-- <h4 class="category">{t("Categorie")}: {indicator.category}</h4> -->
-  <h2 class="title" style="background-color:{$backgroundColor}">{indicator.title}</h2>
+  <h2 class="title" style="background-color:{$configStore.backgroundColor}">{indicator.title}</h2>
   <h4 class="subtitle">{indicator.subtitle}</h4>
   {#if indicator.title === "Gevoelstemperatuur"}
     <YearSwitch {indicator} />

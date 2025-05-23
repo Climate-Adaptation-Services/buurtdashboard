@@ -1,4 +1,5 @@
 import { dsv } from 'd3'
+import { defaultConfig, dordrechtConfig } from '$lib/config'
 
 export async function load({ url }) {
   // Access the URLSearchParams object
@@ -6,9 +7,13 @@ export async function load({ url }) {
 
   // Get individual query parameters
   const lang = searchParams.get('lang');
+  const configParam = searchParams.get('config') || 'default';
+  
+  // Select the appropriate config object based on URL parameter
+  const configObj = configParam === 'dordrecht' ? dordrechtConfig : defaultConfig;
 
-  const metadata = await dsv(';', "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/metadata/buurtdashboard-metadata-170425-02.csv")
-  const metadata_english = await dsv(';', "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/metadata/buurtdashboard-engels-metadata-060125-04.csv")
+  const metadata = await dsv(';', configObj.metadataLocation)
+  const metadata_english = await dsv(';', configObj.metadataLocationEnglish)
 
   return {
     lang,

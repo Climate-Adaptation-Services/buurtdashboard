@@ -1,4 +1,5 @@
 import { writable, derived, readable } from 'svelte/store';
+import { defaultConfig } from './config';
 
 export const municipalitySelection = writable(null);
 export const neighbourhoodSelection = writable(null);
@@ -24,7 +25,7 @@ export const alleIndicatoren = writable([])
 export const AHNSelecties = writable({})
 export const indicatorYearChanged = writable([])
 
-export const backgroundColor = readable('#36575B')
+export const configStore = writable(defaultConfig)
 
 export const selectedNeighbourhoodJSONData = derived(
   [allNeighbourhoodsJSONData, neighbourhoodSelection, neighbourhoodCodeAbbreviation],
@@ -114,4 +115,3 @@ export const currentNameAbbreviation = derived(
     return ($currentOverviewLevel === 'Nederland') ? $municipalityNameAbbreviation : $neighbourhoodNameAbbreviation
   }
 )
-

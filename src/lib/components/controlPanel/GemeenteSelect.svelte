@@ -2,7 +2,7 @@
   import Select from "svelte-select"
   import { t } from "$lib/i18n/translate.js"
   import { onMount } from "svelte"
-  import { URLParams, municipalitySelection, neighbourhoodSelection } from "$lib/stores"
+  import { URLParams, municipalitySelection, neighbourhoodSelection, configStore } from "$lib/stores"
 
   export let lijstAlleGemeentesVoorDropdown
 
@@ -34,4 +34,5 @@
   value={$municipalitySelection}
   on:change={handleGemeenteChange}
   on:clear={handleGemeenteClear}
+  disabled={$configStore.defaultMunicipality !== null}
 />

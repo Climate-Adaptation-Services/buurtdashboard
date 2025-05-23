@@ -1,5 +1,5 @@
 <script>
-  import { backgroundColor } from "$lib/stores"
+  import { configStore } from "$lib/stores"
   import { afterUpdate } from "svelte"
   import { getIndicatorAttribute } from "$lib/noncomponents/getIndicatorAttribute"
 
@@ -17,11 +17,11 @@
   })
 </script>
 
-<h3 class="question-mark" style="background-color:{$backgroundColor}">?</h3>
-<h3 class="category" style="background-color:{$backgroundColor}">C</h3>
+<h3 class="question-mark" style="background-color:{$configStore.backgroundColor}">?</h3>
+<h3 class="category" style="background-color:{$configStore.backgroundColor}">C</h3>
 
 <div class={"indicator-info indicator-info-" + getIndicatorAttribute(indicator, indicator.attribute)} style="left:{indicatorInfoPosition}px">
-  <p class="title" style="background-color:{$backgroundColor}">
+  <p class="title" style="background-color:{$configStore.backgroundColor}">
     <strong>{indicator.title}</strong>
   </p>
   <hr />
