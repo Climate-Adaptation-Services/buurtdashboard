@@ -68,7 +68,7 @@
 <!-- Replacing SVG year switch with two dropdowns -->
 <div class="year-switch-dropdowns {selectedDifference === 'Difference' ? 'less-gap' : ''}">
   <div class="dropdown-wrapper">
-    <select class="year-dropdown" bind:value={selectedAHN} on:change={yearClick} style="border: 2px solid {$configStore.backgroundColor};">
+    <select class="year-dropdown" bind:value={selectedAHN} on:change={yearClick} style="border: 2px solid {$configStore.mainColor};">
       {#each options as option}
         <option value={option.AHN} selected={option.AHN == selectedAHN}>{option.Jaar}</option>
       {/each}
@@ -84,7 +84,7 @@
         class="year-dropdown {selectedDifference === 'Difference' ? 'pseudo-disabled' : ''}"
         bind:value={selectedDifference}
         on:change={yearClickDifference}
-        style="border: 2px solid {$configStore.backgroundColor};"
+        style="border: 2px solid {$configStore.mainColor};"
       >
         {#if selectedDifference === "Difference"}
           <option value="Difference">Vergelijk jaren</option>

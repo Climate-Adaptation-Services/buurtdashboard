@@ -32,7 +32,7 @@
     <div class="footer">
       <h5 class="source"><strong>{indicator.source}</strong></h5>
       {#if indicator.link}
-        <h5 class="info-link"><a href={indicator.link} target="_blank" color={$configStore.backgroundColor}>{t("Meer_info")}</a></h5>
+        <h5 class="info-link"><a href={indicator.link} target="_blank" color={$configStore.mainColor}>{t("Meer_info")}</a></h5>
       {/if}
     </div>
   </div>

@@ -10,6 +10,7 @@
   import { getIndicatorAttribute } from "$lib/noncomponents/getIndicatorAttribute"
 
   export let JSONdata
+  export let CSVdata
   export let mapWidth
   export let mapHeight
   export let mapType
@@ -17,7 +18,7 @@
   export let indicator
 
   if (mapType === "main map") {
-    prepareJSONData(JSONdata)
+    prepareJSONData(JSONdata, CSVdata)
   }
 
   $: topYPosition = mapType === "main map" ? 20 : 15

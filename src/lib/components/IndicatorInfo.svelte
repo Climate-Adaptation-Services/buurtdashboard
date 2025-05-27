@@ -17,11 +17,11 @@
   })
 </script>
 
-<h3 class="question-mark" style="background-color:{$configStore.backgroundColor}">?</h3>
-<h3 class="category" style="background-color:{$configStore.backgroundColor}">C</h3>
+<h3 class="question-mark" style="background-color:{$configStore.mainColor}">?</h3>
+<h3 class="category" style="background-color:{$configStore.mainColor}">C</h3>
 
 <div class={"indicator-info indicator-info-" + getIndicatorAttribute(indicator, indicator.attribute)} style="left:{indicatorInfoPosition}px">
-  <p class="title" style="background-color:{$configStore.backgroundColor}">
+  <p class="title" style="background-color:{$configStore.mainColor}">
     <strong>{indicator.title}</strong>
   </p>
   <hr />

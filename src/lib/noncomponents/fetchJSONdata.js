@@ -1,13 +1,13 @@
 import { unzipSync, strFromU8 } from 'fflate';
-import { get } from 'svelte/store';
-import { configStore } from '$lib/stores';
 
 export const fetchJSONdata = async () => {
-  const currentConfig = get(configStore);
-  
+  // Hardcoded URLs instead of getting from config
+  const MUNICIPALITY_JSON_URL = "https://raw.githubusercontent.com/Climate-Adaptation-Services/buurtdashboard-data/main/GemeenteGrenzen2023-small.json";
+  const NEIGHBOURHOOD_JSON_URL = "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/geojsondata/Buurt2024BuurtdashboardDataset20250425.json.zip";
+
   const response = await Promise.all([
-    fetch(currentConfig.municipalityJSONdataLocation),
-    fetch(currentConfig.neighbourhoodJSONdataLocation),
+    fetch(MUNICIPALITY_JSON_URL),
+    fetch(NEIGHBOURHOOD_JSON_URL),
     // fetch('https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/geojsondata/Buurt2024BuurtdashboardDataset20250425.fgb'),
 
   ]);
@@ -18,24 +18,6 @@ export const fetchJSONdata = async () => {
   const fileName = Object.keys(files).find(name => name.endsWith('.json'));
   const jsonText = strFromU8(files[fileName]);
   const json2 = JSON.parse(jsonText);
-
-
-  // // Load FlatGeobuf data
-  // const fgbBuffer = await response[2].arrayBuffer();
-
-  // // Parse FGB into GeoJSON features
-  // const features = [];
-  // for await (const feature of deserialize(fgbBuffer)) {
-  //   features.push(feature);
-  // }
-
-  // // Wrap into a GeoJSON FeatureCollection
-  // const jsontest = {
-  //   type: "FeatureCollection",
-  //   features: features
-  // };
-
-  // console.log('jsontest', jsontest)
 
   return [json1, json2];
 };

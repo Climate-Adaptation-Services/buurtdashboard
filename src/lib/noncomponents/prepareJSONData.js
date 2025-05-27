@@ -1,9 +1,10 @@
 import { allMunicipalitiesJSONData, allNeighbourhoodsJSONData, neighbourhoodCodeAbbreviation } from "$lib/stores"
+import { get } from 'svelte/store'
 import * as topojsonsimplify from "topojson-simplify";
 import * as topojson from "topojson-client";
 
-export function prepareJSONData(JSONdata) {
-  console.log('JSONdata', JSONdata)
+export function prepareJSONData(JSONdata, CSVdata) {
+  console.log('CSVdata', CSVdata)
 
   let municipalityTopojson = topojsonsimplify.presimplify(JSONdata[0])
   municipalityTopojson = topojson.feature(municipalityTopojson, municipalityTopojson.objects.GemeenteGrenzen2023)
@@ -13,7 +14,20 @@ export function prepareJSONData(JSONdata) {
   neighbourhoodTopojson = topojson.feature(neighbourhoodTopojson, neighbourhoodTopojson.objects['Buurt2024BuurtdashboardDataset20250425'])
   let neighbourhoodTopojsonFeatures = neighbourhoodTopojson.features
 
+  // Get the code abbreviation once to avoid repeated store access
+  const codeAbbreviation = get(neighbourhoodCodeAbbreviation);
+  
   neighbourhoodTopojsonFeatures = neighbourhoodTopojsonFeatures.map(neighbourhood => {
+    // Get the neighborhood code
+    const neighborhoodCode = neighbourhood.properties[codeAbbreviation];
+    
+    // Find matching CSV data
+    const matchingCSVData = CSVdata.filter(nbh => nbh[codeAbbreviation] === neighborhoodCode)[0];
+    
+    // If we found a match, use it; otherwise, keep the original properties
+    if (matchingCSVData) {
+      neighbourhood.properties = matchingCSVData;
+    }
 
     neighbourhood.properties['m2GroenPI'] = (isNaN(parseFloat(neighbourhood.properties['m2GroenPI']))) ? null : parseFloat(neighbourhood.properties['m2GroenPI'])
 

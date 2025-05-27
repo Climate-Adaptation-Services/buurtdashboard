@@ -1,5 +1,5 @@
 import { writable, derived, readable } from 'svelte/store';
-import { defaultConfig } from './config';
+import { defaultConfig, setupThemeSubscription } from './config';
 
 export const municipalitySelection = writable(null);
 export const neighbourhoodSelection = writable(null);
@@ -26,6 +26,11 @@ export const AHNSelecties = writable({})
 export const indicatorYearChanged = writable([])
 
 export const configStore = writable(defaultConfig)
+
+// Set up theme subscription to apply CSS variables when configStore changes
+if (typeof window !== 'undefined') {
+  setupThemeSubscription(configStore);
+}
 
 export const selectedNeighbourhoodJSONData = derived(
   [allNeighbourhoodsJSONData, neighbourhoodSelection, neighbourhoodCodeAbbreviation],

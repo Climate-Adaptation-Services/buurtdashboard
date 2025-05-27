@@ -15,7 +15,8 @@ export function processURLParameters() {
     }
   }, 10);
 
-  const gemeente = get(URLParams).get("gemeente") || get(configStore).defaultMunicipality;
+  let gemeente = ''
+  setTimeout(() => { gemeente = get(URLParams).get("gemeente") || get(configStore).defaultMunicipality; }, 10)
   setTimeout(() => { municipalitySelection.set(gemeente) }, 10)
   setTimeout(() => { neighbourhoodSelection.set(get(URLParams).get("buurt")) }, 10)
   setTimeout(() => { indicatorsSelection.set(get(URLParams).getAll("indicator")) }, 10)
