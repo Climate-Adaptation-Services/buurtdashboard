@@ -17,6 +17,10 @@
   export let indicatorValueColorscale
   export let indicator
 
+  // Define projection and path variables
+  let projection;
+  let path;
+
   if (mapType === "main map") {
     console.time('Map initialization and data preparation');
     prepareJSONData(JSONdata, CSVdata)
