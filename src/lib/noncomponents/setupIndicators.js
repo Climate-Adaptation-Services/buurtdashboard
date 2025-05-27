@@ -16,7 +16,7 @@ export function setupIndicators(data, eff, geb, kwe) {
 
   alleIndicatoren.set(indicatorsList)
 
-  console.log('indicatorenLijst', indicatorsList)
+  // Removed large indicators list console log
 
   return indicatorsList;
 }

@@ -24,9 +24,9 @@
   import { getIndicatorAttribute } from "$lib/noncomponents/getIndicatorAttribute.js"
 
   export let data
-  console.log("data", data)
+  // Removed large object console log
 
-  $: console.log("config", $configStore)
+  // $: console.log("config", $configStore)
 
   let screenWidth = 1000 //default value
   let mapWidth
@@ -42,7 +42,7 @@
   allIndicators = setupIndicators(data, t("Effecten"), t("Gebiedskenmerken"), t("Kwetsbaarheid"))
   displayedIndicators = allIndicators
 
-  $: console.log("allIndicators", allIndicators)
+  // $: console.log("allIndicators", allIndicators)
 
   const jsonResponse = fetchJSONdata()
 

@@ -6,7 +6,7 @@
 
   export let lijstAlleBuurtenInMunicipalityVoorDropdown
 
-  console.log(lijstAlleBuurtenInMunicipalityVoorDropdown)
+  // Removed neighborhood list console log
 
   function handleBuurtChange(e) {
     $URLParams.set("buurt", e.detail.value)

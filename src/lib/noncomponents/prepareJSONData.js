@@ -101,7 +101,8 @@ export function prepareJSONData(JSONdata, CSVdata) {
   console.timeEnd('CSV data mapping to neighborhoods');
 
   console.time('Final GeoJSON creation');
-  console.log('allNeighbourhoodsJSONData', { type: 'FeatureCollection', features: neighbourhoodTopojsonFeatures })
+  // Log only the count, not the entire object
+  console.log(`Processing ${neighbourhoodTopojsonFeatures.length} neighborhood features`);
   allNeighbourhoodsJSONData.set({ type: 'FeatureCollection', features: neighbourhoodTopojsonFeatures })
   console.timeEnd('Final GeoJSON creation');
 
