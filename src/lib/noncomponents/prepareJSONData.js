@@ -5,7 +5,7 @@ import * as topojson from "topojson-client";
 
 export function prepareJSONData(JSONdata, CSVdata) {
   console.time('Total JSON data preparation time');
-  
+
   // 1. Process municipality data (this is fast, no optimization needed)
   console.time('Municipality TopoJSON processing');
   let municipalityTopojson = topojsonsimplify.presimplify(JSONdata[0])
@@ -15,18 +15,18 @@ export function prepareJSONData(JSONdata, CSVdata) {
 
   // 2. Process neighborhood data with optimizations
   console.time('Neighborhood TopoJSON processing');
-  
+
   // Initialize features array
   let neighbourhoodTopojsonFeatures = [];
-  
+
   try {
     // Check if data is in the expected format for TopoJSON processing
     let neighbourhoodTopojson = JSONdata[1];
-    
+
     if (neighbourhoodTopojson && neighbourhoodTopojson.objects) {
       // It's a TopoJSON, process it with simplification
       const objectName = Object.keys(neighbourhoodTopojson.objects)[0];
-      
+
       // Apply topology-preserving simplification with a moderate tolerance
       neighbourhoodTopojson = topojsonsimplify.presimplify(neighbourhoodTopojson);
       neighbourhoodTopojson = topojsonsimplify.simplify(neighbourhoodTopojson, 0.0001); // Small value preserves most details
@@ -50,7 +50,7 @@ export function prepareJSONData(JSONdata, CSVdata) {
   const codeAbbreviation = get(neighbourhoodCodeAbbreviation);
 
   console.time('CSV data mapping to neighborhoods');
-  
+
   // 3. Create a fast lookup table for CSV data instead of using filter
   console.time('Creating CSV lookup table');
   const csvLookup = {};
@@ -60,13 +60,13 @@ export function prepareJSONData(JSONdata, CSVdata) {
     }
   });
   console.timeEnd('Creating CSV lookup table');
-  
+
   // 4. Pre-define the numeric properties to convert for better performance
   const numericProperties = [
-    'm2GroenPI', 'F1865ErnsOv', 'F18ErnstigZ', 'BrozeGezon', 
+    'm2GroenPI', 'F1865ErnsOv', 'F18ErnstigZ', 'BrozeGezon',
     'G_WOZ', 'HuurwTperc', 'perc_groen_zonder_agr'
   ];
-  
+
   // 5. Process all neighborhoods in a single pass with optimized lookups
   console.time('Property mapping and conversion');
   neighbourhoodTopojsonFeatures = neighbourhoodTopojsonFeatures.map(neighbourhood => {
@@ -84,8 +84,8 @@ export function prepareJSONData(JSONdata, CSVdata) {
     // Convert all numeric properties in a single loop
     numericProperties.forEach(prop => {
       if (neighbourhood.properties[prop] !== undefined) {
-        neighbourhood.properties[prop] = (isNaN(parseFloat(neighbourhood.properties[prop]))) 
-          ? null 
+        neighbourhood.properties[prop] = (isNaN(parseFloat(neighbourhood.properties[prop])))
+          ? null
           : parseFloat(neighbourhood.properties[prop]);
       }
     });
@@ -94,7 +94,7 @@ export function prepareJSONData(JSONdata, CSVdata) {
     if (neighbourhood.properties['BEV_DICHTH'] < 0) {
       neighbourhood.properties['BEV_DICHTH'] = null;
     }
-    
+
     return neighbourhood;
   });
   console.timeEnd('Property mapping and conversion');
