@@ -1,20 +1,13 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "build"
-      }
-    }
-  ],
-  "routes": [
-    { "handle": "filesystem" },
-    { "src": "/(.*)", "dest": "/index.html" }
-  ],
+  "buildCommand": "ROLLUP_NATIVE_EXTENSIONS=false npm run build",
+  "installCommand": "npm install --no-optional --no-audit --no-fund",
+  "framework": "sveltekit",
+  "outputDirectory": "build",
   "github": {
     "silent": true
   },
-  "installCommand": "npm install --no-optional"
+  "env": {
+    "ROLLUP_NATIVE_EXTENSIONS": "false"
+  }
 }
