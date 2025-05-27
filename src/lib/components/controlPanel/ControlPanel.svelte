@@ -14,7 +14,8 @@
     neighbourhoodsInMunicipalityJSONData,
     configStore,
   } from "$lib/stores"
-  import * as lo from "lodash"
+  import lodash from "lodash"
+  const { orderBy } = lodash
   import OverDitDashboard from "$lib/components/OverDitDashboard.svelte"
   import { bind } from "svelte-simple-modal"
   import IndicatorFilter from "./indicatorFilter.svelte"
@@ -33,7 +34,7 @@
         label: limitDropdownLabelLength(municipality.properties["GM_NAAM"]),
       }
     })
-    lijstAlleGemeentesVoorDropdown = lo.orderBy(lijstAlleGemeentesVoorDropdown, [(municipality) => municipality.label], ["asc"])
+    lijstAlleGemeentesVoorDropdown = orderBy(lijstAlleGemeentesVoorDropdown, [(municipality) => municipality.label], ["asc"])
   }
   $: if ($municipalitySelection !== null) {
     lijstAlleBuurtenInMunicipalityVoorDropdown = $neighbourhoodsInMunicipalityJSONData.features.map((neighbourhood) => {
@@ -42,7 +43,7 @@
         label: limitDropdownLabelLength(neighbourhood.properties[$neighbourhoodNameAbbreviation]),
       }
     })
-    lijstAlleBuurtenInMunicipalityVoorDropdown = lo.orderBy(
+    lijstAlleBuurtenInMunicipalityVoorDropdown = orderBy(
       lijstAlleBuurtenInMunicipalityVoorDropdown,
       [(neighbourhood) => neighbourhood.label],
       ["asc"],

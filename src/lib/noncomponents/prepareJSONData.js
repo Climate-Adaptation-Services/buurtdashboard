@@ -16,19 +16,34 @@ export function prepareJSONData(JSONdata, CSVdata) {
   // 2. Process neighborhood data with optimizations
   console.time('Neighborhood TopoJSON processing');
   
-  // Apply simplification with a reasonable tolerance that preserves important details
-  // but removes excessive vertices that don't add visual quality
-  let neighbourhoodTopojson = JSONdata[1];
+  // Initialize features array
+  let neighbourhoodTopojsonFeatures = [];
   
-  // Apply topology-preserving simplification with a moderate tolerance
-  // This is the most expensive operation, but necessary for good quality
-  neighbourhoodTopojson = topojsonsimplify.presimplify(neighbourhoodTopojson);
-  neighbourhoodTopojson = topojsonsimplify.simplify(neighbourhoodTopojson, 0.0001); // Small value preserves most details
-  
-  // Get the first object name from the topojson since the file name has changed
-  const objectName = Object.keys(neighbourhoodTopojson.objects)[0]
-  neighbourhoodTopojson = topojson.feature(neighbourhoodTopojson, neighbourhoodTopojson.objects[objectName])
-  let neighbourhoodTopojsonFeatures = neighbourhoodTopojson.features
+  try {
+    // Check if data is in the expected format for TopoJSON processing
+    let neighbourhoodTopojson = JSONdata[1];
+    
+    if (neighbourhoodTopojson && neighbourhoodTopojson.objects) {
+      // It's a TopoJSON, process it with simplification
+      const objectName = Object.keys(neighbourhoodTopojson.objects)[0];
+      
+      // Apply topology-preserving simplification with a moderate tolerance
+      neighbourhoodTopojson = topojsonsimplify.presimplify(neighbourhoodTopojson);
+      neighbourhoodTopojson = topojsonsimplify.simplify(neighbourhoodTopojson, 0.0001); // Small value preserves most details
+      neighbourhoodTopojson = topojson.feature(neighbourhoodTopojson, neighbourhoodTopojson.objects[objectName]);
+      neighbourhoodTopojsonFeatures = neighbourhoodTopojson.features;
+    } else if (neighbourhoodTopojson && neighbourhoodTopojson.type === 'FeatureCollection') {
+      // It's already a GeoJSON FeatureCollection, use features directly
+      console.warn('Neighborhood data is already GeoJSON, skipping TopoJSON processing');
+      neighbourhoodTopojsonFeatures = neighbourhoodTopojson.features || [];
+    } else {
+      console.error('Neighborhood data in unexpected format', neighbourhoodTopojson);
+      neighbourhoodTopojsonFeatures = [];
+    }
+  } catch (error) {
+    console.error('Error processing neighborhood data:', error);
+    neighbourhoodTopojsonFeatures = [];
+  }
   console.timeEnd('Neighborhood TopoJSON processing');
 
   // Get the code abbreviation once to avoid repeated store access

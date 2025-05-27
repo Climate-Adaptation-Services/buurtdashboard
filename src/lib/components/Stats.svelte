@@ -11,7 +11,7 @@
     AHNSelecties,
   } from "$lib/stores"
   import Stat from "./Stat.svelte"
-  import * as _ from "lodash"
+  import lodash from "lodash"
   import { scaleLinear, max, min } from "d3"
   import { t } from "$lib/i18n/translate.js"
   import { calcMedian } from "$lib/noncomponents/calcMedian"
