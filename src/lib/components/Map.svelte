@@ -18,19 +18,30 @@
   export let indicator
 
   if (mapType === "main map") {
+    console.time('Map initialization and data preparation');
     prepareJSONData(JSONdata, CSVdata)
+    console.timeEnd('Map initialization and data preparation');
   }
 
   $: topYPosition = mapType === "main map" ? 20 : 15
 
-  $: projection = geoMercator().fitExtent(
-    [
-      [10, topYPosition],
-      [mapWidth - 10, mapHeight - 45],
-    ],
-    $currentJSONData,
-  )
-  $: path = geoPath(projection)
+  $: {
+    console.time('D3 projection calculation');
+    projection = geoMercator().fitExtent(
+      [
+        [10, topYPosition],
+        [mapWidth - 10, mapHeight - 45],
+      ],
+      $currentJSONData,
+    );
+    console.timeEnd('D3 projection calculation');
+  }
+  
+  $: {
+    console.time('D3 path generator creation');
+    path = geoPath(projection);
+    console.timeEnd('D3 path generator creation');
+  }
 
   function aggregatedMapInfo() {
     select(".tooltip-multi" + indicator.attribute).style("visibility", "visible")
@@ -52,9 +63,24 @@
 <svg class={mapType === "main map" ? "main-map" : "indicator-map-" + indicator.attribute} style="filter:drop-shadow(0 0 15px rgb(160, 160, 160))">
   <!-- svelte-ignore a11y-mouse-events-have-key-events -->
   <!-- svelte-ignore a11y-no-static-element-interactions -->
-  {#each $currentJSONData.features as feature}
-    <!-- svelte-ignore a11y-click-events-have-key-events -->
-    <!-- svelte-ignore a11y-mouse-events-have-key-events -->
+  {#if $currentJSONData.features}
+    {#if mapType === "main map"}
+      {@const featureCount = $currentJSONData.features.length}
+      <text x="10" y="15" font-size="12" fill="white">Rendering {featureCount} features</text>
+    {/if}
+    
+    {#each $currentJSONData.features as feature, i}
+      <!-- Performance monitoring for the first feature to measure SVG path generation time -->
+      {#if i === 0}
+        {@const startTime = performance.now()}
+        {@const pathData = path(feature)}
+        {@const endTime = performance.now()}
+        {#if mapType === "main map"}
+          <text x="10" y="30" font-size="12" fill="white">Path generation: {(endTime - startTime).toFixed(2)}ms per feature</text>
+        {/if}
+      {/if}
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
+      <!-- svelte-ignore a11y-mouse-events-have-key-events -->
     <path
       d={path(feature)}
       class={getClassName(feature, "path", indicator, mapType) + " " + "svgelements_" + feature.properties[$neighbourhoodCodeAbbreviation]}
@@ -82,6 +108,7 @@
       on:click={() => click(feature, indicator, mapType)}
     />
   {/each}
+  {/if}
   {#if indicator && indicator.aggregatedIndicator === true}
     <image
       href="info.png"

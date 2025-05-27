@@ -1,6 +1,6 @@
 import { dsvFormat } from 'd3-dsv'
 import { defaultConfig, dordrechtConfig } from '$lib/config'
-import { unzipSync, strFromU8 } from 'fflate'
+import { unzipSync, gunzipSync, strFromU8 } from 'fflate'
 
 export async function load({ url }) {
   // Access the URLSearchParams object
@@ -25,9 +25,18 @@ export async function load({ url }) {
   // Handle zipped CSV file
   const csvResponse = await fetch(configObj.neighbourhoodCSVdataLocation)
   const zipBuffer = await csvResponse.arrayBuffer()
-  const files = unzipSync(new Uint8Array(zipBuffer))
-  const fileName = Object.keys(files).find(name => name.endsWith('.csv'))
-  const csvText = strFromU8(files[fileName])
+  
+  // Handle both zip and gzip formats
+  let csvText;
+  if (configObj.neighbourhoodCSVdataLocation.endsWith('.gz')) {
+    const decompressed = gunzipSync(new Uint8Array(zipBuffer));
+    csvText = strFromU8(decompressed);
+  } else {
+    const files = unzipSync(new Uint8Array(zipBuffer));
+    const fileName = Object.keys(files).find(name => name.endsWith('.csv'));
+    csvText = strFromU8(files[fileName]);
+  }
+  
   const buurtCSVdata = dsvFormat(';').parse(csvText)
 
   return {

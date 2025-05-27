@@ -4,47 +4,91 @@ import * as topojsonsimplify from "topojson-simplify";
 import * as topojson from "topojson-client";
 
 export function prepareJSONData(JSONdata, CSVdata) {
-  console.log('CSVdata', CSVdata)
-
+  console.time('Total JSON data preparation time');
+  
+  // 1. Process municipality data (this is fast, no optimization needed)
+  console.time('Municipality TopoJSON processing');
   let municipalityTopojson = topojsonsimplify.presimplify(JSONdata[0])
   municipalityTopojson = topojson.feature(municipalityTopojson, municipalityTopojson.objects.GemeenteGrenzen2023)
   allMunicipalitiesJSONData.set(municipalityTopojson)
+  console.timeEnd('Municipality TopoJSON processing');
 
-  let neighbourhoodTopojson = topojsonsimplify.presimplify(JSONdata[1])
-  neighbourhoodTopojson = topojson.feature(neighbourhoodTopojson, neighbourhoodTopojson.objects['Buurt2024BuurtdashboardDataset20250425'])
+  // 2. Process neighborhood data with optimizations
+  console.time('Neighborhood TopoJSON processing');
+  
+  // Apply simplification with a reasonable tolerance that preserves important details
+  // but removes excessive vertices that don't add visual quality
+  let neighbourhoodTopojson = JSONdata[1];
+  
+  // Apply topology-preserving simplification with a moderate tolerance
+  // This is the most expensive operation, but necessary for good quality
+  neighbourhoodTopojson = topojsonsimplify.presimplify(neighbourhoodTopojson);
+  neighbourhoodTopojson = topojsonsimplify.simplify(neighbourhoodTopojson, 0.0001); // Small value preserves most details
+  
+  // Get the first object name from the topojson since the file name has changed
+  const objectName = Object.keys(neighbourhoodTopojson.objects)[0]
+  neighbourhoodTopojson = topojson.feature(neighbourhoodTopojson, neighbourhoodTopojson.objects[objectName])
   let neighbourhoodTopojsonFeatures = neighbourhoodTopojson.features
+  console.timeEnd('Neighborhood TopoJSON processing');
 
   // Get the code abbreviation once to avoid repeated store access
   const codeAbbreviation = get(neighbourhoodCodeAbbreviation);
+
+  console.time('CSV data mapping to neighborhoods');
   
+  // 3. Create a fast lookup table for CSV data instead of using filter
+  console.time('Creating CSV lookup table');
+  const csvLookup = {};
+  CSVdata.forEach(item => {
+    if (item[codeAbbreviation]) {
+      csvLookup[item[codeAbbreviation]] = item;
+    }
+  });
+  console.timeEnd('Creating CSV lookup table');
+  
+  // 4. Pre-define the numeric properties to convert for better performance
+  const numericProperties = [
+    'm2GroenPI', 'F1865ErnsOv', 'F18ErnstigZ', 'BrozeGezon', 
+    'G_WOZ', 'HuurwTperc', 'perc_groen_zonder_agr'
+  ];
+  
+  // 5. Process all neighborhoods in a single pass with optimized lookups
+  console.time('Property mapping and conversion');
   neighbourhoodTopojsonFeatures = neighbourhoodTopojsonFeatures.map(neighbourhood => {
     // Get the neighborhood code
     const neighborhoodCode = neighbourhood.properties[codeAbbreviation];
-    
-    // Find matching CSV data
-    const matchingCSVData = CSVdata.filter(nbh => nbh[codeAbbreviation] === neighborhoodCode)[0];
-    
+
+    // Use direct lookup instead of filter (much faster)
+    const matchingCSVData = csvLookup[neighborhoodCode];
+
     // If we found a match, use it; otherwise, keep the original properties
     if (matchingCSVData) {
       neighbourhood.properties = matchingCSVData;
     }
 
-    neighbourhood.properties['m2GroenPI'] = (isNaN(parseFloat(neighbourhood.properties['m2GroenPI']))) ? null : parseFloat(neighbourhood.properties['m2GroenPI'])
+    // Convert all numeric properties in a single loop
+    numericProperties.forEach(prop => {
+      if (neighbourhood.properties[prop] !== undefined) {
+        neighbourhood.properties[prop] = (isNaN(parseFloat(neighbourhood.properties[prop]))) 
+          ? null 
+          : parseFloat(neighbourhood.properties[prop]);
+      }
+    });
 
-    // verschillende variabelen van string naar num
-    neighbourhood.properties['F1865ErnsOv'] = (isNaN(parseFloat(neighbourhood.properties['F1865ErnsOv']))) ? null : parseFloat(neighbourhood.properties['F1865ErnsOv'])
-    neighbourhood.properties['F18ErnstigZ'] = (isNaN(parseFloat(neighbourhood.properties['F18ErnstigZ']))) ? null : parseFloat(neighbourhood.properties['F18ErnstigZ'])
-    neighbourhood.properties['BrozeGezon'] = (isNaN(parseFloat(neighbourhood.properties['BrozeGezon']))) ? null : parseFloat(neighbourhood.properties['BrozeGezon'])
-    neighbourhood.properties['G_WOZ'] = (isNaN(parseFloat(neighbourhood.properties['G_WOZ']))) ? null : parseFloat(neighbourhood.properties['G_WOZ'])
-    neighbourhood.properties['HuurwTperc'] = (isNaN(parseFloat(neighbourhood.properties['HuurwTperc']))) ? null : parseFloat(neighbourhood.properties['HuurwTperc'])
-    neighbourhood.properties['perc_groen_zonder_agr'] = (isNaN(parseFloat(neighbourhood.properties['perc_groen_zonder_agr']))) ? null : parseFloat(neighbourhood.properties['perc_groen_zonder_agr'])
-
+    // Special case for BEV_DICHTH
     if (neighbourhood.properties['BEV_DICHTH'] < 0) {
-      neighbourhood.properties['BEV_DICHTH'] = null
+      neighbourhood.properties['BEV_DICHTH'] = null;
     }
-    return neighbourhood
-  })
+    
+    return neighbourhood;
+  });
+  console.timeEnd('Property mapping and conversion');
+  console.timeEnd('CSV data mapping to neighborhoods');
 
+  console.time('Final GeoJSON creation');
   console.log('allNeighbourhoodsJSONData', { type: 'FeatureCollection', features: neighbourhoodTopojsonFeatures })
   allNeighbourhoodsJSONData.set({ type: 'FeatureCollection', features: neighbourhoodTopojsonFeatures })
+  console.timeEnd('Final GeoJSON creation');
+
+  console.timeEnd('Total JSON data preparation time');
 }
