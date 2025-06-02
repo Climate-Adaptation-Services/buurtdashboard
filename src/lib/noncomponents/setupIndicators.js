@@ -1,22 +1,18 @@
 import { alleIndicatoren } from "$lib/stores"
 export function setupIndicators(data, eff, geb, kwe) {
+  console.log(data.metadata)
 
   const metadata = (data.lang === 'en')
     ? data.metadata_english
     : data.metadata
-  // const metadata_2019 = (data.lang === 'en')
-  //   ? data.metadata_dordrecht_2019
-  //   : data.metadata_dordrecht_2019
 
 
   let indicatorsList = []
-  indicatorsList = addIndicatorCategory(indicatorsList, metadata.filter(d => d.Categorie === eff))
+  // indicatorsList = addIndicatorCategory(indicatorsList, metadata.filter(d => d.Categorie === eff))
   indicatorsList = addIndicatorCategory(indicatorsList, metadata.filter(d => d.Categorie === geb))
-  indicatorsList = addIndicatorCategory(indicatorsList, metadata.filter(d => d.Categorie === kwe))
+  // indicatorsList = addIndicatorCategory(indicatorsList, metadata.filter(d => d.Categorie === kwe))
 
   alleIndicatoren.set(indicatorsList)
-
-  // Removed large indicators list console log
 
   return indicatorsList;
 }
@@ -26,7 +22,6 @@ function addIndicatorCategory(indicatorsList, indicators) {
   indicatorsList.push({ title: { 'label': indicators[0].Categorie, 'disabled': true } })
 
   indicators.forEach(indicator => {
-    // if (indicator.Titel !== 'Gevoelstemperatuur') { return }
 
     let classes = { 'No data': '-10' }
     // add no data class
