@@ -131,7 +131,7 @@
     <circle
       class={getClassName(node, "node", indicator, "") + " " + "svgelements_" + node.properties[$neighbourhoodCodeAbbreviation]}
       stroke={node.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection ? "#E1575A" : "none"}
-      style="filter: {node.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection ? 'drop-shadow(0 0 5px #36575A)' : 'none'}"
+      class:selected-node={node.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection}
       cx={node.x}
       cy={node.y}
       r={node.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection ? $circleRadius + 3 : $circleRadius}
@@ -145,4 +145,7 @@
 </g>
 
 <style>
+  .selected-node {
+    filter: drop-shadow(0 0 5px #36575A);
+  }
 </style>

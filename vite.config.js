@@ -33,8 +33,8 @@ export default defineConfig({
 	// Fix client routing
 	define: {
 		'__SVELTEKIT_CLIENT_ROUTING__': true,
-		'__SVELTEKIT_CSR__': true,
-		'__WS_TOKEN__': JSON.stringify('disabled')
+		'__SVELTEKIT_CSR__': true
+		// Removed __WS_TOKEN__ to fix syntax error
 	},
 	esbuild: {
 		jsxFactory: 'h',

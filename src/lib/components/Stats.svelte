@@ -8,6 +8,7 @@
     neighbourhoodCodeAbbreviation,
     municipalityCodeAbbreviation,
     selectedNeighbourhoodJSONData,
+    AHNSelecties,
   } from "$lib/stores"
   import Stat from "./Stat.svelte"
   import { scaleLinear, min, max } from "d3"
@@ -20,6 +21,10 @@
 
   let statsWidth
 
+  // Create a reactive variable that updates when AHNSelecties changes
+  $: currentAHNSelection = $AHNSelecties[indicator.title];
+
+  // Make medianValuesDict reactive to AHNSelecties changes
   $: medianValuesDict = {
     medianValueNederland: calcMedian(
       $allNeighbourhoodsJSONData.features.map((neighbourhood) => +neighbourhood.properties[getIndicatorAttribute(indicator, indicator.attribute)]),
@@ -36,7 +41,7 @@
     medianValueWijktype: 0,
   }
 
-  $: if ($municipalitySelection !== null) {
+  $: if ($municipalitySelection !== null && currentAHNSelection) {
     // Neighbourhoods binnen municipality
     const municipalityFilter = $allNeighbourhoodsJSONData.features.filter(
       (neighbourhood) => neighbourhood.properties[$municipalityCodeAbbreviation] === $municipalitySelection,
@@ -48,7 +53,7 @@
     medianValuesDict["medianValueGemeente"] = 0
   }
 
-  $: if ($neighbourhoodSelection !== null) {
+  $: if ($neighbourhoodSelection !== null && currentAHNSelection) {
     // deze filter is 1 neighbourhood
     const neighbourhoodFilter = $allNeighbourhoodsJSONData.features.filter(
       (neighbourhood) => neighbourhood.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection,
