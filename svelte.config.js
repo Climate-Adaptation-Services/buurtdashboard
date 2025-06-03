@@ -1,5 +1,4 @@
-import adapter from '@sveltejs/adapter-static';
-// import adapter from '@sveltejs/adapter-auto'; 
+import adapter from '@sveltejs/adapter-vercel';
 import sveltePreprocess from 'svelte-preprocess';
 
 /** @type {import('@sveltejs/kit').Config} */
@@ -13,12 +12,9 @@ const config = {
 		// If your environment is not supported or you settled on a specific environment, switch out the adapter.
 		// See https://kit.svelte.dev/docs/adapters for more information about adapters.
 		adapter: adapter({
-			// default options are shown
-			pages: 'build',
-			assets: 'build',
-			fallback: 'index.html',
-			precompress: false,
-			strict: true
+			// Vercel adapter options
+			runtime: 'nodejs18.x',
+			split: false
 		}),
 		
 		// Development mode optimizations
