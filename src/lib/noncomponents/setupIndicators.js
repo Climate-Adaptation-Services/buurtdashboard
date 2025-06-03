@@ -27,7 +27,7 @@ function addIndicatorCategory(indicatorsList, indicators) {
     // add no data class
     const indicatorDomein = ['No data', ...indicator.Domein.split(',')]
     const noDataColor = '#333333'
-    const indicatorColors = (indicator['kwantitatief / categoraal / multiline'] !== 'Kwantitatief')
+    const indicatorColors = (indicator['kwantitatief / categoraal / multiline'] !== 'kwantitatief')
       ? [noDataColor, ...indicator.Kleur.split(',')]
       : indicator.Kleur.split(',')
 
@@ -52,7 +52,7 @@ function addIndicatorCategory(indicatorsList, indicators) {
         range: indicatorColors
       },
       classes: classes,
-      numerical: (indicator['kwantitatief / categoraal / multiline'] === 'Kwantitatief') ? true : false,
+      numerical: (indicator['kwantitatief / categoraal / multiline'] === 'kwantitatief') ? true : false,
       link: indicator['Link kaartverhaal'],
       aggregatedIndicator: (indicator['kwantitatief / categoraal / multiline'] === 'Multiline') ? true : false,
       source: indicator.Bron,

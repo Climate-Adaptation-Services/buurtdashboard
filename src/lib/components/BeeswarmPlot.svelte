@@ -114,11 +114,11 @@
   })
 
   // raise node on mount, hacky solution could be better
-  $: if ($selectedNeighbourhoodJSONData) {
-    setTimeout(() => {
-      select("." + getClassName($selectedNeighbourhoodJSONData, "node", indicator, "indicator map")).raise()
-    }, 1000)
-  }
+  // $: if ($selectedNeighbourhoodJSONData) {
+  //   setTimeout(() => {
+  //     select("." + getClassName($selectedNeighbourhoodJSONData, "node", indicator, "indicator map")).raise()
+  //   }, 1000)
+  // }
 </script>
 
 <XAxis xScale={xScaleBeeswarm} height={indicatorHeight} {margin} />
@@ -127,7 +127,7 @@
 {/if}
 
 <g class="inner-chart" transform="translate({margin.left}, {margin.top})">
-  {#each nodes as node (node.id + indicatorAttribute)}
+  {#each nodes as node (node.index + indicatorAttribute)}
     <circle
       class={getClassName(node, "node", indicator, "") + " " + "svgelements_" + node.properties[$neighbourhoodCodeAbbreviation]}
       stroke={node.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection ? "#E1575A" : "none"}

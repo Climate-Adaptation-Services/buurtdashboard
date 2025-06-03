@@ -1,11 +1,5 @@
 <script>
-  import {
-    indicatorYearChanged,
-    AHNSelecties,
-    selectedNeighbourhoodJSONData,
-    neighbourhoodsInMunicipalityJSONData,
-    configStore
-  } from "$lib/stores"
+  import { indicatorYearChanged, AHNSelecties, selectedNeighbourhoodJSONData, neighbourhoodsInMunicipalityJSONData, configStore } from "$lib/stores"
 
   export let indicator
 
@@ -13,8 +7,6 @@
   let selectedAHN
 
   const ahnVersions = indicator.AHNversie.split(",")
-
-  $: console.log(options, "options")
 
   $: {
     if ($selectedNeighbourhoodJSONData) {

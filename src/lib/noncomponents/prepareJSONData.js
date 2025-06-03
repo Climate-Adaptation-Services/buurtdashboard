@@ -4,17 +4,12 @@ import * as topojsonsimplify from "topojson-simplify";
 import * as topojson from "topojson-client";
 
 export function prepareJSONData(JSONdata, CSVdata) {
-  console.time('Total JSON data preparation time');
-
   // 1. Process municipality data (this is fast, no optimization needed)
-  console.time('Municipality TopoJSON processing');
   let municipalityTopojson = topojsonsimplify.presimplify(JSONdata[0])
   municipalityTopojson = topojson.feature(municipalityTopojson, municipalityTopojson.objects.GemeenteGrenzen2023)
   allMunicipalitiesJSONData.set(municipalityTopojson)
-  console.timeEnd('Municipality TopoJSON processing');
 
   // 2. Process neighborhood data with optimizations
-  console.time('Neighborhood TopoJSON processing');
 
   // Initialize features array
   let neighbourhoodTopojsonFeatures = [];
@@ -44,22 +39,15 @@ export function prepareJSONData(JSONdata, CSVdata) {
     console.error('Error processing neighborhood data:', error);
     neighbourhoodTopojsonFeatures = [];
   }
-  console.timeEnd('Neighborhood TopoJSON processing');
-
-  // Get the code abbreviation once to avoid repeated store access
-  const codeAbbreviation = get(neighbourhoodCodeAbbreviation);
-
-  console.time('CSV data mapping to neighborhoods');
 
   // 3. Create a fast lookup table for CSV data instead of using filter
-  console.time('Creating CSV lookup table');
   const csvLookup = {};
   CSVdata.forEach(item => {
-    if (item[codeAbbreviation]) {
-      csvLookup[item[codeAbbreviation]] = item;
+    if (item[get(neighbourhoodCodeAbbreviation)]) {
+      csvLookup[item[get(neighbourhoodCodeAbbreviation)]] = item;
     }
   });
-  console.timeEnd('Creating CSV lookup table');
+
 
   // 4. Pre-define the numeric properties to convert for better performance
   const numericProperties = [
@@ -68,10 +56,9 @@ export function prepareJSONData(JSONdata, CSVdata) {
   ];
 
   // 5. Process all neighborhoods in a single pass with optimized lookups
-  console.time('Property mapping and conversion');
   neighbourhoodTopojsonFeatures = neighbourhoodTopojsonFeatures.map(neighbourhood => {
     // Get the neighborhood code
-    const neighborhoodCode = neighbourhood.properties[codeAbbreviation];
+    const neighborhoodCode = neighbourhood.properties[get(neighbourhoodCodeAbbreviation)];
 
     // Use direct lookup instead of filter (much faster)
     const matchingCSVData = csvLookup[neighborhoodCode];
@@ -97,14 +84,8 @@ export function prepareJSONData(JSONdata, CSVdata) {
 
     return neighbourhood;
   });
-  console.timeEnd('Property mapping and conversion');
-  console.timeEnd('CSV data mapping to neighborhoods');
 
-  console.time('Final GeoJSON creation');
-  // Log only the count, not the entire object
-  console.log(`Processing ${neighbourhoodTopojsonFeatures.length} neighborhood features`);
+
+  // Set the final GeoJSON data
   allNeighbourhoodsJSONData.set({ type: 'FeatureCollection', features: neighbourhoodTopojsonFeatures })
-  console.timeEnd('Final GeoJSON creation');
-
-  console.timeEnd('Total JSON data preparation time');
 }

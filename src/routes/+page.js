@@ -17,15 +17,15 @@ export async function load({ url }) {
   const metadataResponse = await fetch(configObj.metadataLocation)
   const metadataText = await metadataResponse.text()
   const metadata = dsvFormat(';').parse(metadataText)
-  
+
   const metadataEnglishResponse = await fetch(configObj.metadataLocationEnglish)
   const metadataEnglishText = await metadataEnglishResponse.text()
   const metadata_english = dsvFormat(';').parse(metadataEnglishText)
-  
+
   // Handle zipped CSV file
   const csvResponse = await fetch(configObj.neighbourhoodCSVdataLocation)
   const zipBuffer = await csvResponse.arrayBuffer()
-  
+
   // Handle both zip and gzip formats
   let csvText;
   if (configObj.neighbourhoodCSVdataLocation.endsWith('.gz')) {
@@ -36,8 +36,9 @@ export async function load({ url }) {
     const fileName = Object.keys(files).find(name => name.endsWith('.csv'));
     csvText = strFromU8(files[fileName]);
   }
-  
+
   const buurtCSVdata = dsvFormat(';').parse(csvText)
+  console.log(buurtCSVdata)
 
   return {
     lang,

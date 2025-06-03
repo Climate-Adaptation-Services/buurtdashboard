@@ -11,7 +11,7 @@
   <!-- <h4 class="category">{t("Categorie")}: {indicator.category}</h4> -->
   <h2 class="title" style="background-color:{$configStore.mainColor}">{indicator.title}</h2>
   <h4 class="subtitle">{indicator.subtitle}</h4>
-  {#if indicator.title === "Gevoelstemperatuur"}
+  {#if indicator.title === "Broomkroonoppervlakte"}
     <YearSwitch {indicator} />
   {/if}
 </div>
