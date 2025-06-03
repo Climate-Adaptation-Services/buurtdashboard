@@ -114,11 +114,11 @@
   })
 
   // raise node on mount, hacky solution could be better
-  // $: if ($selectedNeighbourhoodJSONData) {
-  //   setTimeout(() => {
-  //     select("." + getClassName($selectedNeighbourhoodJSONData, "node", indicator, "indicator map")).raise()
-  //   }, 1000)
-  // }
+  $: if ($selectedNeighbourhoodJSONData) {
+    setTimeout(() => {
+      select("." + getClassName($selectedNeighbourhoodJSONData, "node", indicator, "indicator map")).raise()
+    }, 1000)
+  }
 </script>
 
 <XAxis xScale={xScaleBeeswarm} height={indicatorHeight} {margin} />
