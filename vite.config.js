@@ -29,6 +29,13 @@ export default defineConfig({
 			overlay: false // Disable the HMR overlay to reduce browser repaints
 		}
 	},
+	
+	// Fix client routing
+	define: {
+		'__SVELTEKIT_CLIENT_ROUTING__': true,
+		'__SVELTEKIT_CSR__': true,
+		'__WS_TOKEN__': JSON.stringify('disabled')
+	},
 	esbuild: {
 		jsxFactory: 'h',
 		jsxFragment: 'Fragment'
