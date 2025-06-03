@@ -1,15 +1,9 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "installCommand": "npm install --no-audit --no-fund",
-        "buildCommand": "npm run vercel-build"
-      }
-    }
-  ],
+  "framework": "svelte",
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install --legacy-peer-deps",
+  "outputDirectory": "build",
   "routes": [
     { "src": "/_app/immutable/.+", "headers": { "cache-control": "public,immutable,max-age=31536000" } },
     { "handle": "filesystem" },

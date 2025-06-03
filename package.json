@@ -8,11 +8,11 @@
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json --watch",
-    "vercel-build": "vite build"
+    "vercel-build": "node ./vercel-build.js",
+    "preinstall": "npx only-allow npm && (test -f ./vercel-build.js || node -e \"fs.writeFileSync('./vercel-build.js', 'import { execSync } from \\\'child_process\\\'; execSync(\\\'npm i rollup@4.12.0 -g && npm i && vite build\\\', {stdio: \\\'inherit\\\'});')\")"
   },
-  "overrides": {
-    "@rollup/rollup-linux-x64-gnu": "4.9.5",
-    "@rollup/rollup-linux-x64-musl": "4.9.5"
+  "engines": {
+    "node": ">=18.0.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.49.1",
