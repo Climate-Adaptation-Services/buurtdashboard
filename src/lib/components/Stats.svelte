@@ -22,7 +22,7 @@
   let statsWidth
 
   // Create a reactive variable that updates when AHNSelecties changes
-  $: currentAHNSelection = $AHNSelecties[indicator.title];
+  $: currentAHNSelection = $AHNSelecties[indicator.title]
 
   // Make medianValuesDict reactive to AHNSelecties changes
   $: medianValuesDict = {
@@ -41,7 +41,7 @@
     medianValueWijktype: 0,
   }
 
-  $: if ($municipalitySelection !== null && currentAHNSelection) {
+  $: if ($municipalitySelection !== null) {
     // Neighbourhoods binnen municipality
     const municipalityFilter = $allNeighbourhoodsJSONData.features.filter(
       (neighbourhood) => neighbourhood.properties[$municipalityCodeAbbreviation] === $municipalitySelection,
