@@ -21,7 +21,7 @@
 </div>
 <div class="indicator-graph" style="height:{graphHeight}px" bind:clientWidth={graphWidth}>
   {#if $municipalitySelection !== null}
-    <svg class={"beeswarm_" + getIndicatorAttribute(indicator, indicator.attribute)}>
+    <svg class={"beeswarm_" + indicator.attribute}>
       <BeeswarmPlot
         {graphWidth}
         indicatorHeight={graphHeight}
