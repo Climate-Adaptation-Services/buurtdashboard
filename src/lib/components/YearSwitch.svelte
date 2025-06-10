@@ -1,5 +1,5 @@
 <script>
-  import { indicatorYearChanged, AHNSelecties, selectedNeighbourhoodJSONData, neighbourhoodsInMunicipalityJSONData, configStore } from "$lib/stores"
+  import { AHNSelecties, selectedNeighbourhoodJSONData, neighbourhoodsInMunicipalityJSONData, configStore } from "$lib/stores"
 
   export let indicator
 
@@ -42,7 +42,6 @@
 
   function yearClick(change) {
     const newAHN = change.target.value
-    indicatorYearChanged.set([indicator.title, newAHN])
     $AHNSelecties[indicator.title] = newAHN
     AHNSelecties.set($AHNSelecties)
     selectedAHN = newAHN
@@ -50,10 +49,22 @@
 
   function yearClickDifference(change) {
     const differenceAHN = change.target.value
-    indicatorYearChanged.set([indicator.title, "AHN2"])
-    $AHNSelecties[indicator.title] = ["AHN2", "AHN4"]
+    
+    if (differenceAHN === "Difference") {
+      // Reset to single year selection
+      $AHNSelecties[indicator.title] = selectedAHN
+      selectedDifference = "Difference"
+    } else {
+      // Store both years for difference calculation
+      $AHNSelecties[indicator.title] = {
+        baseYear: selectedAHN,
+        compareYear: differenceAHN,
+        isDifference: true
+      }
+      selectedDifference = differenceAHN
+    }
+    
     AHNSelecties.set($AHNSelecties)
-    selectedAHN = "AHN2"
   }
 </script>
 

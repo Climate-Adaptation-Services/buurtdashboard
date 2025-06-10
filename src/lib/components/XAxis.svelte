@@ -1,20 +1,50 @@
 <script>
   import { axisBottom, select, selectAll, format } from "d3"
+  import { AHNSelecties } from "$lib/stores"
 
   export let xScale
   export let height
   export let margin
+  export let indicator = null
 
   let pinXAxis // declare pins
+  
+  // Determine if we're showing a difference plot
+  $: isDifferencePlot = indicator && $AHNSelecties[indicator.title] && 
+      typeof $AHNSelecties[indicator.title] === 'object' && 
+      $AHNSelecties[indicator.title].isDifference
+  
+  // Get domain to check if it spans positive and negative values
+  $: domain = xScale.domain()
+  $: hasNegativeValues = domain[0] < 0
+  $: hasPositiveValues = domain[1] > 0
+  $: hasZero = hasNegativeValues && hasPositiveValues
 
   // call axis generators on the scale and pin the SVG pins.
   $: if (pinXAxis) {
-    select(pinXAxis).call(
-      axisBottom(xScale)
-        .ticks(6)
-        .tickSize(-height + margin.top + margin.bottom),
-    )
+    const axis = axisBottom(xScale)
+      .ticks(6)
+      .tickSize(-height + margin.top + margin.bottom)
+    
+    // Format tick labels for difference plots
+    if (isDifferencePlot) {
+      axis.tickFormat(d => d > 0 ? "+" + d.toFixed(1) : d.toFixed(1))
+    }
+    
+    select(pinXAxis).call(axis)
+    
+    // Style the axis
     selectAll(".domain, .tick line").style("stroke", "lightgrey")
+    
+    // Highlight the zero line if we have both positive and negative values
+    if (hasZero) {
+      select(pinXAxis)
+        .selectAll(".tick")
+        .filter(d => d === 0)
+        .select("line")
+        .style("stroke", "#666")
+        .style("stroke-width", "2px")
+    }
   }
 </script>
 

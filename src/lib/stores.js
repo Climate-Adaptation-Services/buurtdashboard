@@ -23,7 +23,6 @@ export const districtTypeAbbreviation = readable('def_wijkty')
 export const indicatorsSelection = writable([])
 export const alleIndicatoren = writable([])
 export const AHNSelecties = writable({})
-export const indicatorYearChanged = writable([])
 
 export const configStore = writable(defaultConfig)
 

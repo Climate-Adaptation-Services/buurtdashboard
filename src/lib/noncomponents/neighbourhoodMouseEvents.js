@@ -28,8 +28,14 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
 
   } else {
     attributeWithoutYear = getIndicatorAttribute(indicator, indicator.attribute).slice(0, -4)
-    if (get(AHNSelecties)[indicator.title] === 'Difference') {
-      indicatorAttribute = attributeWithoutYear + 'Difference'
+    
+    // Check if we're in difference mode
+    const ahnSelection = get(AHNSelecties)[indicator.title]
+    const isDifferenceMode = ahnSelection && typeof ahnSelection === 'object' && ahnSelection.isDifference
+    
+    if (isDifferenceMode) {
+      // For difference mode, we'll use the base attribute but will calculate the difference value later
+      indicatorAttribute = getIndicatorAttribute(indicator, indicator.attribute)
     } else {
       indicatorAttribute = getIndicatorAttribute(indicator, indicator.attribute)
     }
@@ -80,12 +86,38 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
 
       // if beeswarm interaction 
     } else {
-      // @ts-ignore
-      tooltipValues.set({
-        indicator: indicator.title,
-        value: Math.round(feature.properties[indicatorAttribute] * 100) / 100,
-        color: indicatorValueColorscale(feature.properties[indicatorAttribute])
-      })
+      // Check if we're in difference mode
+      const ahnSelection = get(AHNSelecties)[indicator.title]
+      const isDifferenceMode = ahnSelection && typeof ahnSelection === 'object' && ahnSelection.isDifference
+      
+      if (isDifferenceMode) {
+        // For difference mode, calculate and display the difference value
+        const baseAttribute = indicatorAttribute
+        const compareAttribute = indicator.attribute + ahnSelection.compareYear
+        
+        const baseValue = +feature.properties[baseAttribute] || 0
+        const compareValue = +feature.properties[compareAttribute] || 0
+        const diffValue = compareValue - baseValue
+        
+        // Format the difference value with a + sign for positive values
+        const formattedDiffValue = diffValue > 0 
+          ? "+" + (Math.round(diffValue * 100) / 100).toFixed(1)
+          : (Math.round(diffValue * 100) / 100).toFixed(1)
+        
+        // Set tooltip with difference value and years
+        tooltipValues.set({
+          indicator: `${indicator.title} (${ahnSelection.compareYear} vs ${ahnSelection.baseYear})`,
+          value: formattedDiffValue,
+          color: diffValue > 0 ? "#4682b4" : diffValue < 0 ? "#b44646" : "#cccccc"
+        })
+      } else {
+        // Regular tooltip for non-difference mode
+        tooltipValues.set({
+          indicator: indicator.title,
+          value: Math.round(feature.properties[indicatorAttribute] * 100) / 100,
+          color: indicatorValueColorscale(feature.properties[indicatorAttribute])
+        })
+      }
 
       let elem = document.getElementsByClassName('beeswarm_' + indicator.attribute)[0]
       let rectmap = elem.getBoundingClientRect();
