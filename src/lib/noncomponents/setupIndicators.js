@@ -8,7 +8,7 @@ export function setupIndicators(data, eff, geb, kwe) {
 
 
   let indicatorsList = []
-  // indicatorsList = addIndicatorCategory(indicatorsList, metadata.filter(d => d.Categorie === eff))
+  indicatorsList = addIndicatorCategory(indicatorsList, metadata.filter(d => d.Categorie === eff))
   indicatorsList = addIndicatorCategory(indicatorsList, metadata.filter(d => d.Categorie === geb))
   // indicatorsList = addIndicatorCategory(indicatorsList, metadata.filter(d => d.Categorie === kwe))
 

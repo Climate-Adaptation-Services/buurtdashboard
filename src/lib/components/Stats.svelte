@@ -21,19 +21,46 @@
 
   let statsWidth
 
-  // Create a reactive variable that updates when AHNSelecties changes
+  // Create reactive variables that update when AHNSelecties changes
   $: currentAHNSelection = $AHNSelecties[indicator.title]
+  $: isDifferenceMode = currentAHNSelection && typeof currentAHNSelection === "object" && currentAHNSelection.isDifference
 
-  // Make medianValuesDict reactive to AHNSelecties changes
+  // Variables to store attribute names
+  let baseAttribute, compareAttribute
+
+  // Get the appropriate attributes based on whether we're in difference mode
+  $: {
+    if (isDifferenceMode) {
+      // For difference mode, we need to construct the attribute names correctly
+      // The attribute name format is typically: baseAttributeAHN2, baseAttributeAHN4, etc.
+      baseAttribute = indicator.attribute + currentAHNSelection.baseYear
+      compareAttribute = indicator.attribute + currentAHNSelection.compareYear
+    } else {
+      // For regular mode, just use the current selection
+      baseAttribute = getIndicatorAttribute(indicator, indicator.attribute)
+      compareAttribute = null
+    }
+  }
+
+  // Calculate median values based on the current mode (regular or difference)
   $: medianValuesDict = {
-    medianValueNederland: calcMedian(
-      $allNeighbourhoodsJSONData.features.map((neighbourhood) => +neighbourhood.properties[getIndicatorAttribute(indicator, indicator.attribute)]),
-    ),
+    medianValueNederland: isDifferenceMode
+      ? calcMedian(
+          $allNeighbourhoodsJSONData.features.map((neighbourhood) => {
+            // Get values for both years
+            const baseValue = +neighbourhood.properties[baseAttribute] || 0
+            const compareValue = +neighbourhood.properties[compareAttribute] || 0
+            const diff = compareValue - baseValue
+            return diff
+          }),
+        )
+      : calcMedian($allNeighbourhoodsJSONData.features.map((neighbourhood) => +neighbourhood.properties[baseAttribute])),
     medianValueGemeente: 0,
     medianValueBuurt: 0,
     medianValueWijktype: 0,
   }
 
+  // This is used for showing comparison values
   let medianValuesDictOtherYear = {
     medianValueNederland: 0,
     medianValueGemeente: 0,
@@ -46,9 +73,18 @@
     const municipalityFilter = $allNeighbourhoodsJSONData.features.filter(
       (neighbourhood) => neighbourhood.properties[$municipalityCodeAbbreviation] === $municipalitySelection,
     )
-    medianValuesDict["medianValueGemeente"] = calcMedian(
-      municipalityFilter.map((neighbourhood) => neighbourhood.properties[getIndicatorAttribute(indicator, indicator.attribute)]),
-    )
+
+    medianValuesDict["medianValueGemeente"] = isDifferenceMode
+      ? calcMedian(
+          municipalityFilter.map((neighbourhood) => {
+            // Get values for both years
+            const baseValue = +neighbourhood.properties[baseAttribute] || 0
+            const compareValue = +neighbourhood.properties[compareAttribute] || 0
+            const diff = compareValue - baseValue
+            return diff
+          }),
+        )
+      : calcMedian(municipalityFilter.map((neighbourhood) => +neighbourhood.properties[baseAttribute]))
   } else {
     medianValuesDict["medianValueGemeente"] = 0
   }
@@ -58,14 +94,35 @@
     const neighbourhoodFilter = $allNeighbourhoodsJSONData.features.filter(
       (neighbourhood) => neighbourhood.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection,
     )
-    medianValuesDict["medianValueBuurt"] =
-      neighbourhoodFilter[0].properties[getIndicatorAttribute(indicator, indicator.attribute)] !== null
-        ? Math.round(neighbourhoodFilter[0].properties[getIndicatorAttribute(indicator, indicator.attribute)] * 100) / 100
-        : "Geen data"
 
-    medianValuesDict["medianValueWijktype"] = calcMedian(
-      $districtTypeJSONData.features.map((neighbourhood) => neighbourhood.properties[getIndicatorAttribute(indicator, indicator.attribute)]),
-    )
+    if (isDifferenceMode) {
+      // Calculate difference for the selected neighborhood
+      const baseValue = +neighbourhoodFilter[0].properties[baseAttribute] || 0
+      const compareValue = +neighbourhoodFilter[0].properties[compareAttribute] || 0
+      const diffValue = compareValue - baseValue
+
+      medianValuesDict["medianValueBuurt"] = !isNaN(diffValue) ? Math.round(diffValue * 100) / 100 : "Geen data"
+
+      // Calculate difference for the district type
+      medianValuesDict["medianValueWijktype"] = calcMedian(
+        $districtTypeJSONData.features.map((neighbourhood) => {
+          const baseVal = +neighbourhood.properties[baseAttribute] || 0
+          const compareVal = +neighbourhood.properties[compareAttribute] || 0
+          const diff = compareVal - baseVal
+          return diff
+        }),
+      )
+    } else {
+      // Regular mode - show single value
+      medianValuesDict["medianValueBuurt"] =
+        neighbourhoodFilter[0].properties[baseAttribute] !== null
+          ? Math.round(neighbourhoodFilter[0].properties[baseAttribute] * 100) / 100
+          : "Geen data"
+
+      medianValuesDict["medianValueWijktype"] = calcMedian(
+        $districtTypeJSONData.features.map((neighbourhood) => neighbourhood.properties[baseAttribute]),
+      )
+    }
   } else {
     medianValuesDict["medianValueBuurt"] = 0
     medianValuesDict["medianValueWijktype"] = 0
@@ -73,32 +130,44 @@
     medianValuesDictOtherYear["medianValueWijktype"] = 0
   }
 
-  $: xScaleMin = min([
-    0,
-    medianValuesDict["medianValueNederland"],
-    medianValuesDict["medianValueGemeente"],
-    medianValuesDict["medianValueBuurt"],
-    medianValuesDict["medianValueWijktype"],
-  ])
-  // grondwater hoog kan negatief zijn, en de schaal moet wat opgerekt
-  if (xScaleMin < 0) {
-    xScaleMin -= 10
-  }
+  // Declare variables for scale
+  let xScaleMin = 0
+  let xDomain = [0, 100]
 
-  let xDomain
+  // Calculate min and max values for the scale
   $: {
-    let medianValues = [
+    // Filter out non-numeric values
+    const numericValues = [
       medianValuesDict["medianValueNederland"],
       medianValuesDict["medianValueGemeente"],
       medianValuesDict["medianValueBuurt"],
       medianValuesDict["medianValueWijktype"],
-    ]
-    xDomain = [0, max(medianValues)]
+    ].filter((val) => typeof val === "number")
+
+    // Calculate min and max
+    const minValue = min(numericValues)
+    const maxValue = max(numericValues)
+
+    // For difference mode, we need a diverging scale that includes zero
+    if (isDifferenceMode) {
+      // Add some padding to the scale
+      const padding = Math.max(Math.abs(minValue || 0), Math.abs(maxValue || 0)) * 0.1
+      xScaleMin = minValue < 0 ? minValue - padding : -1 // Ensure negative values are shown
+      xDomain = [xScaleMin, maxValue + padding]
+    } else {
+      // For regular mode, start at 0
+      xScaleMin = minValue < 0 ? minValue - 1 : 0
+      xDomain = [xScaleMin, maxValue * 1.1] // Add 10% padding
+    }
   }
 
   $: xScaleStats = scaleLinear()
     .domain(xDomain)
-    .range([0, statsWidth - 240])
+    .range(
+      isDifferenceMode
+        ? [30, statsWidth - 300] // More space on left for difference mode
+        : [0, statsWidth - 240],
+    )
 </script>
 
 <div class="indicator-stats" style="height: {bodyHeight * 0.2 * 0.25}px" bind:clientWidth={statsWidth}>

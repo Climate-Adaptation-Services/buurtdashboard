@@ -3,20 +3,25 @@
 
   export let indicator
 
-  let options
+  let options = []
   let selectedAHN
+  let selectedDifference = "Difference"
 
+  // Parse AHN versions from the indicator
   const ahnVersions = indicator.AHNversie.split(",")
 
+  // Reactive statement to update options when data changes
   $: {
     if ($selectedNeighbourhoodJSONData) {
-      options = ahnVersions.map((ahn) => {
-        return { AHN: ahn, Jaar: $selectedNeighbourhoodJSONData.properties["Jaar" + ahn] }
-      })
+      // For a selected neighborhood, get years directly from its properties
+      options = ahnVersions.map((ahn) => ({
+        AHN: ahn,
+        Jaar: $selectedNeighbourhoodJSONData.properties["Jaar" + ahn],
+      }))
     } else if ($neighbourhoodsInMunicipalityJSONData) {
-      options = ahnVersions.map((ahn) => {
-        return { AHN: ahn, Jaar: [] }
-      })
+      // For municipality view, collect all unique years
+      options = ahnVersions.map((ahn) => ({ AHN: ahn, Jaar: [] }))
+
       $neighbourhoodsInMunicipalityJSONData.features.forEach((nh) => {
         ahnVersions.forEach((ahn) => {
           if (!options.find((j) => j.AHN === ahn).Jaar.includes(nh.properties["Jaar" + ahn])) {
@@ -24,32 +29,99 @@
           }
         })
       })
-    } else {
-      options = [
-        { AHN: "AHN2", Jaar: "2006 - 2012" },
-        { AHN: "AHN4", Jaar: "2018 - 2020" },
-      ]
     }
   }
 
+  // Update selected AHN when neighborhood data changes
   selectedNeighbourhoodJSONData.subscribe(() => {
     if ($selectedNeighbourhoodJSONData) {
       selectedAHN = $AHNSelecties[indicator.title]
     }
   })
 
-  let selectedDifference = "Difference"
-
+  /**
+   * Handle base year selection change
+   */
   function yearClick(change) {
     const newAHN = change.target.value
-    $AHNSelecties[indicator.title] = newAHN
+    
+    // Check if we're currently in difference mode
+    const currentSelection = $AHNSelecties[indicator.title]
+    const isDifferenceMode = currentSelection && typeof currentSelection === 'object' && currentSelection.isDifference
+    
+    if (isDifferenceMode) {
+      // Maintain difference mode but update the base year
+      $AHNSelecties[indicator.title] = {
+        baseYear: newAHN,
+        compareYear: currentSelection.compareYear,
+        isDifference: true
+      }
+      
+      // If the new base year is >= compare year, find a new valid compare year
+      const baseNum = parseInt(newAHN.replace(/\D/g, "") || "0", 10)
+      const compareNum = parseInt(currentSelection.compareYear.replace(/\D/g, "") || "0", 10)
+      
+      if (baseNum >= compareNum) {
+        // Find the next available year after the new base year
+        const nextOption = options.find(option => {
+          if (!option || !option.AHN) return false
+          const optionNum = parseInt(option.AHN.replace(/\D/g, "") || "0", 10)
+          return optionNum > baseNum
+        })
+        
+        if (nextOption) {
+          $AHNSelecties[indicator.title].compareYear = nextOption.AHN
+          selectedDifference = nextOption.AHN
+        } else {
+          // No valid compare year available, revert to regular mode
+          $AHNSelecties[indicator.title] = newAHN
+          selectedDifference = "Difference"
+        }
+      } else {
+        // Keep the current compare year
+        selectedDifference = currentSelection.compareYear
+      }
+    } else {
+      // Regular mode - just update the base year
+      $AHNSelecties[indicator.title] = newAHN
+    }
+    
     AHNSelecties.set($AHNSelecties)
     selectedAHN = newAHN
   }
 
+  /**
+   * Determine if an option should be shown in the difference dropdown
+   * Only shows years later than the selected base year
+   */
+  function isLaterVersion(optionAHN) {
+    try {
+      if (!optionAHN || !selectedAHN) return false
+
+      // Handle case when selectedAHN is an object (difference mode)
+      const baseAHN = typeof selectedAHN === "object" ? selectedAHN.baseYear : selectedAHN
+
+      // Make sure we're working with strings
+      const optionStr = String(optionAHN)
+      const selectedStr = String(baseAHN)
+
+      // Extract numeric parts from AHN versions (e.g., AHN2 → 2)
+      const optionNum = parseInt(optionStr.replace(/\D/g, "") || "0", 10)
+      const selectedNum = parseInt(selectedStr.replace(/\D/g, "") || "0", 10)
+
+      return optionNum > selectedNum
+    } catch (e) {
+      console.error("Error comparing AHN versions:", e)
+      return false
+    }
+  }
+
+  /**
+   * Handle difference year selection change
+   */
   function yearClickDifference(change) {
     const differenceAHN = change.target.value
-    
+
     if (differenceAHN === "Difference") {
       // Reset to single year selection
       $AHNSelecties[indicator.title] = selectedAHN
@@ -59,11 +131,11 @@
       $AHNSelecties[indicator.title] = {
         baseYear: selectedAHN,
         compareYear: differenceAHN,
-        isDifference: true
+        isDifference: true,
       }
       selectedDifference = differenceAHN
     }
-    
+
     AHNSelecties.set($AHNSelecties)
   }
 </script>
@@ -94,9 +166,13 @@
         {:else}
           <option value="Difference">Stop vergelijken</option>
         {/if}
-        {#each options.slice(1) as option}
-          <option value={option.AHN} selected={option.Jaar === selectedDifference}>{option.Jaar}</option>
-        {/each}
+        {#if options && options.length > 0}
+          {#each options as option}
+            {#if option && option.AHN && isLaterVersion(option.AHN)}
+              <option value={option.AHN} selected={option.AHN === selectedDifference}>{option.Jaar}</option>
+            {/if}
+          {/each}
+        {/if}
       </select>
       {#if selectedDifference !== "Difference"}
         <span class="dropdown-arrow">&#9662;</span>
