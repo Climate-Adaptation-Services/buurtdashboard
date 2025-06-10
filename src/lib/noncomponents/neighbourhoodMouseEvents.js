@@ -55,26 +55,53 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
     }
 
     if (mapType === 'indicator map') {
-      const tooltipValueColor = (indicator.numerical)
-        ? (feature.properties[indicatorAttribute])
-          ? indicatorValueColorscale(feature.properties[indicatorAttribute])
-          : '#000000'
-        : (indicator.aggregatedIndicator)
-          ? indicatorValueColorscale(getMostCommonClass(indicator, feature))
-          : indicatorValueColorscale(getClassByIndicatorValue(indicator, feature.properties[getIndicatorAttribute(indicator, indicator.attribute)]))
-
-      const tooltipValue = (indicator.numerical)
-        // check of dit iets is
-        ? (/\d/.test(feature.properties[indicatorAttribute]))
-          ? Math.round(+feature.properties[indicatorAttribute] * 100) / 100
-          : 'Geen data'
-        : (indicator.aggregatedIndicator)
+      // Check if we're in difference mode
+      const ahnSelection = get(AHNSelecties)[indicator.title]
+      const isDifferenceMode = ahnSelection && typeof ahnSelection === 'object' && ahnSelection.isDifference
+      
+      let tooltipValueColor, tooltipValue, tooltipIndicator
+      
+      if (indicator.numerical) {
+        if (isDifferenceMode) {
+          // For difference mode, use the calculated difference value
+          const diffValue = feature.properties.calculatedDifference
+          
+          // Format the difference value with a + sign for positive values
+          tooltipValue = diffValue > 0 
+            ? "+" + (Math.round(diffValue * 100) / 100).toFixed(1)
+            : (Math.round(diffValue * 100) / 100).toFixed(1)
+          
+          // Use the same color scale as defined in Indicator.svelte
+          tooltipValueColor = indicatorValueColorscale(diffValue)
+          
+          // Include both years in the tooltip title
+          tooltipIndicator = `${indicator.title} (${ahnSelection.compareYear} vs ${ahnSelection.baseYear})`
+        } else {
+          // Regular numerical indicator
+          tooltipValue = /\d/.test(feature.properties[indicatorAttribute])
+            ? Math.round(+feature.properties[indicatorAttribute] * 100) / 100
+            : 'Geen data'
+          tooltipValueColor = feature.properties[indicatorAttribute]
+            ? indicatorValueColorscale(feature.properties[indicatorAttribute])
+            : '#000000'
+          tooltipIndicator = indicator.title
+        }
+      } else {
+        // Non-numerical indicator
+        tooltipValue = indicator.aggregatedIndicator
           ? getMostCommonClass(indicator, feature)
           : getClassByIndicatorValue(indicator, feature.properties[getIndicatorAttribute(indicator, indicator.attribute)])
+        
+        tooltipValueColor = indicator.aggregatedIndicator
+          ? indicatorValueColorscale(getMostCommonClass(indicator, feature))
+          : indicatorValueColorscale(getClassByIndicatorValue(indicator, feature.properties[getIndicatorAttribute(indicator, indicator.attribute)]))
+        
+        tooltipIndicator = indicator.title
+      }
 
       // @ts-ignore
       tooltipValues.set({
-        indicator: indicator.title,
+        indicator: tooltipIndicator,
         value: tooltipValue,
         color: tooltipValueColor
       })

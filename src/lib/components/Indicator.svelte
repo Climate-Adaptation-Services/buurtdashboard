@@ -27,9 +27,17 @@
         // this can deal with any amount of colors in the scale
         const step = (rangeExtent[1] - rangeExtent[0]) / (indicator.color.range.length - 1)
 
+        // Check if we're in difference mode
+        const ahnSelection = $AHNSelecties[indicator.title]
+        const isDifferenceMode = ahnSelection && typeof ahnSelection === 'object' && ahnSelection.isDifference
+        
         // if looking at difference between years
-        if ($AHNSelecties[indicator.title] === "Difference") {
-          indicatorValueColorscale = scaleLinear().domain([-10, 0, 20]).range(["orange", "lightgrey", "purple"])
+        if (isDifferenceMode) {
+          // Create a diverging color scale for difference values
+          // Using purple for positive values and orange for negative values
+          indicatorValueColorscale = scaleLinear()
+            .domain([-10, 0, 10])
+            .range(["#E1575A", "#cccccc", "#4682b4"])
         } else {
           indicatorValueColorscale = scaleLinear()
             .domain([...Array(indicator.color.range.length).keys()].map((i) => rangeExtent[0] + i * step))

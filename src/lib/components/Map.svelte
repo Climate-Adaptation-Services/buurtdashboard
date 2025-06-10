@@ -49,9 +49,30 @@
     select(".tooltip-multi" + indicator.attribute).style("visibility", "hidden")
   }
 
-  function getNumericalAttribute() {
-    if ($AHNSelecties[indicator.title] === "Difference") {
-      return getIndicatorAttribute(indicator, indicator.attribute).slice(0, -4) + "Difference"
+  // Check if we're in difference mode
+  $: isDifferenceMode = indicator && $AHNSelecties[indicator.title] && 
+      typeof $AHNSelecties[indicator.title] === 'object' && 
+      $AHNSelecties[indicator.title].isDifference
+      
+  // Calculate difference values for each feature when in difference mode
+  $: differenceValues = isDifferenceMode && $currentJSONData && $currentJSONData.features ? 
+    $currentJSONData.features.map(feature => {
+      // Store the difference value in a temporary property
+      const baseAttribute = getIndicatorAttribute(indicator, indicator.attribute)
+      const compareAttribute = indicator.attribute + $AHNSelecties[indicator.title].compareYear
+      
+      const baseValue = +feature.properties[baseAttribute] || 0
+      const compareValue = +feature.properties[compareAttribute] || 0
+      
+      // Store the calculated difference
+      feature.properties.calculatedDifference = compareValue - baseValue
+      return feature
+    }) : null
+  
+  // Function to get the appropriate attribute for coloring the map
+  function getNumericalAttribute(feature) {
+    if (isDifferenceMode) {
+      return 'calculatedDifference'
     } else {
       return getIndicatorAttribute(indicator, indicator.attribute)
     }
@@ -76,7 +97,7 @@
             ? // check if value not null
               feature.properties[getIndicatorAttribute(indicator, indicator.attribute)] !== null &&
               feature.properties[getIndicatorAttribute(indicator, indicator.attribute)] !== ""
-              ? indicatorValueColorscale(feature.properties[getNumericalAttribute()])
+              ? indicatorValueColorscale(feature.properties[getNumericalAttribute(feature)])
               : "#000000"
             : indicator.aggregatedIndicator
               ? indicatorValueColorscale(getMostCommonClass(indicator, feature))

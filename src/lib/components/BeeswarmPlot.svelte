@@ -164,9 +164,7 @@
       cx={node.x}
       cy={node.y}
       r={node.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection ? $circleRadius + 3 : $circleRadius}
-      fill={differenceValues ? 
-        (node.diffValue > 0 ? "#4682b4" : node.diffValue < 0 ? "#b44646" : "#cccccc") : 
-        indicatorValueColorscale(+node.properties[indicatorAttribute])}
+      fill={indicatorValueColorscale(differenceValues ? node.diffValue : +node.properties[indicatorAttribute])}
       stroke-width="3"
       on:mouseover={(e) => {
         // If we're showing a difference plot, add the diffValue to the node properties
