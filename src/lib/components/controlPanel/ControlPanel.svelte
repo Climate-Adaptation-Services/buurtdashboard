@@ -72,21 +72,23 @@
       <img src={$configStore.sidebarImage} class="dord-icon" alt="Sidebar background" />
     {/if}
     <div class="download-and-about">
-      <div class="about" on:click={() => laatMeerInfoPanelZien("intro")}>
+      <!-- <div class="about" on:click={() => laatMeerInfoPanelZien("intro")}> -->
+      <div class="about">
         <img src="./about.png" width="30px" />
         <p class="download-and-about-text">Intro dashboard</p>
       </div>
-      <div class="about" on:click={() => laatMeerInfoPanelZien("graphs")}>
+      <!-- <div class="about" on:click={() => laatMeerInfoPanelZien("graphs")}> -->
+      <div class="about">
         <img src="./uitleg-grafieken.png" width="40px" />
         <p class="download-and-about-text">{t("Uitleg_grafieken")}</p>
       </div>
-      <div class="download">
+      <!-- <div class="download">
         <a
           href="https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/data-download/Buurt2024BuurtdashboardDataset20250416.xlsx"
           download="BuurtdashboardDownload20241218"><img src="./download.png" width="30px" /></a
         >
         <p class="download-and-about-text">Download data</p>
-      </div>
+      </div> -->
     </div>
     <br />
 

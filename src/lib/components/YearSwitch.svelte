@@ -44,26 +44,56 @@
     })
   }
 
-  AHNSelecties.subscribe(() => {
-    const currentSelection = $AHNSelecties[indicator.title]
-    
-    // Handle both regular mode and difference mode
-    if (currentSelection && typeof currentSelection === "object" && currentSelection.isDifference) {
-      // In difference mode, set selectedAHN to the baseYear
-      selectedAHN = currentSelection.baseYear
-      selectedDifference = currentSelection.compareYear
-    } else {
-      // In regular mode, set selectedAHN directly
-      selectedAHN = currentSelection
+  // Helper function to update local state from AHNSelecties
+  function updateFromSelection(currentSelection) {
+    if (currentSelection) {
+      if (typeof currentSelection === "object") {
+        // Use the object structure
+        selectedAHN = currentSelection.baseYear
+        selectedDifference = currentSelection.isDifference ? currentSelection.compareYear : "Difference"
+      } else {
+        // Legacy format - convert to object structure on next update
+        selectedAHN = currentSelection
+        selectedDifference = "Difference"
+      }
     }
+  }
+
+  // Subscribe to AHNSelecties changes
+  AHNSelecties.subscribe(() => {
+    updateFromSelection($AHNSelecties[indicator.title])
   })
 
   // Update selected AHN when neighborhood data changes
   selectedNeighbourhoodJSONData.subscribe(() => {
     if ($selectedNeighbourhoodJSONData) {
-      selectedAHN = $AHNSelecties[indicator.title]
+      updateFromSelection($AHNSelecties[indicator.title])
     }
   })
+
+  /**
+   * Helper function to get or create a selection object
+   */
+  function getSelectionObject(selection) {
+    if (!selection) {
+      return {
+        baseYear: options.length > 0 ? options[0].AHN : null,
+        compareYear: null,
+        isDifference: false,
+      }
+    }
+
+    if (typeof selection === "object") {
+      return selection
+    }
+
+    // Convert string to object
+    return {
+      baseYear: selection,
+      compareYear: null,
+      isDifference: false,
+    }
+  }
 
   /**
    * Handle base year selection change
@@ -71,45 +101,43 @@
   function yearClick(change) {
     const newAHN = change.target.value
 
-    // Check if we're currently in difference mode
-    const currentSelection = $AHNSelecties[indicator.title]
-    const isDifferenceMode = currentSelection && typeof currentSelection === "object" && currentSelection.isDifference
+    // Get current selection as an object
+    const selectionObj = getSelectionObject($AHNSelecties[indicator.title])
+    const isDifferenceMode = selectionObj.isDifference
+    const compareYear = selectionObj.compareYear
 
-    if (isDifferenceMode) {
-      // Maintain difference mode but update the base year
-      $AHNSelecties[indicator.title] = {
-        baseYear: newAHN,
-        compareYear: currentSelection.compareYear,
-        isDifference: true,
-      }
+    // Update with new base year
+    $AHNSelecties[indicator.title] = {
+      baseYear: newAHN,
+      compareYear: compareYear,
+      isDifference: isDifferenceMode,
+    }
 
-      // If the new base year is >= compare year, find a new valid compare year
-      const baseNum = parseInt(newAHN.replace(/\D/g, "") || "0", 10)
-      const compareNum = parseInt(currentSelection.compareYear.replace(/\D/g, "") || "0", 10)
+    // If the new base year is >= compare year, find a new valid compare year
+    const baseNum = parseInt(newAHN.replace(/\D/g, "") || "0", 10)
+    const compareNum = parseInt(compareYear.replace(/\D/g, "") || "0", 10)
 
-      if (baseNum >= compareNum) {
-        // Find the next available year after the new base year
-        const nextOption = options.find((option) => {
-          if (!option || !option.AHN) return false
-          const optionNum = parseInt(option.AHN.replace(/\D/g, "") || "0", 10)
-          return optionNum > baseNum
-        })
+    if (baseNum >= compareNum) {
+      // Find the next available year after the new base year
+      const nextOption = options.find((option) => {
+        if (!option || !option.AHN) return false
+        const optionNum = parseInt(option.AHN.replace(/\D/g, "") || "0", 10)
+        return optionNum > baseNum
+      })
 
-        if (nextOption) {
-          $AHNSelecties[indicator.title].compareYear = nextOption.AHN
-          selectedDifference = nextOption.AHN
-        } else {
-          // No valid compare year available, revert to regular mode
-          $AHNSelecties[indicator.title] = newAHN
-          selectedDifference = "Difference"
-        }
+      if (nextOption) {
+        // Update compare year in the object
+        $AHNSelecties[indicator.title].compareYear = nextOption.AHN
+        selectedDifference = nextOption.AHN
       } else {
-        // Keep the current compare year
-        selectedDifference = currentSelection.compareYear
+        // No valid compare year available, revert to regular mode
+        $AHNSelecties[indicator.title].isDifference = false
+        $AHNSelecties[indicator.title].compareYear = null
+        selectedDifference = "Difference"
       }
     } else {
-      // Regular mode - just update the base year
-      $AHNSelecties[indicator.title] = newAHN
+      // Keep the current compare year
+      selectedDifference = compareYear
     }
 
     AHNSelecties.set($AHNSelecties)
@@ -148,14 +176,21 @@
   function yearClickDifference(change) {
     const differenceAHN = change.target.value
 
+    // Get current selection as an object
+    const selectionObj = getSelectionObject($AHNSelecties[indicator.title])
+
     if (differenceAHN === "Difference") {
-      // Reset to single year selection
-      $AHNSelecties[indicator.title] = selectedAHN
+      // Turn off difference mode but keep the object structure
+      $AHNSelecties[indicator.title] = {
+        baseYear: selectionObj.baseYear,
+        compareYear: null,
+        isDifference: false,
+      }
       selectedDifference = "Difference"
     } else {
       // Store both years for difference calculation
       $AHNSelecties[indicator.title] = {
-        baseYear: selectedAHN,
+        baseYear: selectionObj.baseYear,
         compareYear: differenceAHN,
         isDifference: true,
       }

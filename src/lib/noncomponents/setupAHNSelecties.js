@@ -4,9 +4,16 @@ export function setupAHNSelecties(data) {
 
   let AHNSelectiesTemp = {}
   data.metadata.forEach(indicator => {
-    AHNSelectiesTemp[indicator.Titel] = (indicator.AHNversie)
+    const baseYear = (indicator.AHNversie)
       ? indicator.AHNversie.split(',')[indicator.AHNversie.split(',').length - 1]
       : ''
+    
+    // Use the consistent object structure
+    AHNSelectiesTemp[indicator.Titel] = {
+      baseYear: baseYear,
+      compareYear: null,
+      isDifference: false
+    }
   });
   AHNSelecties.set(AHNSelectiesTemp)
 }

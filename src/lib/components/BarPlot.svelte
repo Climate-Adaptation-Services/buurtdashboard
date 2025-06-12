@@ -8,6 +8,7 @@
     neighbourhoodSelection,
     selectedNeighbourhoodJSONData,
     AHNSelecties,
+    configStore,
   } from "$lib/stores"
   import { scaleLinear, scaleBand, stack } from "d3"
   import { checkContrast } from "$lib/noncomponents/checkContrast"
@@ -87,6 +88,7 @@
             width={xScale(st[1]) - xScale(st[0])}
             height={yScale.bandwidth() / 2.0}
             stroke-width="4"
+            style={st.data.group === "Nederland" && $configStore && $configStore.dashboardTitle === "Buurtdashboard Dordrecht" ? "visibility: hidden;" : ""}
           >
           </rect>
           {#if xScale(st[1]) - xScale(st[0]) > 40}
@@ -104,7 +106,9 @@
       </g>
     {/each}
     {#each regios as regio, i}
-      <text style="fill:#645F5E" x={graphWidth / 2} text-anchor="middle" font-size="15px" y={i * yScale.bandwidth() - 5}>{getRegionName(regio)}</text>
+      {#if regio !== "Nederland" || !($configStore && $configStore.dashboardTitle === "Buurtdashboard Dordrecht")}
+        <text style="fill:#645F5E" x={graphWidth / 2} text-anchor="middle" font-size="15px" y={i * yScale.bandwidth() - 5}>{getRegionName(regio)}</text>
+      {/if}
     {/each}
   </g>
 </svg>

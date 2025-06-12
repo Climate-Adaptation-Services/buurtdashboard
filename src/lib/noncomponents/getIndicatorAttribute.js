@@ -20,13 +20,6 @@ export function getIndicatorAttribute(indicator, attribute, specificYear) {
     return attribute
   }
   
-  // Check if this is a difference calculation (object with isDifference property)
-  if (ahnSelection && typeof ahnSelection === 'object' && ahnSelection.isDifference) {
-    // For difference calculation, return the base year attribute
-    // The actual difference calculation will be done in the component
-    return attribute + ahnSelection.baseYear
-  } else {
-    // Regular single year selection
-    return attribute + ahnSelection
-  }
+  // Handle the consistent object structure
+  return attribute + (typeof ahnSelection === 'object' ? ahnSelection.baseYear : ahnSelection)
 }

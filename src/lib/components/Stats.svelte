@@ -9,6 +9,7 @@
     municipalityCodeAbbreviation,
     selectedNeighbourhoodJSONData,
     AHNSelecties,
+    configStore,
   } from "$lib/stores"
   import Stat from "./Stat.svelte"
   import { scaleLinear, min, max } from "d3"
@@ -170,7 +171,7 @@
     )
 </script>
 
-<div class="indicator-stats" style="height: {bodyHeight * 0.2 * 0.25}px" bind:clientWidth={statsWidth}>
+<div class="indicator-stats" style="height: {bodyHeight * 0.2 * 0.25}px; {$configStore && $configStore.dashboardTitle === 'Buurtdashboard Dordrecht' ? 'visibility: hidden;' : ''}" bind:clientWidth={statsWidth}>
   <Stat
     {indicatorValueColorscale}
     {indicator}
