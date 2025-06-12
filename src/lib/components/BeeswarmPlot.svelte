@@ -1,6 +1,6 @@
 <script>
   import { neighbourhoodSelection, neighbourhoodCodeAbbreviation, circleRadius, selectedNeighbourhoodJSONData, AHNSelecties } from "$lib/stores"
-  import { extent, scaleLinear, scaleLog, select } from "d3"
+  import { extent, scaleLinear, scaleLog, select, min, max } from "d3"
   import XAxis from "$lib/components/XAxis.svelte"
   import { forceSimulation, forceY, forceX, forceCollide, forceManyBody } from "d3-force"
   import { getClassName } from "$lib/noncomponents/getClassName"
@@ -54,13 +54,57 @@
   // Use either regular values or difference values based on whether we're doing a comparison
   $: plotData = differenceValues || neighbourhoodsInMunicipalityFeaturesClone
 
+  // Calculate global min and max values across all AHN versions for this indicator
+  $: globalExtent = (() => {
+    // Only calculate if we're not in difference mode
+    if (differenceValues) return null;
+    
+    // Get all possible AHN versions for this indicator
+    const ahnVersions = indicator.AHNversie.split(",");
+    
+    // Calculate min and max across all versions
+    let minVal = Infinity;
+    let maxVal = -Infinity;
+    
+    ahnVersions.forEach(ahnVersion => {
+      // Get the attribute for this specific AHN version
+      const ahnAttribute = getIndicatorAttribute(indicator, indicator.attribute, ahnVersion);
+      
+      // Filter out null and empty values
+      const validData = neighbourhoodsInMunicipalityFeaturesClone.filter(
+        d => d.properties[ahnAttribute] !== null && d.properties[ahnAttribute] !== ""
+      );
+      
+      // Special handling for logarithmic scale indicators
+      if (indicator.title === "Groen per inwoner") {
+        const validPositiveData = validData.filter(d => +d.properties[ahnAttribute] > 0);
+        if (validPositiveData.length > 0) {
+          const extentForVersion = extent(validPositiveData, d => +d.properties[ahnAttribute]);
+          minVal = Math.min(minVal, extentForVersion[0]);
+          maxVal = Math.max(maxVal, extentForVersion[1]);
+        }
+      } else {
+        if (validData.length > 0) {
+          const extentForVersion = extent(validData, d => +d.properties[ahnAttribute]);
+          minVal = Math.min(minVal, extentForVersion[0]);
+          maxVal = Math.max(maxVal, extentForVersion[1]);
+        }
+      }
+    });
+    
+    return minVal !== Infinity && maxVal !== -Infinity ? [minVal, maxVal] : [0, 1];
+  })();
+
   // Make xScaleExtent reactive to indicatorAttribute changes
   $: xScaleExtent = differenceValues
     ? extent(differenceValues, (d) => d.diffValue)
     : extent(neighbourhoodsInMunicipalityFeaturesClone, (d) => +d.properties[indicatorAttribute])
 
   // Ensure the domain includes zero for difference plots and has appropriate padding
-  $: xDomain = differenceValues ? [Math.min(xScaleExtent[0], 0), Math.max(xScaleExtent[1], 0)] : xScaleExtent
+  // For base year view, use the global extent to keep axis consistent across AHN selections
+  $: xDomain = differenceValues 
+    ? [Math.min(xScaleExtent[0], 0), Math.max(xScaleExtent[1], 0)] 
+    : globalExtent
 
   $: xScaleBeeswarm =
     indicator.title !== "Groen per inwoner"
