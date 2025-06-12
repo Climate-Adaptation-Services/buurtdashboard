@@ -48,6 +48,9 @@
         const compareValue = +d.properties[compareAttribute] || 0
         // Store the difference in a temporary property
         featureCopy.diffValue = compareValue - baseValue
+        // Ensure the neighborhood code is preserved for stable identity
+        featureCopy.properties = featureCopy.properties || {}
+        featureCopy.properties[$neighbourhoodCodeAbbreviation] = d.properties[$neighbourhoodCodeAbbreviation]
         return featureCopy
       })
     : null
@@ -56,7 +59,7 @@
   $: plotData = differenceValues || neighbourhoodsInMunicipalityFeaturesClone
 
   // Calculate global min and max values across all AHN versions for this indicator
-  $: globalExtent = getGlobalExtent(indicator, neighbourhoodsInMunicipalityFeaturesClone, !!differenceValues);
+  $: globalExtent = getGlobalExtent(indicator, neighbourhoodsInMunicipalityFeaturesClone, !!differenceValues)
 
   // Make xScaleExtent reactive to indicatorAttribute changes
   $: xScaleExtent = differenceValues
@@ -65,9 +68,7 @@
 
   // Ensure the domain includes zero for difference plots and has appropriate padding
   // For base year view, use the global extent to keep axis consistent across AHN selections
-  $: xDomain = differenceValues 
-    ? [Math.min(xScaleExtent[0], 0), Math.max(xScaleExtent[1], 0)] 
-    : globalExtent
+  $: xDomain = differenceValues ? [Math.min(xScaleExtent[0], 0), Math.max(xScaleExtent[1], 0)] : globalExtent
 
   $: xScaleBeeswarm =
     indicator.title !== "Groen per inwoner"
@@ -113,9 +114,33 @@
     }
   }
 
+  // Store previous node positions for smooth transitions
+  let previousNodePositions = {}
+
   function runSimulation() {
+    // Store current positions before stopping simulation
+    if (nodes && nodes.length > 0) {
+      nodes.forEach((node) => {
+        if (node.properties && node.properties[$neighbourhoodCodeAbbreviation]) {
+          previousNodePositions[node.properties[$neighbourhoodCodeAbbreviation]] = {
+            x: node.x || 0,
+            y: node.y || 0,
+          }
+        }
+      })
+    }
+
     // Stop any existing simulation
     simulation.stop()
+
+    // Apply previous positions to new data if available
+    plotData.forEach((d) => {
+      const id = d.properties && d.properties[$neighbourhoodCodeAbbreviation]
+      if (id && previousNodePositions[id]) {
+        d.x = previousNodePositions[id].x
+        d.y = previousNodePositions[id].y
+      }
+    })
 
     // Create a new simulation with the nodes
     simulation = forceSimulation(plotData)
@@ -127,12 +152,12 @@
           } else {
             return xScaleBeeswarm(+d.properties[indicatorAttribute])
           }
-        }).strength(0.7),
+        }).strength(0.5),
       )
       .force("y", forceY().y(70).strength(0.05))
       .force("charge", forceManyBody().strength(0.3)) // Moderate increase for initial repulsion
       .force("collide", forceCollide().radius($circleRadius * 1.25))
-      .alpha(0.6) // Moderate increase for initial energy
+      .alpha(0.4) // Lower initial energy for smoother transitions
       .alphaDecay(0.015) // Balanced decay rate
 
     // Set up the tick handler with a moderate boost at initialization only
@@ -148,7 +173,7 @@
         tickCount++
         // Moderate reheat only for the first 5 ticks
         if (tickCount < 5) {
-          simulation.alpha(0.5) // Less aggressive reheat
+          simulation.alpha(0.4) // Less aggressive reheat
         }
       }
     })
@@ -180,7 +205,7 @@
 {/if}
 
 <g class="inner-chart" transform="translate({margin.left}, {margin.top})">
-  {#each nodes as node (node.index + indicatorAttribute)}
+  {#each nodes as node (node.properties[$neighbourhoodCodeAbbreviation])}
     <circle
       class={getClassName(node, "node", indicator, "") + " " + "svgelements_" + node.properties[$neighbourhoodCodeAbbreviation]}
       stroke={node.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection ? "#E1575A" : "none"}
