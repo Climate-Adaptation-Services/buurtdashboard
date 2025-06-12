@@ -123,15 +123,27 @@
         }).strength(0.7),
       )
       .force("y", forceY().y(70).strength(0.05))
-      .force("charge", forceManyBody().strength(0.2)) // Reduced from 0.5
+      .force("charge", forceManyBody().strength(0.3)) // Moderate increase for initial repulsion
       .force("collide", forceCollide().radius($circleRadius * 1.25))
-      .alpha(0.3) // Reduced from 1 to lower initial energy
-      .alphaDecay(0.02) // Increased from 0.005 to cool down faster
+      .alpha(0.6) // Moderate increase for initial energy
+      .alphaDecay(0.015) // Balanced decay rate
 
-    // Set up the tick handler
+    // Set up the tick handler with a moderate boost at initialization only
+    let tickCount = 0
+    const maxInitialTicks = 15 // Fewer boosted ticks
+
     simulation.on("tick", () => {
       // Update nodes array to trigger Svelte reactivity
       nodes = simulation.nodes()
+
+      // Apply extra force only during the first few ticks
+      if (tickCount < maxInitialTicks) {
+        tickCount++
+        // Moderate reheat only for the first 5 ticks
+        if (tickCount < 5) {
+          simulation.alpha(0.5) // Less aggressive reheat
+        }
+      }
     })
 
     // Start the simulation
@@ -141,7 +153,10 @@
   }
 
   onMount(() => {
-    runSimulation()
+    // Run simulation with a slight delay to ensure DOM is ready
+    setTimeout(() => {
+      runSimulation()
+    }, 10)
   })
 
   // raise node on mount, hacky solution could be better

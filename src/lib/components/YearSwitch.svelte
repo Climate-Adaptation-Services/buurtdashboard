@@ -148,24 +148,17 @@
    * Determine if an option should be shown in the difference dropdown
    * Only shows years later than the selected base year
    */
-  function isLaterVersion(optionAHN) {
+  function shouldShowInDifferenceDropdown(optionAHN, index) {
     try {
-      if (!optionAHN || !selectedAHN) return false
-
-      // Handle case when selectedAHN is an object (difference mode)
-      const baseAHN = typeof selectedAHN === "object" ? selectedAHN.baseYear : selectedAHN
-
-      // Make sure we're working with strings
-      const optionStr = String(optionAHN)
-      const selectedStr = String(baseAHN)
-
-      // Extract numeric parts from AHN versions (e.g., AHN2 → 2)
-      const optionNum = parseInt(optionStr.replace(/\D/g, "") || "0", 10)
-      const selectedNum = parseInt(selectedStr.replace(/\D/g, "") || "0", 10)
-
-      return optionNum > selectedNum
+      if (!optionAHN) return false
+      
+      // Get the index of this option in the options array
+      const optionIndex = options.findIndex(opt => opt.AHN === optionAHN)
+      
+      // Show all options except the first one
+      return optionIndex > 0
     } catch (e) {
-      console.error("Error comparing AHN versions:", e)
+      console.error("Error evaluating dropdown options:", e)
       return false
     }
   }
@@ -188,13 +181,38 @@
       }
       selectedDifference = "Difference"
     } else {
+      // Extract numeric parts for comparison
+      const compareNum = parseInt(differenceAHN.replace(/\D/g, "") || "0", 10)
+      const baseNum = parseInt(selectionObj.baseYear.replace(/\D/g, "") || "0", 10)
+      
+      let newBaseYear = selectionObj.baseYear
+      
+      // If compareYear is earlier or the same as baseYear
+      if (compareNum <= baseNum) {
+        // Find the AHN before the compareYear
+        const sortedOptions = [...options].sort((a, b) => {
+          const aNum = parseInt(a.AHN.replace(/\D/g, "") || "0", 10)
+          const bNum = parseInt(b.AHN.replace(/\D/g, "") || "0", 10)
+          return aNum - bNum
+        })
+        
+        // Find the index of the compareYear
+        const compareIndex = sortedOptions.findIndex(opt => opt.AHN === differenceAHN)
+        
+        // If it's not the first option, set baseYear to the previous option
+        if (compareIndex > 0) {
+          newBaseYear = sortedOptions[compareIndex - 1].AHN
+        }
+      }
+      
       // Store both years for difference calculation
       $AHNSelecties[indicator.title] = {
-        baseYear: selectionObj.baseYear,
+        baseYear: newBaseYear,
         compareYear: differenceAHN,
         isDifference: true,
       }
       selectedDifference = differenceAHN
+      selectedAHN = newBaseYear
     }
 
     AHNSelecties.set($AHNSelecties)
@@ -228,8 +246,8 @@
           <option value="Difference">Stop vergelijken</option>
         {/if}
         {#if options && options.length > 0}
-          {#each options as option}
-            {#if option && option.AHN && isLaterVersion(option.AHN)}
+          {#each options as option, index}
+            {#if option && option.AHN && shouldShowInDifferenceDropdown(option.AHN, index)}
               <option value={option.AHN} selected={option.AHN === selectedDifference}>{option.Jaar}</option>
             {/if}
           {/each}
