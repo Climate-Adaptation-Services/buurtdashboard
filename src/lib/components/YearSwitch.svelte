@@ -19,18 +19,44 @@
         Jaar: $selectedNeighbourhoodJSONData.properties["Jaar" + ahn],
       }))
     } else if ($neighbourhoodsInMunicipalityJSONData) {
-      // For municipality view, collect all unique years
-      options = ahnVersions.map((ahn) => ({ AHN: ahn, Jaar: [] }))
+      findAHNyearsWithoutDuplicatesAndSort()
+    }
+  }
 
-      $neighbourhoodsInMunicipalityJSONData.features.forEach((nh) => {
-        ahnVersions.forEach((ahn) => {
-          if (!options.find((j) => j.AHN === ahn).Jaar.includes(nh.properties["Jaar" + ahn])) {
-            options.find((j) => j.AHN === ahn).Jaar += nh.properties["Jaar" + ahn]
+  function findAHNyearsWithoutDuplicatesAndSort() {
+    // For municipality view, collect all unique years
+    options = ahnVersions.map((ahn) => ({ AHN: ahn, Jaar: [] }))
+
+    $neighbourhoodsInMunicipalityJSONData.features.forEach((nh) => {
+      ahnVersions.forEach((ahn) => {
+        const ahnYear = nh.properties["Jaar" + ahn].split(". ")
+        ahnYear.forEach((year) => {
+          if (!options.find((j) => j.AHN === ahn).Jaar.includes(year)) {
+            options.find((j) => j.AHN === ahn).Jaar += year + ","
           }
         })
       })
-    }
+    })
+
+    options.forEach((option) => {
+      option.Jaar = option.Jaar.split(",").sort((a, b) => a - b)
+      option.Jaar = option.Jaar.slice(1)
+    })
   }
+
+  AHNSelecties.subscribe(() => {
+    const currentSelection = $AHNSelecties[indicator.title]
+    
+    // Handle both regular mode and difference mode
+    if (currentSelection && typeof currentSelection === "object" && currentSelection.isDifference) {
+      // In difference mode, set selectedAHN to the baseYear
+      selectedAHN = currentSelection.baseYear
+      selectedDifference = currentSelection.compareYear
+    } else {
+      // In regular mode, set selectedAHN directly
+      selectedAHN = currentSelection
+    }
+  })
 
   // Update selected AHN when neighborhood data changes
   selectedNeighbourhoodJSONData.subscribe(() => {
@@ -44,31 +70,31 @@
    */
   function yearClick(change) {
     const newAHN = change.target.value
-    
+
     // Check if we're currently in difference mode
     const currentSelection = $AHNSelecties[indicator.title]
-    const isDifferenceMode = currentSelection && typeof currentSelection === 'object' && currentSelection.isDifference
-    
+    const isDifferenceMode = currentSelection && typeof currentSelection === "object" && currentSelection.isDifference
+
     if (isDifferenceMode) {
       // Maintain difference mode but update the base year
       $AHNSelecties[indicator.title] = {
         baseYear: newAHN,
         compareYear: currentSelection.compareYear,
-        isDifference: true
+        isDifference: true,
       }
-      
+
       // If the new base year is >= compare year, find a new valid compare year
       const baseNum = parseInt(newAHN.replace(/\D/g, "") || "0", 10)
       const compareNum = parseInt(currentSelection.compareYear.replace(/\D/g, "") || "0", 10)
-      
+
       if (baseNum >= compareNum) {
         // Find the next available year after the new base year
-        const nextOption = options.find(option => {
+        const nextOption = options.find((option) => {
           if (!option || !option.AHN) return false
           const optionNum = parseInt(option.AHN.replace(/\D/g, "") || "0", 10)
           return optionNum > baseNum
         })
-        
+
         if (nextOption) {
           $AHNSelecties[indicator.title].compareYear = nextOption.AHN
           selectedDifference = nextOption.AHN
@@ -85,9 +111,9 @@
       // Regular mode - just update the base year
       $AHNSelecties[indicator.title] = newAHN
     }
-    
+
     AHNSelecties.set($AHNSelecties)
-    selectedAHN = newAHN
+    // selectedAHN = newAHN
   }
 
   /**
