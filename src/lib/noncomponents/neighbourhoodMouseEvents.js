@@ -135,7 +135,7 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
         tooltipValues.set({
           indicator: `${indicator.title} (${ahnSelection.compareYear} vs ${ahnSelection.baseYear})`,
           value: formattedDiffValue,
-          color: diffValue > 0 ? "#4682b4" : diffValue < 0 ? "#b44646" : "#cccccc"
+          color: indicatorValueColorscale(diffValue)
         })
       } else {
         // Regular tooltip for non-difference mode
