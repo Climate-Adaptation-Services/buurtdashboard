@@ -1,6 +1,7 @@
 import { dsvFormat } from 'd3-dsv'
 import { defaultConfig, dordrechtConfig } from '$lib/config'
 import { unzipSync, gunzipSync, strFromU8 } from 'fflate'
+import { BUURT_GEOJSON_URL, MUNICIPALITY_JSON_URL } from '$lib/datasets'
 
 export async function load({ url }) {
   // Access the URLSearchParams object
@@ -13,18 +14,55 @@ export async function load({ url }) {
   // Select the appropriate config object based on URL parameter
   const configObj = configParam === 'dordrecht' ? dordrechtConfig : defaultConfig;
 
-  // Fetch and parse metadata files
-  const metadataResponse = await fetch(configObj.metadataLocation)
-  const metadataText = await metadataResponse.text()
-  const metadata = dsvFormat(';').parse(metadataText)
+  // Start all fetches in parallel - including GeoJSON data
+  const [metadataPromise, metadataEnglishPromise, csvPromise, neighbourhoodGeoJsonPromise, municipalityGeoJsonPromise] = [
+    fetch(configObj.metadataLocation),
+    fetch(configObj.metadataLocationEnglish),
+    fetch(configObj.neighbourhoodCSVdataLocation),
+    fetch(BUURT_GEOJSON_URL),
+    fetch(MUNICIPALITY_JSON_URL)
+  ];
 
-  const metadataEnglishResponse = await fetch(configObj.metadataLocationEnglish)
-  const metadataEnglishText = await metadataEnglishResponse.text()
-  const metadata_english = dsvFormat(';').parse(metadataEnglishText)
+  // Wait for all fetches to complete
+  const [metadataResponse, metadataEnglishResponse, csvResponse, neighbourhoodGeoJsonResponse, municipalityGeoJsonResponse] = await Promise.all([
+    metadataPromise,
+    metadataEnglishPromise,
+    csvPromise,
+    neighbourhoodGeoJsonPromise,
+    municipalityGeoJsonPromise
+  ]);
 
-  // Handle zipped CSV file
-  const csvResponse = await fetch(configObj.neighbourhoodCSVdataLocation)
-  const zipBuffer = await csvResponse.arrayBuffer()
+  // Process the responses in parallel with error handling for GeoJSON data
+  let neighbourhoodGeoJson = null;
+  let municipalityGeoJson = null;
+  let metadataText = '';
+  let metadataEnglishText = '';
+  let zipBuffer;
+
+  try {
+    // Process the responses in parallel
+    const [metadataTextResult, metadataEnglishTextResult, zipBufferResult, neighbourhoodGeoJsonResult, municipalityGeoJsonResult] = await Promise.all([
+      metadataResponse.text(),
+      metadataEnglishResponse.text(),
+      csvResponse.arrayBuffer(),
+      neighbourhoodGeoJsonResponse.ok ? neighbourhoodGeoJsonResponse.json() : Promise.resolve(null),
+      municipalityGeoJsonResponse.ok ? municipalityGeoJsonResponse.json() : Promise.resolve(null)
+    ]);
+
+    // Assign the results
+    metadataText = metadataTextResult;
+    metadataEnglishText = metadataEnglishTextResult;
+    zipBuffer = zipBufferResult;
+    neighbourhoodGeoJson = neighbourhoodGeoJsonResult;
+    municipalityGeoJson = municipalityGeoJsonResult;
+  } catch (error) {
+    console.error('Error processing responses:', error);
+    // Continue with available data
+  }
+
+  // Parse metadata
+  const metadata = dsvFormat(';').parse(metadataText);
+  const metadata_english = dsvFormat(';').parse(metadataEnglishText);
 
   // Handle both zip and gzip formats
   let csvText;
@@ -37,13 +75,14 @@ export async function load({ url }) {
     csvText = strFromU8(files[fileName]);
   }
 
-  const buurtCSVdata = dsvFormat(';').parse(csvText)
-  console.log(buurtCSVdata)
+  const buurtCSVdata = dsvFormat(';').parse(csvText);
 
   return {
     lang,
     metadata,
     metadata_english,
     buurtCSVdata,
+    neighbourhoodGeoJson,
+    municipalityGeoJson
   };
 }

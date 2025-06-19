@@ -14,6 +14,8 @@ export function setupIndicators(data, eff, geb, kwe) {
 
   alleIndicatoren.set(indicatorsList)
 
+  console.log('indicatorsList', indicatorsList)
+
   return indicatorsList;
 }
 
@@ -27,11 +29,11 @@ function addIndicatorCategory(indicatorsList, indicators) {
     // add no data class
     const indicatorDomein = ['No data', ...indicator.Domein.split(',')]
     const noDataColor = '#333333'
-    const indicatorColors = (indicator['kwantitatief / categoraal / multiline'] !== 'kwantitatief')
+    const indicatorColors = (indicator['kwantitatief / categoraal / aggregated'] !== 'kwantitatief')
       ? [noDataColor, ...indicator.Kleur.split(',')]
       : indicator.Kleur.split(',')
 
-    if (indicator['kwantitatief / categoraal / multiline'] !== 'categoraal') {
+    if (indicator['kwantitatief / categoraal / aggregated'] !== 'categoraal') {
       indicatorDomein.slice(1).forEach((d, i) => {
         classes[d] = indicator.Indicatornaamtabel.split(',')[i]
       });
@@ -52,9 +54,9 @@ function addIndicatorCategory(indicatorsList, indicators) {
         range: indicatorColors
       },
       classes: classes,
-      numerical: (indicator['kwantitatief / categoraal / multiline'] === 'kwantitatief') ? true : false,
+      numerical: (indicator['kwantitatief / categoraal / aggregated'] === 'kwantitatief') ? true : false,
       link: indicator['Link kaartverhaal'],
-      aggregatedIndicator: (indicator['kwantitatief / categoraal / multiline'] === 'Multiline') ? true : false,
+      aggregatedIndicator: (indicator['kwantitatief / categoraal / aggregated'] === 'aggregated') ? true : false,
       source: indicator.Bron,
       description: indicator['Tekst vraagteken'],
       AHNversie: indicator['AHNversie'],

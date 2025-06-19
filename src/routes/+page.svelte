@@ -18,7 +18,7 @@
   import { browser } from "$app/environment"
   import LoadingIcon from "$lib/components/LoadingIcon.svelte"
   import { setLanguage } from "$lib/noncomponents/setLanguage.js"
-  import { fetchJSONdata } from "$lib/noncomponents/fetchJSONdata.js"
+  // GeoJSON data now comes from page data, no need for separate fetch
   import { processURLParameters } from "$lib/noncomponents/processURLParameters.js"
   import { setupAHNSelecties } from "$lib/noncomponents/setupAHNSelecties.js"
   import { getIndicatorAttribute } from "$lib/noncomponents/getIndicatorAttribute.js"
@@ -44,7 +44,8 @@
 
   // $: console.log("allIndicators", allIndicators)
 
-  const jsonResponse = fetchJSONdata()
+  // GeoJSON data is now available directly from page data
+  const geoJSONData = [data.municipalityGeoJson, data.neighbourhoodGeoJson]
 
   // de URL parameters laden
   $: if (browser) {
@@ -86,18 +87,16 @@
   <div class="sidebar" style="position:{screenWidth > 800 ? 'fixed' : 'relative'}">
     <div class="control-panel"><ControlPanel {indicatorsSelection} {allIndicators} /></div>
     <div class="map" bind:clientWidth={mapWidth} bind:clientHeight={mapHeight}>
-      {#await jsonResponse}
+      {#if data.municipalityGeoJson && data.neighbourhoodGeoJson}
+        <Map JSONdata={geoJSONData} CSVdata={data.buurtCSVdata} {mapWidth} {mapHeight} mapType={"main map"} />
+      {:else}
         <pre style="color:white">Kaart laden...</pre>
-      {:then response}
-        <Map JSONdata={response} CSVdata={data.buurtCSVdata} {mapWidth} {mapHeight} mapType={"main map"} />
-      {/await}
+      {/if}
     </div>
   </div>
 
   <div class="indicators" style="margin-left:{screenWidth > 800 ? 400 : 0}px">
-    {#await jsonResponse}
-      <LoadingIcon />
-    {:then res}
+    {#if data.municipalityGeoJson && data.neighbourhoodGeoJson}
       {#each displayedIndicators as indicator}
         {#if getIndicatorAttribute(indicator, indicator.attribute)}
           <div class="indicator" style="height:{indicatorHeight}px">
@@ -105,7 +104,9 @@
           </div>
         {/if}
       {/each}
-    {/await}
+    {:else}
+      <LoadingIcon />
+    {/if}
   </div>
 
   <Tooltip />

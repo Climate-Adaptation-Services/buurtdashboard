@@ -88,7 +88,9 @@
             width={xScale(st[1]) - xScale(st[0])}
             height={yScale.bandwidth() / 2.0}
             stroke-width="4"
-            style={st.data.group === "Nederland" && $configStore && $configStore.dashboardTitle === "Buurtdashboard Dordrecht" ? "visibility: hidden;" : ""}
+            style={st.data.group === "Nederland" && $configStore && $configStore.dashboardTitle === "Buurtdashboard Dordrecht"
+              ? "visibility: hidden;"
+              : ""}
           >
           </rect>
           {#if xScale(st[1]) - xScale(st[0]) > 40}
@@ -107,7 +109,9 @@
     {/each}
     {#each regios as regio, i}
       {#if regio !== "Nederland" || !($configStore && $configStore.dashboardTitle === "Buurtdashboard Dordrecht")}
-        <text style="fill:#645F5E" x={graphWidth / 2} text-anchor="middle" font-size="15px" y={i * yScale.bandwidth() - 5}>{getRegionName(regio)}</text>
+        <text style="fill:#645F5E" x={graphWidth / 2} text-anchor="middle" font-size="15px" y={i * yScale.bandwidth() - 5}
+          >{getRegionName(regio)}</text
+        >
       {/if}
     {/each}
   </g>

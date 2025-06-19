@@ -50,29 +50,30 @@
   }
 
   // Check if we're in difference mode
-  $: isDifferenceMode = indicator && $AHNSelecties[indicator.title] && 
-      typeof $AHNSelecties[indicator.title] === 'object' && 
-      $AHNSelecties[indicator.title].isDifference
-      
+  $: isDifferenceMode =
+    indicator && $AHNSelecties[indicator.title] && typeof $AHNSelecties[indicator.title] === "object" && $AHNSelecties[indicator.title].isDifference
+
   // Calculate difference values for each feature when in difference mode
-  $: differenceValues = isDifferenceMode && $currentJSONData && $currentJSONData.features ? 
-    $currentJSONData.features.map(feature => {
-      // Store the difference value in a temporary property
-      const baseAttribute = getIndicatorAttribute(indicator, indicator.attribute)
-      const compareAttribute = indicator.attribute + $AHNSelecties[indicator.title].compareYear
-      
-      const baseValue = +feature.properties[baseAttribute] || 0
-      const compareValue = +feature.properties[compareAttribute] || 0
-      
-      // Store the calculated difference
-      feature.properties.calculatedDifference = compareValue - baseValue
-      return feature
-    }) : null
-  
+  $: differenceValues =
+    isDifferenceMode && $currentJSONData && $currentJSONData.features
+      ? $currentJSONData.features.map((feature) => {
+          // Store the difference value in a temporary property
+          const baseAttribute = getIndicatorAttribute(indicator, indicator.attribute)
+          const compareAttribute = indicator.attribute + $AHNSelecties[indicator.title].compareYear
+
+          const baseValue = +feature.properties[baseAttribute] || 0
+          const compareValue = +feature.properties[compareAttribute] || 0
+
+          // Store the calculated difference
+          feature.properties.calculatedDifference = compareValue - baseValue
+          return feature
+        })
+      : null
+
   // Function to get the appropriate attribute for coloring the map
   function getNumericalAttribute(feature) {
     if (isDifferenceMode) {
-      return 'calculatedDifference'
+      return "calculatedDifference"
     } else {
       return getIndicatorAttribute(indicator, indicator.attribute)
     }
