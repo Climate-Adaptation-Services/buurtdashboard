@@ -17,7 +17,8 @@ export const handle: Handle = async ({ event, resolve }) => {
   // Add the hint only to HTML documents
   if (response.headers.get('content-type')?.startsWith('text/html')) {
     // Get config parameter to determine which URLs to preload
-    const configParam = event.url.searchParams.get('config') || 'default';
+    // Check if we're in a prerendering environment
+    const configParam = import.meta.env.SSR && !import.meta.env.DEV ? 'default' : event.url.searchParams.get('config') || 'default';
     
     // Add preload for GeoJSON data
     response.headers.append(
