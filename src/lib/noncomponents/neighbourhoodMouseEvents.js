@@ -193,9 +193,7 @@ export function click(feature, indicator, mapType) {
   selectAll('.svgelements_' + feature.properties[get(neighbourhoodCodeAbbreviation)])
     .raise()
 
-  console.log(feature, indicator, mapType, get(currentCodeAbbreviation))
   const newSelection = feature.properties[get(currentCodeAbbreviation)].replaceAll(' ', '').replaceAll('(', '').replaceAll(')', '')
-  console.log(newSelection)
   if (get(currentOverviewLevel) === 'Nederland') {
     get(URLParams).set('gemeente', newSelection);
     window.history.pushState(null, '', '?' + get(URLParams).toString());
