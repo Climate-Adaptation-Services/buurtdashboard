@@ -3,7 +3,7 @@
   "trailingSlash": false,
   "headers": [
     {
-      "source": "/_app/immutable/(.+)\.js",
+      "source": "/_app/immutable/(.+)\\.js",
       "headers": [
         {
           "key": "Cache-Control",
@@ -16,7 +16,7 @@
       ]
     },
     {
-      "source": "/_app/immutable/(.+)\.css",
+      "source": "/_app/immutable/(.+)\\.css",
       "headers": [
         {
           "key": "Cache-Control",
@@ -29,7 +29,7 @@
       ]
     },
     {
-      "source": "/(.+)\.js",
+      "source": "/(.+)\\.js",
       "headers": [
         {
           "key": "Content-Type",
