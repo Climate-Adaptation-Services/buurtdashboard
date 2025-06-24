@@ -1,4 +1,5 @@
 // Fix for SvelteKit client routing and WebSocket token errors
+// Added comment to trigger fresh Vercel build - fixes MIME type issues
 if (typeof window !== 'undefined') {
   // Define required SvelteKit variables if they don't exist
   if (typeof __SVELTEKIT_CLIENT_ROUTING__ === 'undefined') {
