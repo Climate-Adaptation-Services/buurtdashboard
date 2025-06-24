@@ -85,7 +85,7 @@ export async function load({ url }) {
       municipalityUrl: MUNICIPALITY_JSON_URL,
       neighbourhoodUrl: BUURT_GEOJSON_URL
     };
-    
+
     // Process the data with caching
     await prepareJSONData([municipalityGeoJson, neighbourhoodGeoJson], buurtCSVdata, dataUrls);
   }

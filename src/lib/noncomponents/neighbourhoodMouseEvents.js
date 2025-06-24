@@ -28,11 +28,11 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
 
   } else {
     attributeWithoutYear = getIndicatorAttribute(indicator, indicator.attribute).slice(0, -4)
-    
+
     // Check if we're in difference mode
     const ahnSelection = get(AHNSelecties)[indicator.title]
     const isDifferenceMode = ahnSelection && typeof ahnSelection === 'object' && ahnSelection.isDifference
-    
+
     if (isDifferenceMode) {
       // For difference mode, we'll use the base attribute but will calculate the difference value later
       indicatorAttribute = getIndicatorAttribute(indicator, indicator.attribute)
@@ -58,22 +58,22 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
       // Check if we're in difference mode
       const ahnSelection = get(AHNSelecties)[indicator.title]
       const isDifferenceMode = ahnSelection && typeof ahnSelection === 'object' && ahnSelection.isDifference
-      
+
       let tooltipValueColor, tooltipValue, tooltipIndicator
-      
+
       if (indicator.numerical) {
         if (isDifferenceMode) {
           // For difference mode, use the calculated difference value
           const diffValue = feature.properties.calculatedDifference
-          
+
           // Format the difference value with a + sign for positive values
-          tooltipValue = diffValue > 0 
+          tooltipValue = diffValue > 0
             ? "+" + (Math.round(diffValue * 100) / 100).toFixed(1)
             : (Math.round(diffValue * 100) / 100).toFixed(1)
-          
+
           // Use the same color scale as defined in Indicator.svelte
           tooltipValueColor = indicatorValueColorscale(diffValue)
-          
+
           // Include both years in the tooltip title
           tooltipIndicator = `${indicator.title} (${ahnSelection.compareYear} vs ${ahnSelection.baseYear})`
         } else {
@@ -91,11 +91,11 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
         tooltipValue = indicator.aggregatedIndicator
           ? getMostCommonClass(indicator, feature)
           : getClassByIndicatorValue(indicator, feature.properties[getIndicatorAttribute(indicator, indicator.attribute)])
-        
+
         tooltipValueColor = indicator.aggregatedIndicator
           ? indicatorValueColorscale(getMostCommonClass(indicator, feature))
           : indicatorValueColorscale(getClassByIndicatorValue(indicator, feature.properties[getIndicatorAttribute(indicator, indicator.attribute)]))
-        
+
         tooltipIndicator = indicator.title
       }
 
@@ -116,21 +116,21 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
       // Check if we're in difference mode
       const ahnSelection = get(AHNSelecties)[indicator.title]
       const isDifferenceMode = ahnSelection && typeof ahnSelection === 'object' && ahnSelection.isDifference
-      
+
       if (isDifferenceMode) {
         // For difference mode, calculate and display the difference value
         const baseAttribute = indicatorAttribute
         const compareAttribute = indicator.attribute + ahnSelection.compareYear
-        
+
         const baseValue = +feature.properties[baseAttribute] || 0
         const compareValue = +feature.properties[compareAttribute] || 0
         const diffValue = compareValue - baseValue
-        
+
         // Format the difference value with a + sign for positive values
-        const formattedDiffValue = diffValue > 0 
+        const formattedDiffValue = diffValue > 0
           ? "+" + (Math.round(diffValue * 100) / 100).toFixed(1)
           : (Math.round(diffValue * 100) / 100).toFixed(1)
-        
+
         // Set tooltip with difference value and years
         tooltipValues.set({
           indicator: `${indicator.title} (${ahnSelection.compareYear} vs ${ahnSelection.baseYear})`,
@@ -193,7 +193,9 @@ export function click(feature, indicator, mapType) {
   selectAll('.svgelements_' + feature.properties[get(neighbourhoodCodeAbbreviation)])
     .raise()
 
+  console.log(feature, indicator, mapType, get(currentCodeAbbreviation))
   const newSelection = feature.properties[get(currentCodeAbbreviation)].replaceAll(' ', '').replaceAll('(', '').replaceAll(')', '')
+  console.log(newSelection)
   if (get(currentOverviewLevel) === 'Nederland') {
     get(URLParams).set('gemeente', newSelection);
     window.history.pushState(null, '', '?' + get(URLParams).toString());

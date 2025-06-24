@@ -8,7 +8,7 @@ export const DATASET_VERSION = '20250619';
 export const BUURT_GEOJSON_URL = "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/geojsondata/Buurt2024_IdentificationOnly.json";
 
 // Municipality data URL
-export const MUNICIPALITY_JSON_URL = "https://raw.githubusercontent.com/Climate-Adaptation-Services/buurtdashboard-data/main/GemeenteGrenzen2023-small.json";
+export const MUNICIPALITY_JSON_URL = "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/geojsondata/gemeentes.json";
 
 // Default config URLs
 export const DEFAULT_METADATA_URL =

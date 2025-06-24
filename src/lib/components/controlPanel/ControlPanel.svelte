@@ -30,8 +30,8 @@
   $: if ($allMunicipalitiesJSONData !== null) {
     lijstAlleGemeentesVoorDropdown = $allMunicipalitiesJSONData.features.map((municipality) => {
       return {
-        value: municipality.properties["GM_CODE"],
-        label: limitDropdownLabelLength(municipality.properties["GM_NAAM"]),
+        value: municipality.properties[$municipalityCodeAbbreviation],
+        label: limitDropdownLabelLength(municipality.properties[$municipalityNameAbbreviation]),
       }
     })
     lijstAlleGemeentesVoorDropdown = orderBy(lijstAlleGemeentesVoorDropdown, [(municipality) => municipality.label], ["asc"])
