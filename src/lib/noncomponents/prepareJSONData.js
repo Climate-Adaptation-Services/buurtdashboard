@@ -2,38 +2,116 @@ import { allMunicipalitiesJSONData, allNeighbourhoodsJSONData, neighbourhoodCode
 import { get } from 'svelte/store'
 import * as topojsonsimplify from "topojson-simplify";
 import * as topojson from "topojson-client";
+import { getFromCache, saveToCache } from "./cacheUtils";
 
-export function prepareJSONData(JSONdata, CSVdata) {
-  // 1. Process municipality data (this is fast, no optimization needed)
-  let municipalityTopojson = topojsonsimplify.presimplify(JSONdata[0])
-  municipalityTopojson = topojson.feature(municipalityTopojson, municipalityTopojson.objects.GemeenteGrenzen2023)
+// Module-level flag to track if data has been processed
+let hasProcessedData = false;
+
+// Performance measurement utility
+function measurePerformance(label, fn) {
+  const start = performance.now();
+  const result = fn();
+  const end = performance.now();
+  console.log(`⏱️ ${label}: ${(end - start).toFixed(2)}ms`);
+  return result;
+}
+
+/**
+ * Process TopoJSON data with caching for improved performance
+ * @param {Array} JSONdata - Array containing municipality and neighborhood TopoJSON data
+ * @param {Array} CSVdata - CSV data for neighborhoods
+ * @param {Object} options - Optional parameters including source URLs for caching
+ */
+export async function prepareJSONData(JSONdata, CSVdata, options = {}) {
+  // Skip if we've already processed this data
+  if (hasProcessedData) {
+    console.log('Data already processed, skipping duplicate prepareJSONData call');
+    return;
+  }
+  
+  // Mark as processed at the beginning to prevent race conditions
+  hasProcessedData = true;
+  const totalStart = performance.now();
+  const { municipalityUrl, neighbourhoodUrl } = options;
+
+  // 1. Process municipality data with caching
+  let municipalityTopojson;
+  let municipalityCached = false;
+
+  if (municipalityUrl) {
+    // Try to get processed municipality data from cache
+    const cachedData = await getFromCache(municipalityUrl);
+    if (cachedData) {
+      console.log('Using cached municipality data');
+      municipalityTopojson = cachedData;
+      municipalityCached = true;
+    }
+  }
+
+  // If not cached, process the data
+  if (!municipalityCached) {
+    municipalityTopojson = measurePerformance('Municipality TopoJSON processing', () => {
+      // Apply presimplify and convert to feature
+      let topoData = topojsonsimplify.presimplify(JSONdata[0]);
+      return topojson.feature(topoData, topoData.objects.GemeenteGrenzen2023);
+    });
+
+    // Cache the processed data if URL is provided
+    if (municipalityUrl) {
+      saveToCache(municipalityUrl, municipalityTopojson);
+    }
+  }
+
   allMunicipalitiesJSONData.set(municipalityTopojson)
 
-  // 2. Process neighborhood data with optimizations
+  // 2. Process neighborhood data with caching and optimizations
 
   // Initialize features array
   let neighbourhoodTopojsonFeatures = [];
+  let neighbourhoodCached = false;
 
   try {
-    // Check if data is in the expected format for TopoJSON processing
-    let neighbourhoodTopojson = JSONdata[1];
+    // Try to get processed neighborhood data from cache
+    if (neighbourhoodUrl) {
+      const cachedData = await getFromCache(neighbourhoodUrl);
+      if (cachedData && cachedData.features) {
+        console.log('Using cached neighborhood data');
+        neighbourhoodTopojsonFeatures = cachedData.features;
+        neighbourhoodCached = true;
+      }
+    }
 
-    if (neighbourhoodTopojson && neighbourhoodTopojson.objects) {
-      // It's a TopoJSON, process it with simplification
-      const objectName = Object.keys(neighbourhoodTopojson.objects)[0];
+    // If not cached, process the data
+    if (!neighbourhoodCached) {
+      neighbourhoodTopojsonFeatures = measurePerformance('Neighborhood TopoJSON processing', () => {
+        // Check if data is in the expected format for TopoJSON processing
+        let neighbourhoodTopojson = JSONdata[1];
 
-      // Apply topology-preserving simplification with a moderate tolerance
-      neighbourhoodTopojson = topojsonsimplify.presimplify(neighbourhoodTopojson);
-      neighbourhoodTopojson = topojsonsimplify.simplify(neighbourhoodTopojson, 0.0001); // Small value preserves most details
-      neighbourhoodTopojson = topojson.feature(neighbourhoodTopojson, neighbourhoodTopojson.objects[objectName]);
-      neighbourhoodTopojsonFeatures = neighbourhoodTopojson.features;
-    } else if (neighbourhoodTopojson && neighbourhoodTopojson.type === 'FeatureCollection') {
-      // It's already a GeoJSON FeatureCollection, use features directly
-      console.warn('Neighborhood data is already GeoJSON, skipping TopoJSON processing');
-      neighbourhoodTopojsonFeatures = neighbourhoodTopojson.features || [];
-    } else {
-      console.error('Neighborhood data in unexpected format', neighbourhoodTopojson);
-      neighbourhoodTopojsonFeatures = [];
+        if (neighbourhoodTopojson && neighbourhoodTopojson.objects) {
+          // It's a TopoJSON
+          const objectName = Object.keys(neighbourhoodTopojson.objects)[0];
+
+          console.log('Applying TopoJSON simplification');
+          // Apply topology-preserving simplification with a moderate tolerance
+          neighbourhoodTopojson = topojsonsimplify.presimplify(neighbourhoodTopojson);
+          neighbourhoodTopojson = topojsonsimplify.simplify(neighbourhoodTopojson, 0.0001); // Small value preserves most details
+          neighbourhoodTopojson = topojson.feature(neighbourhoodTopojson, neighbourhoodTopojson.objects[objectName]);
+          return neighbourhoodTopojson.features;
+        } else if (neighbourhoodTopojson && neighbourhoodTopojson.type === 'FeatureCollection') {
+          // It's already a GeoJSON FeatureCollection, use features directly
+          console.warn('Neighborhood data is already GeoJSON, skipping TopoJSON processing');
+          return neighbourhoodTopojson.features || [];
+        } else {
+          console.error('Neighborhood data in unexpected format', neighbourhoodTopojson);
+          return [];
+        }
+      });
+
+      // Cache the processed data if URL is provided
+      if (neighbourhoodUrl) {
+        const featureCollection = { type: 'FeatureCollection', features: neighbourhoodTopojsonFeatures };
+        saveToCache(neighbourhoodUrl, featureCollection);
+      }
     }
   } catch (error) {
     console.error('Error processing neighborhood data:', error);
@@ -41,51 +119,62 @@ export function prepareJSONData(JSONdata, CSVdata) {
   }
 
   // 3. Create a fast lookup table for CSV data instead of using filter
-  const csvLookup = {};
-  CSVdata.forEach(item => {
-    if (item[get(neighbourhoodCodeAbbreviation)]) {
-      csvLookup[item[get(neighbourhoodCodeAbbreviation)]] = item;
-    }
+  const csvLookup = measurePerformance('CSV lookup creation', () => {
+    const lookup = {};
+    CSVdata.forEach(item => {
+      if (item[get(neighbourhoodCodeAbbreviation)]) {
+        lookup[item[get(neighbourhoodCodeAbbreviation)]] = item;
+      }
+    });
+    return lookup;
   });
 
 
-  // 4. Pre-define the numeric properties to convert for better performance
+  // 4. Pre-define the numeric properties to convert
   const numericProperties = [
     'm2GroenPI', 'F1865ErnsOv', 'F18ErnstigZ', 'BrozeGezon',
     'G_WOZ', 'HuurwTperc', 'perc_groen_zonder_agr'
   ];
 
   // 5. Process all neighborhoods in a single pass with optimized lookups
-  neighbourhoodTopojsonFeatures = neighbourhoodTopojsonFeatures.map(neighbourhood => {
-    // Get the neighborhood code
-    const neighborhoodCode = neighbourhood.properties[get(neighbourhoodCodeAbbreviation)];
+  neighbourhoodTopojsonFeatures = measurePerformance('Neighborhood data mapping', () => {
+    return neighbourhoodTopojsonFeatures.map(neighbourhood => {
+      // Get the neighborhood code
+      const neighborhoodCode = neighbourhood.properties[get(neighbourhoodCodeAbbreviation)];
 
-    // Use direct lookup instead of filter (much faster)
-    const matchingCSVData = csvLookup[neighborhoodCode];
+      // Use direct lookup instead of filter (much faster)
+      const matchingCSVData = csvLookup[neighborhoodCode];
 
-    // If we found a match, use it; otherwise, keep the original properties
-    if (matchingCSVData) {
-      neighbourhood.properties = matchingCSVData;
-    }
-
-    // Convert all numeric properties in a single loop
-    numericProperties.forEach(prop => {
-      if (neighbourhood.properties[prop] !== undefined) {
-        neighbourhood.properties[prop] = (isNaN(parseFloat(neighbourhood.properties[prop])))
-          ? null
-          : parseFloat(neighbourhood.properties[prop]);
+      // If we found a match, use it; otherwise, keep the original properties
+      if (matchingCSVData) {
+        neighbourhood.properties = matchingCSVData;
       }
+
+      // Convert all numeric properties in a single loop
+      numericProperties.forEach(prop => {
+        if (neighbourhood.properties[prop] !== undefined) {
+          neighbourhood.properties[prop] = (isNaN(parseFloat(neighbourhood.properties[prop])))
+            ? null
+            : parseFloat(neighbourhood.properties[prop]);
+        }
+      });
+
+      // Special case for BEV_DICHTH
+      if (neighbourhood.properties['BEV_DICHTH'] < 0) {
+        neighbourhood.properties['BEV_DICHTH'] = null;
+      }
+
+      return neighbourhood;
     });
-
-    // Special case for BEV_DICHTH
-    if (neighbourhood.properties['BEV_DICHTH'] < 0) {
-      neighbourhood.properties['BEV_DICHTH'] = null;
-    }
-
-    return neighbourhood;
   });
 
 
   // Set the final GeoJSON data
-  allNeighbourhoodsJSONData.set({ type: 'FeatureCollection', features: neighbourhoodTopojsonFeatures })
+  measurePerformance('Set final GeoJSON data', () => {
+    allNeighbourhoodsJSONData.set({ type: 'FeatureCollection', features: neighbourhoodTopojsonFeatures })
+  });
+
+  const totalEnd = performance.now();
+  console.log(`⏱️ Total prepareJSONData execution time: ${(totalEnd - totalStart).toFixed(2)}ms`);
+  console.log(`⏱️ Using cached data: Municipality=${municipalityCached}, Neighborhood=${neighbourhoodCached}`);
 }

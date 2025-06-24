@@ -12,13 +12,13 @@ export const MUNICIPALITY_JSON_URL = "https://raw.githubusercontent.com/Climate-
 
 // Default config URLs
 export const DEFAULT_METADATA_URL =
-  "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/metadata/buurtdashboard-metadata-170425-03.csv";
+  "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/metadata/buurtdashboard-metadata-230625-01.csv";
 
 export const DEFAULT_METADATA_ENGLISH_URL =
   "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/metadata/buurtdashboard-engels-metadata-060125-04.csv";
 
 export const DEFAULT_CSV_DATA_URL =
-  "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/csvdata/BuurtdashboardDataDownload20250425.csv.gz";
+  "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/csvdata/BuurtdashboardDataDownload20250623.csv.gz";
 
 // Dordrecht config URLs
 export const DORDRECHT_METADATA_URL =

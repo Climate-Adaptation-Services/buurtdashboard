@@ -9,8 +9,7 @@
   import { getClassByIndicatorValue } from "$lib/noncomponents/getClassByIndicatorValue"
   import { getIndicatorAttribute } from "$lib/noncomponents/getIndicatorAttribute"
 
-  export let JSONdata
-  export let CSVdata
+  // Removed unused exports for JSONdata and CSVdata
   export let mapWidth
   export let mapHeight
   export let mapType
@@ -21,9 +20,8 @@
   let projection
   let path
 
-  if (mapType === "main map") {
-    prepareJSONData(JSONdata, CSVdata)
-  }
+  // Data preparation is now handled in +page.js
+  // No need to call prepareJSONData here
 
   $: topYPosition = mapType === "main map" ? 20 : 15
 

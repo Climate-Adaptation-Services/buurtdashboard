@@ -18,7 +18,7 @@ export const neighbourhoodCodeAbbreviation = readable('buurtcode2024')
 export const municipalityCodeAbbreviation = readable('gemeentecode')
 export const neighbourhoodNameAbbreviation = readable('buurtnaam')
 export const municipalityNameAbbreviation = readable('gemeentenaam')
-export const districtTypeAbbreviation = readable('def_wijkty')
+export const districtTypeAbbreviation = readable('Wijktype')
 
 export const indicatorsSelection = writable([])
 export const alleIndicatoren = writable([])
