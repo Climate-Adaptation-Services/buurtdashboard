@@ -17,7 +17,7 @@
   })
 </script>
 
-<h3 class="question-mark" style="background-color:{$configStore.mainColor}">?</h3>
+<h3 class="question-mark" style="background-color:{$configStore.mainColor}">i</h3>
 <h3 class="category" style="background-color:{$configStore.mainColor}">C</h3>
 
 <div class={"indicator-info indicator-info-" + getIndicatorAttribute(indicator, indicator.attribute)} style="left:{indicatorInfoPosition}px">

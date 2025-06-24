@@ -4,7 +4,7 @@
  */
 
 const CACHE_NAME = 'buurtdashboard-topojson-cache';
-const CACHE_VERSION = '1'; // Increment this when data structure changes
+const CACHE_VERSION = '2'; // Increment this when data structure changes
 const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
 /**
@@ -36,12 +36,12 @@ export async function getFromCache(url) {
   // Skip cache in development mode unless forced
   // Check if we're in a browser environment
   const isBrowser = typeof window !== 'undefined';
-  
+
   if (import.meta.env.DEV && !(isBrowser && window.FORCE_ENABLE_CACHE)) {
     console.log('Skipping cache in development mode');
     return null;
   }
-  
+
   // Log cache check attempt
   console.log(`Checking cache for ${url}`);
 
@@ -54,18 +54,18 @@ export async function getFromCache(url) {
 
     const cache = await caches.open(CACHE_NAME);
     const cacheKey = generateCacheKey(url);
-    
+
     // Get both the data and metadata
     const dataResponse = await cache.match(cacheKey);
     const metadataResponse = await cache.match(`${cacheKey}-metadata`);
-    
+
     if (!dataResponse || !metadataResponse) {
       console.log(`Cache miss for ${url}`);
       return null;
     }
-    
+
     const metadata = await metadataResponse.json();
-    
+
     // Check if cache is expired
     if (isCacheExpired(metadata)) {
       console.log(`Cache expired for ${url}`);
@@ -74,7 +74,7 @@ export async function getFromCache(url) {
       await cache.delete(`${cacheKey}-metadata`);
       return null;
     }
-    
+
     console.log(`Cache hit for ${url}`);
     return await dataResponse.json();
   } catch (error) {
@@ -93,12 +93,12 @@ export async function saveToCache(url, data) {
   // Skip cache in development mode unless forced
   // Check if we're in a browser environment
   const isBrowser = typeof window !== 'undefined';
-  
+
   if (import.meta.env.DEV && !(isBrowser && window.FORCE_ENABLE_CACHE)) {
     console.log('Skipping cache in development mode');
     return false;
   }
-  
+
   // Log caching attempt
   console.log(`Attempting to cache data for ${url}`);
 
@@ -110,26 +110,26 @@ export async function saveToCache(url, data) {
 
     const cache = await caches.open(CACHE_NAME);
     const cacheKey = generateCacheKey(url);
-    
+
     // Create a Response object from the data
     const dataResponse = new Response(JSON.stringify(data), {
       headers: { 'Content-Type': 'application/json' }
     });
-    
+
     // Create metadata with timestamp
     const metadata = {
       timestamp: Date.now(),
       url: url
     };
-    
+
     const metadataResponse = new Response(JSON.stringify(metadata), {
       headers: { 'Content-Type': 'application/json' }
     });
-    
+
     // Store both the data and metadata
     await cache.put(cacheKey, dataResponse);
     await cache.put(`${cacheKey}-metadata`, metadataResponse);
-    
+
     console.log(`Cached data for ${url}`);
     return true;
   } catch (error) {
@@ -147,7 +147,7 @@ export async function clearCache() {
     if (!('caches' in self)) {
       return false;
     }
-    
+
     await caches.delete(CACHE_NAME);
     console.log('Cache cleared');
     return true;
