@@ -10,7 +10,7 @@ return {
 	assets: new Set([".DS_Store","about.png","ai.png","carousel-1-en.png","carousel-1.png","carousel-2-en.png","carousel-2.png","chart.png","dord3.png","dordrecht-icon.png","dordrecht-icon2.png","dordrecht-icon3.png","download.png","favicon.png","global.css","info.png","uitleg-grafieken.png"]),
 	mimeTypes: {".png":"image/png",".css":"text/css"},
 	_: {
-		client: {start:"_app/immutable/entry/start.CsUSwSBy.js",app:"_app/immutable/entry/app.Q0CMqAPw.js",imports:["_app/immutable/entry/start.CsUSwSBy.js","_app/immutable/chunks/BMBzRvuN.js","_app/immutable/chunks/BtgGQ92H.js","_app/immutable/chunks/B5Lywc65.js","_app/immutable/entry/app.Q0CMqAPw.js","_app/immutable/chunks/BtgGQ92H.js","_app/immutable/chunks/YORhUFDs.js"],stylesheets:[],fonts:[],uses_env_dynamic_public:false},
+		client: {start:"_app/immutable/entry/start.CfEqRbSY.js",app:"_app/immutable/entry/app.4R7HAaVl.js",imports:["_app/immutable/entry/start.CfEqRbSY.js","_app/immutable/chunks/DA1yglS5.js","_app/immutable/chunks/BtgGQ92H.js","_app/immutable/chunks/B5Lywc65.js","_app/immutable/entry/app.4R7HAaVl.js","_app/immutable/chunks/BtgGQ92H.js","_app/immutable/chunks/YORhUFDs.js"],stylesheets:[],fonts:[],uses_env_dynamic_public:false},
 		nodes: [
 			__memo(() => import('../output/server/nodes/0.js')),
 			__memo(() => import('../output/server/nodes/1.js'))
