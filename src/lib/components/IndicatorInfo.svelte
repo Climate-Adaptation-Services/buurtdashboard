@@ -18,8 +18,8 @@
 </script>
 
 <h3 class="question-mark" style="background-color:{$configStore.mainColor}">i</h3>
-<h3 class="category" style="background-color:{$configStore.mainColor}">C</h3>
-
+<!-- <h3 class="category" style="background-color:{$configStore.mainColor}">C</h3> -->
+<img class="category" src="{indicator.category}.png" alt={indicator.category} />
 <div class={"indicator-info indicator-info-" + getIndicatorAttribute(indicator, indicator.attribute)} style="left:{indicatorInfoPosition}px">
   <p class="title" style="background-color:{$configStore.mainColor}">
     <strong>{indicator.title}</strong>
@@ -34,11 +34,16 @@
   }
 
   .category {
-    left: 5px;
+    width: 29px;
+    padding: 0px 6px;
+    margin: 0;
+    position: absolute;
+    border-radius: 50px;
+    top: 5px;
   }
 
   h3 {
-    padding: 3px 10px;
+    padding: 3px 11px;
     margin: 0;
     position: absolute;
     border-radius: 50px;
