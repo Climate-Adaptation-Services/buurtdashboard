@@ -6,11 +6,12 @@ export function setupIndicators(data, eff, geb, kwe) {
     ? data.metadata_english
     : data.metadata
 
-
-  let indicatorsList = []
-  indicatorsList = addIndicatorCategory(indicatorsList, metadata.filter(d => d.Categorie === eff))
-  indicatorsList = addIndicatorCategory(indicatorsList, metadata.filter(d => d.Categorie === geb))
-  indicatorsList = addIndicatorCategory(indicatorsList, metadata.filter(d => d.Categorie === kwe))
+  let indicatorsList = [];
+  [eff, geb, kwe].forEach(category => {
+    if (metadata.filter(d => d.Categorie === category)) {
+      indicatorsList = addIndicatorCategory(indicatorsList, metadata.filter(d => d.Categorie === category))
+    }
+  });
 
   alleIndicatoren.set(indicatorsList)
 
