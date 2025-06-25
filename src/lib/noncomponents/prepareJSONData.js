@@ -5,6 +5,7 @@ import * as topojson from "topojson-client";
 import { getFromCache, saveToCache } from "./cacheUtils";
 
 // Module-level flag to track if data has been processed
+// Set to false on each import to ensure data is processed when JSON changes
 let hasProcessedData = false;
 
 // Performance measurement utility
@@ -23,12 +24,15 @@ function measurePerformance(label, fn) {
  * @param {Object} options - Optional parameters including source URLs for caching
  */
 export async function prepareJSONData(JSONdata, CSVdata, options = {}) {
-  // Skip if we've already processed this data
-  if (hasProcessedData) {
-    console.log('Data already processed, skipping duplicate prepareJSONData call');
-    return;
-  }
-  
+  // Reset flag to ensure data is processed when JSON changes
+  hasProcessedData = false;
+
+  // Skip if we've already processed this data (now disabled to ensure reprocessing)
+  // if (hasProcessedData) {
+  //   console.log('Data already processed, skipping duplicate prepareJSONData call');
+  //   return;
+  // }
+
   // Mark as processed at the beginning to prevent race conditions
   hasProcessedData = true;
   const totalStart = performance.now();
@@ -94,7 +98,7 @@ export async function prepareJSONData(JSONdata, CSVdata, options = {}) {
           console.log('Applying TopoJSON simplification');
           // Apply topology-preserving simplification with a moderate tolerance
           neighbourhoodTopojson = topojsonsimplify.presimplify(neighbourhoodTopojson);
-          neighbourhoodTopojson = topojsonsimplify.simplify(neighbourhoodTopojson, 0.0001); // Small value preserves most details
+          neighbourhoodTopojson = topojsonsimplify.simplify(neighbourhoodTopojson, 0.00001); // Small value preserves most details
           neighbourhoodTopojson = topojson.feature(neighbourhoodTopojson, neighbourhoodTopojson.objects[objectName]);
           return neighbourhoodTopojson.features;
         } else if (neighbourhoodTopojson && neighbourhoodTopojson.type === 'FeatureCollection') {
@@ -144,7 +148,6 @@ export async function prepareJSONData(JSONdata, CSVdata, options = {}) {
 
       // Use direct lookup instead of filter (much faster)
       const matchingCSVData = csvLookup[neighborhoodCode];
-
       // If we found a match, use it; otherwise, keep the original properties
       if (matchingCSVData) {
         neighbourhood.properties = matchingCSVData;
@@ -167,7 +170,6 @@ export async function prepareJSONData(JSONdata, CSVdata, options = {}) {
       return neighbourhood;
     });
   });
-
 
   // Set the final GeoJSON data
   measurePerformance('Set final GeoJSON data', () => {
