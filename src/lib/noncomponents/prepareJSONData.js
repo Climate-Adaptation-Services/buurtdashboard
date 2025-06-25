@@ -167,6 +167,12 @@ export async function prepareJSONData(JSONdata, CSVdata, options = {}) {
         neighbourhood.properties['BEV_DICHTH'] = null;
       }
 
+      // Special case for Waterdiepte bij hevige bui
+      ['perc5_10mm', 'perc10_15mm', 'perc15_20mm', 'perc20_30mm', 'perc30mmME', 'percNODATA'].forEach(attribute => {
+        neighbourhood.properties[attribute] *= 100;
+      });
+
+
       return neighbourhood;
     });
   });
