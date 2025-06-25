@@ -20,6 +20,7 @@
 <h3 class="question-mark" style="background-color:{$configStore.mainColor}">i</h3>
 <!-- <h3 class="category" style="background-color:{$configStore.mainColor}">C</h3> -->
 <img class="category" src="{indicator.category}.png" alt={indicator.category} />
+<div class="category-tooltip">Categorie: {indicator.category}</div>
 <div class={"indicator-info indicator-info-" + getIndicatorAttribute(indicator, indicator.attribute)} style="left:{indicatorInfoPosition}px">
   <p class="title" style="background-color:{$configStore.mainColor}">
     <strong>{indicator.title}</strong>
@@ -83,6 +84,24 @@
   }
 
   .question-mark:hover ~ .indicator-info {
+    visibility: visible;
+  }
+
+  .category-tooltip {
+    visibility: hidden;
+    position: absolute;
+    left: 40px;
+    top: 10px;
+    background-color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    box-shadow: rgba(0, 0, 0, 0.15) 0px 2px 8px;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    z-index: 1000;
+  }
+
+  .category:hover ~ .category-tooltip {
     visibility: visible;
   }
 </style>
