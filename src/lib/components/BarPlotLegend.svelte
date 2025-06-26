@@ -21,7 +21,7 @@
   style="height:26%; width:{graphWidth - margin.left - margin.right}px; margin-left:{margin.left}px; margin-top:{margin.top}px"
 >
   {#each klasseNamen as klasse, i}
-    {#if !(["Waterdiepte bij hevige bui", t("Gevoelstemperatuur")].includes(indicator.title) && klasse === "No data")}
+    {#if !(["Waterdiepte bij hevige bui", t("Gevoelstemperatuur"), "Maximale overstromingsdiepte"].includes(indicator.title) && klasse === "No data")}
       <div class="legend-element" style="width:{legendElementWidth}px">
         <svg>
           <g>

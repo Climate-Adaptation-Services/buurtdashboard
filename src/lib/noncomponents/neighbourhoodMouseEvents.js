@@ -92,6 +92,9 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
           ? getMostCommonClass(indicator, feature)
           : getClassByIndicatorValue(indicator, feature.properties[getIndicatorAttribute(indicator, indicator.attribute)])
 
+        if (indicator.title === 'Maximale overstromingsdiepte' && tooltipValue === 'No data') {
+          tooltipValue = 'Geen'
+        }
         tooltipValueColor = indicator.aggregatedIndicator
           ? indicatorValueColorscale(getMostCommonClass(indicator, feature))
           : indicatorValueColorscale(getClassByIndicatorValue(indicator, feature.properties[getIndicatorAttribute(indicator, indicator.attribute)]))

@@ -36,17 +36,18 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
       }
     });
     if (noData) {
-      if (indicator.title !== t('Gevoelstemperatuur')) {
+      if (indicator.title !== t('Gevoelstemperatuur') && indicator.title !== 'Maximale overstromingsdiepte') {
         totalSumPerClass.filter(kl => kl.className === 'No data')[0].som += 100
       }
     }
   });
 
   totalSumPerClass.forEach(kl => {
-    // kl.som = (kl.som/totalSurfaceArea)
     kl.som = (kl.som / data.features.length)
     if (indicator.title === t('Gevoelstemperatuur')) { kl.som *= 100 }
   })
+
+
 
   // we stoppen het resultaat per klasse in een dictionary
   let result = { 'group': regio }
