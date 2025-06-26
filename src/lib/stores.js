@@ -1,4 +1,5 @@
 import { writable, derived, readable } from 'svelte/store';
+import { defaultConfig, setupThemeSubscription } from './config';
 
 export const municipalitySelection = writable(null);
 export const neighbourhoodSelection = writable(null);
@@ -13,20 +14,29 @@ export const lang = writable('')
 
 export const URLParams = writable(new URLSearchParams("foo=1"))
 
-export const neighbourhoodCodeAbbreviation = readable('BU_CODE')
-export const municipalityCodeAbbreviation = readable('GM_CODE')
-export const neighbourhoodNameAbbreviation = readable('BU_NAAM')
-export const municipalityNameAbbreviation = readable('GM_NAAM')
-export const districtTypeAbbreviation = readable('def_wijkty')
+export const neighbourhoodCodeAbbreviation = readable('buurtcode2024')
+export const municipalityCodeAbbreviation = readable('gemeentecode')
+export const neighbourhoodNameAbbreviation = readable('buurtnaam')
+export const municipalityNameAbbreviation = readable('gemeentenaam')
+export const districtTypeAbbreviation = readable('Wijktype')
 
 export const indicatorsSelection = writable([])
+export const alleIndicatoren = writable([])
+export const AHNSelecties = writable({})
+
+export const configStore = writable(defaultConfig)
+
+// Set up theme subscription to apply CSS variables when configStore changes
+if (typeof window !== 'undefined') {
+  setupThemeSubscription(configStore);
+}
 
 export const selectedNeighbourhoodJSONData = derived(
-  [allNeighbourhoodsJSONData, neighbourhoodSelection],
-  ([$allNeighbourhoodsJSONData, $neighbourhoodSelection]) => {
-    if($allNeighbourhoodsJSONData !== null){
-      return $allNeighbourhoodsJSONData.features.filter(neighbourhood => neighbourhood.properties['BU_CODE'] === $neighbourhoodSelection)[0]
-    }else{
+  [allNeighbourhoodsJSONData, neighbourhoodSelection, neighbourhoodCodeAbbreviation],
+  ([$allNeighbourhoodsJSONData, $neighbourhoodSelection, $neighbourhoodCodeAbbreviation]) => {
+    if ($allNeighbourhoodsJSONData !== null) {
+      return $allNeighbourhoodsJSONData.features.filter(neighbourhood => neighbourhood.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection)[0]
+    } else {
       return null
     }
   }
@@ -46,16 +56,16 @@ export const currentOverviewLevel = derived(
 
 // filter the current data for the map, based on the currentOverviewLevel
 export const currentJSONData = derived(
-  [currentOverviewLevel, allMunicipalitiesJSONData, allNeighbourhoodsJSONData, municipalitySelection, neighbourhoodSelection],
-  ([$currentOverviewLevel, $allMunicipalitiesJSONData, $allNeighbourhoodsJSONData, $municipalitySelection, $neighbourhoodSelection]) => {
-    if($currentOverviewLevel === 'Nederland'){
+  [currentOverviewLevel, allMunicipalitiesJSONData, allNeighbourhoodsJSONData, municipalitySelection, neighbourhoodSelection, municipalityCodeAbbreviation],
+  ([$currentOverviewLevel, $allMunicipalitiesJSONData, $allNeighbourhoodsJSONData, $municipalitySelection, $neighbourhoodSelection, $municipalityCodeAbbreviation]) => {
+    if ($currentOverviewLevel === 'Nederland') {
       return $allMunicipalitiesJSONData
-    }else if($currentOverviewLevel === 'Gemeente'){
-      const newFeatures = $allNeighbourhoodsJSONData.features.filter(neighbourhood => neighbourhood.properties['GM_CODE'] === $municipalitySelection)
-      return {type: 'FeatureCollection', features: newFeatures}
-    }else{
-      const newFeatures = $allNeighbourhoodsJSONData.features.filter(neighbourhood => neighbourhood.properties['GM_CODE'] === $municipalitySelection)
-      return {type: 'FeatureCollection', features: newFeatures}
+    } else if ($currentOverviewLevel === 'Gemeente') {
+      const newFeatures = $allNeighbourhoodsJSONData.features.filter(neighbourhood => neighbourhood.properties[$municipalityCodeAbbreviation] === $municipalitySelection)
+      return { type: 'FeatureCollection', features: newFeatures }
+    } else {
+      const newFeatures = $allNeighbourhoodsJSONData.features.filter(neighbourhood => neighbourhood.properties[$municipalityCodeAbbreviation] === $municipalitySelection)
+      return { type: 'FeatureCollection', features: newFeatures }
       // const newFeatures = $allNeighbourhoodsJSONData.features.filter(neighbourhood => neighbourhood.properties['bu_code'] === $neighbourhoodSelection)
       // return {type: 'FeatureCollection', features: newFeatures}
     }
@@ -63,12 +73,12 @@ export const currentJSONData = derived(
 )
 
 export const neighbourhoodsInMunicipalityJSONData = derived(
-  [municipalitySelection, allNeighbourhoodsJSONData],
-  ([$municipalitySelection, $allNeighbourhoodsJSONData]) => {
-    if($municipalitySelection !== null && $allNeighbourhoodsJSONData){
-      const newFeatures = $allNeighbourhoodsJSONData.features.filter(neighbourhood => neighbourhood.properties['GM_CODE'] === $municipalitySelection)
-      return {type: 'FeatureCollection', features: newFeatures}
-    }else{
+  [municipalitySelection, allNeighbourhoodsJSONData, municipalityCodeAbbreviation],
+  ([$municipalitySelection, $allNeighbourhoodsJSONData, $municipalityCodeAbbreviation]) => {
+    if ($municipalitySelection !== null && $allNeighbourhoodsJSONData) {
+      const newFeatures = $allNeighbourhoodsJSONData.features.filter(neighbourhood => neighbourhood.properties[$municipalityCodeAbbreviation] === $municipalitySelection)
+      return { type: 'FeatureCollection', features: newFeatures }
+    } else {
       return null
     }
   }
@@ -77,9 +87,9 @@ export const neighbourhoodsInMunicipalityJSONData = derived(
 export const circleRadius = derived(
   [neighbourhoodsInMunicipalityJSONData],
   ([$neighbourhoodsInMunicipalityJSONData]) => {
-    if($neighbourhoodsInMunicipalityJSONData){
-      return ($neighbourhoodsInMunicipalityJSONData.features.length > 150) ? 3 : 5
-    }else{
+    if ($neighbourhoodsInMunicipalityJSONData) {
+      return ($neighbourhoodsInMunicipalityJSONData.features.length > 150) ? 3 : 4.5
+    } else {
       return 0
     }
   }
@@ -88,9 +98,9 @@ export const circleRadius = derived(
 export const districtTypeJSONData = derived(
   [neighbourhoodSelection, allNeighbourhoodsJSONData, selectedNeighbourhoodJSONData, districtTypeAbbreviation],
   ([$neighbourhoodSelection, $allNeighbourhoodsJSONData, $selectedNeighbourhoodJSONData, $districtTypeAbbreviation]) => {
-    if($neighbourhoodSelection !== null){
-      return {type: 'FeatureCollection', features: $allNeighbourhoodsJSONData.features.filter(neighbourhood => neighbourhood.properties[$districtTypeAbbreviation] === $selectedNeighbourhoodJSONData.properties[$districtTypeAbbreviation])}
-    }else{
+    if ($neighbourhoodSelection !== null) {
+      return { type: 'FeatureCollection', features: $allNeighbourhoodsJSONData.features.filter(neighbourhood => neighbourhood.properties[$districtTypeAbbreviation] === $selectedNeighbourhoodJSONData.properties[$districtTypeAbbreviation]) }
+    } else {
       return null
     }
   }
@@ -109,4 +119,3 @@ export const currentNameAbbreviation = derived(
     return ($currentOverviewLevel === 'Nederland') ? $municipalityNameAbbreviation : $neighbourhoodNameAbbreviation
   }
 )
-

@@ -1,19 +1,23 @@
 import { getClassName } from '$lib/noncomponents/getClassName';
-import { currentCodeAbbreviation, neighbourhoodSelection, mousePosition, circleRadius, municipalitySelection, currentNameAbbreviation, URLParams, currentOverviewLevel, neighbourhoodCodeAbbreviation, tooltipValues, tooltipRegion } from '$lib/stores';
+import { currentCodeAbbreviation, neighbourhoodSelection, mousePosition, circleRadius, municipalitySelection, currentNameAbbreviation, URLParams, currentOverviewLevel, neighbourhoodCodeAbbreviation, tooltipValues, tooltipRegion, AHNSelecties } from '$lib/stores';
 import { get } from 'svelte/store';
 import { select, selectAll } from 'd3';
-import { getClassByIndicatorValue } from './getClassByIndicatorValue';
-import { mostCommonClass } from './mostCommonClass';
+import { getClassByIndicatorValue } from './getClassByIndicatorValue.js';
+import { getMostCommonClass } from './getMostCommonClass.js';
 import center from '@turf/center'
 import { t } from '$lib/i18n/translate.js';
+import { getIndicatorAttribute } from './getIndicatorAttribute.js';
 
-export function mouseOver(e, feature, indicator, mapType, indicatorValueColorscale, projection, beeswarmMargin){
+export function mouseOver(e, feature, indicator, mapType, indicatorValueColorscale, projection, beeswarmMargin) {
   const shapeClassName = getClassName(feature, 'path', indicator, mapType)
   const circleClassName = getClassName(feature, 'node', indicator, mapType)
   let tooltipCenter
 
-  if(mapType === 'main map'){
-    if(feature.properties[get(currentCodeAbbreviation)] !== get(neighbourhoodSelection)){
+  let attributeWithoutYear = ''
+  let indicatorAttribute = ''
+
+  if (mapType === 'main map') {
+    if (feature.properties[get(currentCodeAbbreviation)] !== get(neighbourhoodSelection)) {
       select('.' + shapeClassName).attr('fill', '#36575A')
       mousePosition.set(window.innerHeight - e.screenY)
     }
@@ -21,14 +25,27 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
     const rectmap = mapElement.getBoundingClientRect();
     const featureCenter = projection(center(feature).geometry.coordinates)
     tooltipCenter = [featureCenter[0] + rectmap.left, featureCenter[1] + rectmap.top]
-    
-  }else{
+
+  } else {
+    attributeWithoutYear = getIndicatorAttribute(indicator, indicator.attribute).slice(0, -4)
+
+    // Check if we're in difference mode
+    const ahnSelection = get(AHNSelecties)[indicator.title]
+    const isDifferenceMode = ahnSelection && typeof ahnSelection === 'object' && ahnSelection.isDifference
+
+    if (isDifferenceMode) {
+      // For difference mode, we'll use the base attribute but will calculate the difference value later
+      indicatorAttribute = getIndicatorAttribute(indicator, indicator.attribute)
+    } else {
+      indicatorAttribute = getIndicatorAttribute(indicator, indicator.attribute)
+    }
+
     select('.' + shapeClassName)
       .attr('stroke-width', 3)
       .style('filter', 'drop-shadow(0 0 15px black)')
       .raise()
-    if(indicator.numerical === true){
-      if(feature.properties[get(currentCodeAbbreviation)] !== get(neighbourhoodSelection)){
+    if (indicator.numerical === true) {
+      if (feature.properties[get(currentCodeAbbreviation)] !== get(neighbourhoodSelection)) {
         select('.' + circleClassName)
           .attr('stroke', 'white')
           .attr('r', get(circleRadius) + 3)
@@ -37,28 +54,58 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
       }
     }
 
-    if(mapType === 'indicator map'){
-      const tooltipValueColor = (indicator.numerical) 
-        ? (feature.properties[indicator.attribute])
-          ? indicatorValueColorscale(feature.properties[indicator.attribute]) 
-          : '#000000'
-        : (indicator.aggregatedIndicator)
-          ? indicatorValueColorscale(mostCommonClass(indicator, feature))
-          : indicatorValueColorscale(getClassByIndicatorValue(indicator, feature.properties[indicator.attribute]))
-      
-      const tooltipValue = (indicator.numerical)
-        // check of dit iets is
-        ? (/\d/.test(feature.properties[indicator.attribute]))
-          ? Math.round(+feature.properties[indicator.attribute]*100)/100
-          : 'Geen data'
-        : (indicator.aggregatedIndicator)
-          ? mostCommonClass(indicator, feature)
-          : getClassByIndicatorValue(indicator, feature.properties[indicator.attribute])
-      
+    if (mapType === 'indicator map') {
+      // Check if we're in difference mode
+      const ahnSelection = get(AHNSelecties)[indicator.title]
+      const isDifferenceMode = ahnSelection && typeof ahnSelection === 'object' && ahnSelection.isDifference
+
+      let tooltipValueColor, tooltipValue, tooltipIndicator
+
+      if (indicator.numerical) {
+        if (isDifferenceMode) {
+          // For difference mode, use the calculated difference value
+          const diffValue = feature.properties.calculatedDifference
+
+          // Format the difference value with a + sign for positive values
+          tooltipValue = diffValue > 0
+            ? "+" + (Math.round(diffValue * 100) / 100).toFixed(1)
+            : (Math.round(diffValue * 100) / 100).toFixed(1)
+
+          // Use the same color scale as defined in Indicator.svelte
+          tooltipValueColor = indicatorValueColorscale(diffValue)
+
+          // Include both years in the tooltip title
+          tooltipIndicator = `${indicator.title} (${ahnSelection.compareYear} vs ${ahnSelection.baseYear})`
+        } else {
+          // Regular numerical indicator
+          tooltipValue = /\d/.test(feature.properties[indicatorAttribute])
+            ? Math.round(+feature.properties[indicatorAttribute] * 100) / 100
+            : 'Geen data'
+          tooltipValueColor = feature.properties[indicatorAttribute]
+            ? indicatorValueColorscale(feature.properties[indicatorAttribute])
+            : '#000000'
+          tooltipIndicator = indicator.title
+        }
+      } else {
+        // Non-numerical indicator
+        tooltipValue = indicator.aggregatedIndicator
+          ? getMostCommonClass(indicator, feature)
+          : getClassByIndicatorValue(indicator, feature.properties[getIndicatorAttribute(indicator, indicator.attribute)])
+
+        if (indicator.title === 'Maximale overstromingsdiepte' && tooltipValue === 'No data') {
+          tooltipValue = 'Geen'
+        }
+        tooltipValueColor = indicator.aggregatedIndicator
+          ? indicatorValueColorscale(getMostCommonClass(indicator, feature))
+          : indicatorValueColorscale(getClassByIndicatorValue(indicator, feature.properties[getIndicatorAttribute(indicator, indicator.attribute)]))
+
+        tooltipIndicator = indicator.title
+      }
+
       // @ts-ignore
       tooltipValues.set({
-        indicator: indicator.title, 
-        value: tooltipValue, 
+        indicator: tooltipIndicator,
+        value: tooltipValue,
         color: tooltipValueColor
       })
 
@@ -66,20 +113,46 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
       const rectmap = mapElement.getBoundingClientRect();
       const featureCenter = projection(center(feature).geometry.coordinates)
       tooltipCenter = [featureCenter[0] + rectmap.left, featureCenter[1] + rectmap.top]
-      
-    // if beeswarm interaction 
-    }else{
-      // @ts-ignore
-      tooltipValues.set({
-        indicator: indicator.title, 
-        value: Math.round(feature.properties[indicator.attribute]*100)/100, 
-        color: indicatorValueColorscale(feature.properties[indicator.attribute])
-      })
+
+      // if beeswarm interaction 
+    } else {
+      // Check if we're in difference mode
+      const ahnSelection = get(AHNSelecties)[indicator.title]
+      const isDifferenceMode = ahnSelection && typeof ahnSelection === 'object' && ahnSelection.isDifference
+
+      if (isDifferenceMode) {
+        // For difference mode, calculate and display the difference value
+        const baseAttribute = indicatorAttribute
+        const compareAttribute = indicator.attribute + ahnSelection.compareYear
+
+        const baseValue = +feature.properties[baseAttribute] || 0
+        const compareValue = +feature.properties[compareAttribute] || 0
+        const diffValue = compareValue - baseValue
+
+        // Format the difference value with a + sign for positive values
+        const formattedDiffValue = diffValue > 0
+          ? "+" + (Math.round(diffValue * 100) / 100).toFixed(1)
+          : (Math.round(diffValue * 100) / 100).toFixed(1)
+
+        // Set tooltip with difference value and years
+        tooltipValues.set({
+          indicator: `${indicator.title} (${ahnSelection.compareYear} vs ${ahnSelection.baseYear})`,
+          value: formattedDiffValue,
+          color: indicatorValueColorscale(diffValue)
+        })
+      } else {
+        // Regular tooltip for non-difference mode
+        tooltipValues.set({
+          indicator: indicator.title,
+          value: Math.round(feature.properties[indicatorAttribute] * 100) / 100,
+          color: indicatorValueColorscale(feature.properties[indicatorAttribute])
+        })
+      }
 
       let elem = document.getElementsByClassName('beeswarm_' + indicator.attribute)[0]
       let rectmap = elem.getBoundingClientRect();
       tooltipCenter = [feature.x + rectmap.left + beeswarmMargin.left, rectmap.top + beeswarmMargin.top + feature.y + 10]
-    } 
+    }
   }
   // @ts-ignore
   tooltipRegion.set({
@@ -89,47 +162,47 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
   })
 }
 
-export function mouseOut(feature, indicator, mapType){
+export function mouseOut(feature, indicator, mapType) {
   const shapeClassName = getClassName(feature, 'path', indicator, mapType)
   const circleClassName = getClassName(feature, 'node', indicator, mapType)
 
-  if(feature.properties[get(currentCodeAbbreviation)] !== get(neighbourhoodSelection)){
+  if (feature.properties[get(currentCodeAbbreviation)] !== get(neighbourhoodSelection)) {
 
-    if(mapType === 'main map'){
+    if (mapType === 'main map') {
       select('.' + shapeClassName)
         .attr('fill', 'whitesmoke')
       mousePosition.set(null)
-    }else{
+    } else {
       select('.' + shapeClassName)
         .attr('stroke-width', 0.5)
         .style('filter', 'none')
         .lower()
-      if(indicator.numerical){
+      if (indicator.numerical) {
         select('.' + circleClassName)
           .attr('stroke', 'none')
           .attr('r', get(circleRadius))
           .style('filter', 'none')
           .lower()
-      }   
+      }
       tooltipValues.set(null)
     }
   }
   tooltipRegion.set(null)
 }
 
-export function click(feature, indicator, mapType){
+export function click(feature, indicator, mapType) {
 
   mouseOut(feature, indicator, mapType)
   selectAll('.svgelements_' + feature.properties[get(neighbourhoodCodeAbbreviation)])
     .raise()
 
-  const newSelection = feature.properties[get(currentCodeAbbreviation)].replaceAll(' ','').replaceAll('(','').replaceAll(')','')
-  if(get(currentOverviewLevel) === 'Nederland'){
+  const newSelection = feature.properties[get(currentCodeAbbreviation)].replaceAll(' ', '').replaceAll('(', '').replaceAll(')', '')
+  if (get(currentOverviewLevel) === 'Nederland') {
     get(URLParams).set('gemeente', newSelection);
     window.history.pushState(null, '', '?' + get(URLParams).toString());
 
     municipalitySelection.set(newSelection)
-  }else{
+  } else {
     get(URLParams).set('buurt', newSelection);
     window.history.pushState(null, '', '?' + get(URLParams).toString());
 

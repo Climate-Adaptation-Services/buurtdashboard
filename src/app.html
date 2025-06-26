@@ -4,8 +4,39 @@
 		<meta charset="utf-8" />
 		<link rel="icon" href="%sveltekit.assets%/favicon.png" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<link rel="stylesheet" href="./global.css" crossorigin="" />
-		<link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css" crossorigin="" />
+		
+		<!-- Font preconnect and preload for better performance -->
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		
+		<!-- S3 bucket preconnect and dns-prefetch for early connection -->
+		<link rel="preconnect" href="https://buurtdashboard-data.s3.eu-north-1.amazonaws.com" crossorigin>
+		<link rel="dns-prefetch" href="https://buurtdashboard-data.s3.eu-north-1.amazonaws.com">
+		
+		<!-- Add local font fallback -->
+		<style>
+			/* Local system font fallback if Google Fonts fail to load */
+			@font-face {
+				font-family: 'Roboto';
+				font-style: normal;
+				font-weight: 400;
+				src: local('Roboto'), local('Roboto-Regular'), local('Arial'), local('Helvetica'), local('sans-serif');
+				font-display: swap;
+			}
+			
+			/* Fix for WebSocket token error */
+			:root {
+				--ws-token: 'none';
+			}
+		</style>
+		
+		<link rel="stylesheet" href="%sveltekit.assets%/global.css" />
+		<link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css" crossorigin="anonymous" />
+		
+		<!-- Fix for WebSocket token issue -->
+		<script>
+			window.__WS_TOKEN__ = window.__WS_TOKEN__ || 'disabled';
+		</script>
 
 		%sveltekit.head%
 	</head>
