@@ -8,7 +8,7 @@ export function setupIndicators(data, eff, geb, kwe) {
 
   let indicatorsList = [];
   [eff, geb, kwe].forEach(category => {
-    if (metadata.filter(d => d.Categorie === category)) {
+    if (metadata.filter(d => d.Categorie === category).length > 0) {
       indicatorsList = addIndicatorCategory(indicatorsList, metadata.filter(d => d.Categorie === category))
     }
   });
