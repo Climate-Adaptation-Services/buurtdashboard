@@ -72,13 +72,13 @@
       <img src={$configStore.sidebarImage} class="dord-icon" alt="Sidebar background" />
     {/if}
     <div class="download-and-about">
-      <!-- <div class="about" on:click={() => laatMeerInfoPanelZien("intro")}> -->
-      <div class="about">
+      <div class="about" on:click={() => laatMeerInfoPanelZien("intro")}>
+        <!-- <div class="about"> -->
         <img src="./about.png" width="30px" />
         <p class="download-and-about-text">Intro dashboard</p>
       </div>
-      <!-- <div class="about" on:click={() => laatMeerInfoPanelZien("graphs")}> -->
-      <div class="about">
+      <div class="about" on:click={() => laatMeerInfoPanelZien("graphs")}>
+        <!-- <div class="about"> -->
         <img src="./uitleg-grafieken.png" width="40px" />
         <p class="download-and-about-text">{t("Uitleg_grafieken")}</p>
       </div>
