@@ -21,6 +21,6 @@ export const nederlands = {
   "Over dit dashboard": "<h1>Buurtdashboard Klimaateffectatlas</h1><p>Wil je voor één of meer buurten inzicht krijgen in hoe klimaatbestendig ze zijn? Daar kan dit buurtdashboard je bij helpen.</p><h3>Wat kun je met het Buurtdashboard?</h3><p>Met het buurtdashboard krijg je snel inzicht in hoe klimaatbestendig buurten zijn. Je kunt er bijvoorbeeld vinden hoe groen een buurt is of hoe hoog de gevoelstemperatuur is op een warme zomerdag. De statistieken kun je vergelijken met buurten van hetzelfde wijktype of met de rest van de gemeente. Ook kan het buurtdashboard helpen om te bepalen welke opgaven het meest urgent zijn of waar de meeste kansen liggen voor klimaatadaptatie.</p><h3>Voor wie is het buurtdashboard een handige tool?</h3><p>Het buurtdashboard is vooral handig voor gemeenten. Maar ook andere partijen die met klimaatadaptatie aan de slag willen, kunnen er gebruik van maken.</p><h3>Is het dashboard alleen geschikt voor stedelijk gebied?</h3><p>Het buurtdashboard biedt vooral inzicht in stedelijke buurten, al staan er ook landelijke buurten in.</p><h3>Hoe is het buurtdashboard tot stand gekomen? </h3><p>  Veel informatie in het buurtdasboard komt direct uit de Klimaateffectatlas, maar sommige gegevens komen van andere bronnen, zoals van het CBS en RIVM. Het buurtdashboard is ontwikkeld in samenwerking met de Hogeschool van Amsterdam en Deltares. </p>",
   "Indicator 1": "Indicator type 1: Kwantitatieve indicator",
   "Indicator 2": "Indicator type 2: Categorische indicator",
-  "Carousel1-path": "carousel-2.png",
-  "Carousel2-path": "carousel-1.png"
+  "Carousel1-path": "carousel-2-300625.png",
+  "Carousel2-path": "carousel-1-300625.png"
 }
