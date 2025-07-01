@@ -18,6 +18,7 @@ export const defaultConfig = {
   neighbourhoodCSVdataLocation: DEFAULT_CSV_DATA_URL,
   defaultMunicipality: null,
   sidebarImage: null,
+  categoryPath: ''
 }
 
 // Dordrecht-specific configuration
@@ -30,6 +31,7 @@ export const dordrechtConfig = {
   neighbourhoodCSVdataLocation: DORDRECHT_CSV_DATA_URL,
   defaultMunicipality: "GM0505",
   sidebarImage: "./dord3.png",
+  categoryPath: '-dordrecht'
 }
 
 // Function to apply theme variables from config to CSS

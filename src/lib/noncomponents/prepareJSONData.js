@@ -177,6 +177,8 @@ export async function prepareJSONData(JSONdata, CSVdata, options = {}) {
     });
   });
 
+  console.log('Neighbourhoods processed', neighbourhoodTopojsonFeatures)
+
   // Set the final GeoJSON data
   measurePerformance('Set final GeoJSON data', () => {
     allNeighbourhoodsJSONData.set({ type: 'FeatureCollection', features: neighbourhoodTopojsonFeatures })

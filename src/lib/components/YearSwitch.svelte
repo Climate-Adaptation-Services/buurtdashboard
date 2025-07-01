@@ -10,13 +10,25 @@
   // Parse AHN versions from the indicator
   const ahnVersions = indicator.AHNversie.split(",")
 
+  // Format years consistently - sort and use commas instead of periods
+  function formatYears(yearsString) {
+    if (!yearsString) return ""
+
+    // Split by periods or commas, filter empty strings, sort numerically, join with commas
+    return yearsString
+      .split(/[.,]\s*/)
+      .filter((y) => y.trim())
+      .sort((a, b) => a - b)
+      .join(", ")
+  }
+
   // Reactive statement to update options when data changes
   $: {
     if ($selectedNeighbourhoodJSONData) {
-      // For a selected neighborhood, get years directly from its properties
+      // For a selected neighborhood, get years and format them consistently
       options = ahnVersions.map((ahn) => ({
         AHN: ahn,
-        Jaar: $selectedNeighbourhoodJSONData.properties["Jaar" + ahn],
+        Jaar: formatYears($selectedNeighbourhoodJSONData.properties["Jaar" + ahn]),
       }))
     } else if ($neighbourhoodsInMunicipalityJSONData) {
       findAHNyearsWithoutDuplicatesAndSort()
@@ -29,18 +41,22 @@
 
     $neighbourhoodsInMunicipalityJSONData.features.forEach((nh) => {
       ahnVersions.forEach((ahn) => {
-        const ahnYear = nh.properties["Jaar" + ahn].split(". ")
-        ahnYear.forEach((year) => {
-          if (!options.find((j) => j.AHN === ahn).Jaar.includes(year)) {
-            options.find((j) => j.AHN === ahn).Jaar += year + ","
-          }
-        })
+        // Use the same splitting logic as in formatYears
+        const ahnYear = nh.properties["Jaar" + ahn].split(/[.,]\s*/)
+        ahnYear
+          .filter((y) => y.trim())
+          .forEach((year) => {
+            if (!options.find((j) => j.AHN === ahn).Jaar.includes(year)) {
+              options.find((j) => j.AHN === ahn).Jaar.push(year)
+            }
+          })
       })
     })
 
+    // Sort years and convert to comma-separated string
     options.forEach((option) => {
-      option.Jaar = option.Jaar.split(",").sort((a, b) => a - b)
-      option.Jaar = option.Jaar.slice(1)
+      option.Jaar.sort((a, b) => a - b)
+      option.Jaar = option.Jaar.join(", ")
     })
   }
 
@@ -104,7 +120,7 @@
     // Get current selection as an object
     const selectionObj = getSelectionObject($AHNSelecties[indicator.title])
     const isDifferenceMode = selectionObj.isDifference
-    const compareYear = selectionObj.compareYear
+    const compareYear = selectionObj.compareYear || null
 
     // Update with new base year
     $AHNSelecties[indicator.title] = {
@@ -113,11 +129,11 @@
       isDifference: isDifferenceMode,
     }
 
-    // If the new base year is >= compare year, find a new valid compare year
+    // If the new base year is >= compare year or compareYear is null, find a new valid compare year
     const baseNum = parseInt(newAHN.replace(/\D/g, "") || "0", 10)
-    const compareNum = parseInt(compareYear.replace(/\D/g, "") || "0", 10)
+    const compareNum = compareYear ? parseInt(compareYear.replace(/\D/g, "") || "0", 10) : 0
 
-    if (baseNum >= compareNum) {
+    if (compareYear === null || baseNum >= compareNum) {
       // Find the next available year after the new base year
       const nextOption = options.find((option) => {
         if (!option || !option.AHN) return false

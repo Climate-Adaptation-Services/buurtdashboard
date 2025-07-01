@@ -57,7 +57,7 @@
       ? $currentJSONData.features.map((feature) => {
           // Store the difference value in a temporary property
           const baseAttribute = getIndicatorAttribute(indicator, indicator.attribute)
-          const compareAttribute = indicator.attribute + $AHNSelecties[indicator.title].compareYear
+          const compareAttribute = getIndicatorAttribute(indicator, indicator.attribute, $AHNSelecties[indicator.title].compareYear)
 
           const baseValue = +feature.properties[baseAttribute] || 0
           const compareValue = +feature.properties[compareAttribute] || 0

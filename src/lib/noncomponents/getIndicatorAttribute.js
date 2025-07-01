@@ -11,15 +11,14 @@ import { get } from "svelte/store"
 export function getIndicatorAttribute(indicator, attribute, specificYear) {
   // If a specific year is provided, use that directly
   if (specificYear) {
-    return attribute + specificYear
+    return attribute + '_' + specificYear;
   }
-  
-  const ahnSelection = get(AHNSelecties)[indicator.title]
-  
-  if (!ahnSelection) {
-    return attribute
+
+  const ahnSelection = get(AHNSelecties)[indicator.title];
+  if (!ahnSelection || ahnSelection.baseYear === '') {
+    return attribute;
   }
-  
+
   // Handle the consistent object structure
-  return attribute + (typeof ahnSelection === 'object' ? ahnSelection.baseYear : ahnSelection)
+  return attribute + '_' + (typeof ahnSelection === 'object' ? ahnSelection.baseYear : ahnSelection);
 }

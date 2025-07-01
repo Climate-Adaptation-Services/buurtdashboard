@@ -29,16 +29,11 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
   } else {
     attributeWithoutYear = getIndicatorAttribute(indicator, indicator.attribute).slice(0, -4)
 
-    // Check if we're in difference mode
+    indicatorAttribute = getIndicatorAttribute(indicator, indicator.attribute)
+
+    // Check if we're in difference mode (might be needed elsewhere)
     const ahnSelection = get(AHNSelecties)[indicator.title]
     const isDifferenceMode = ahnSelection && typeof ahnSelection === 'object' && ahnSelection.isDifference
-
-    if (isDifferenceMode) {
-      // For difference mode, we'll use the base attribute but will calculate the difference value later
-      indicatorAttribute = getIndicatorAttribute(indicator, indicator.attribute)
-    } else {
-      indicatorAttribute = getIndicatorAttribute(indicator, indicator.attribute)
-    }
 
     select('.' + shapeClassName)
       .attr('stroke-width', 3)
@@ -75,7 +70,7 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
           tooltipValueColor = indicatorValueColorscale(diffValue)
 
           // Include both years in the tooltip title
-          tooltipIndicator = `${indicator.title} (${ahnSelection.compareYear} vs ${ahnSelection.baseYear})`
+          tooltipIndicator = `${indicator.title}`
         } else {
           // Regular numerical indicator
           tooltipValue = /\d/.test(feature.properties[indicatorAttribute])
@@ -123,7 +118,7 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
       if (isDifferenceMode) {
         // For difference mode, calculate and display the difference value
         const baseAttribute = indicatorAttribute
-        const compareAttribute = indicator.attribute + ahnSelection.compareYear
+        const compareAttribute = getIndicatorAttribute(indicator, indicator.attribute, ahnSelection.compareYear)
 
         const baseValue = +feature.properties[baseAttribute] || 0
         const compareValue = +feature.properties[compareAttribute] || 0

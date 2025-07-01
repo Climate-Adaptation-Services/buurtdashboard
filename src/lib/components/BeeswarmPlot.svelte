@@ -35,8 +35,10 @@
   // Get the compare year attribute if we're doing a difference calculation
   $: compareAttribute =
     $AHNSelecties[indicator.title] && typeof $AHNSelecties[indicator.title] === "object" && $AHNSelecties[indicator.title].isDifference
-      ? indicator.attribute + $AHNSelecties[indicator.title].compareYear
+      ? getIndicatorAttribute(indicator, indicator.attribute, $AHNSelecties[indicator.title].compareYear)
       : null
+
+  $: console.log(compareAttribute)
 
   // Calculate difference values if we're doing a difference comparison
   $: differenceValues = compareAttribute
