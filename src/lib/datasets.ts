@@ -22,13 +22,13 @@ export const DEFAULT_CSV_DATA_URL =
 
 // Dordrecht config URLs
 export const DORDRECHT_METADATA_URL =
-  "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/dordrecht-rmk/metadata/metadata_rmk_010725_4.csv";
+  "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/dordrecht-rmk/metadata/metadata_rmk_030725_1.csv";
 
 export const DORDRECHT_METADATA_ENGLISH_URL =
   "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/dordrecht-rmk/metadata/metadata_030625_2023_2.csv";
 
 export const DORDRECHT_CSV_DATA_URL =
-  "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/dordrecht-rmk/csvdata/Dordrecht_rmk_010725_7.csv.zip";
+  "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/dordrecht-rmk/csvdata/Dordrecht_rmk_030725_1.csv.zip";
 
 // S3 base URL for preconnect
 export const S3_BASE_URL = "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com";
