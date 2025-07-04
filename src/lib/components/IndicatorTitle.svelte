@@ -9,7 +9,9 @@
 
 <div class="indicator-title" style="height: {titleHeight}px">
   <!-- <h4 class="category">{t("Categorie")}: {indicator.category}</h4> -->
-  <h2 class="title" style="background-color:{$configStore.mainColor}">{indicator.title}</h2>
+  <h2 class="title" style="background-color:{$configStore.mainColor}">
+    {indicator.title}
+  </h2>
   <h4 class="subtitle">{indicator.subtitle}</h4>
   {#if indicator.AHNversie}
     <YearSwitch {indicator} />
@@ -34,9 +36,10 @@
 
   .title {
     padding: 5px 15px;
-    margin: 10px 0 7px 0;
+    margin: 10px 40px 7px 40px;
     border-radius: 15px;
     color: white;
+    text-align: center;
   }
 
   .subtitle {
