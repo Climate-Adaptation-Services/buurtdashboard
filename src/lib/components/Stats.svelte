@@ -34,8 +34,8 @@
     if (isDifferenceMode) {
       // For difference mode, we need to construct the attribute names correctly
       // The attribute name format is typically: baseAttributeAHN2, baseAttributeAHN4, etc.
-      baseAttribute = indicator.attribute + currentAHNSelection.baseYear
-      compareAttribute = indicator.attribute + currentAHNSelection.compareYear
+      baseAttribute = getIndicatorAttribute(indicator, indicator.attribute, currentAHNSelection.baseYear)
+      compareAttribute = getIndicatorAttribute(indicator, indicator.attribute, currentAHNSelection.compareYear)
     } else {
       // For regular mode, just use the current selection
       baseAttribute = getIndicatorAttribute(indicator, indicator.attribute)
@@ -171,7 +171,13 @@
     )
 </script>
 
-<div class="indicator-stats" style="height: {bodyHeight * 0.2 * 0.25}px; {$configStore && $configStore.dashboardTitle === 'Buurtdashboard Dordrecht' ? 'visibility: hidden;' : ''}" bind:clientWidth={statsWidth}>
+<div
+  class="indicator-stats"
+  style="height: {bodyHeight * 0.2 * 0.25}px; {$configStore && $configStore.dashboardTitle === 'Buurtdashboard Dordrecht'
+    ? 'visibility: hidden;'
+    : ''}"
+  bind:clientWidth={statsWidth}
+>
   <Stat
     {indicatorValueColorscale}
     {indicator}

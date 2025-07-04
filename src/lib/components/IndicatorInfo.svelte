@@ -1,5 +1,5 @@
 <script>
-  import { configStore } from "$lib/stores"
+  import { AHNSelecties, allMunicipalitiesJSONData, configStore, neighbourhoodsInMunicipalityJSONData } from "$lib/stores"
   import { afterUpdate } from "svelte"
   import { getIndicatorAttribute } from "$lib/noncomponents/getIndicatorAttribute"
 
@@ -19,7 +19,7 @@
 
 <h3 class="question-mark" style="background-color:{$configStore.mainColor}">i</h3>
 <!-- <h3 class="category" style="background-color:{$configStore.mainColor}">C</h3> -->
-<img class="category" src="{indicator.category}.png" alt={indicator.category} />
+<img class="category" src="{indicator.category + $configStore.categoryPath}.png" alt={indicator.category} />
 <div class="category-tooltip">Categorie: {indicator.category}</div>
 <div class={"indicator-info indicator-info-" + getIndicatorAttribute(indicator, indicator.attribute)} style="left:{indicatorInfoPosition}px">
   <p class="title" style="background-color:{$configStore.mainColor}">

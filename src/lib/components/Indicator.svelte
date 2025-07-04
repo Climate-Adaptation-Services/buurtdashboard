@@ -35,7 +35,7 @@
         if (isDifferenceMode) {
           // Create a diverging color scale for difference values
           // Using purple for positive values and orange for negative values
-          indicatorValueColorscale = scaleLinear().domain([-10, 0, 10]).range(["orange", "#cccccc", "purple"])
+          indicatorValueColorscale = scaleLinear().domain([-10, -5, 0, 10, 20]).range(["black", "#D73027", "#cccccc", "green", "black"])
         } else {
           indicatorValueColorscale = scaleLinear()
             .domain([...Array(indicator.color.range.length).keys()].map((i) => rangeExtent[0] + i * step))
