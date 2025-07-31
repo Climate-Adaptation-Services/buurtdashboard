@@ -1,7 +1,10 @@
 <script>
-  import { AHNSelecties, selectedNeighbourhoodJSONData, neighbourhoodsInMunicipalityJSONData, configStore } from "$lib/stores"
+  import { getIndicatorStore, selectedNeighbourhoodJSONData, neighbourhoodsInMunicipalityJSONData, configStore } from "$lib/stores"
 
   export let indicator
+
+  // Get the dedicated store for this specific indicator
+  const indicatorStore = getIndicatorStore(indicator.title)
 
   let options = []
   let selectedAHN
@@ -75,17 +78,15 @@
     }
   }
 
-  // Subscribe to AHNSelecties changes
-  AHNSelecties.subscribe(() => {
-    updateFromSelection($AHNSelecties[indicator.title])
-  })
+  // React to indicator store changes - much cleaner!
+  $: {
+    updateFromSelection($indicatorStore)
+  }
 
   // Update selected AHN when neighborhood data changes
-  selectedNeighbourhoodJSONData.subscribe(() => {
-    if ($selectedNeighbourhoodJSONData) {
-      updateFromSelection($AHNSelecties[indicator.title])
-    }
-  })
+  $: if ($selectedNeighbourhoodJSONData) {
+    updateFromSelection($indicatorStore)
+  }
 
   /**
    * Helper function to get or create a selection object
@@ -117,16 +118,18 @@
   function yearClick(change) {
     const newAHN = change.target.value
 
+
     // Get current selection as an object
-    const selectionObj = getSelectionObject($AHNSelecties[indicator.title])
+    const selectionObj = getSelectionObject($indicatorStore)
     const isDifferenceMode = selectionObj.isDifference
     const compareYear = selectionObj.compareYear || null
 
-    // Update with new base year
-    $AHNSelecties[indicator.title] = {
+    // FIXED: Update with new base year using proper store update
+    let updatedSelection = {
       baseYear: newAHN,
       compareYear: compareYear,
       isDifference: isDifferenceMode,
+      unit: selectionObj.unit || '%', // Preserve existing unit
     }
 
     // If the new base year is >= compare year or compareYear is null, find a new valid compare year
@@ -142,13 +145,13 @@
       })
 
       if (nextOption) {
-        // Update compare year in the object
-        $AHNSelecties[indicator.title].compareYear = nextOption.AHN
+        // Update compare year in the local object
+        updatedSelection.compareYear = nextOption.AHN
         selectedDifference = nextOption.AHN
       } else {
         // No valid compare year available, revert to regular mode
-        $AHNSelecties[indicator.title].isDifference = false
-        $AHNSelecties[indicator.title].compareYear = null
+        updatedSelection.isDifference = false
+        updatedSelection.compareYear = null
         selectedDifference = "Difference"
       }
     } else {
@@ -156,7 +159,10 @@
       selectedDifference = compareYear
     }
 
-    AHNSelecties.set($AHNSelecties)
+    // FIXED: Single store update with the final selection object
+    // Much simpler with dedicated store!
+    indicatorStore.set(updatedSelection)
+
     // selectedAHN = newAHN
   }
 
@@ -186,14 +192,17 @@
     const differenceAHN = change.target.value
 
     // Get current selection as an object
-    const selectionObj = getSelectionObject($AHNSelecties[indicator.title])
+    const selectionObj = getSelectionObject($indicatorStore)
 
+    let updatedSelection
+    
     if (differenceAHN === "Difference") {
       // Turn off difference mode but keep the object structure
-      $AHNSelecties[indicator.title] = {
+      updatedSelection = {
         baseYear: selectionObj.baseYear,
         compareYear: null,
         isDifference: false,
+        unit: selectionObj.unit || '%', // Preserve existing unit
       }
       selectedDifference = "Difference"
     } else {
@@ -222,16 +231,18 @@
       }
 
       // Store both years for difference calculation
-      $AHNSelecties[indicator.title] = {
+      updatedSelection = {
         baseYear: newBaseYear,
         compareYear: differenceAHN,
         isDifference: true,
+        unit: selectionObj.unit || '%', // Preserve existing unit
       }
       selectedDifference = differenceAHN
       selectedAHN = newBaseYear
     }
 
-    AHNSelecties.set($AHNSelecties)
+    // Much simpler with dedicated store!
+    indicatorStore.set(updatedSelection)
   }
 </script>
 

@@ -7,21 +7,22 @@ import { getIndicatorAttribute } from "./getIndicatorAttribute";
  * @param {Object} indicator - The indicator object
  * @param {Array} neighbourhoodFeatures - Array of neighborhood features with properties
  * @param {Boolean} isDifferenceMode - Whether we're in difference mode
+ * @param {String} indicatorAttribute - The indicator attribute to use (unit-aware)
  * @returns {Array|null} - [min, max] extent array or null if in difference mode
  */
-export function getGlobalExtent(indicator, neighbourhoodFeatures, isDifferenceMode) {
+export function getGlobalExtent(indicator, neighbourhoodFeatures, isDifferenceMode, indicatorAttribute) {
   // Only calculate if we're not in difference mode
   if (isDifferenceMode) {
     return null;
   }
 
   // Check if indicator exists
-  if (!indicator || !indicator.attribute) {
+  if (!indicator || !indicatorAttribute) {
     return [0, 1]; // Default fallback
   }
 
-  // Get the current attribute name based on the indicator
-  const currentAttribute = getIndicatorAttribute(indicator, indicator.attribute);
+  // Use the provided indicator attribute
+  const currentAttribute = indicatorAttribute;
   
   // Filter out null and empty values
   const validData = neighbourhoodFeatures.filter(

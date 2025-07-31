@@ -1,5 +1,5 @@
 <script>
-  import { neighbourhoodSelection, neighbourhoodCodeAbbreviation, circleRadius, selectedNeighbourhoodJSONData, AHNSelecties } from "$lib/stores"
+  import { neighbourhoodSelection, neighbourhoodCodeAbbreviation, circleRadius, selectedNeighbourhoodJSONData, getIndicatorStore } from "$lib/stores"
   import { extent, scaleLinear, scaleLog, select } from "d3"
   import XAxis from "$lib/components/XAxis.svelte"
   import { forceSimulation, forceY, forceX, forceCollide, forceManyBody } from "d3-force"
@@ -9,59 +9,94 @@
   import { getIndicatorAttribute } from "$lib/noncomponents/getIndicatorAttribute"
   import { getGlobalExtent } from "$lib/noncomponents/getGlobalExtent"
 
+  // MIGRATED: Import centralized value retrieval system
+  import { getNumericalValue, getDifferenceValue, getAHNSelection, isValidValue } from "$lib/noncomponents/valueRetrieval.js"
+
   export let graphWidth
   export let indicatorHeight
   export let indicator
   export let indicatorValueColorscale
   export let neighbourhoodsInMunicipalityFeaturesClone
 
-  // filter out null values
-  neighbourhoodsInMunicipalityFeaturesClone = neighbourhoodsInMunicipalityFeaturesClone.filter(
-    (d) =>
-      d.properties[getIndicatorAttribute(indicator, indicator.attribute)] !== null &&
-      d.properties[getIndicatorAttribute(indicator, indicator.attribute)] !== "",
-  )
+  // Get the dedicated store for this specific indicator - naturally isolated!
+  const indicatorStore = getIndicatorStore(indicator.title)
+
+  // MIGRATED: Filter out invalid values using centralized validation
+  neighbourhoodsInMunicipalityFeaturesClone = neighbourhoodsInMunicipalityFeaturesClone.filter((d) => {
+    const rawValue = d.properties[getIndicatorAttribute(indicator, indicator.attribute)]
+    // For beeswarm plots, we need values that exist and are not null/empty
+    // but we allow NaN values (they'll be handled by the color scale)
+    return rawValue !== null && rawValue !== ""
+  })
+
+  // Special case for "Groen per inwoner" - filter out zero and negative values
   if (indicator.title === "Groen per inwoner") {
-    neighbourhoodsInMunicipalityFeaturesClone = neighbourhoodsInMunicipalityFeaturesClone.filter(
-      (d) => +d.properties[getIndicatorAttribute(indicator, indicator.attribute)] > 0,
-    )
+    neighbourhoodsInMunicipalityFeaturesClone = neighbourhoodsInMunicipalityFeaturesClone.filter((d) => {
+      const numericalValue = getNumericalValue(d, indicator)
+      return numericalValue !== null && numericalValue > 0
+    })
   }
 
   const margin = { bottom: 50, top: 20, left: 30, right: 30 }
 
-  // Make indicatorAttribute reactive to AHNSelecties changes
-  $: indicatorAttribute = getIndicatorAttribute(indicator, indicator.attribute)
+  // Declare indicatorAttribute variable
+  let indicatorAttribute = null
+  
+  // Declare original attribute for consistent colors (always percentage values)
+  let originalAttribute = null
 
-  // Get the compare year attribute if we're doing a difference calculation
-  $: compareAttribute =
-    $AHNSelecties[indicator.title] && typeof $AHNSelecties[indicator.title] === "object" && $AHNSelecties[indicator.title].isDifference
-      ? getIndicatorAttribute(indicator, indicator.attribute, $AHNSelecties[indicator.title].compareYear)
+  // Set indicatorAttribute for positioning and originalAttribute for consistent colors
+  $: {
+    // For positioning: use reactive attribute (may include _M2 suffix based on unit selection)
+    indicatorAttribute = getIndicatorAttribute(indicator, indicator.attribute)
+    
+    // For colors: always use original percentage attribute (bypass unit conversion entirely)
+    // This ensures consistent colors regardless of unit selection
+    const ahnSelection = $indicatorStore
+    if (ahnSelection && ahnSelection.baseYear) {
+      originalAttribute = indicator.attribute + '_' + ahnSelection.baseYear
+    } else {
+      originalAttribute = indicator.attribute
+    }
+  }
+
+  // DEBUG: Track prop changes that might cause re-renders
+  $: if (indicator.title === "Boomkroonoppervlakte") {
+    console.log("📊 Props received by BeeswarmPlot:", indicator.title, {
+      neighbourhoodsLength: neighbourhoodsInMunicipalityFeaturesClone?.length,
+      colorscaleType: typeof indicatorValueColorscale,
+      colorscaleString: indicatorValueColorscale.toString().substring(0, 100),
+      neighbourhoodsRef: neighbourhoodsInMunicipalityFeaturesClone,
+      timestamp: new Date().toISOString(),
+    })
+  }
+
+  // CLEAN: Use dedicated indicator store for difference mode detection (naturally isolated)
+  $: isDifferenceMode = $indicatorStore && typeof $indicatorStore === "object" && $indicatorStore.isDifference
+
+  // CLEAN: Calculate difference values reactive only to this indicator's selection
+  $: differenceValues =
+    isDifferenceMode && $indicatorStore
+      ? neighbourhoodsInMunicipalityFeaturesClone.map((d) => {
+          // Create a copy of the feature
+          const featureCopy = { ...d }
+
+          // Use centralized difference calculation (will be reactive to the store dependency above)
+          const diffValue = getDifferenceValue(d, indicator)
+          featureCopy.diffValue = diffValue
+
+          // Ensure the neighborhood code is preserved for stable identity
+          featureCopy.properties = featureCopy.properties || {}
+          featureCopy.properties[$neighbourhoodCodeAbbreviation] = d.properties[$neighbourhoodCodeAbbreviation]
+          return featureCopy
+        })
       : null
-
-  $: console.log(compareAttribute)
-
-  // Calculate difference values if we're doing a difference comparison
-  $: differenceValues = compareAttribute
-    ? neighbourhoodsInMunicipalityFeaturesClone.map((d) => {
-        // Create a copy of the feature
-        const featureCopy = { ...d }
-        // Calculate the difference between compare year and base year
-        const baseValue = +d.properties[indicatorAttribute] || 0
-        const compareValue = +d.properties[compareAttribute] || 0
-        // Store the difference in a temporary property
-        featureCopy.diffValue = compareValue - baseValue
-        // Ensure the neighborhood code is preserved for stable identity
-        featureCopy.properties = featureCopy.properties || {}
-        featureCopy.properties[$neighbourhoodCodeAbbreviation] = d.properties[$neighbourhoodCodeAbbreviation]
-        return featureCopy
-      })
-    : null
 
   // Use either regular values or difference values based on whether we're doing a comparison
   $: plotData = differenceValues || neighbourhoodsInMunicipalityFeaturesClone
 
   // Calculate global min and max values across all AHN versions for this indicator
-  $: globalExtent = getGlobalExtent(indicator, neighbourhoodsInMunicipalityFeaturesClone, !!differenceValues)
+  $: globalExtent = getGlobalExtent(indicator, neighbourhoodsInMunicipalityFeaturesClone, !!differenceValues, indicatorAttribute)
 
   // Make xScaleExtent reactive to indicatorAttribute changes
   $: xScaleExtent = differenceValues
@@ -94,26 +129,20 @@
 
   let alpha = 0.5
 
-  // Create a reactive variable to track AHN selection changes
-  $: currentAHNSelection = $AHNSelecties[indicator.title]
-
-  // Store previous AHN selection to detect changes
-  let prevAHNSelection = null
-
-  // Run the simulation whenever the AHN selection changes
+  // FIXED: Let Svelte handle reactivity naturally - run simulation when AHN selection changes
   $: {
-    // Only trigger when currentAHNSelection actually changes
-    if (currentAHNSelection !== prevAHNSelection) {
-      prevAHNSelection = currentAHNSelection
+    // This reactive block will trigger whenever this indicator's store changes
+    const currentSelection = $indicatorStore
 
-      // Get the updated indicator attribute
-      indicatorAttribute = getIndicatorAttribute(indicator, indicator.attribute)
 
-      // Restart the simulation with new data
-      setTimeout(() => {
-        runSimulation()
-      }, 50) // Small delay to ensure reactive values have updated
-    }
+
+    // Get the updated indicator attribute
+    indicatorAttribute = getIndicatorAttribute(indicator, indicator.attribute)
+
+    // Restart the simulation with new data
+    setTimeout(() => {
+      runSimulation()
+    }, 50) // Small delay to ensure reactive values have updated
   }
 
   // Store previous node positions for smooth transitions
@@ -150,9 +179,12 @@
         "x",
         forceX((d) => {
           if (differenceValues) {
+            // Use the pre-calculated difference value
             return xScaleBeeswarm(d.diffValue)
           } else {
-            return xScaleBeeswarm(+d.properties[indicatorAttribute])
+            // FIXED: Use raw property value for positioning (matches original behavior)
+            const rawValue = d.properties[indicatorAttribute]
+            return xScaleBeeswarm(+rawValue)
           }
         }).strength(0.5),
       )
@@ -194,7 +226,7 @@
   })
 
   // raise node on mount, hacky solution could be better
-  $: if ($selectedNeighbourhoodJSONData) {
+  $: if ($selectedNeighbourhoodJSONData && $selectedNeighbourhoodJSONData.properties) {
     setTimeout(() => {
       select("." + getClassName($selectedNeighbourhoodJSONData, "node", indicator, "indicator map")).raise()
     }, 1000)
@@ -215,7 +247,7 @@
       cx={node.x}
       cy={node.y}
       r={node.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection ? $circleRadius + 3 : $circleRadius}
-      fill={indicatorValueColorscale(differenceValues ? node.diffValue : +node.properties[indicatorAttribute])}
+      fill={differenceValues ? indicatorValueColorscale(node.diffValue) : indicatorValueColorscale(node.properties[originalAttribute])}
       stroke-width="3"
       on:mouseover={(e) => {
         // If we're showing a difference plot, add the diffValue to the node properties

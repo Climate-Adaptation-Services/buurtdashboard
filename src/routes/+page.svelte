@@ -3,6 +3,7 @@
   import Indicator from "$lib/components/Indicator.svelte"
   import Map from "$lib/components/Map.svelte"
   import Tooltip from "$lib/components/Tooltip.svelte"
+
   import {
     neighbourhoodSelection,
     indicatorsSelection,
@@ -38,9 +39,11 @@
 
   let displayedIndicators = []
   let allIndicators = []
+  let isInitialized = false
 
   allIndicators = setupIndicators(data, t("Effecten"), t("Gebiedskenmerken"), t("Kwetsbaarheid"))
   displayedIndicators = allIndicators
+  isInitialized = true
 
   // $: console.log("allIndicators", allIndicators)
 
@@ -57,25 +60,30 @@
     processURLParameters()
   }
 
-  $: onChangeIndicatorenSelectie($indicatorsSelection)
+  // Only react to indicator selection changes after initialization
+  $: if (isInitialized) {
+    onChangeIndicatorenSelectie($indicatorsSelection)
+  }
 
   function onChangeIndicatorenSelectie(_) {
-    displayedIndicators = []
+    // Directly update displayed indicators without clearing first
+    const newDisplayedIndicators = $indicatorsSelection.length === 0 ? allIndicators : allIndicators.filter((d) => $indicatorsSelection.includes(d["title"]))
+    
+    // Only do the complex reset if indicators actually changed
+    if (JSON.stringify(displayedIndicators.map(d => d.title)) !== JSON.stringify(newDisplayedIndicators.map(d => d.title))) {
+      const tempGemeenteSelection = $municipalitySelection
+      const tempBuurtSelection = $neighbourhoodSelection
+      municipalitySelection.set(null)
+      neighbourhoodSelection.set(null)
 
-    const tempGemeenteSelection = $municipalitySelection
-    const tempBuurtSelection = $neighbourhoodSelection
-    municipalitySelection.set(null)
-    neighbourhoodSelection.set(null)
+      displayedIndicators = newDisplayedIndicators
 
-    // dit is een hacky oplossing om te zorgen dat alles even leeg is,
-    // en vervolgens de indicatorsselectie weer toevoegen
-    setTimeout(() => {
-      displayedIndicators = $indicatorsSelection.length === 0 ? allIndicators : allIndicators.filter((d) => $indicatorsSelection.includes(d["title"]))
-    }, 1)
-    setTimeout(() => {
-      municipalitySelection.set(tempGemeenteSelection)
-      neighbourhoodSelection.set(tempBuurtSelection)
-    }, 1)
+      // Restore selections after a brief delay
+      setTimeout(() => {
+        municipalitySelection.set(tempGemeenteSelection)
+        neighbourhoodSelection.set(tempBuurtSelection)
+      }, 1)
+    }
   }
 </script>
 

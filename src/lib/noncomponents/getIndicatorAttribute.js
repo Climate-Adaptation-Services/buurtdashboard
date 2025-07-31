@@ -1,4 +1,4 @@
-import { AHNSelecties } from "$lib/stores"
+import { getIndicatorStore } from "$lib/stores"
 import { get } from "svelte/store"
 
 /**
@@ -14,11 +14,14 @@ export function getIndicatorAttribute(indicator, attribute, specificYear) {
     return attribute + '_' + specificYear;
   }
 
-  const ahnSelection = get(AHNSelecties)[indicator.title];
-  if (!ahnSelection || ahnSelection.baseYear === '') {
+  // Get the indicator-specific store
+  const indicatorStore = getIndicatorStore(indicator.title);
+  const ahnSelection = get(indicatorStore);
+
+  if (!ahnSelection || !ahnSelection.baseYear || ahnSelection.baseYear === '') {
     return attribute;
   }
 
-  // Handle the consistent object structure
-  return attribute + '_' + (typeof ahnSelection === 'object' ? ahnSelection.baseYear : ahnSelection);
+  // Use the baseYear from the indicator store
+  return attribute + '_' + ahnSelection.baseYear;
 }

@@ -24,6 +24,80 @@ export const indicatorsSelection = writable([])
 export const alleIndicatoren = writable([])
 export const AHNSelecties = writable({})
 
+const indicatorStores = new Map()
+
+export function getIndicatorStore(indicatorTitle) {
+  if (!indicatorStores.has(indicatorTitle)) {
+    // Get current AHNSelecties value without subscribing
+    let currentAHNSelecties
+    const unsubscribe = AHNSelecties.subscribe(v => currentAHNSelecties = v)
+    unsubscribe() // Immediately unsubscribe to avoid loops
+
+    // Initialize from existing data if available
+    const existing = currentAHNSelecties[indicatorTitle]
+    let initialSelection
+
+    if (existing) {
+      if (typeof existing === 'object') {
+        initialSelection = {
+          baseYear: existing.baseYear || '',
+          compareYear: existing.compareYear || null,
+          isDifference: existing.isDifference || false,
+          unit: existing.unit || '%'
+        }
+      } else {
+        // Legacy string format
+        initialSelection = {
+          baseYear: existing,
+          compareYear: null,
+          isDifference: false,
+          unit: '%'
+        }
+      }
+    } else {
+      // Default values if no existing data
+      initialSelection = {
+        baseYear: '',
+        compareYear: null,
+        isDifference: false,
+        unit: '%'
+      }
+    }
+
+    const store = writable(initialSelection)
+    indicatorStores.set(indicatorTitle, store)
+  }
+  return indicatorStores.get(indicatorTitle)
+}
+
+// Helper to get current value without subscribing
+export function getIndicatorSelection(indicatorTitle) {
+  const store = getIndicatorStore(indicatorTitle)
+  let value
+  store.subscribe(v => value = v)()
+  return value
+}
+
+// Note: No automatic sync to prevent loops. 
+// Components should use the new indicator stores directly.
+
+// Initialize indicator stores from the old AHNSelecties data
+export function initializeIndicatorStores(data) {
+  data.metadata.forEach(indicator => {
+    const baseYear = (indicator.AHNversie)
+      ? indicator.AHNversie.split(',')[indicator.AHNversie.split(',').length - 1]
+      : ''
+
+    const store = getIndicatorStore(indicator.Titel)
+    store.set({
+      baseYear: baseYear,
+      compareYear: null,
+      isDifference: false,
+      unit: '%'
+    })
+  })
+}
+
 export const configStore = writable(defaultConfig)
 
 // Set up theme subscription to apply CSS variables when configStore changes

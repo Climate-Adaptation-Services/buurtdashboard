@@ -1,5 +1,7 @@
 <script>
-  import { neighbourhoodSelection, municipalitySelection, allNeighbourhoodsJSONData, AHNSelecties } from "$lib/stores"
+  // console.log('🚀 Stat.svelte script loaded')
+  import { neighbourhoodSelection, municipalitySelection, allNeighbourhoodsJSONData, getIndicatorStore } from "$lib/stores"
+  import { onMount } from 'svelte'
   import { getRegionName } from "$lib/noncomponents/getRegionName"
 
   export let graphWidth
@@ -9,12 +11,25 @@
 
   export let regio
   export let xScaleStats
-  export let medianValue
+  export let medianValue // Display value (unit-converted)
+  export let scaleValue = medianValue // Scale value (original %) for positioning - defaults to medianValue for backward compatibility
   export let indicatorValueColorscale
 
   // Determine if we're in difference mode
-  $: currentAHNSelection = $AHNSelecties[indicator.title]
-  $: isDifferenceMode = currentAHNSelection && typeof currentAHNSelection === "object" && currentAHNSelection.isDifference
+  $: indicatorStore = getIndicatorStore(indicator.title)
+  $: currentAHNSelection = $indicatorStore
+  $: isDifferenceMode = currentAHNSelection && currentAHNSelection.isDifference
+  
+  // DEBUG: Track medianValue changes
+  // $: console.log('📊 Stat', regio, 'received medianValue:', medianValue, 'for', indicator.title)
+  $: displayValue = medianValue !== "Geen data" ? Math.round(medianValue * 100) / 100 : "Geen data"
+  // $: console.log('📝 Stat', regio, 'will display:', displayValue, 'for', indicator.title)
+  // $: console.log('🎨 Stat', regio, 'template will render:', textPlus + displayValue)
+  
+  // Force mount logging
+  // onMount(() => {
+  //   console.log('🎆 Stat MOUNTED:', regio, 'with value:', medianValue, 'display:', displayValue)
+  // })
 
   // Format region name
   let regioNaam = ""
@@ -31,19 +46,19 @@
   let textX = 180
   let textAnchor = "start"
 
-  // Calculate bar width
-  $: rectWidth = medianValue !== "Geen data" ? (isDifferenceMode ? Math.abs(xScaleStats(medianValue) - xScaleStats(0)) : xScaleStats(medianValue)) : 0
+  // Calculate bar width using scaleValue for consistent positioning
+  $: rectWidth = medianValue !== "Geen data" ? (isDifferenceMode ? Math.abs(xScaleStats(scaleValue) - xScaleStats(0)) : xScaleStats(scaleValue)) : 0
 
-  // Calculate bar X position
-  $: rectX = isDifferenceMode ? (medianValue > 0 ? 175 + xScaleStats(0) : 175 + xScaleStats(0) - rectWidth) : 175
+  // Calculate bar X position using scaleValue for consistent positioning
+  $: rectX = isDifferenceMode ? (scaleValue > 0 ? 175 + xScaleStats(0) : 175 + xScaleStats(0) - rectWidth) : 175
 
-  // Calculate text X position - position labels outside the bars
+  // Calculate text X position - position labels outside the bars using scaleValue for consistency
   $: {
     if (medianValue === "Geen data") {
       textX = 180
       textAnchor = "start"
     } else if (isDifferenceMode) {
-      if (medianValue < 0) {
+      if (scaleValue < 0) {
         // For negative values, position to the left of the bar
         textX = 170 + xScaleStats(0) - rectWidth
         textAnchor = "end"
@@ -53,24 +68,24 @@
         textAnchor = "start"
       }
     } else {
-      // For regular mode, position to the right of the bar
-      textX = 175 + xScaleStats(medianValue) + 10
+      // For regular mode, position to the right of the bar using scaleValue
+      textX = 175 + xScaleStats(scaleValue) + 10
       textAnchor = "start"
     }
   }
 
-  // Add plus sign for positive difference values
-  $: textPlus = isDifferenceMode && medianValue > 0 ? "+" : ""
+  // Add plus sign for positive difference values using scaleValue for consistency
+  $: textPlus = isDifferenceMode && scaleValue > 0 ? "+" : ""
 
-  // Get the appropriate color for the bar
+  // Get the appropriate color for the bar using scaleValue for consistent colors
   $: barColor =
     medianValue !== "Geen data"
       ? indicatorValueColorscale
-        ? indicatorValueColorscale(medianValue)
+        ? indicatorValueColorscale(scaleValue) // Use scaleValue for consistent colors
         : isDifferenceMode
-          ? medianValue > 0
+          ? scaleValue > 0 // Use scaleValue for consistent color logic
             ? "#4682b4" // Blue for positive differences (fallback)
-            : medianValue < 0
+            : scaleValue < 0
               ? "#E1575A" // Red for negative differences (fallback)
               : "#cccccc" // Gray for zero (fallback)
           : "steelblue"
@@ -120,7 +135,7 @@
       text-anchor={textAnchor}
       fill={isDifferenceMode ? (medianValue > 0 ? "#4682b4" : medianValue < 0 ? "#E1575A" : "#666666") : "#645f5e"}
     >
-      {medianValue !== "Geen data" ? textPlus + Math.round(medianValue * 100) / 100 : "Geen data"}
+      {displayValue !== "Geen data" ? textPlus + displayValue : "Geen data"}
     </text>
   </g>
 </svg>

@@ -8,13 +8,14 @@
     neighbourhoodCodeAbbreviation,
     municipalityCodeAbbreviation,
     selectedNeighbourhoodJSONData,
-    AHNSelecties,
+    getIndicatorStore,
     configStore,
   } from "$lib/stores"
   import Stat from "./Stat.svelte"
   import { scaleLinear, min, max } from "d3"
   import { calcMedian } from "$lib/noncomponents/calcMedian"
-  import { getIndicatorAttribute } from "$lib/noncomponents/getIndicatorAttribute"
+  // MIGRATED: Import centralized value retrieval functions
+  import { getNumericalValue, getDifferenceValue, getIndicatorAttribute, toNumber, isValidValue } from "$lib/noncomponents/valueRetrieval.js"
 
   export let bodyHeight
   export let indicator
@@ -22,44 +23,170 @@
 
   let statsWidth
 
-  // Create reactive variables that update when AHNSelecties changes
-  $: currentAHNSelection = $AHNSelecties[indicator.title]
-  $: isDifferenceMode = currentAHNSelection && typeof currentAHNSelection === "object" && currentAHNSelection.isDifference
+  // MIGRATED: Use centralized AHN selection handling with reactive store dependency
+  $: indicatorStore = getIndicatorStore(indicator.title)
+  $: currentAHNSelection = $indicatorStore
+  $: isDifferenceMode = currentAHNSelection && currentAHNSelection.isDifference
 
-  // Variables to store attribute names
-  let baseAttribute, compareAttribute
+  // MIGRATED: Make attribute calculation reactive to store changes
+  $: currentAttribute = getIndicatorAttribute(indicator, indicator.attribute)
 
-  // Get the appropriate attributes based on whether we're in difference mode
-  $: {
-    if (isDifferenceMode) {
-      // For difference mode, we need to construct the attribute names correctly
-      // The attribute name format is typically: baseAttributeAHN2, baseAttributeAHN4, etc.
-      baseAttribute = getIndicatorAttribute(indicator, indicator.attribute, currentAHNSelection.baseYear)
-      compareAttribute = getIndicatorAttribute(indicator, indicator.attribute, currentAHNSelection.compareYear)
-    } else {
-      // For regular mode, just use the current selection
-      baseAttribute = getIndicatorAttribute(indicator, indicator.attribute)
-      compareAttribute = null
-    }
-  }
-
-  // Calculate median values based on the current mode (regular or difference)
-  $: medianValuesDict = {
-    medianValueNederland: isDifferenceMode
+  // MIGRATED: Calculate display values (unit-converted) and scale values (original %) separately
+  $: medianValuesDict = currentAHNSelection && (() => {
+    // Nederland calculation - DISPLAY VALUES (unit-converted)
+    const nederlandMedian = isDifferenceMode
       ? calcMedian(
-          $allNeighbourhoodsJSONData.features.map((neighbourhood) => {
-            // Get values for both years
-            const baseValue = +neighbourhood.properties[baseAttribute] || 0
-            const compareValue = +neighbourhood.properties[compareAttribute] || 0
-            const diff = compareValue - baseValue
-            return diff
-          }),
+          $allNeighbourhoodsJSONData.features
+            .map((neighbourhood) => getDifferenceValue(neighbourhood, indicator))
+            .filter((value) => value !== null)
         )
-      : calcMedian($allNeighbourhoodsJSONData.features.map((neighbourhood) => +neighbourhood.properties[baseAttribute])),
-    medianValueGemeente: 0,
-    medianValueBuurt: 0,
-    medianValueWijktype: 0,
-  }
+      : (() => {
+          const values = $allNeighbourhoodsJSONData.features
+            .map((neighbourhood) => getNumericalValue(neighbourhood, indicator))
+            .filter((value) => value !== null)
+          return calcMedian(values)
+        })()
+    
+    // Municipality calculation - DISPLAY VALUES (unit-converted)
+    const gemeenteMedian = $municipalitySelection !== null ? (() => {
+      const municipalityFilter = $allNeighbourhoodsJSONData.features.filter(
+        (neighbourhood) => neighbourhood.properties[$municipalityCodeAbbreviation] === $municipalitySelection
+      )
+      return isDifferenceMode
+        ? calcMedian(
+            municipalityFilter
+              .map((neighbourhood) => getDifferenceValue(neighbourhood, indicator))
+              .filter((value) => value !== null)
+          )
+        : calcMedian(
+            municipalityFilter
+              .map((neighbourhood) => getNumericalValue(neighbourhood, indicator))
+              .filter((value) => value !== null)
+          )
+    })() : 0
+    
+    // Neighborhood and district type calculations - DISPLAY VALUES (unit-converted)
+    let buurtValue = 0
+    let wijktypeMedian = 0
+    
+    if ($neighbourhoodSelection !== null && currentAHNSelection) {
+      const neighbourhoodFilter = $allNeighbourhoodsJSONData.features.filter(
+        (neighbourhood) => neighbourhood.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection
+      )
+      
+      if (isDifferenceMode) {
+        const diffValue = getDifferenceValue(neighbourhoodFilter[0], indicator)
+        buurtValue = diffValue !== null ? Math.round(diffValue * 100) / 100 : "Geen data"
+        
+        wijktypeMedian = calcMedian(
+          $districtTypeJSONData.features
+            .map((neighbourhood) => getDifferenceValue(neighbourhood, indicator))
+            .filter((value) => value !== null)
+        )
+      } else {
+        const feature = neighbourhoodFilter[0]
+        const buurtRawValue = getNumericalValue(feature, indicator)
+        buurtValue = buurtRawValue !== null
+          ? Math.round(buurtRawValue * 100) / 100
+          : "Geen data"
+        
+        wijktypeMedian = calcMedian(
+          $districtTypeJSONData.features
+            .map((neighbourhood) => getNumericalValue(neighbourhood, indicator))
+            .filter((value) => value !== null)
+        )
+      }
+    }
+    
+    const result = {
+      medianValueNederland: nederlandMedian,
+      medianValueGemeente: gemeenteMedian,
+      medianValueBuurt: buurtValue,
+      medianValueWijktype: wijktypeMedian,
+    }
+    return result
+  })()
+  
+  // SCALE VALUES: Calculate using original percentage values for consistent positioning/colors
+  $: scaleValuesDict = currentAHNSelection && (() => {
+    // Get the original attribute (always percentage, no unit conversion)
+    const originalAttribute = getIndicatorAttribute(indicator, indicator.attribute)
+    
+    // Nederland scale calculation - ORIGINAL VALUES (for positioning)
+    const nederlandScale = isDifferenceMode
+      ? calcMedian(
+          $allNeighbourhoodsJSONData.features
+            .map((neighbourhood) => getDifferenceValue(neighbourhood, indicator))
+            .filter((value) => value !== null)
+        )
+      : (() => {
+          const values = $allNeighbourhoodsJSONData.features
+            .map((neighbourhood) => neighbourhood.properties[originalAttribute])
+            .filter((value) => value !== null && value !== "" && !isNaN(value))
+            .map((value) => +value)
+          return calcMedian(values)
+        })()
+    
+    // Municipality scale calculation - ORIGINAL VALUES (for positioning)
+    const gemeenteScale = $municipalitySelection !== null ? (() => {
+      const municipalityFilter = $allNeighbourhoodsJSONData.features.filter(
+        (neighbourhood) => neighbourhood.properties[$municipalityCodeAbbreviation] === $municipalitySelection
+      )
+      return isDifferenceMode
+        ? calcMedian(
+            municipalityFilter
+              .map((neighbourhood) => getDifferenceValue(neighbourhood, indicator))
+              .filter((value) => value !== null)
+          )
+        : calcMedian(
+            municipalityFilter
+              .map((neighbourhood) => neighbourhood.properties[originalAttribute])
+              .filter((value) => value !== null && value !== "" && !isNaN(value))
+              .map((value) => +value)
+          )
+    })() : 0
+    
+    // Neighborhood and district type scale calculations - ORIGINAL VALUES (for positioning)
+    let buurtScale = 0
+    let wijktypeScale = 0
+    
+    if ($neighbourhoodSelection !== null && currentAHNSelection) {
+      const neighbourhoodFilter = $allNeighbourhoodsJSONData.features.filter(
+        (neighbourhood) => neighbourhood.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection
+      )
+      
+      if (isDifferenceMode) {
+        const diffValue = getDifferenceValue(neighbourhoodFilter[0], indicator)
+        buurtScale = diffValue !== null ? diffValue : 0
+        
+        wijktypeScale = calcMedian(
+          $districtTypeJSONData.features
+            .map((neighbourhood) => getDifferenceValue(neighbourhood, indicator))
+            .filter((value) => value !== null)
+        )
+      } else {
+        const feature = neighbourhoodFilter[0]
+        const buurtRawValue = feature.properties[originalAttribute]
+        buurtScale = (buurtRawValue !== null && buurtRawValue !== "" && !isNaN(buurtRawValue)) 
+          ? +buurtRawValue : 0
+        
+        wijktypeScale = calcMedian(
+          $districtTypeJSONData.features
+            .map((neighbourhood) => neighbourhood.properties[originalAttribute])
+            .filter((value) => value !== null && value !== "" && !isNaN(value))
+            .map((value) => +value)
+        )
+      }
+    }
+    
+    const result = {
+      medianValueNederland: nederlandScale,
+      medianValueGemeente: gemeenteScale,
+      medianValueBuurt: buurtScale,
+      medianValueWijktype: wijktypeScale,
+    }
+    return result
+  })()
 
   // This is used for showing comparison values
   let medianValuesDictOtherYear = {
@@ -69,83 +196,23 @@
     medianValueWijktype: 0,
   }
 
-  $: if ($municipalitySelection !== null) {
-    // Neighbourhoods binnen municipality
-    const municipalityFilter = $allNeighbourhoodsJSONData.features.filter(
-      (neighbourhood) => neighbourhood.properties[$municipalityCodeAbbreviation] === $municipalitySelection,
-    )
-
-    medianValuesDict["medianValueGemeente"] = isDifferenceMode
-      ? calcMedian(
-          municipalityFilter.map((neighbourhood) => {
-            // Get values for both years
-            const baseValue = +neighbourhood.properties[baseAttribute] || 0
-            const compareValue = +neighbourhood.properties[compareAttribute] || 0
-            const diff = compareValue - baseValue
-            return diff
-          }),
-        )
-      : calcMedian(municipalityFilter.map((neighbourhood) => +neighbourhood.properties[baseAttribute]))
-  } else {
-    medianValuesDict["medianValueGemeente"] = 0
-  }
-
-  $: if ($neighbourhoodSelection !== null && currentAHNSelection) {
-    // deze filter is 1 neighbourhood
-    const neighbourhoodFilter = $allNeighbourhoodsJSONData.features.filter(
-      (neighbourhood) => neighbourhood.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection,
-    )
-
-    if (isDifferenceMode) {
-      // Calculate difference for the selected neighborhood
-      const baseValue = +neighbourhoodFilter[0].properties[baseAttribute] || 0
-      const compareValue = +neighbourhoodFilter[0].properties[compareAttribute] || 0
-      const diffValue = compareValue - baseValue
-
-      medianValuesDict["medianValueBuurt"] = !isNaN(diffValue) ? Math.round(diffValue * 100) / 100 : "Geen data"
-
-      // Calculate difference for the district type
-      medianValuesDict["medianValueWijktype"] = calcMedian(
-        $districtTypeJSONData.features.map((neighbourhood) => {
-          const baseVal = +neighbourhood.properties[baseAttribute] || 0
-          const compareVal = +neighbourhood.properties[compareAttribute] || 0
-          const diff = compareVal - baseVal
-          return diff
-        }),
-      )
-    } else {
-      // Regular mode - show single value
-      medianValuesDict["medianValueBuurt"] =
-        neighbourhoodFilter[0].properties[baseAttribute] !== null
-          ? Math.round(neighbourhoodFilter[0].properties[baseAttribute] * 100) / 100
-          : "Geen data"
-
-      medianValuesDict["medianValueWijktype"] = calcMedian(
-        $districtTypeJSONData.features.map((neighbourhood) => neighbourhood.properties[baseAttribute]),
-      )
-    }
-  } else {
-    medianValuesDict["medianValueBuurt"] = 0
-    medianValuesDict["medianValueWijktype"] = 0
-    medianValuesDictOtherYear["medianValueBuurt"] = 0
-    medianValuesDictOtherYear["medianValueWijktype"] = 0
-  }
+  // NOTE: All median calculations are now handled in the single comprehensive reactive statement above
 
   // Declare variables for scale
   let xScaleMin = 0
   let xDomain = [0, 100]
 
-  // Calculate min and max values for the scale
+  // Calculate min and max values for the scale using SCALE VALUES (original %) for consistent positioning
   $: {
-    // Filter out non-numeric values
+    // Use scale values (original percentages) for consistent bar positioning
     const numericValues = [
-      medianValuesDict["medianValueNederland"],
-      medianValuesDict["medianValueGemeente"],
-      medianValuesDict["medianValueBuurt"],
-      medianValuesDict["medianValueWijktype"],
+      scaleValuesDict["medianValueNederland"],
+      scaleValuesDict["medianValueGemeente"],
+      scaleValuesDict["medianValueBuurt"],
+      scaleValuesDict["medianValueWijktype"],
     ].filter((val) => typeof val === "number")
 
-    // Calculate min and max
+    // Calculate min and max based on original percentage values
     const minValue = min(numericValues)
     const maxValue = max(numericValues)
 
@@ -186,6 +253,7 @@
     indicatorHeight={bodyHeight * 0.2 * 0.25}
     regio="Nederland"
     medianValue={medianValuesDict["medianValueNederland"]}
+    scaleValue={scaleValuesDict["medianValueNederland"]}
     {xScaleStats}
   />
 </div>
@@ -199,6 +267,7 @@
       indicatorHeight={bodyHeight * 0.2 * 0.25}
       regio="Gemeente"
       medianValue={medianValuesDict["medianValueGemeente"]}
+      scaleValue={scaleValuesDict["medianValueGemeente"]}
       {xScaleStats}
     />
   </div>
@@ -213,6 +282,7 @@
       indicatorHeight={bodyHeight * 0.2 * 0.25}
       regio="Buurt"
       medianValue={medianValuesDict["medianValueBuurt"]}
+      scaleValue={scaleValuesDict["medianValueBuurt"]}
       {xScaleStats}
     />
   </div>
@@ -226,6 +296,7 @@
         indicatorHeight={bodyHeight * 0.2 * 0.25}
         regio="Wijktype"
         medianValue={medianValuesDict["medianValueWijktype"]}
+        scaleValue={scaleValuesDict["medianValueWijktype"]}
         {xScaleStats}
       />
     </div>

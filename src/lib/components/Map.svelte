@@ -8,6 +8,15 @@
   import { getMostCommonClass } from "$lib/noncomponents/getMostCommonClass"
   import { getClassByIndicatorValue } from "$lib/noncomponents/getClassByIndicatorValue"
   import { getIndicatorAttribute } from "$lib/noncomponents/getIndicatorAttribute"
+  
+  // MIGRATED: Import centralized value retrieval system
+  import {
+    getNumericalValue,
+    getCategoricalValue,
+    getDifferenceValue,
+    getAHNSelection,
+    isValidValue
+  } from "$lib/noncomponents/valueRetrieval.js"
 
   // Removed unused exports for JSONdata and CSVdata
   export let mapWidth
@@ -47,33 +56,54 @@
     select(".tooltip-multi" + indicator.attribute).style("visibility", "hidden")
   }
 
-  // Check if we're in difference mode
-  $: isDifferenceMode =
-    indicator && $AHNSelecties[indicator.title] && typeof $AHNSelecties[indicator.title] === "object" && $AHNSelecties[indicator.title].isDifference
+  // FIXED: Use store-based reactivity for difference mode detection (aligned with BeeswarmPlot)
+  $: isDifferenceMode = indicator && $AHNSelecties[indicator.title] && typeof $AHNSelecties[indicator.title] === 'object' && $AHNSelecties[indicator.title].isDifference
+  
 
-  // Calculate difference values for each feature when in difference mode
-  $: differenceValues =
-    isDifferenceMode && $currentJSONData && $currentJSONData.features
-      ? $currentJSONData.features.map((feature) => {
-          // Store the difference value in a temporary property
-          const baseAttribute = getIndicatorAttribute(indicator, indicator.attribute)
-          const compareAttribute = getIndicatorAttribute(indicator, indicator.attribute, $AHNSelecties[indicator.title].compareYear)
+  
 
-          const baseValue = +feature.properties[baseAttribute] || 0
-          const compareValue = +feature.properties[compareAttribute] || 0
 
-          // Store the calculated difference
-          feature.properties.calculatedDifference = compareValue - baseValue
-          return feature
-        })
-      : null
+  // FIXED: Don't mutate shared store data - calculate difference values on-demand in getMapFillColor
 
-  // Function to get the appropriate attribute for coloring the map
-  function getNumericalAttribute(feature) {
-    if (isDifferenceMode) {
-      return "calculatedDifference"
+  // Declare indicatorAttribute variable
+  let indicatorAttribute = null
+  
+  // Set indicatorAttribute for coloring (always use % values for consistent colors)
+  $: {
+    if (indicator) {
+      // Always use base attribute for coloring (% values) to maintain consistent color scale
+      indicatorAttribute = getIndicatorAttribute(indicator, indicator.attribute)
     } else {
-      return getIndicatorAttribute(indicator, indicator.attribute)
+      indicatorAttribute = null
+    }
+  }
+  
+  // SIMPLIFIED: Use BeeswarmPlot's direct color logic approach
+  function getMapFillColor(feature) {
+    // Check if this is the main map (no indicator) - use whitesmoke
+    if (!indicator) {
+      return $neighbourhoodSelection === feature.properties[$neighbourhoodCodeAbbreviation]
+        ? "#FF6B35"
+        : "whitesmoke"
+    }
+    
+    if (indicator.numerical) {
+      // FIXED: Calculate difference value on-demand to avoid mutating shared store
+      const value = isDifferenceMode
+        ? getDifferenceValue(feature, indicator)
+        : feature.properties[indicatorAttribute]
+      
+      const color = value !== null && value !== "" && !isNaN(value)
+        ? indicatorValueColorscale(value)
+        : "#000000"
+      
+      return color
+    } else {
+      // MIGRATED: Use centralized categorical value retrieval
+      const categoricalValue = getCategoricalValue(feature, indicator)
+      return categoricalValue !== null
+        ? indicatorValueColorscale(categoricalValue)
+        : "#000000"
     }
   }
 </script>
@@ -88,21 +118,7 @@
       <path
         d={path(feature)}
         class={getClassName(feature, "path", indicator, mapType) + " " + "svgelements_" + feature.properties[$neighbourhoodCodeAbbreviation]}
-        fill={mapType === "main map"
-          ? feature.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection
-            ? "#E1575A"
-            : "whitesmoke"
-          : indicator.numerical
-            ? // check if value not null
-              feature.properties[getIndicatorAttribute(indicator, indicator.attribute)] !== null &&
-              feature.properties[getIndicatorAttribute(indicator, indicator.attribute)] !== ""
-              ? indicatorValueColorscale(feature.properties[getNumericalAttribute(feature)])
-              : "#000000"
-            : indicator.aggregatedIndicator
-              ? indicatorValueColorscale(getMostCommonClass(indicator, feature))
-              : indicatorValueColorscale(
-                  getClassByIndicatorValue(indicator, feature.properties[getIndicatorAttribute(indicator, indicator.attribute)]),
-                )}
+        fill={isDifferenceMode, indicatorValueColorscale, $AHNSelecties, getMapFillColor(feature)}
         stroke={mapType === "main map"
           ? "grey"
           : feature.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection
