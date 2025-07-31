@@ -27,7 +27,7 @@
   export let data
   // Removed large object console log
 
-  // $: console.log("config", $configStore)
+
 
   let screenWidth = 1000 //default value
   let mapWidth
@@ -45,7 +45,7 @@
   displayedIndicators = allIndicators
   isInitialized = true
 
-  // $: console.log("allIndicators", allIndicators)
+
 
   // GeoJSON data is now available directly from page data
   const geoJSONData = [data.municipalityGeoJson, data.neighbourhoodGeoJson]

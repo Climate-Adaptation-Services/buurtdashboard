@@ -38,17 +38,15 @@ export async function getFromCache(url) {
   const isBrowser = typeof window !== 'undefined';
 
   if (import.meta.env.DEV && !(isBrowser && window.FORCE_ENABLE_CACHE)) {
-    console.log('Skipping cache in development mode');
     return null;
   }
 
-  // Log cache check attempt
-  console.log(`Checking cache for ${url}`);
+
 
   try {
     // Check if Cache API is available (browser environment)
     if (!('caches' in self)) {
-      console.log('Cache API not available');
+
       return null;
     }
 
@@ -60,7 +58,7 @@ export async function getFromCache(url) {
     const metadataResponse = await cache.match(`${cacheKey}-metadata`);
 
     if (!dataResponse || !metadataResponse) {
-      console.log(`Cache miss for ${url}`);
+
       return null;
     }
 
@@ -68,14 +66,14 @@ export async function getFromCache(url) {
 
     // Check if cache is expired
     if (isCacheExpired(metadata)) {
-      console.log(`Cache expired for ${url}`);
+
       // Delete expired cache entries
       await cache.delete(cacheKey);
       await cache.delete(`${cacheKey}-metadata`);
       return null;
     }
 
-    console.log(`Cache hit for ${url}`);
+
     return await dataResponse.json();
   } catch (error) {
     console.error('Error accessing cache:', error);
@@ -95,12 +93,10 @@ export async function saveToCache(url, data) {
   const isBrowser = typeof window !== 'undefined';
 
   if (import.meta.env.DEV && !(isBrowser && window.FORCE_ENABLE_CACHE)) {
-    console.log('Skipping cache in development mode');
     return false;
   }
 
-  // Log caching attempt
-  console.log(`Attempting to cache data for ${url}`);
+
 
   try {
     // Check if Cache API is available

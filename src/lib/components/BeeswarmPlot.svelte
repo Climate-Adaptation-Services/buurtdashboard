@@ -60,21 +60,10 @@
     }
   }
 
-  // DEBUG: Track prop changes that might cause re-renders
-  $: if (indicator.title === "Boomkroonoppervlakte") {
-    console.log("📊 Props received by BeeswarmPlot:", indicator.title, {
-      neighbourhoodsLength: neighbourhoodsInMunicipalityFeaturesClone?.length,
-      colorscaleType: typeof indicatorValueColorscale,
-      colorscaleString: indicatorValueColorscale.toString().substring(0, 100),
-      neighbourhoodsRef: neighbourhoodsInMunicipalityFeaturesClone,
-      timestamp: new Date().toISOString(),
-    })
-  }
-
-  // CLEAN: Use dedicated indicator store for difference mode detection (naturally isolated)
+  // Use dedicated indicator store for difference mode detection (naturally isolated)
   $: isDifferenceMode = $indicatorStore && typeof $indicatorStore === "object" && $indicatorStore.isDifference
 
-  // CLEAN: Calculate difference values reactive only to this indicator's selection
+  // Calculate difference values reactive only to this indicator's selection
   $: differenceValues =
     isDifferenceMode && $indicatorStore
       ? neighbourhoodsInMunicipalityFeaturesClone.map((d) => {

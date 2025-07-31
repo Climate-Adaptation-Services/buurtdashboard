@@ -1,5 +1,5 @@
 <script>
-  import { currentJSONData, neighbourhoodSelection, neighbourhoodCodeAbbreviation, AHNSelecties } from "$lib/stores"
+  import { currentJSONData, neighbourhoodSelection, neighbourhoodCodeAbbreviation, AHNSelecties, getIndicatorStore } from "$lib/stores"
   import { geoMercator, geoPath, select } from "d3"
   import { prepareJSONData } from "$lib/noncomponents/prepareJSONData.js"
   import { t } from "$lib/i18n/translate.js"
@@ -56,29 +56,45 @@
     select(".tooltip-multi" + indicator.attribute).style("visibility", "hidden")
   }
 
-  // FIXED: Use store-based reactivity for difference mode detection (aligned with BeeswarmPlot)
-  $: isDifferenceMode = indicator && $AHNSelecties[indicator.title] && typeof $AHNSelecties[indicator.title] === 'object' && $AHNSelecties[indicator.title].isDifference
+  // Use dedicated indicator store for difference mode detection (naturally isolated)
+  $: indicatorStore = indicator ? getIndicatorStore(indicator.title) : null
+  $: isDifferenceMode = $indicatorStore && typeof $indicatorStore === "object" && $indicatorStore.isDifference
   
+  // Pre-calculate difference values for map features to match BeeswarmPlot approach
+  $: differenceValues = isDifferenceMode && indicator
+    ? $currentJSONData.features.map((d) => {
+        const diffValue = getDifferenceValue(d, indicator)
+        // Return the feature id and its difference value for lookup
+        return {
+          id: d.properties[$neighbourhoodCodeAbbreviation],
+          diffValue: diffValue
+        }
+      })
+    : null
 
-  
-
-
-  // FIXED: Don't mutate shared store data - calculate difference values on-demand in getMapFillColor
-
-  // Declare indicatorAttribute variable
+  // Declare both display attribute and original attribute variables
   let indicatorAttribute = null
+  let originalAttribute = null
   
-  // Set indicatorAttribute for coloring (always use % values for consistent colors)
+  // Set attributes for both display and coloring, matching BeeswarmPlot's approach
   $: {
-    if (indicator) {
-      // Always use base attribute for coloring (% values) to maintain consistent color scale
+    if (indicator && $indicatorStore) {
+      // For display: use reactive attribute (may include _M2 suffix based on unit selection)
       indicatorAttribute = getIndicatorAttribute(indicator, indicator.attribute)
+      
+      // For colors: always use original percentage attribute (consistent with BeeswarmPlot)
+      if ($indicatorStore && $indicatorStore.baseYear) {
+        originalAttribute = indicator.attribute + '_' + $indicatorStore.baseYear
+      } else {
+        originalAttribute = indicator.attribute
+      }
     } else {
       indicatorAttribute = null
+      originalAttribute = null
     }
   }
   
-  // SIMPLIFIED: Use BeeswarmPlot's direct color logic approach
+  // ALIGNED: Match BeeswarmPlot's color logic precisely for consistency
   function getMapFillColor(feature) {
     // Check if this is the main map (no indicator) - use whitesmoke
     if (!indicator) {
@@ -88,16 +104,27 @@
     }
     
     if (indicator.numerical) {
-      // FIXED: Calculate difference value on-demand to avoid mutating shared store
-      const value = isDifferenceMode
-        ? getDifferenceValue(feature, indicator)
-        : feature.properties[indicatorAttribute]
+      // Get feature ID for difference value lookup
+      const featureId = feature.properties[$neighbourhoodCodeAbbreviation]
       
-      const color = value !== null && value !== "" && !isNaN(value)
-        ? indicatorValueColorscale(value)
-        : "#000000"
-      
-      return color
+      if (isDifferenceMode && differenceValues) {
+        // Find pre-calculated difference value from our lookup array
+        const diffRecord = differenceValues.find(d => d.id === featureId)
+        const diffValue = diffRecord ? diffRecord.diffValue : null
+        
+        // Color based on difference value, matching BeeswarmPlot behavior
+        return diffValue !== null && diffValue !== "" && !isNaN(diffValue)
+          ? indicatorValueColorscale(diffValue)
+          : "#000000"
+      } else {
+        // For non-difference mode, use the original attribute for consistent coloring
+        // This matches BeeswarmPlot which uses: indicatorValueColorscale(node.properties[originalAttribute])
+        const value = feature.properties[originalAttribute]
+        
+        return value !== null && value !== "" && !isNaN(value)
+          ? indicatorValueColorscale(value)
+          : "#000000"
+      }
     } else {
       // MIGRATED: Use centralized categorical value retrieval
       const categoricalValue = getCategoricalValue(feature, indicator)

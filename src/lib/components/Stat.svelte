@@ -1,5 +1,5 @@
 <script>
-  // console.log('🚀 Stat.svelte script loaded')
+
   import { neighbourhoodSelection, municipalitySelection, allNeighbourhoodsJSONData, getIndicatorStore } from "$lib/stores"
   import { onMount } from 'svelte'
   import { getRegionName } from "$lib/noncomponents/getRegionName"
@@ -20,16 +20,9 @@
   $: currentAHNSelection = $indicatorStore
   $: isDifferenceMode = currentAHNSelection && currentAHNSelection.isDifference
   
-  // DEBUG: Track medianValue changes
-  // $: console.log('📊 Stat', regio, 'received medianValue:', medianValue, 'for', indicator.title)
   $: displayValue = medianValue !== "Geen data" ? Math.round(medianValue * 100) / 100 : "Geen data"
-  // $: console.log('📝 Stat', regio, 'will display:', displayValue, 'for', indicator.title)
-  // $: console.log('🎨 Stat', regio, 'template will render:', textPlus + displayValue)
   
-  // Force mount logging
-  // onMount(() => {
-  //   console.log('🎆 Stat MOUNTED:', regio, 'with value:', medianValue, 'display:', displayValue)
-  // })
+
 
   // Format region name
   let regioNaam = ""

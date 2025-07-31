@@ -13,7 +13,7 @@ function measurePerformance(label, fn) {
   const start = performance.now();
   const result = fn();
   const end = performance.now();
-  console.log(`⏱️ ${label}: ${(end - start).toFixed(2)}ms`);
+  // Performance logging removed for production
   return result;
 }
 
@@ -27,11 +27,7 @@ export async function prepareJSONData(JSONdata, CSVdata, options = {}) {
   // Reset flag to ensure data is processed when JSON changes
   hasProcessedData = false;
 
-  // Skip if we've already processed this data (now disabled to ensure reprocessing)
-  // if (hasProcessedData) {
-  //   console.log('Data already processed, skipping duplicate prepareJSONData call');
-  //   return;
-  // }
+
 
   // Mark as processed at the beginning to prevent race conditions
   hasProcessedData = true;
@@ -46,7 +42,7 @@ export async function prepareJSONData(JSONdata, CSVdata, options = {}) {
     // Try to get processed municipality data from cache
     const cachedData = await getFromCache(municipalityUrl);
     if (cachedData) {
-      console.log('Using cached municipality data');
+
       municipalityTopojson = cachedData;
       municipalityCached = true;
     }
@@ -79,7 +75,7 @@ export async function prepareJSONData(JSONdata, CSVdata, options = {}) {
     if (neighbourhoodUrl) {
       const cachedData = await getFromCache(neighbourhoodUrl);
       if (cachedData && cachedData.features) {
-        console.log('Using cached neighborhood data');
+
         neighbourhoodTopojsonFeatures = cachedData.features;
         neighbourhoodCached = true;
       }
@@ -95,7 +91,7 @@ export async function prepareJSONData(JSONdata, CSVdata, options = {}) {
           // It's a TopoJSON
           const objectName = Object.keys(neighbourhoodTopojson.objects)[0];
 
-          console.log('Applying TopoJSON simplification');
+
           // Apply topology-preserving simplification with a moderate tolerance
           neighbourhoodTopojson = topojsonsimplify.presimplify(neighbourhoodTopojson);
           neighbourhoodTopojson = topojsonsimplify.simplify(neighbourhoodTopojson, 0.00001); // Small value preserves most details
@@ -177,14 +173,8 @@ export async function prepareJSONData(JSONdata, CSVdata, options = {}) {
     });
   });
 
-  console.log('Neighbourhoods processed', neighbourhoodTopojsonFeatures)
-
   // Set the final GeoJSON data
   measurePerformance('Set final GeoJSON data', () => {
     allNeighbourhoodsJSONData.set({ type: 'FeatureCollection', features: neighbourhoodTopojsonFeatures })
   });
-
-  const totalEnd = performance.now();
-  console.log(`⏱️ Total prepareJSONData execution time: ${(totalEnd - totalStart).toFixed(2)}ms`);
-  console.log(`⏱️ Using cached data: Municipality=${municipalityCached}, Neighborhood=${neighbourhoodCached}`);
 }

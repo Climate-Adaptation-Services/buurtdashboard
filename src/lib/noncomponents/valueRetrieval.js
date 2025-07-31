@@ -77,7 +77,16 @@ function getCategoryValue(feature, indicator, { defaultValue = 'No data', ...opt
 
 // AHN selection helper
 export function getAHNSelection(indicator) {
-  const selection = get(AHNSelecties)[indicator.title]
+  // Use indicator-specific store for proper reactivity
+  const indicatorStore = getIndicatorStore(indicator.title)
+  let selection = null;
+  
+  // Get the current value from the store
+  const unsubscribe = indicatorStore.subscribe(value => {
+    selection = value
+  })
+  unsubscribe() // Immediately unsubscribe to avoid memory leaks
+  
   if (!selection) return { baseYear: '', compareYear: null, isDifference: false, unit: '%' }
   if (typeof selection === 'object') {
     // Ensure unit property exists with default

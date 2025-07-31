@@ -1,6 +1,6 @@
 import { alleIndicatoren } from "$lib/stores"
 export function setupIndicators(data, eff, geb, kwe) {
-  console.log(data.metadata)
+
 
   const metadata = (data.lang === 'en')
     ? data.metadata_english
@@ -15,7 +15,7 @@ export function setupIndicators(data, eff, geb, kwe) {
 
   alleIndicatoren.set(indicatorsList)
 
-  console.log('indicatorsList', indicatorsList)
+
 
   return indicatorsList;
 }
