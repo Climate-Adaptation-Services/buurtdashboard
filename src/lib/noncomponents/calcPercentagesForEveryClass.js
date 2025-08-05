@@ -1,6 +1,7 @@
 import { getClassByIndicatorValue } from "./getClassByIndicatorValue.js";
 import { t } from "$lib/i18n/translate.js"
 import { getIndicatorAttribute } from "./getIndicatorAttribute.js";
+import { getNumericalValue } from "./valueRetrieval.js";
 
 export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regio) {
   // let totalSurfaceArea = 0
