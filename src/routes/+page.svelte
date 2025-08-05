@@ -41,7 +41,7 @@
   let allIndicators = []
   let isInitialized = false
 
-  allIndicators = setupIndicators(data, t("Effecten"), t("Gebiedskenmerken"), t("Kwetsbaarheid"))
+  allIndicators = setupIndicators(data, "Effecten", "Gebiedskenmerken", "Kwetsbaarheid")
   displayedIndicators = allIndicators
   isInitialized = true
 
