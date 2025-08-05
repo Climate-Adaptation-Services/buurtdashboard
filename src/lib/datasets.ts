@@ -15,7 +15,7 @@ export const DEFAULT_METADATA_URL =
   "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/metadata/buurtdashboard-metadata-250625-01.csv";
 
 export const DEFAULT_METADATA_ENGLISH_URL =
-  "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/metadata/buurtdashboard-engels-metadata-060125-04.csv";
+  "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/metadata/EN-buurtdashboard-metadata-050825-01.csv";
 
 export const DEFAULT_CSV_DATA_URL =
   "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/csvdata/BuurtdashboardDataDownload20250625_2.csv.gz";

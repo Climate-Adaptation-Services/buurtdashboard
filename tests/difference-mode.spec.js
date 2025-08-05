@@ -192,8 +192,7 @@ test.describe('Difference Mode Color Consistency Tests', () => {
     expect(percentModeMapColor).toBe(percentModeBeeswarmColor);
     
     // Switch to m² unit if available
-    const unitSwitchSelector = '.unit-switch button:nth-child(2)'; // Second button for m²
-    const hasUnitSwitch = await page.locator(unitSwitchSelector).count() > 0;
+    const hasUnitSwitch = await page.getByRole('button', { name: 'm²' }).count() > 0;
     
     if (hasUnitSwitch) {
       // Switch to m² units
