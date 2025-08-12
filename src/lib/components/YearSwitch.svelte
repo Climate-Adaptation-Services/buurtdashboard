@@ -128,8 +128,7 @@
     let updatedSelection = {
       baseYear: newAHN,
       compareYear: compareYear,
-      isDifference: isDifferenceMode,
-      unit: selectionObj.unit || '%', // Preserve existing unit
+      isDifference: isDifferenceMode
     }
 
     // If the new base year is >= compare year or compareYear is null, find a new valid compare year
@@ -201,8 +200,7 @@
       updatedSelection = {
         baseYear: selectionObj.baseYear,
         compareYear: null,
-        isDifference: false,
-        unit: selectionObj.unit || '%', // Preserve existing unit
+        isDifference: false
       }
       selectedDifference = "Difference"
     } else {
@@ -234,8 +232,7 @@
       updatedSelection = {
         baseYear: newBaseYear,
         compareYear: differenceAHN,
-        isDifference: true,
-        unit: selectionObj.unit || '%', // Preserve existing unit
+        isDifference: true
       }
       selectedDifference = differenceAHN
       selectedAHN = newBaseYear

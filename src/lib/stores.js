@@ -42,16 +42,14 @@ export function getIndicatorStore(indicatorTitle) {
         initialSelection = {
           baseYear: existing.baseYear || '',
           compareYear: existing.compareYear || null,
-          isDifference: existing.isDifference || false,
-          unit: existing.unit || '%'
+          isDifference: existing.isDifference || false
         }
       } else {
         // Legacy string format
         initialSelection = {
           baseYear: existing,
           compareYear: null,
-          isDifference: false,
-          unit: '%'
+          isDifference: false
         }
       }
     } else {
@@ -59,8 +57,7 @@ export function getIndicatorStore(indicatorTitle) {
       initialSelection = {
         baseYear: '',
         compareYear: null,
-        isDifference: false,
-        unit: '%'
+        isDifference: false
       }
     }
 
@@ -92,8 +89,7 @@ export function initializeIndicatorStores(data) {
     store.set({
       baseYear: baseYear,
       compareYear: null,
-      isDifference: false,
-      unit: '%'
+      isDifference: false
     })
   })
 }

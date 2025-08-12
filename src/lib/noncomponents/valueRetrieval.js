@@ -28,26 +28,31 @@ export function formatValue(value, { decimals = 2, showSign = false, nullText = 
   return showSign && num > 0 ? `+${formatted}` : formatted
 }
 
+// Helper function to format M2 values for better readability
+function formatM2Value(value) {
+  if (value === null || value === undefined || isNaN(value)) return null
+  
+  const absValue = Math.abs(value)
+  
+  // Format large numbers with thousand separators and appropriate units
+  if (absValue >= 1000000) {
+    const millions = value / 1000000
+    return `${millions.toFixed(1).replace(/\.0$/, '')}M`
+  } else if (absValue >= 1000) {
+    const thousands = value / 1000
+    return `${thousands.toFixed(1).replace(/\.0$/, '')}k`
+  } else {
+    return Math.round(value * 100) / 100
+  }
+}
+
 // Property access
-function getRawValue(feature, indicator, { year, attributeOverride } = {}) {
+function getRawValue(feature, indicator, { year, attributeOverride, forceM2 = false } = {}) {
   let baseAttribute = indicator.attribute
 
-  // Handle unit selection for M2 variants - use the indicator store directly for reactivity
-  if (!attributeOverride && indicator.variants && indicator.variants.split(',').includes('M2')) {
-    // Get the indicator store for this specific indicator
-    const indicatorStore = getIndicatorStore(indicator.title)
-    let ahnSelection
-    
-    // Get the current value from the store
-    const unsubscribe = indicatorStore.subscribe(value => {
-      ahnSelection = value
-    })
-    unsubscribe() // Immediately unsubscribe to avoid memory leaks
-    
-    // Check if unit is m2 (case-insensitive)
-    if (ahnSelection?.unit && (ahnSelection.unit.toLowerCase() === 'm2')) {
-      baseAttribute = baseAttribute + '_M2'
-    }
+  // Only handle M2 variants for popups when explicitly requested
+  if (!attributeOverride && forceM2 && indicator.variants && indicator.variants.split(',').includes('M2')) {
+    baseAttribute = baseAttribute + '_M2'
   }
 
   const attribute = attributeOverride ||
@@ -87,24 +92,23 @@ export function getAHNSelection(indicator) {
   })
   unsubscribe() // Immediately unsubscribe to avoid memory leaks
   
-  if (!selection) return { baseYear: '', compareYear: null, isDifference: false, unit: '%' }
+  if (!selection) return { baseYear: '', compareYear: null, isDifference: false }
   if (typeof selection === 'object') {
-    // Ensure unit property exists with default
-    return { ...selection, unit: selection.unit || '%' }
+    return { baseYear: selection.baseYear || '', compareYear: selection.compareYear || null, isDifference: selection.isDifference || false }
   }
-  return { baseYear: selection, compareYear: null, isDifference: false, unit: '%' }
+  return { baseYear: selection, compareYear: null, isDifference: false }
 }
 
-// Difference calculation
-function getDifferenceValue(feature, indicator, { baseYear, compareYear, defaultValue = null } = {}) {
+// Difference calculation - now supports M2 variants
+function getDifferenceValue(feature, indicator, { baseYear, compareYear, defaultValue = null, forceM2 = false } = {}) {
   const ahnSelection = getAHNSelection(indicator)
   const actualBaseYear = baseYear || ahnSelection.baseYear
   const actualCompareYear = compareYear || ahnSelection.compareYear
 
   if (!actualBaseYear || !actualCompareYear) return defaultValue
 
-  const baseValue = getNumberValue(feature, indicator, { year: actualBaseYear })
-  const compareValue = getNumberValue(feature, indicator, { year: actualCompareYear })
+  const baseValue = getNumberValue(feature, indicator, { year: actualBaseYear, forceM2 })
+  const compareValue = getNumberValue(feature, indicator, { year: actualCompareYear, forceM2 })
 
   return (baseValue !== null && compareValue !== null) ? compareValue - baseValue : defaultValue
 }
@@ -158,10 +162,56 @@ export function getMultipleValues(feature, indicator, { types = ['number', 'cate
   return result
 }
 
+// Special function for popup tooltips that can show both percentage and M2 values when variant is M2
+export function getPopupValue(feature, indicator, options = {}) {
+  const ahnSelection = getAHNSelection(indicator)
+  const isDifferenceMode = ahnSelection && ahnSelection.isDifference
+  
+  if (isDifferenceMode) {
+    // Handle difference mode for both regular and M2 values
+    const regularDiff = getDifferenceValue(feature, indicator, options)
+    
+    if (indicator.variants && indicator.variants.split(',').includes('M2')) {
+      const m2Diff = getDifferenceValue(feature, indicator, { ...options, forceM2: true })
+      if (regularDiff !== null && m2Diff !== null) {
+        return {
+          value: regularDiff,
+          unit: '%',
+          m2Value: m2Diff,
+          hasM2: true,
+          isDifference: true
+        }
+      }
+    }
+    
+    return { value: regularDiff, unit: '%', hasM2: false, isDifference: true }
+  } else {
+    // Regular mode
+    const regularValue = getNumberValue(feature, indicator, options)
+    
+    // For M2 variants, show both percentage and M2 values
+    if (indicator.variants && indicator.variants.split(',').includes('M2')) {
+      const m2Value = getNumberValue(feature, indicator, { ...options, forceM2: true })
+      if (regularValue !== null && m2Value !== null) {
+        return { 
+          value: regularValue, 
+          unit: '%',
+          m2Value: m2Value,
+          hasM2: true,
+          isDifference: false
+        }
+      }
+    }
+    
+    // Fallback to regular value with % symbol only
+    return { value: regularValue, unit: '%', hasM2: false, isDifference: false }
+  }
+}
+
 // Backward compatibility
 export { getRawValue, getNumberValue as getNumericalValue, getCategoryValue as getCategoricalValue, getDifferenceValue }
 export const getDisplayValue = (feature, indicator, options = {}) => getValue(feature, indicator, { mode: 'display', ...options })
 export const getBatchValues = (features, indicator, { valueType = 'display', ...options } = {}) => getValues(features, indicator, { mode: valueType, ...options })
 
 // Utilities
-export { getIndicatorAttribute, getMostCommonClass, getClassByIndicatorValue }
+export { getIndicatorAttribute, getMostCommonClass, getClassByIndicatorValue, formatM2Value }

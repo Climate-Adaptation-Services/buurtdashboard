@@ -1,14 +1,10 @@
 <script>
   import { configStore } from "$lib/stores"
   import YearSwitch from "./YearSwitch.svelte"
-  import UnitSwitch from "./UnitSwitch.svelte"
   import { t } from "$lib/i18n/translate.js"
 
   export let indicator
   export let titleHeight = 120
-
-  // Check if indicator has M2 variant
-  $: hasM2Variant = indicator.variants && indicator.variants.split(",").includes("M2")
 </script>
 
 <div class="indicator-title" style="height: {titleHeight}px">
@@ -18,9 +14,6 @@
   </h2>
   <h4 class="subtitle">
     {indicator.subtitle}
-    {#if hasM2Variant}
-      <UnitSwitch {indicator} />
-    {/if}
   </h4>
   {#if indicator.AHNversie}
     <YearSwitch {indicator} />

@@ -16,7 +16,9 @@ import {
   getNumericalValue,
   getRawValue,
   getAHNSelection,
-  isValidValue
+  isValidValue,
+  getPopupValue,
+  formatM2Value
 } from './valueRetrieval.js';
 
 export function mouseOver(e, feature, indicator, mapType, indicatorValueColorscale, projection, beeswarmMargin) {
@@ -69,31 +71,54 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
 
       if (indicator.numerical) {
         if (isDifferenceMode) {
-          // MIGRATED: Use centralized difference value calculation
-          const diffValue = getDifferenceValue(feature, indicator)
+          // Use popup value for difference mode to get both percentage and M2 differences
+          const popupResult = getPopupValue(feature, indicator)
           
-          // Format the difference value with a + sign for positive values
-          tooltipValue = diffValue !== null && !isNaN(diffValue)
-            ? (diffValue > 0 ? "+" : "") + (Math.round(diffValue * 100) / 100).toFixed(1)
-            : 'Geen data'
+          // Get original diff value for color calculation
+          const originalDiffValue = getDifferenceValue(feature, indicator)
           
-          tooltipValueColor = diffValue !== null && !isNaN(diffValue)
-            ? indicatorValueColorscale(diffValue)
+          // Format the difference value with proper sign and units
+          if (popupResult.value !== null && !isNaN(popupResult.value)) {
+            const roundedValue = Math.round(popupResult.value * 100) / 100
+            const sign = popupResult.value > 0 ? "+" : ""
+            tooltipValue = `${sign}${roundedValue.toFixed(1)}${popupResult.unit}`
+            
+            // Add M2 difference if available
+            if (popupResult.hasM2 && popupResult.m2Value !== null) {
+              const m2Sign = popupResult.m2Value > 0 ? "+" : ""
+              const formattedM2 = formatM2Value(popupResult.m2Value)
+              tooltipValue += ` (${m2Sign}${formattedM2} m²)`
+            }
+          } else {
+            tooltipValue = 'Geen data'
+          }
+          
+          tooltipValueColor = originalDiffValue !== null && !isNaN(originalDiffValue)
+            ? indicatorValueColorscale(originalDiffValue)
             : '#000000'
           
           tooltipIndicator = `${indicator.title}`
         } else {
-          // MIGRATED: Use centralized value retrieval for unit-aware tooltips
-          const numericalValue = getNumericalValue(feature, indicator)
+          // Use popup value to potentially show both percentage and M2 values for M2 variants
+          const popupResult = getPopupValue(feature, indicator)
           
           // Get original value for consistent color calculation (force original attribute, no unit conversion)
           const originalAttribute = getIndicatorAttribute(indicator, indicator.attribute)
           const originalValue = feature.properties[originalAttribute]
           
-          // Format the value with proper rounding
-          tooltipValue = numericalValue !== null && !isNaN(numericalValue)
-            ? Math.round(numericalValue * 100) / 100
-            : 'Geen data'
+          // Format the value with proper rounding and unit
+          if (popupResult.value !== null && !isNaN(popupResult.value)) {
+            const roundedValue = Math.round(popupResult.value * 100) / 100
+            tooltipValue = `${roundedValue}${popupResult.unit}`
+            
+            // Add M2 value if available with nice formatting
+            if (popupResult.hasM2 && popupResult.m2Value !== null) {
+              const formattedM2 = formatM2Value(popupResult.m2Value)
+              tooltipValue += ` (${formattedM2} m²)`
+            }
+          } else {
+            tooltipValue = 'Geen data'
+          }
           
           // Use original value for consistent colors
           tooltipValueColor = originalValue !== null && !isNaN(originalValue)
@@ -137,30 +162,58 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
       const isDifferenceMode = ahnSelection && typeof ahnSelection === 'object' && ahnSelection.isDifference
 
       if (isDifferenceMode) {
-        // MIGRATED: Use centralized difference value calculation
-        const diffValue = getDifferenceValue(feature, indicator)
+        // Use popup value for difference mode to get both percentage and M2 differences
+        const popupResult = getPopupValue(feature, indicator)
         
-        const formattedDiffValue = diffValue !== null && !isNaN(diffValue)
-          ? (diffValue > 0 ? "+" : "") + (Math.round(diffValue * 100) / 100).toFixed(1)
-          : 'Geen data'
+        // Get original diff value for color calculation
+        const originalDiffValue = getDifferenceValue(feature, indicator)
+        
+        let formattedDiffValue
+        if (popupResult.value !== null && !isNaN(popupResult.value)) {
+          const roundedValue = Math.round(popupResult.value * 100) / 100
+          const sign = popupResult.value > 0 ? "+" : ""
+          formattedDiffValue = `${sign}${roundedValue.toFixed(1)}${popupResult.unit}`
+          
+          // Add M2 difference if available
+          if (popupResult.hasM2 && popupResult.m2Value !== null) {
+            const m2Sign = popupResult.m2Value > 0 ? "+" : ""
+            const formattedM2 = formatM2Value(popupResult.m2Value)
+            formattedDiffValue += ` (${m2Sign}${formattedM2} m²)`
+          }
+        } else {
+          formattedDiffValue = 'Geen data'
+        }
 
         tooltipValues.set({
           indicator: `${indicator.title} (${ahnSelection.compareYear} vs ${ahnSelection.baseYear})`,
           value: formattedDiffValue,
-          color: diffValue !== null && !isNaN(diffValue) ? indicatorValueColorscale(diffValue) : '#000000'
+          color: originalDiffValue !== null && !isNaN(originalDiffValue) ? indicatorValueColorscale(originalDiffValue) : '#000000'
         })
       } else {
-        // MIGRATED: Use centralized value retrieval for unit-aware beeswarm tooltips
-        const numericalValue = getNumericalValue(feature, indicator)
+        // Use popup value to potentially show both percentage and M2 values for M2 variants in beeswarm
+        const popupResult = getPopupValue(feature, indicator)
         
-        const displayValue = numericalValue !== null && !isNaN(numericalValue)
-          ? Math.round(numericalValue * 100) / 100
-          : 'Geen data'
+        let displayValue
+        if (popupResult.value !== null && !isNaN(popupResult.value)) {
+          const roundedValue = Math.round(popupResult.value * 100) / 100
+          displayValue = `${roundedValue}${popupResult.unit}`
+          
+          // Add M2 value if available with nice formatting
+          if (popupResult.hasM2 && popupResult.m2Value !== null) {
+            const formattedM2 = formatM2Value(popupResult.m2Value)
+            displayValue += ` (${formattedM2} m²)`
+          }
+        } else {
+          displayValue = 'Geen data'
+        }
+        
+        // For color calculation, use the original % value for consistency
+        const originalValue = getNumericalValue(feature, indicator)
         
         tooltipValues.set({
           indicator: indicator.title,
           value: displayValue,
-          color: numericalValue !== null && !isNaN(numericalValue) ? indicatorValueColorscale(numericalValue) : '#000000'
+          color: originalValue !== null && !isNaN(originalValue) ? indicatorValueColorscale(originalValue) : '#000000'
         })
       }
 
