@@ -7,7 +7,7 @@ jobs:
   run-e2es:
     if: github.event_name == 'deployment_status' && github.event.deployment_status.state == 'success'
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    timeout-minutes: 10
     steps:
       # Notify Slack that tests have started
       - name: Notify Slack that tests have started
@@ -33,9 +33,11 @@ jobs:
         id: test
         run: |
           echo "Running Playwright tests..."
-          npx playwright test
+          echo "Base URL: ${{ github.event.deployment_status.environment_url }}"
+          npx playwright test --reporter=github
         env:
           BASE_URL: ${{ github.event.deployment_status.environment_url }}
+          CI: true
 
       - name: Capture Test Result (Failure or Success)
         id: result
