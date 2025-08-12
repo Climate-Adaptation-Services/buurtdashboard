@@ -118,66 +118,55 @@
   function yearClick(change) {
     const newAHN = change.target.value
 
-
     // Get current selection as an object
     const selectionObj = getSelectionObject($indicatorStore)
     const isDifferenceMode = selectionObj.isDifference
     const compareYear = selectionObj.compareYear || null
 
-    // FIXED: Update with new base year using proper store update
+    // Update with new base year
     let updatedSelection = {
       baseYear: newAHN,
       compareYear: compareYear,
       isDifference: isDifferenceMode
     }
 
-    // If the new base year is >= compare year or compareYear is null, find a new valid compare year
-    const baseNum = parseInt(newAHN.replace(/\D/g, "") || "0", 10)
-    const compareNum = compareYear ? parseInt(compareYear.replace(/\D/g, "") || "0", 10) : 0
-
-    if (compareYear === null || baseNum >= compareNum) {
-      // Find the next available year after the new base year
-      const nextOption = options.find((option) => {
-        if (!option || !option.AHN) return false
-        const optionNum = parseInt(option.AHN.replace(/\D/g, "") || "0", 10)
-        return optionNum > baseNum
+    // If in difference mode and the new base year equals the current compare year,
+    // we need to find a different compare year
+    if (isDifferenceMode && compareYear === newAHN) {
+      // Find any other available year (preferably later, but any will do)
+      const availableOption = options.find((option) => {
+        return option && option.AHN && option.AHN !== newAHN
       })
 
-      if (nextOption) {
-        // Update compare year in the local object
-        updatedSelection.compareYear = nextOption.AHN
-        selectedDifference = nextOption.AHN
+      if (availableOption) {
+        // Use the available option as the new compare year
+        updatedSelection.compareYear = availableOption.AHN
+        selectedDifference = availableOption.AHN
       } else {
-        // No valid compare year available, revert to regular mode
+        // No other year available, turn off difference mode
         updatedSelection.isDifference = false
         updatedSelection.compareYear = null
         selectedDifference = "Difference"
       }
-    } else {
-      // Keep the current compare year
+    } else if (isDifferenceMode && compareYear) {
+      // Keep the current compare year if it's different from the new base year
       selectedDifference = compareYear
     }
 
-    // FIXED: Single store update with the final selection object
-    // Much simpler with dedicated store!
+    // Update the store
     indicatorStore.set(updatedSelection)
-
-    // selectedAHN = newAHN
   }
 
   /**
    * Determine if an option should be shown in the difference dropdown
-   * Only shows years later than the selected base year
+   * Shows all options except the one selected in the left dropdown
    */
   function shouldShowInDifferenceDropdown(optionAHN, index) {
     try {
       if (!optionAHN) return false
 
-      // Get the index of this option in the options array
-      const optionIndex = options.findIndex((opt) => opt.AHN === optionAHN)
-
-      // Show all options except the first one
-      return optionIndex > 0
+      // Show all options except the one selected in the left dropdown
+      return optionAHN !== selectedAHN
     } catch (e) {
       console.error("Error evaluating dropdown options:", e)
       return false
@@ -204,41 +193,36 @@
       }
       selectedDifference = "Difference"
     } else {
-      // Extract numeric parts for comparison
+      // Extract numeric parts for comparison to ensure proper chronological order
       const compareNum = parseInt(differenceAHN.replace(/\D/g, "") || "0", 10)
       const baseNum = parseInt(selectionObj.baseYear.replace(/\D/g, "") || "0", 10)
 
-      let newBaseYear = selectionObj.baseYear
+      let newBaseYear, newCompareYear
 
-      // If compareYear is earlier or the same as baseYear
-      if (compareNum <= baseNum) {
-        // Find the AHN before the compareYear
-        const sortedOptions = [...options].sort((a, b) => {
-          const aNum = parseInt(a.AHN.replace(/\D/g, "") || "0", 10)
-          const bNum = parseInt(b.AHN.replace(/\D/g, "") || "0", 10)
-          return aNum - bNum
-        })
-
-        // Find the index of the compareYear
-        const compareIndex = sortedOptions.findIndex((opt) => opt.AHN === differenceAHN)
-
-        // If it's not the first option, set baseYear to the previous option
-        if (compareIndex > 0) {
-          newBaseYear = sortedOptions[compareIndex - 1].AHN
-        }
+      // Always ensure base year is earlier and compare year is later
+      if (compareNum < baseNum) {
+        // If selected year is earlier than current base, swap them
+        newBaseYear = differenceAHN
+        newCompareYear = selectionObj.baseYear
+      } else {
+        // Normal case: selected year is later than base year
+        newBaseYear = selectionObj.baseYear
+        newCompareYear = differenceAHN
       }
 
       // Store both years for difference calculation
       updatedSelection = {
         baseYear: newBaseYear,
-        compareYear: differenceAHN,
+        compareYear: newCompareYear,
         isDifference: true
       }
-      selectedDifference = differenceAHN
+      
+      // Update the UI state
+      selectedDifference = newCompareYear
       selectedAHN = newBaseYear
     }
 
-    // Much simpler with dedicated store!
+    // Update the store
     indicatorStore.set(updatedSelection)
   }
 </script>
