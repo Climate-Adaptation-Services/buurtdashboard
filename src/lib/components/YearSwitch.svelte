@@ -97,11 +97,15 @@
         baseYear: options.length > 0 ? options[0].AHN : null,
         compareYear: null,
         isDifference: false,
+        beb: 'hele_buurt'
       }
     }
 
     if (typeof selection === "object") {
-      return selection
+      return {
+        ...selection,
+        beb: selection.beb || 'hele_buurt'
+      }
     }
 
     // Convert string to object
@@ -109,6 +113,7 @@
       baseYear: selection,
       compareYear: null,
       isDifference: false,
+      beb: 'hele_buurt'
     }
   }
 
@@ -127,7 +132,8 @@
     let updatedSelection = {
       baseYear: newAHN,
       compareYear: compareYear,
-      isDifference: isDifferenceMode
+      isDifference: isDifferenceMode,
+      beb: selectionObj.beb || 'hele_buurt'
     }
 
     // If in difference mode and the new base year equals the current compare year,
@@ -189,7 +195,8 @@
       updatedSelection = {
         baseYear: selectionObj.baseYear,
         compareYear: null,
-        isDifference: false
+        isDifference: false,
+        beb: selectionObj.beb || 'hele_buurt'
       }
       selectedDifference = "Difference"
     } else {
@@ -214,7 +221,8 @@
       updatedSelection = {
         baseYear: newBaseYear,
         compareYear: newCompareYear,
-        isDifference: true
+        isDifference: true,
+        beb: selectionObj.beb || 'hele_buurt'
       }
       
       // Update the UI state

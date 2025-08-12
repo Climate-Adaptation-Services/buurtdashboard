@@ -42,14 +42,16 @@ export function getIndicatorStore(indicatorTitle) {
         initialSelection = {
           baseYear: existing.baseYear || '',
           compareYear: existing.compareYear || null,
-          isDifference: existing.isDifference || false
+          isDifference: existing.isDifference || false,
+          beb: existing.beb || 'hele_buurt'
         }
       } else {
         // Legacy string format
         initialSelection = {
           baseYear: existing,
           compareYear: null,
-          isDifference: false
+          isDifference: false,
+          beb: 'hele_buurt'
         }
       }
     } else {
@@ -57,7 +59,8 @@ export function getIndicatorStore(indicatorTitle) {
       initialSelection = {
         baseYear: '',
         compareYear: null,
-        isDifference: false
+        isDifference: false,
+        beb: 'hele_buurt'
       }
     }
 
@@ -89,7 +92,8 @@ export function initializeIndicatorStores(data) {
     store.set({
       baseYear: baseYear,
       compareYear: null,
-      isDifference: false
+      isDifference: false,
+      beb: 'hele_buurt'
     })
   })
 }

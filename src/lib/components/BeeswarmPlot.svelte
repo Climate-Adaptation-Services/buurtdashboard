@@ -10,7 +10,7 @@
   import { getGlobalExtent } from "$lib/noncomponents/getGlobalExtent"
 
   // MIGRATED: Import centralized value retrieval system
-  import { getNumericalValue, getDifferenceValue, getAHNSelection, isValidValue } from "$lib/noncomponents/valueRetrieval.js"
+  import { getNumericalValue, getDifferenceValue, getAHNSelection, isValidValue, getRawValue } from "$lib/noncomponents/valueRetrieval.js"
 
   export let graphWidth
   export let indicatorHeight
@@ -21,20 +21,27 @@
   // Get the dedicated store for this specific indicator - naturally isolated!
   const indicatorStore = getIndicatorStore(indicator.title)
 
-  // MIGRATED: Filter out invalid values using centralized validation
-  neighbourhoodsInMunicipalityFeaturesClone = neighbourhoodsInMunicipalityFeaturesClone.filter((d) => {
-    const rawValue = d.properties[getIndicatorAttribute(indicator, indicator.attribute)]
-    // For beeswarm plots, we need values that exist and are not null/empty
-    // but we allow NaN values (they'll be handled by the color scale)
-    return rawValue !== null && rawValue !== ""
-  })
+  // Declare filtered data to be populated reactively
+  let baseFilteredData = []
 
-  // Special case for "Groen per inwoner" - filter out zero and negative values
-  if (indicator.title === "Groen per inwoner") {
-    neighbourhoodsInMunicipalityFeaturesClone = neighbourhoodsInMunicipalityFeaturesClone.filter((d) => {
-      const numericalValue = getNumericalValue(d, indicator)
-      return numericalValue !== null && numericalValue > 0
-    })
+  // Reactive data filtering using value retrieval system
+  $: {
+    if ($indicatorStore) {
+      // MIGRATED: Filter using centralized value retrieval system 
+      baseFilteredData = neighbourhoodsInMunicipalityFeaturesClone.filter((d) => {
+        const rawValue = getRawValue(d, indicator)
+        // For beeswarm plots, we need values that exist and are not null/empty
+        return rawValue !== null && rawValue !== ""
+      })
+
+      // Special case for "Groen per inwoner" - filter out zero and negative values
+      if (indicator.title === "Groen per inwoner") {
+        baseFilteredData = baseFilteredData.filter((d) => {
+          const numericalValue = getNumericalValue(d, indicator)
+          return numericalValue !== null && numericalValue > 0
+        })
+      }
+    }
   }
 
   const margin = { bottom: 50, top: 20, left: 30, right: 30 }
@@ -45,19 +52,25 @@
   // Declare original attribute for consistent colors (always percentage values)
   let originalAttribute = null
 
-  // Set indicatorAttribute for positioning and originalAttribute for consistent colors
+  // Set indicatorAttribute for positioning and use value retrieval for colors
   $: {
-    // For positioning: use reactive attribute (may include _M2 suffix based on unit selection)
-    indicatorAttribute = getIndicatorAttribute(indicator, indicator.attribute)
+    const ahnSelection = $indicatorStore || {}
     
-    // For colors: always use original percentage attribute (bypass unit conversion entirely)
-    // This ensures consistent colors regardless of unit selection
-    const ahnSelection = $indicatorStore
-    if (ahnSelection && ahnSelection.baseYear) {
-      originalAttribute = indicator.attribute + '_' + ahnSelection.baseYear
-    } else {
-      originalAttribute = indicator.attribute
+    // Create base attribute considering BEB selection
+    let baseAttribute = indicator.attribute
+    if (indicator.variants && indicator.variants.split(',').map(v => v.trim()).includes('BEB')) {
+      const bebSelection = ahnSelection.beb || 'hele_buurt'
+      if (bebSelection === 'bebouwde_kom') {
+        baseAttribute = baseAttribute + '_BEB'
+      }
     }
+    
+    // For positioning: use reactive attribute (may include _BEB and year suffixes)
+    indicatorAttribute = getIndicatorAttribute(indicator, baseAttribute)
+    
+    // For colors: we'll use the value retrieval system directly in the template
+    // This ensures consistency with the rest of the application
+    originalAttribute = indicatorAttribute // Keep this for backward compatibility but use getRawValue for colors
   }
 
   // Use dedicated indicator store for difference mode detection (naturally isolated)
@@ -65,8 +78,8 @@
 
   // Calculate difference values reactive only to this indicator's selection
   $: differenceValues =
-    isDifferenceMode && $indicatorStore
-      ? neighbourhoodsInMunicipalityFeaturesClone.map((d) => {
+    isDifferenceMode && $indicatorStore && baseFilteredData.length > 0
+      ? baseFilteredData.map((d) => {
           // Create a copy of the feature
           const featureCopy = { ...d }
 
@@ -82,15 +95,15 @@
       : null
 
   // Use either regular values or difference values based on whether we're doing a comparison
-  $: plotData = differenceValues || neighbourhoodsInMunicipalityFeaturesClone
+  $: plotData = differenceValues || baseFilteredData
 
   // Calculate global min and max values across all AHN versions for this indicator
-  $: globalExtent = getGlobalExtent(indicator, neighbourhoodsInMunicipalityFeaturesClone, !!differenceValues, indicatorAttribute)
+  $: globalExtent = getGlobalExtent(indicator, baseFilteredData, !!differenceValues, indicatorAttribute)
 
   // Make xScaleExtent reactive to indicatorAttribute changes
   $: xScaleExtent = differenceValues
     ? extent(differenceValues, (d) => d.diffValue)
-    : extent(neighbourhoodsInMunicipalityFeaturesClone, (d) => +d.properties[indicatorAttribute])
+    : extent(baseFilteredData, (d) => +d.properties[indicatorAttribute])
 
   // Ensure the domain includes zero for difference plots and has appropriate padding
   // For base year view, use the global extent to keep axis consistent across AHN selections
@@ -120,18 +133,17 @@
 
   // FIXED: Let Svelte handle reactivity naturally - run simulation when AHN selection changes
   $: {
-    // This reactive block will trigger whenever this indicator's store changes
+    // This reactive block will trigger whenever this indicator's store changes OR indicatorAttribute changes
     const currentSelection = $indicatorStore
+    const currentIndicatorAttribute = indicatorAttribute
 
-
-
-    // Get the updated indicator attribute
-    indicatorAttribute = getIndicatorAttribute(indicator, indicator.attribute)
-
-    // Restart the simulation with new data
-    setTimeout(() => {
-      runSimulation()
-    }, 50) // Small delay to ensure reactive values have updated
+    // Only restart simulation if we have a valid indicator attribute
+    if (currentIndicatorAttribute) {
+      // Restart the simulation with new data
+      setTimeout(() => {
+        runSimulation()
+      }, 50) // Small delay to ensure reactive values have updated
+    }
   }
 
   // Store previous node positions for smooth transitions
@@ -238,7 +250,7 @@
       cx={node.x}
       cy={node.y}
       r={node.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection ? $circleRadius + 3 : $circleRadius}
-      fill={differenceValues ? indicatorValueColorscale(node.diffValue) : indicatorValueColorscale(node.properties[originalAttribute])}
+      fill={differenceValues ? indicatorValueColorscale(node.diffValue) : indicatorValueColorscale(getRawValue(node, indicator))}
       stroke-width="3"
       on:mouseover={(e) => {
         // If we're showing a difference plot, add the diffValue to the node properties

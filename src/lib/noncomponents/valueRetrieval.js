@@ -47,11 +47,32 @@ function formatM2Value(value) {
 }
 
 // Property access
-function getRawValue(feature, indicator, { year, attributeOverride, forceM2 = false } = {}) {
+function getRawValue(feature, indicator, { year, attributeOverride, forceM2 = false, forceBEB = null } = {}) {
   let baseAttribute = indicator.attribute
 
-  // Only handle M2 variants for popups when explicitly requested
-  if (!attributeOverride && forceM2 && indicator.variants && indicator.variants.split(',').includes('M2')) {
+  // Handle BEB variants using indicator store (handle spaces)
+  if (!attributeOverride && indicator.variants && indicator.variants.split(',').map(v => v.trim()).includes('BEB')) {
+    const indicatorStore = getIndicatorStore(indicator.title)
+    let ahnSelection
+    
+    // Get the current value from the store
+    const unsubscribe = indicatorStore.subscribe(value => {
+      ahnSelection = value
+    })
+    unsubscribe() // Immediately unsubscribe to avoid memory leaks
+    
+    // Use forceBEB if provided, otherwise use store value
+    const bebSelection = forceBEB || (ahnSelection?.beb) || 'hele_buurt'
+    
+    // Append BEB suffix based on selection
+    if (bebSelection === 'bebouwde_kom') {
+      baseAttribute = baseAttribute + '_BEB'
+    }
+    // For 'hele_buurt', use the base attribute as-is (no suffix)
+  }
+
+  // Only handle M2 variants for popups when explicitly requested (handle spaces)
+  if (!attributeOverride && forceM2 && indicator.variants && indicator.variants.split(',').map(v => v.trim()).includes('M2')) {
     baseAttribute = baseAttribute + '_M2'
   }
 
@@ -92,11 +113,16 @@ export function getAHNSelection(indicator) {
   })
   unsubscribe() // Immediately unsubscribe to avoid memory leaks
   
-  if (!selection) return { baseYear: '', compareYear: null, isDifference: false }
+  if (!selection) return { baseYear: '', compareYear: null, isDifference: false, beb: 'hele_buurt' }
   if (typeof selection === 'object') {
-    return { baseYear: selection.baseYear || '', compareYear: selection.compareYear || null, isDifference: selection.isDifference || false }
+    return { 
+      baseYear: selection.baseYear || '', 
+      compareYear: selection.compareYear || null, 
+      isDifference: selection.isDifference || false,
+      beb: selection.beb || 'hele_buurt'
+    }
   }
-  return { baseYear: selection, compareYear: null, isDifference: false }
+  return { baseYear: selection, compareYear: null, isDifference: false, beb: 'hele_buurt' }
 }
 
 // Difference calculation - now supports M2 variants
@@ -171,7 +197,7 @@ export function getPopupValue(feature, indicator, options = {}) {
     // Handle difference mode for both regular and M2 values
     const regularDiff = getDifferenceValue(feature, indicator, options)
     
-    if (indicator.variants && indicator.variants.split(',').includes('M2')) {
+    if (indicator.variants && indicator.variants.split(',').map(v => v.trim()).includes('M2')) {
       const m2Diff = getDifferenceValue(feature, indicator, { ...options, forceM2: true })
       if (regularDiff !== null && m2Diff !== null) {
         return {
@@ -189,8 +215,8 @@ export function getPopupValue(feature, indicator, options = {}) {
     // Regular mode
     const regularValue = getNumberValue(feature, indicator, options)
     
-    // For M2 variants, show both percentage and M2 values
-    if (indicator.variants && indicator.variants.split(',').includes('M2')) {
+    // For M2 variants, show both percentage and M2 values (handle spaces)
+    if (indicator.variants && indicator.variants.split(',').map(v => v.trim()).includes('M2')) {
       const m2Value = getNumberValue(feature, indicator, { ...options, forceM2: true })
       if (regularValue !== null && m2Value !== null) {
         return { 

@@ -15,7 +15,8 @@
     getCategoricalValue,
     getDifferenceValue,
     getAHNSelection,
-    isValidValue
+    isValidValue,
+    getRawValue
   } from "$lib/noncomponents/valueRetrieval.js"
 
   // Removed unused exports for JSONdata and CSVdata
@@ -117,9 +118,9 @@
           ? indicatorValueColorscale(diffValue)
           : "#000000"
       } else {
-        // For non-difference mode, use the original attribute for consistent coloring
-        // This matches BeeswarmPlot which uses: indicatorValueColorscale(node.properties[originalAttribute])
-        const value = feature.properties[originalAttribute]
+        // For non-difference mode, use the value retrieval system for BEB-aware coloring
+        // This matches BeeswarmPlot which now uses: getRawValue(node, indicator)
+        const value = getRawValue(feature, indicator)
         
         return value !== null && value !== "" && !isNaN(value)
           ? indicatorValueColorscale(value)

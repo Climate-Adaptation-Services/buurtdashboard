@@ -28,10 +28,21 @@
     const relevantData = $municipalitySelection !== null ? $neighbourhoodsInMunicipalityJSONData : $allNeighbourhoodsJSONData
     
     if (indicator && relevantData) {
-      // Create a memoization key based only on data that affects THIS indicator's color scale
-      const indicatorAttribute = getIndicatorAttribute(indicator, indicator.attribute)
+      // Get the current AHN selection including BEB
       const ahnSelection = $indicatorStore || {}
       const isDifferenceMode = ahnSelection && typeof ahnSelection === "object" && ahnSelection.isDifference
+      
+      // Create base attribute considering BEB selection
+      let baseAttribute = indicator.attribute
+      if (indicator.variants && indicator.variants.split(',').map(v => v.trim()).includes('BEB')) {
+        const bebSelection = ahnSelection.beb || 'hele_buurt'
+        if (bebSelection === 'bebouwde_kom') {
+          baseAttribute = baseAttribute + '_BEB'
+        }
+      }
+      
+      // Get the final indicator attribute with year
+      const indicatorAttribute = getIndicatorAttribute(indicator, baseAttribute)
 
       // Create key from only the data that matters for this indicator's color scale
       const newMemoKey = JSON.stringify({
@@ -39,6 +50,7 @@
         indicatorAttribute,
         isDifferenceMode,
         municipalitySelection: $municipalitySelection,
+        bebSelection: ahnSelection.beb, // Include BEB selection in memo key
         // Only include the actual data values for this indicator, not the entire store reference
         dataValues: relevantData?.features?.map((d) => d.properties[indicatorAttribute]).sort(),
       })
