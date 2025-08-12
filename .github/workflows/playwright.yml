@@ -29,14 +29,28 @@ jobs:
       - uses: actions/checkout@v2
       - name: Install dependencies
         run: npm ci && npx playwright install --with-deps
+      - name: Set test URL
+        id: set-url
+        run: |
+          DEPLOY_URL="${{ github.event.deployment_status.environment_url }}"
+          echo "Deployment URL: $DEPLOY_URL"
+          
+          # Default to dev if no specific URL provided
+          if [ -z "$DEPLOY_URL" ] || [ "$DEPLOY_URL" = "null" ]; then
+            DEPLOY_URL="https://buurtdashboard-dev.vercel.app"
+            echo "Using fallback URL: $DEPLOY_URL"
+          fi
+          
+          echo "test_url=$DEPLOY_URL" >> $GITHUB_OUTPUT
+          
       - name: Run Playwright tests
         id: test
         run: |
           echo "Running Playwright tests..."
-          echo "Base URL: ${{ github.event.deployment_status.environment_url }}"
+          echo "Testing URL: ${{ steps.set-url.outputs.test_url }}"
           npx playwright test --reporter=github
         env:
-          BASE_URL: ${{ github.event.deployment_status.environment_url }}
+          BASE_URL: ${{ steps.set-url.outputs.test_url }}
           CI: true
 
       - name: Capture Test Result (Failure or Success)

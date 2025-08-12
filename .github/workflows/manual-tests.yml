@@ -1,0 +1,90 @@
+name: Manual E2E Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to test'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - production
+      test_suite:
+        description: 'Test suite to run'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - basic
+          - functional
+
+jobs:
+  manual-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Install Playwright Browsers
+      run: npx playwright install --with-deps chromium
+    
+    - name: Set test URL
+      id: set-url
+      run: |
+        if [ "${{ github.event.inputs.environment }}" = "production" ]; then
+          TEST_URL="https://buurtdashboard.vercel.app"
+        else
+          TEST_URL="https://buurtdashboard-dev.vercel.app"
+        fi
+        echo "Testing environment: ${{ github.event.inputs.environment }}"
+        echo "Test URL: $TEST_URL"
+        echo "test_url=$TEST_URL" >> $GITHUB_OUTPUT
+    
+    - name: Run Playwright tests
+      run: |
+        case "${{ github.event.inputs.test_suite }}" in
+          "basic")
+            npx playwright test tests/improved-basic-tests.spec.js --reporter=github
+            ;;
+          "functional") 
+            npx playwright test tests/functional-workflow.spec.js --reporter=github
+            ;;
+          *)
+            npx playwright test tests/improved-basic-tests.spec.js tests/functional-workflow.spec.js --reporter=github
+            ;;
+        esac
+      env:
+        BASE_URL: ${{ steps.set-url.outputs.test_url }}
+        CI: true
+    
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: playwright-report-${{ github.event.inputs.environment }}-${{ github.event.inputs.test_suite }}
+        path: |
+          playwright-report/
+          test-results/
+        retention-days: 30
+    
+    - name: Comment PR with results
+      if: github.event_name == 'pull_request'
+      run: |
+        echo "## 🎭 Playwright Test Results" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "- **Environment**: ${{ github.event.inputs.environment }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Test Suite**: ${{ github.event.inputs.test_suite }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **URL Tested**: ${{ steps.set-url.outputs.test_url }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Status**: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
