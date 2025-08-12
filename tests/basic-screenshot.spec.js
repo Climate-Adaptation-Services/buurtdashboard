@@ -8,12 +8,13 @@ import { test } from '@playwright/test';
  * without complex interactions.
  */
 test('Capture dashboard screenshots', async ({ page }) => {
-  // Navigate to the development site with Dordrecht config
+  // Navigate to the local development server with Dordrecht config
   console.log('Loading application...');
-  await page.goto('https://buurtdashboard-dev.vercel.app/?config=dordrecht');
+  await page.goto('/?config=dordrecht');
   
-  // Wait for page to load
-  await page.waitForLoadState('networkidle');
+  // Wait for page to load with extended timeout for data loading
+  await page.waitForLoadState('domcontentloaded');
+  await page.waitForTimeout(5000); // Allow time for data fetching
   console.log('Page loaded');
   
   try {

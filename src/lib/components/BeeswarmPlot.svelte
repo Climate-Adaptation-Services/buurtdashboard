@@ -224,7 +224,9 @@
 
 <XAxis xScale={xScaleBeeswarm} height={indicatorHeight} {margin} {indicator} />
 {#if indicator.title === "Groen per inwoner"}
-  <text x={graphWidth / 2} y={indicatorHeight - margin.bottom - 5} text-anchor="middle" font-size="13">Let op logaritmische schaal</text>
+  {#if graphWidth > 0}
+    <text x={graphWidth / 2} y={indicatorHeight - margin.bottom - 5} text-anchor="middle" font-size="13">Let op logaritmische schaal</text>
+  {/if}
 {/if}
 
 <g class="inner-chart" transform="translate({margin.left}, {margin.top})">

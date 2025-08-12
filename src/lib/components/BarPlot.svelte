@@ -189,9 +189,11 @@
     {/each}
     {#each regios as regio, i}
       {#if regio !== "Nederland" || !($configStore && $configStore.dashboardTitle === "Buurtdashboard Dordrecht")}
-        <text style="fill:#645F5E" x={graphWidth / 2} text-anchor="middle" font-size="15px" y={i * yScale.bandwidth() - 5}
-          >{getRegionName(regio)}</text
-        >
+        {#if graphWidth > 0}
+          <text style="fill:#645F5E" x={graphWidth / 2} text-anchor="middle" font-size="15px" y={i * yScale.bandwidth() - 5}
+            >{getRegionName(regio)}</text
+          >
+        {/if}
       {/if}
     {/each}
   </g>

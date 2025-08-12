@@ -210,22 +210,35 @@
       scaleValuesDict["medianValueGemeente"],
       scaleValuesDict["medianValueBuurt"],
       scaleValuesDict["medianValueWijktype"],
-    ].filter((val) => typeof val === "number")
+    ].filter((val) => typeof val === "number" && !isNaN(val))
 
     // Calculate min and max based on original percentage values
-    const minValue = min(numericValues)
-    const maxValue = max(numericValues)
+    let minValue = min(numericValues)
+    let maxValue = max(numericValues)
+    
+    // Fallback to safe defaults if no valid values
+    if (isNaN(minValue) || minValue === undefined) minValue = 0
+    if (isNaN(maxValue) || maxValue === undefined) maxValue = 100
+    
+    // Ensure we have valid numbers
+    minValue = Number(minValue) || 0
+    maxValue = Number(maxValue) || 100
 
     // For difference mode, we need a diverging scale that includes zero
     if (isDifferenceMode) {
       // Add some padding to the scale
-      const padding = Math.max(Math.abs(minValue || 0), Math.abs(maxValue || 0)) * 0.1
+      const padding = Math.max(Math.abs(minValue), Math.abs(maxValue)) * 0.1
       xScaleMin = minValue < 0 ? minValue - padding : -1 // Ensure negative values are shown
       xDomain = [xScaleMin, maxValue + padding]
     } else {
       // For regular mode, start at 0
       xScaleMin = minValue < 0 ? minValue - 1 : 0
       xDomain = [xScaleMin, maxValue * 1.1] // Add 10% padding
+    }
+    
+    // Validate domain values
+    if (isNaN(xDomain[0]) || isNaN(xDomain[1])) {
+      xDomain = [0, 100] // Fallback to safe domain
     }
   }
 

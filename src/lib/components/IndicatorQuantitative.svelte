@@ -42,7 +42,9 @@
         {indicatorValueColorscale}
         neighbourhoodsInMunicipalityFeaturesClone={memoizedClonedFeatures}
       />
-      <text class="graph-title" x={graphWidth / 2} y={graphHeight - 18}>{indicatorPlottitle} per buurt</text>
+      {#if graphWidth > 0 && graphHeight > 0}
+        <text class="graph-title" x={graphWidth / 2} y={graphHeight - 18}>{indicatorPlottitle} per buurt</text>
+      {/if}
     </svg>
   {:else}
     <p class="select-municipality"><em>{t("Selecteer_gemeente")}...</em></p>

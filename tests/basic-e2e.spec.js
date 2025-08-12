@@ -15,7 +15,7 @@ test('Basic end-to-end functionality test', async ({ page, context }) => {
     console.log('URL: ' + window.location.href);
   });
   // Set longer timeout for the entire test since we're testing a complete workflow
-  test.setTimeout(120000);
+  test.setTimeout(90000);
   
   // Setup console log capture
   page.on('console', msg => {
@@ -28,27 +28,12 @@ test('Basic end-to-end functionality test', async ({ page, context }) => {
   
   // STEP 1: Load application
   console.log('Step 1: Loading application...');
-  // Try both the development and fallback URLs
-  try {
-    await page.goto('https://buurtdashboard-dev.vercel.app/?config=dordrecht', {
-      timeout: 30000, // Extended timeout
-      waitUntil: 'domcontentloaded'
-    });
-  } catch (e) {
-    console.log(`Error loading dev URL: ${e.message}`);
-    console.log('Trying alternative URL...');
-    try {
-      await page.goto('https://buurtdashboard-dev.vercel.app', {
-        timeout: 30000,
-        waitUntil: 'domcontentloaded'
-      });
-    } catch (e2) {
-      console.log(`Error loading alternative URL: ${e2.message}`);
-    }
-  }
+  // Navigate to local development server
+  await page.goto('/?config=dordrecht', {
+    waitUntil: 'domcontentloaded'
+  });
   
   // Wait for the page to be substantially loaded
-  await page.waitForLoadState('networkidle');
   await page.waitForTimeout(8000); // Extra time for all components to initialize
   
   console.log('Waiting for content to stabilize...');
@@ -298,8 +283,8 @@ test('Basic end-to-end functionality test', async ({ page, context }) => {
       // Get map area and click on a path
       await map.scrollIntoViewIfNeeded();
       
-      // Find all paths in the map
-      const paths = await page.locator('.leaflet-container path[class*="_path"]').all();
+      // Find all paths in the map - use more generic selector
+      const paths = await page.locator('.map path, svg path').all();
       console.log(`Found ${paths.length} map paths`);
       
       if (paths.length > 0) {
