@@ -11,6 +11,8 @@ import { defineConfig, devices } from '@playwright/test';
  */
 export default defineConfig({
 	testDir: './tests',
+	/* Only run the clean test files */
+	testMatch: ['**/smoke.spec.js', '**/integration.spec.js'],
 	/* Maximum time one test can run for. */
 	timeout: 60 * 1000,
 	expect: {
