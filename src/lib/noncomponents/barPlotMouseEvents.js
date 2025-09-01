@@ -4,9 +4,12 @@ import { select } from "d3";
 import { get } from "svelte/store";
 
 export function barPlotMouseOver(indicator, indicatorValueColorscale, st, stacked) {
+  const percentageValue = st[1] - st[0]
+  const displayValue = Math.round(percentageValue * 100) / 100
+  
   tooltipValues.set({
     indicator: stacked.key,
-    value: Math.round((st[1] - st[0]) * 100) / 100 + '%',
+    value: displayValue + '%',
     color: indicatorValueColorscale(stacked.key)
   })
 

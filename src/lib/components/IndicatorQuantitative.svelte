@@ -2,6 +2,19 @@
   import BeeswarmPlot from "./BeeswarmPlot.svelte"
   import Stats from "./Stats.svelte"
   import { neighbourhoodsInMunicipalityJSONData, AHNSelecties, municipalitySelection } from "$lib/stores"
+  
+  // Memoize cloned data to prevent unnecessary BeeswarmPlot re-renders
+  let memoizedClonedFeatures = []
+  let lastDataReference = null
+  
+  $: {
+    // Only clone when the actual data reference changes, not on every render
+    const currentData = $neighbourhoodsInMunicipalityJSONData?.features
+    if (currentData && currentData !== lastDataReference) {
+      memoizedClonedFeatures = structuredClone(currentData)
+      lastDataReference = currentData
+    }
+  }
   import { t } from "$lib/i18n/translate.js"
   import { getIndicatorAttribute } from "$lib/noncomponents/getIndicatorAttribute"
 
@@ -27,9 +40,11 @@
         indicatorHeight={graphHeight}
         {indicator}
         {indicatorValueColorscale}
-        neighbourhoodsInMunicipalityFeaturesClone={structuredClone($neighbourhoodsInMunicipalityJSONData.features)}
+        neighbourhoodsInMunicipalityFeaturesClone={memoizedClonedFeatures}
       />
-      <text class="graph-title" x={graphWidth / 2} y={graphHeight - 18}>{indicatorPlottitle} per buurt</text>
+      {#if graphWidth > 0 && graphHeight > 0}
+        <text class="graph-title" x={graphWidth / 2} y={graphHeight - 18}>{indicatorPlottitle} per buurt</text>
+      {/if}
     </svg>
   {:else}
     <p class="select-municipality"><em>{t("Selecteer_gemeente")}...</em></p>

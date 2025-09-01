@@ -7,7 +7,12 @@
     "build": "vite build",
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json",
-    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json --watch"
+    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json --watch",
+    "test": "playwright test",
+    "test:smoke": "playwright test smoke.spec.js",
+    "test:integration": "playwright test integration.spec.js",
+    "test:ui": "playwright test --ui",
+    "test:debug": "playwright test --debug"
   },
   "engines": {
     "node": "22.x"

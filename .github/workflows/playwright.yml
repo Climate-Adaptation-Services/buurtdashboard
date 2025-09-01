@@ -7,7 +7,7 @@ jobs:
   run-e2es:
     if: github.event_name == 'deployment_status' && github.event.deployment_status.state == 'success'
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    timeout-minutes: 10
     steps:
       # Notify Slack that tests have started
       - name: Notify Slack that tests have started
@@ -26,16 +26,49 @@ jobs:
             ]
           }' ${{ secrets.SLACK_WEBHOOK_URL_ORG }}
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
       - name: Install dependencies
-        run: npm ci && npx playwright install --with-deps
+        run: npm ci
+      
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ hashFiles('package-lock.json') }}
+      
+      - name: Install Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+      - name: Set test URL
+        id: set-url
+        run: |
+          DEPLOY_URL="${{ github.event.deployment_status.environment_url }}"
+          echo "Deployment URL: $DEPLOY_URL"
+          
+          # Default to dev if no specific URL provided
+          if [ -z "$DEPLOY_URL" ] || [ "$DEPLOY_URL" = "null" ]; then
+            DEPLOY_URL="https://buurtdashboard-dev.vercel.app"
+            echo "Using fallback URL: $DEPLOY_URL"
+          fi
+          
+          echo "test_url=$DEPLOY_URL" >> $GITHUB_OUTPUT
+          
       - name: Run Playwright tests
         id: test
         run: |
           echo "Running Playwright tests..."
-          npx playwright test
+          echo "Testing URL: ${{ steps.set-url.outputs.test_url }}"
+          npx playwright test --reporter=github
         env:
-          BASE_URL: ${{ github.event.deployment_status.environment_url }}
+          BASE_URL: ${{ steps.set-url.outputs.test_url }}
+          CI: true
 
       - name: Capture Test Result (Failure or Success)
         id: result

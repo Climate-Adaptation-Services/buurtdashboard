@@ -1,6 +1,7 @@
 import { getClassByIndicatorValue } from "./getClassByIndicatorValue.js";
 import { t } from "$lib/i18n/translate.js"
 import { getIndicatorAttribute } from "./getIndicatorAttribute.js";
+import { getNumericalValue } from "./valueRetrieval.js";
 
 export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regio) {
   // let totalSurfaceArea = 0
@@ -66,7 +67,7 @@ export function calcPercentagesForEveryClassSingleIndicator(indicator, data, reg
   }
 
   data.features.forEach(neighbourhoodOrMunicipality => {
-    console.log(indicator, neighbourhoodOrMunicipality, classesTotal, getIndicatorAttribute(indicator, indicator.attribute))
+
     classesTotal.filter(kl => kl.className === getClassByIndicatorValue(indicator, neighbourhoodOrMunicipality.properties[getIndicatorAttribute(indicator, indicator.attribute)]))[0].waarde += 1
     totalAmount += 1
   });

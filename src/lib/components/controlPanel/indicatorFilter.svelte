@@ -12,14 +12,11 @@
 
   function handleIndicatorFilterAdd(e) {
     $URLParams.append("indicator", e.detail.option)
-    console.log($URLParams)
     window.history.pushState(null, "", "?" + $URLParams.toString())
   }
 
   function handleIndicatorFilterRemove(e) {
-    console.log(e.detail.option, $URLParams)
     $URLParams.delete("indicator", e.detail.option)
-    console.log($URLParams)
     window.history.replaceState(null, "", "?" + $URLParams.toString())
   }
 

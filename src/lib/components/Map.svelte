@@ -1,5 +1,5 @@
 <script>
-  import { currentJSONData, neighbourhoodSelection, neighbourhoodCodeAbbreviation, AHNSelecties } from "$lib/stores"
+  import { currentJSONData, neighbourhoodSelection, neighbourhoodCodeAbbreviation, AHNSelecties, getIndicatorStore } from "$lib/stores"
   import { geoMercator, geoPath, select } from "d3"
   import { prepareJSONData } from "$lib/noncomponents/prepareJSONData.js"
   import { t } from "$lib/i18n/translate.js"
@@ -8,6 +8,16 @@
   import { getMostCommonClass } from "$lib/noncomponents/getMostCommonClass"
   import { getClassByIndicatorValue } from "$lib/noncomponents/getClassByIndicatorValue"
   import { getIndicatorAttribute } from "$lib/noncomponents/getIndicatorAttribute"
+  
+  // MIGRATED: Import centralized value retrieval system
+  import {
+    getNumericalValue,
+    getCategoricalValue,
+    getDifferenceValue,
+    getAHNSelection,
+    isValidValue,
+    getRawValue
+  } from "$lib/noncomponents/valueRetrieval.js"
 
   // Removed unused exports for JSONdata and CSVdata
   export let mapWidth
@@ -47,33 +57,81 @@
     select(".tooltip-multi" + indicator.attribute).style("visibility", "hidden")
   }
 
-  // Check if we're in difference mode
-  $: isDifferenceMode =
-    indicator && $AHNSelecties[indicator.title] && typeof $AHNSelecties[indicator.title] === "object" && $AHNSelecties[indicator.title].isDifference
+  // Use dedicated indicator store for difference mode detection (naturally isolated)
+  $: indicatorStore = indicator ? getIndicatorStore(indicator.title) : null
+  $: isDifferenceMode = $indicatorStore && typeof $indicatorStore === "object" && $indicatorStore.isDifference
+  
+  // Pre-calculate difference values for map features to match BeeswarmPlot approach
+  $: differenceValues = isDifferenceMode && indicator
+    ? $currentJSONData.features.map((d) => {
+        const diffValue = getDifferenceValue(d, indicator)
+        // Return the feature id and its difference value for lookup
+        return {
+          id: d.properties[$neighbourhoodCodeAbbreviation],
+          diffValue: diffValue
+        }
+      })
+    : null
 
-  // Calculate difference values for each feature when in difference mode
-  $: differenceValues =
-    isDifferenceMode && $currentJSONData && $currentJSONData.features
-      ? $currentJSONData.features.map((feature) => {
-          // Store the difference value in a temporary property
-          const baseAttribute = getIndicatorAttribute(indicator, indicator.attribute)
-          const compareAttribute = getIndicatorAttribute(indicator, indicator.attribute, $AHNSelecties[indicator.title].compareYear)
-
-          const baseValue = +feature.properties[baseAttribute] || 0
-          const compareValue = +feature.properties[compareAttribute] || 0
-
-          // Store the calculated difference
-          feature.properties.calculatedDifference = compareValue - baseValue
-          return feature
-        })
-      : null
-
-  // Function to get the appropriate attribute for coloring the map
-  function getNumericalAttribute(feature) {
-    if (isDifferenceMode) {
-      return "calculatedDifference"
+  // Declare both display attribute and original attribute variables
+  let indicatorAttribute = null
+  let originalAttribute = null
+  
+  // Set attributes for both display and coloring, matching BeeswarmPlot's approach
+  $: {
+    if (indicator && $indicatorStore) {
+      // For display: use reactive attribute (may include _M2 suffix based on unit selection)
+      indicatorAttribute = getIndicatorAttribute(indicator, indicator.attribute)
+      
+      // For colors: always use original percentage attribute (consistent with BeeswarmPlot)
+      if ($indicatorStore && $indicatorStore.baseYear) {
+        originalAttribute = indicator.attribute + '_' + $indicatorStore.baseYear
+      } else {
+        originalAttribute = indicator.attribute
+      }
     } else {
-      return getIndicatorAttribute(indicator, indicator.attribute)
+      indicatorAttribute = null
+      originalAttribute = null
+    }
+  }
+  
+  // ALIGNED: Match BeeswarmPlot's color logic precisely for consistency
+  function getMapFillColor(feature) {
+    // Check if this is the main map (no indicator) - use whitesmoke
+    if (!indicator) {
+      return $neighbourhoodSelection === feature.properties[$neighbourhoodCodeAbbreviation]
+        ? "#FF6B35"
+        : "whitesmoke"
+    }
+    
+    if (indicator.numerical) {
+      // Get feature ID for difference value lookup
+      const featureId = feature.properties[$neighbourhoodCodeAbbreviation]
+      
+      if (isDifferenceMode && differenceValues) {
+        // Find pre-calculated difference value from our lookup array
+        const diffRecord = differenceValues.find(d => d.id === featureId)
+        const diffValue = diffRecord ? diffRecord.diffValue : null
+        
+        // Color based on difference value, matching BeeswarmPlot behavior
+        return diffValue !== null && diffValue !== "" && !isNaN(diffValue)
+          ? indicatorValueColorscale(diffValue)
+          : "#000000"
+      } else {
+        // For non-difference mode, use the value retrieval system for BEB-aware coloring
+        // This matches BeeswarmPlot which now uses: getRawValue(node, indicator)
+        const value = getRawValue(feature, indicator)
+        
+        return value !== null && value !== "" && !isNaN(value)
+          ? indicatorValueColorscale(value)
+          : "#000000"
+      }
+    } else {
+      // MIGRATED: Use centralized categorical value retrieval
+      const categoricalValue = getCategoricalValue(feature, indicator)
+      return categoricalValue !== null
+        ? indicatorValueColorscale(categoricalValue)
+        : "#000000"
     }
   }
 </script>
@@ -88,21 +146,7 @@
       <path
         d={path(feature)}
         class={getClassName(feature, "path", indicator, mapType) + " " + "svgelements_" + feature.properties[$neighbourhoodCodeAbbreviation]}
-        fill={mapType === "main map"
-          ? feature.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection
-            ? "#E1575A"
-            : "whitesmoke"
-          : indicator.numerical
-            ? // check if value not null
-              feature.properties[getIndicatorAttribute(indicator, indicator.attribute)] !== null &&
-              feature.properties[getIndicatorAttribute(indicator, indicator.attribute)] !== ""
-              ? indicatorValueColorscale(feature.properties[getNumericalAttribute(feature)])
-              : "#000000"
-            : indicator.aggregatedIndicator
-              ? indicatorValueColorscale(getMostCommonClass(indicator, feature))
-              : indicatorValueColorscale(
-                  getClassByIndicatorValue(indicator, feature.properties[getIndicatorAttribute(indicator, indicator.attribute)]),
-                )}
+        fill={isDifferenceMode, indicatorValueColorscale, $AHNSelecties, getMapFillColor(feature)}
         stroke={mapType === "main map"
           ? "grey"
           : feature.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection

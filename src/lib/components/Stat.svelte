@@ -1,5 +1,7 @@
 <script>
-  import { neighbourhoodSelection, municipalitySelection, allNeighbourhoodsJSONData, AHNSelecties } from "$lib/stores"
+
+  import { neighbourhoodSelection, municipalitySelection, allNeighbourhoodsJSONData, getIndicatorStore } from "$lib/stores"
+  import { onMount } from 'svelte'
   import { getRegionName } from "$lib/noncomponents/getRegionName"
 
   export let graphWidth
@@ -9,12 +11,18 @@
 
   export let regio
   export let xScaleStats
-  export let medianValue
+  export let medianValue // Display value (unit-converted)
+  export let scaleValue = medianValue // Scale value (original %) for positioning - defaults to medianValue for backward compatibility
   export let indicatorValueColorscale
 
   // Determine if we're in difference mode
-  $: currentAHNSelection = $AHNSelecties[indicator.title]
-  $: isDifferenceMode = currentAHNSelection && typeof currentAHNSelection === "object" && currentAHNSelection.isDifference
+  $: indicatorStore = getIndicatorStore(indicator.title)
+  $: currentAHNSelection = $indicatorStore
+  $: isDifferenceMode = currentAHNSelection && currentAHNSelection.isDifference
+  
+  $: displayValue = medianValue !== "Geen data" ? Math.round(medianValue * 100) / 100 : "Geen data"
+  
+
 
   // Format region name
   let regioNaam = ""
@@ -31,46 +39,84 @@
   let textX = 180
   let textAnchor = "start"
 
-  // Calculate bar width
-  $: rectWidth = medianValue !== "Geen data" ? (isDifferenceMode ? Math.abs(xScaleStats(medianValue) - xScaleStats(0)) : xScaleStats(medianValue)) : 0
-
-  // Calculate bar X position
-  $: rectX = isDifferenceMode ? (medianValue > 0 ? 175 + xScaleStats(0) : 175 + xScaleStats(0) - rectWidth) : 175
-
-  // Calculate text X position - position labels outside the bars
+  // Calculate bar width using scaleValue for consistent positioning
   $: {
-    if (medianValue === "Geen data") {
-      textX = 180
-      textAnchor = "start"
-    } else if (isDifferenceMode) {
-      if (medianValue < 0) {
-        // For negative values, position to the left of the bar
-        textX = 170 + xScaleStats(0) - rectWidth
-        textAnchor = "end"
-      } else {
-        // For positive values, position to the right of the bar
-        textX = 170 + xScaleStats(0) + rectWidth + 10
-        textAnchor = "start"
-      }
+    if (medianValue === "Geen data" || isNaN(scaleValue) || !xScaleStats) {
+      rectWidth = 0
     } else {
-      // For regular mode, position to the right of the bar
-      textX = 175 + xScaleStats(medianValue) + 10
-      textAnchor = "start"
+      const scaledValue = xScaleStats(scaleValue)
+      const scaledZero = xScaleStats(0)
+      
+      if (isNaN(scaledValue) || isNaN(scaledZero)) {
+        rectWidth = 0
+      } else {
+        rectWidth = isDifferenceMode 
+          ? Math.abs(scaledValue - scaledZero) 
+          : Math.max(0, scaledValue) // Ensure positive width
+      }
     }
   }
 
-  // Add plus sign for positive difference values
-  $: textPlus = isDifferenceMode && medianValue > 0 ? "+" : ""
+  // Calculate bar X position using scaleValue for consistent positioning
+  $: {
+    if (!xScaleStats || isNaN(scaleValue) || medianValue === "Geen data") {
+      rectX = 175
+    } else {
+      const scaledZero = xScaleStats(0)
+      if (isNaN(scaledZero)) {
+        rectX = 175
+      } else {
+        rectX = isDifferenceMode 
+          ? (scaleValue > 0 ? 175 + scaledZero : 175 + scaledZero - rectWidth) 
+          : 175
+      }
+    }
+  }
 
-  // Get the appropriate color for the bar
+  // Calculate text X position - position labels outside the bars using scaleValue for consistency
+  $: {
+    if (medianValue === "Geen data" || !xScaleStats || isNaN(scaleValue)) {
+      textX = 180
+      textAnchor = "start"
+    } else if (isDifferenceMode) {
+      const scaledZero = xScaleStats(0)
+      if (isNaN(scaledZero) || isNaN(rectWidth)) {
+        textX = 180
+        textAnchor = "start"
+      } else if (scaleValue < 0) {
+        // For negative values, position to the left of the bar
+        textX = 170 + scaledZero - rectWidth
+        textAnchor = "end"
+      } else {
+        // For positive values, position to the right of the bar
+        textX = 170 + scaledZero + rectWidth + 10
+        textAnchor = "start"
+      }
+    } else {
+      // For regular mode, position to the right of the bar using scaleValue
+      const scaledValue = xScaleStats(scaleValue)
+      if (isNaN(scaledValue)) {
+        textX = 180
+        textAnchor = "start"
+      } else {
+        textX = 175 + scaledValue + 10
+        textAnchor = "start"
+      }
+    }
+  }
+
+  // Add plus sign for positive difference values using scaleValue for consistency
+  $: textPlus = isDifferenceMode && scaleValue > 0 ? "+" : ""
+
+  // Get the appropriate color for the bar using scaleValue for consistent colors
   $: barColor =
     medianValue !== "Geen data"
       ? indicatorValueColorscale
-        ? indicatorValueColorscale(medianValue)
+        ? indicatorValueColorscale(scaleValue) // Use scaleValue for consistent colors
         : isDifferenceMode
-          ? medianValue > 0
+          ? scaleValue > 0 // Use scaleValue for consistent color logic
             ? "#4682b4" // Blue for positive differences (fallback)
-            : medianValue < 0
+            : scaleValue < 0
               ? "#E1575A" // Red for negative differences (fallback)
               : "#cccccc" // Gray for zero (fallback)
           : "steelblue"
@@ -83,23 +129,27 @@
     <text dx={170} dy="0.32em" text-anchor="end" font-size="13">{regioNaam}</text>
 
     <!-- Zero line for difference mode -->
-    {#if isDifferenceMode}
-      <line
-        x1={xScaleStats(0) + 175}
-        x2={xScaleStats(0) + 175}
-        y1="-0.5em"
-        y2={indicatorHeight * 0.2}
-        stroke="#888888"
-        stroke-width="2"
-        stroke-dasharray="3,2"
-      />
+    {#if isDifferenceMode && xScaleStats}
+      {#if !isNaN(xScaleStats(0))}
+        <line
+          x1={xScaleStats(0) + 175}
+          x2={xScaleStats(0) + 175}
+          y1="-0.5em"
+          y2={indicatorHeight * 0.2}
+          stroke="#888888"
+          stroke-width="2"
+          stroke-dasharray="3,2"
+        />
+      {/if}
     {/if}
 
     <!-- Value bar -->
-    <rect x={rectX} y="-0.4em" fill={barColor} width={rectWidth} height={indicatorHeight * 0.45} rx="4"></rect>
+    {#if !isNaN(rectX) && !isNaN(rectWidth) && rectWidth > 0}
+      <rect x={rectX} y="-0.4em" fill={barColor} width={rectWidth} height={indicatorHeight * 0.45} rx="4"></rect>
+    {/if}
 
     <!-- Comparison year indicator (hidden by default) -->
-    {#if regio !== "Nederland"}
+    {#if regio !== "Nederland" && xScaleStats && !isNaN(medianValueOtherYear) && !isNaN(xScaleStats(medianValueOtherYear))}
       <g
         class="hoveryear_{indicator.title.replaceAll(' ', '')}"
         transform="translate({xScaleStats(medianValueOtherYear) + 175},0)"
@@ -113,15 +163,17 @@
     {/if}
 
     <!-- Value label -->
-    <text
-      dx={textX}
-      dy="0.34em"
-      font-size="11"
-      text-anchor={textAnchor}
-      fill={isDifferenceMode ? (medianValue > 0 ? "#4682b4" : medianValue < 0 ? "#E1575A" : "#666666") : "#645f5e"}
-    >
-      {medianValue !== "Geen data" ? textPlus + Math.round(medianValue * 100) / 100 : "Geen data"}
-    </text>
+    {#if !isNaN(textX)}
+      <text
+        dx={textX}
+        dy="0.34em"
+        font-size="11"
+        text-anchor={textAnchor}
+        fill={isDifferenceMode ? (medianValue > 0 ? "#4682b4" : medianValue < 0 ? "#E1575A" : "#666666") : "#645f5e"}
+      >
+        {displayValue !== "Geen data" ? textPlus + displayValue : "Geen data"}
+      </text>
+    {/if}
   </g>
 </svg>
 

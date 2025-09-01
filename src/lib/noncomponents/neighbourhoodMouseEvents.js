@@ -8,6 +8,19 @@ import center from '@turf/center'
 import { t } from '$lib/i18n/translate.js';
 import { getIndicatorAttribute } from './getIndicatorAttribute.js';
 
+// MIGRATED: Import centralized value retrieval system
+import {
+  getDisplayValue,
+  getDifferenceValue,
+  getCategoricalValue,
+  getNumericalValue,
+  getRawValue,
+  getAHNSelection,
+  isValidValue,
+  getPopupValue,
+  formatM2Value
+} from './valueRetrieval.js';
+
 export function mouseOver(e, feature, indicator, mapType, indicatorValueColorscale, projection, beeswarmMargin) {
   const shapeClassName = getClassName(feature, 'path', indicator, mapType)
   const circleClassName = getClassName(feature, 'node', indicator, mapType)
@@ -50,50 +63,84 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
     }
 
     if (mapType === 'indicator map') {
-      // Check if we're in difference mode
-      const ahnSelection = get(AHNSelecties)[indicator.title]
+      // MIGRATED: Use centralized value retrieval system
+      const ahnSelection = getAHNSelection(indicator)
       const isDifferenceMode = ahnSelection && typeof ahnSelection === 'object' && ahnSelection.isDifference
 
       let tooltipValueColor, tooltipValue, tooltipIndicator
 
       if (indicator.numerical) {
         if (isDifferenceMode) {
-          // For difference mode, use the calculated difference value
-          const diffValue = feature.properties.calculatedDifference
-
-          // Format the difference value with a + sign for positive values
-          tooltipValue = diffValue > 0
-            ? "+" + (Math.round(diffValue * 100) / 100).toFixed(1)
-            : (Math.round(diffValue * 100) / 100).toFixed(1)
-
-          // Use the same color scale as defined in Indicator.svelte
-          tooltipValueColor = indicatorValueColorscale(diffValue)
-
-          // Include both years in the tooltip title
+          // Use popup value for difference mode to get both percentage and M2 differences
+          const popupResult = getPopupValue(feature, indicator)
+          
+          // Get original diff value for color calculation
+          const originalDiffValue = getDifferenceValue(feature, indicator)
+          
+          // Format the difference value with proper sign and units
+          if (popupResult.value !== null && !isNaN(popupResult.value)) {
+            const roundedValue = Math.round(popupResult.value * 100) / 100
+            const sign = popupResult.value > 0 ? "+" : ""
+            tooltipValue = `${sign}${roundedValue.toFixed(1)}${popupResult.unit}`
+            
+            // Add M2 difference if available
+            if (popupResult.hasM2 && popupResult.m2Value !== null) {
+              const m2Sign = popupResult.m2Value > 0 ? "+" : ""
+              const formattedM2 = formatM2Value(popupResult.m2Value)
+              tooltipValue += ` (${m2Sign}${formattedM2} m²)`
+            }
+          } else {
+            tooltipValue = 'Geen data'
+          }
+          
+          tooltipValueColor = originalDiffValue !== null && !isNaN(originalDiffValue)
+            ? indicatorValueColorscale(originalDiffValue)
+            : '#000000'
+          
           tooltipIndicator = `${indicator.title}`
         } else {
-          // Regular numerical indicator
-          tooltipValue = /\d/.test(feature.properties[indicatorAttribute])
-            ? Math.round(+feature.properties[indicatorAttribute] * 100) / 100
-            : 'Geen data'
-          tooltipValueColor = feature.properties[indicatorAttribute]
-            ? indicatorValueColorscale(feature.properties[indicatorAttribute])
+          // Use popup value to potentially show both percentage and M2 values for M2 variants
+          const popupResult = getPopupValue(feature, indicator)
+          
+          // Get original value for consistent color calculation (force original attribute, no unit conversion)
+          const originalAttribute = getIndicatorAttribute(indicator, indicator.attribute)
+          const originalValue = feature.properties[originalAttribute]
+          
+          // Format the value with proper rounding and unit
+          if (popupResult.value !== null && !isNaN(popupResult.value)) {
+            const roundedValue = Math.round(popupResult.value * 100) / 100
+            tooltipValue = `${roundedValue}${popupResult.unit}`
+            
+            // Add M2 value if available with nice formatting
+            if (popupResult.hasM2 && popupResult.m2Value !== null) {
+              const formattedM2 = formatM2Value(popupResult.m2Value)
+              tooltipValue += ` (${formattedM2} m²)`
+            }
+          } else {
+            tooltipValue = 'Geen data'
+          }
+          
+          // Use original value for consistent colors
+          tooltipValueColor = originalValue !== null && !isNaN(originalValue)
+            ? indicatorValueColorscale(originalValue)
             : '#000000'
           tooltipIndicator = indicator.title
         }
       } else {
-        // Non-numerical indicator
-        tooltipValue = indicator.aggregatedIndicator
-          ? getMostCommonClass(indicator, feature)
-          : getClassByIndicatorValue(indicator, feature.properties[getIndicatorAttribute(indicator, indicator.attribute)])
-
+        // MIGRATED: Use centralized categorical value retrieval
+        tooltipValue = getCategoricalValue(feature, indicator)
+        
+        // Handle special case for flood depth indicator
         if (indicator.title === 'Maximale overstromingsdiepte' && tooltipValue === 'No data') {
           tooltipValue = 'Geen'
         }
-        tooltipValueColor = indicator.aggregatedIndicator
-          ? indicatorValueColorscale(getMostCommonClass(indicator, feature))
-          : indicatorValueColorscale(getClassByIndicatorValue(indicator, feature.properties[getIndicatorAttribute(indicator, indicator.attribute)]))
-
+        
+        // Get color for categorical value
+        const categoricalValue = indicator.aggregatedIndicator
+          ? getMostCommonClass(indicator, feature)
+          : getClassByIndicatorValue(indicator, feature.properties[getIndicatorAttribute(indicator, indicator.attribute)])
+        
+        tooltipValueColor = indicatorValueColorscale(categoricalValue)
         tooltipIndicator = indicator.title
       }
 
@@ -109,38 +156,64 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
       const featureCenter = projection(center(feature).geometry.coordinates)
       tooltipCenter = [featureCenter[0] + rectmap.left, featureCenter[1] + rectmap.top]
 
-      // if beeswarm interaction 
+      // MIGRATED: Beeswarm interaction with centralized value retrieval
     } else {
-      // Check if we're in difference mode
-      const ahnSelection = get(AHNSelecties)[indicator.title]
+      const ahnSelection = getAHNSelection(indicator)
       const isDifferenceMode = ahnSelection && typeof ahnSelection === 'object' && ahnSelection.isDifference
 
       if (isDifferenceMode) {
-        // For difference mode, calculate and display the difference value
-        const baseAttribute = indicatorAttribute
-        const compareAttribute = getIndicatorAttribute(indicator, indicator.attribute, ahnSelection.compareYear)
+        // Use popup value for difference mode to get both percentage and M2 differences
+        const popupResult = getPopupValue(feature, indicator)
+        
+        // Get original diff value for color calculation
+        const originalDiffValue = getDifferenceValue(feature, indicator)
+        
+        let formattedDiffValue
+        if (popupResult.value !== null && !isNaN(popupResult.value)) {
+          const roundedValue = Math.round(popupResult.value * 100) / 100
+          const sign = popupResult.value > 0 ? "+" : ""
+          formattedDiffValue = `${sign}${roundedValue.toFixed(1)}${popupResult.unit}`
+          
+          // Add M2 difference if available
+          if (popupResult.hasM2 && popupResult.m2Value !== null) {
+            const m2Sign = popupResult.m2Value > 0 ? "+" : ""
+            const formattedM2 = formatM2Value(popupResult.m2Value)
+            formattedDiffValue += ` (${m2Sign}${formattedM2} m²)`
+          }
+        } else {
+          formattedDiffValue = 'Geen data'
+        }
 
-        const baseValue = +feature.properties[baseAttribute] || 0
-        const compareValue = +feature.properties[compareAttribute] || 0
-        const diffValue = compareValue - baseValue
-
-        // Format the difference value with a + sign for positive values
-        const formattedDiffValue = diffValue > 0
-          ? "+" + (Math.round(diffValue * 100) / 100).toFixed(1)
-          : (Math.round(diffValue * 100) / 100).toFixed(1)
-
-        // Set tooltip with difference value and years
         tooltipValues.set({
           indicator: `${indicator.title} (${ahnSelection.compareYear} vs ${ahnSelection.baseYear})`,
           value: formattedDiffValue,
-          color: indicatorValueColorscale(diffValue)
+          color: originalDiffValue !== null && !isNaN(originalDiffValue) ? indicatorValueColorscale(originalDiffValue) : '#000000'
         })
       } else {
-        // Regular tooltip for non-difference mode
+        // Use popup value to potentially show both percentage and M2 values for M2 variants in beeswarm
+        const popupResult = getPopupValue(feature, indicator)
+        
+        let displayValue
+        if (popupResult.value !== null && !isNaN(popupResult.value)) {
+          const roundedValue = Math.round(popupResult.value * 100) / 100
+          displayValue = `${roundedValue}${popupResult.unit}`
+          
+          // Add M2 value if available with nice formatting
+          if (popupResult.hasM2 && popupResult.m2Value !== null) {
+            const formattedM2 = formatM2Value(popupResult.m2Value)
+            displayValue += ` (${formattedM2} m²)`
+          }
+        } else {
+          displayValue = 'Geen data'
+        }
+        
+        // For color calculation, use the original % value for consistency
+        const originalValue = getNumericalValue(feature, indicator)
+        
         tooltipValues.set({
           indicator: indicator.title,
-          value: Math.round(feature.properties[indicatorAttribute] * 100) / 100,
-          color: indicatorValueColorscale(feature.properties[indicatorAttribute])
+          value: displayValue,
+          color: originalValue !== null && !isNaN(originalValue) ? indicatorValueColorscale(originalValue) : '#000000'
         })
       }
 

@@ -89,7 +89,7 @@ export async function load({ url }) {
     // Process the data with caching
     await prepareJSONData([municipalityGeoJson, neighbourhoodGeoJson], buurtCSVdata, dataUrls);
   }
-  console.log('csvdata', buurtCSVdata)
+
 
   return {
     lang,

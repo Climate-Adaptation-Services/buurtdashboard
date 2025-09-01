@@ -9,6 +9,7 @@
     selectedNeighbourhoodJSONData,
     AHNSelecties,
     configStore,
+    getIndicatorStore,
   } from "$lib/stores"
   import { scaleLinear, scaleBand, stack } from "d3"
   import { checkContrast } from "$lib/noncomponents/checkContrast"
@@ -18,6 +19,7 @@
     calcPercentagesForEveryClassMultiIndicator,
     calcPercentagesForEveryClassSingleIndicator,
   } from "$lib/noncomponents/calcPercentagesForEveryClass"
+  import { getNumericalValue } from "$lib/noncomponents/valueRetrieval.js"
 
   export let graphWidth
   export let indicatorHeight
@@ -30,15 +32,23 @@
 
   const calcPercentagesForEveryClass = aggregated ? calcPercentagesForEveryClassMultiIndicator : calcPercentagesForEveryClassSingleIndicator
 
+  // Get the indicator-specific store for reactivity
+  const indicatorStore = getIndicatorStore(indicator.title)
+
+  // Simplified function - always show percentages in bar plot
+  function getDisplayValue(percentageValue) {
+    return Math.round(percentageValue * 10) / 10
+  }
+
   let nederlandValues
-  $: if ($AHNSelecties) {
+  $: if ($indicatorStore) {
     nederlandValues = calcPercentagesForEveryClass(indicator, $allNeighbourhoodsJSONData, "Nederland")
   }
   let barPlotData = []
   let regios = []
 
   $: {
-    if ($neighbourhoodSelection !== null && $AHNSelecties) {
+    if ($neighbourhoodSelection !== null && $indicatorStore) {
       if ($selectedNeighbourhoodJSONData.properties[$districtTypeAbbreviation]) {
         barPlotData = [
           nederlandValues,
@@ -55,10 +65,10 @@
         ]
         regios = ["Nederland", "Gemeente", "Buurt"]
       }
-    } else if ($municipalitySelection !== null) {
+    } else if ($municipalitySelection !== null && $indicatorStore) {
       barPlotData = [nederlandValues, calcPercentagesForEveryClass(indicator, $neighbourhoodsInMunicipalityJSONData, "Gemeente")]
       regios = ["Nederland", "Gemeente"]
-    } else {
+    } else if ($indicatorStore) {
       barPlotData = [nederlandValues]
       regios = ["Nederland"]
     }
@@ -101,7 +111,7 @@
               fill={checkContrast(indicatorValueColorscale(stacked.key)) ? "white" : "black"}
               dy="1.1em"
               font-size="14px"
-              pointer-events="none">{Math.round(st.data[stacked.key] * 10) / 10}%</text
+              pointer-events="none">{getDisplayValue(st.data[stacked.key])}%</text
             >
           {/if}
         {/each}
@@ -109,9 +119,11 @@
     {/each}
     {#each regios as regio, i}
       {#if regio !== "Nederland" || !($configStore && $configStore.dashboardTitle === "Buurtdashboard Dordrecht")}
-        <text style="fill:#645F5E" x={graphWidth / 2} text-anchor="middle" font-size="15px" y={i * yScale.bandwidth() - 5}
-          >{getRegionName(regio)}</text
-        >
+        {#if graphWidth > 0}
+          <text style="fill:#645F5E" x={graphWidth / 2} text-anchor="middle" font-size="15px" y={i * yScale.bandwidth() - 5}
+            >{getRegionName(regio)}</text
+          >
+        {/if}
       {/if}
     {/each}
   </g>
