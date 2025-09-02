@@ -100,7 +100,7 @@
     // Check if this is the main map (no indicator) - use whitesmoke
     if (!indicator) {
       return $neighbourhoodSelection === feature.properties[$neighbourhoodCodeAbbreviation]
-        ? "#FF6B35"
+        ? "#E1575A"
         : "whitesmoke"
     }
     

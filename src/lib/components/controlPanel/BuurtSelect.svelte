@@ -1,5 +1,6 @@
 <script>
   import { municipalitySelection, neighbourhoodSelection, URLParams } from "$lib/stores"
+  import { addURLParameter, removeURLParameter } from "$lib/noncomponents/updateURLParams"
   import { selectAll } from "d3"
   import Select from "svelte-select"
   import { t } from "$lib/i18n/translate.js"
@@ -10,7 +11,7 @@
 
   function handleBuurtChange(e) {
     $URLParams.set("buurt", e.detail.value)
-    window.history.pushState(null, "", "?" + $URLParams.toString())
+    addURLParameter()
 
     neighbourhoodSelection.set(e.detail.value)
     selectAll(".svgelements_" + e.detail.value).raise()
@@ -18,7 +19,7 @@
 
   function handleBuurtClear(e) {
     $URLParams.delete("buurt")
-    window.history.replaceState(null, "", "?" + $URLParams.toString())
+    removeURLParameter()
 
     neighbourhoodSelection.set(null)
   }

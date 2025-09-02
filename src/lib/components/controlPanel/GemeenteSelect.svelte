@@ -3,12 +3,13 @@
   import { t } from "$lib/i18n/translate.js"
   import { onMount } from "svelte"
   import { URLParams, municipalitySelection, neighbourhoodSelection, configStore } from "$lib/stores"
+  import { addURLParameter, removeURLParameter } from "$lib/noncomponents/updateURLParams"
 
   export let lijstAlleGemeentesVoorDropdown
 
   function handleGemeenteChange(e) {
     $URLParams.set("gemeente", e.detail.value)
-    window.history.pushState(null, "", "?" + $URLParams.toString())
+    addURLParameter()
 
     municipalitySelection.set(null)
     neighbourhoodSelection.set(null)
@@ -20,7 +21,7 @@
   function handleGemeenteClear(e) {
     $URLParams.delete("gemeente")
     $URLParams.delete("buurt")
-    window.history.replaceState(null, "", "?" + $URLParams.toString())
+    removeURLParameter()
 
     municipalitySelection.set(null)
     neighbourhoodSelection.set(null)
