@@ -1,5 +1,6 @@
 <script>
   import { indicatorsSelection, URLParams } from "$lib/stores"
+  import { addURLParameter, removeURLParameter } from "$lib/noncomponents/updateURLParams"
   import MultiSelect from "svelte-multiselect?client"
   import { browser } from "$app/environment"
   import { selectAll } from "d3"
@@ -12,17 +13,17 @@
 
   function handleIndicatorFilterAdd(e) {
     $URLParams.append("indicator", e.detail.option)
-    window.history.pushState(null, "", "?" + $URLParams.toString())
+    addURLParameter()
   }
 
   function handleIndicatorFilterRemove(e) {
     $URLParams.delete("indicator", e.detail.option)
-    window.history.replaceState(null, "", "?" + $URLParams.toString())
+    removeURLParameter()
   }
 
   function handleIndicatorFilterClear() {
     $URLParams.delete("indicator")
-    window.history.replaceState(null, "", "?" + $URLParams.toString())
+    removeURLParameter()
   }
 
   // deze styling gebeurt hier, omdat het via css niet lukte

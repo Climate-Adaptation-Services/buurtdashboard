@@ -21,6 +21,7 @@
   import { setLanguage } from "$lib/noncomponents/setLanguage.js"
   // GeoJSON data now comes from page data, no need for separate fetch
   import { processURLParameters } from "$lib/noncomponents/processURLParameters.js"
+  import { loadURLParamsFromPostMessage } from "$lib/noncomponents/loadURLParamsFromPostMessage.js"
   import { setupAHNSelecties } from "$lib/noncomponents/setupAHNSelecties.js"
   import { getIndicatorAttribute } from "$lib/noncomponents/getIndicatorAttribute.js"
 
@@ -50,9 +51,14 @@
   // GeoJSON data is now available directly from page data
   const geoJSONData = [data.municipalityGeoJson, data.neighbourhoodGeoJson]
 
-  // de URL parameters laden
+  // load URL params if standalone page
   $: if (browser) {
     URLParams.set(new URLSearchParams(window.location.search))
+  }
+  
+  // Listen for postmessage from parent if iframe
+  $: if (browser) {
+    loadURLParamsFromPostMessage()
   }
 
   // zodra allNeighbourhoodsJSONData geladen is, lees de url parameters
