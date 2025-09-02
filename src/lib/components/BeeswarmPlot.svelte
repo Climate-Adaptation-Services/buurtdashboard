@@ -249,7 +249,7 @@
       class:selected-node={node.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection}
       cx={node.x}
       cy={node.y}
-      r={node.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection ? $circleRadius + 3 : $circleRadius}
+      r={$circleRadius}
       fill={differenceValues ? indicatorValueColorscale(node.diffValue) : indicatorValueColorscale(getRawValue(node, indicator))}
       stroke-width="3"
       on:mouseover={(e) => {
@@ -270,4 +270,12 @@
   .selected-node {
     filter: drop-shadow(0 0 5px #36575a);
   }
+  
+  /* Use CSS custom properties for highlighting instead of reactive DOM attributes */
+  .inner-chart circle[data-neighbourhood] {
+    stroke: none;
+    stroke-width: 3;
+  }
+  
+  /* This selector won't work as intended - need a different approach */
 </style>

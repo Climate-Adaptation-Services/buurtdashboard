@@ -11,11 +11,10 @@
     $URLParams.set("gemeente", e.detail.value)
     addURLParameter()
 
-    municipalitySelection.set(null)
+    // Clear neighbourhood first since it's no longer valid for the new municipality
     neighbourhoodSelection.set(null)
-    setTimeout(() => {
-      municipalitySelection.set(e.detail.value)
-    }, 1)
+    // Then set the new municipality directly without setTimeout
+    municipalitySelection.set(e.detail.value)
   }
 
   function handleGemeenteClear(e) {
