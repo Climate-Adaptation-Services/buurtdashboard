@@ -1,5 +1,6 @@
 import { getClassName } from '$lib/noncomponents/getClassName';
 import { currentCodeAbbreviation, neighbourhoodSelection, mousePosition, circleRadius, municipalitySelection, currentNameAbbreviation, URLParams, currentOverviewLevel, neighbourhoodCodeAbbreviation, tooltipValues, tooltipRegion, AHNSelecties } from '$lib/stores';
+import { addURLParameter } from './updateURLParams.js';
 import { get } from 'svelte/store';
 import { select, selectAll } from 'd3';
 import { getClassByIndicatorValue } from './getClassByIndicatorValue.js';
@@ -267,13 +268,11 @@ export function click(feature, indicator, mapType) {
   const newSelection = feature.properties[get(currentCodeAbbreviation)].replaceAll(' ', '').replaceAll('(', '').replaceAll(')', '')
   if (get(currentOverviewLevel) === 'Nederland') {
     get(URLParams).set('gemeente', newSelection);
-    window.history.pushState(null, '', '?' + get(URLParams).toString());
-
+    addURLParameter();
     municipalitySelection.set(newSelection)
   } else {
     get(URLParams).set('buurt', newSelection);
-    window.history.pushState(null, '', '?' + get(URLParams).toString());
-
+    addURLParameter();
     neighbourhoodSelection.set(newSelection)
   }
 }

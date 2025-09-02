@@ -56,7 +56,7 @@
     URLParams.set(new URLSearchParams(window.location.search))
   }
   
-  // Listen for postmessage from parent if iframe
+  // Listen for postMessage from parent if iframe
   $: if (browser) {
     loadURLParamsFromPostMessage()
   }
@@ -65,6 +65,7 @@
   $: if ($allNeighbourhoodsJSONData) {
     processURLParameters()
   }
+
 
   // Only react to indicator selection changes after initialization
   $: if (isInitialized) {

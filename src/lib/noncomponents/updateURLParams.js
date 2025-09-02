@@ -5,7 +5,7 @@ function sendPostMessage(message, data) {
   // Only send postMessage if we're actually in an iframe (not standalone)
   if (window.parent !== window) {
     try {
-      window.parent.postMessage(message, data);
+      window.parent.postMessage({ type: message, params: data }, "*");
     } catch (error) {
       // Silently ignore postMessage errors in development
       if (import.meta.env.DEV) {
@@ -17,10 +17,10 @@ function sendPostMessage(message, data) {
 
 export function addURLParameter(){
   window.history.pushState(null, '', '?' + get(URLParams).toString());
-  sendPostMessage("Update URL params", '?' + get(URLParams).toString());
+  sendPostMessage("urlUpdate", get(URLParams).toString());
 }
 
 export function removeURLParameter(){
   window.history.replaceState(null, '', '?' + get(URLParams).toString());
-  sendPostMessage("Update URL params", '?' + get(URLParams).toString());
+  sendPostMessage("urlUpdate", get(URLParams).toString());
 }
