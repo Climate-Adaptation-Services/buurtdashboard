@@ -1,5 +1,5 @@
 <script>
-  import { getIndicatorStore, selectedNeighbourhoodJSONData, neighbourhoodsInMunicipalityJSONData, configStore } from "$lib/stores"
+  import { getIndicatorStore, selectedNeighbourhoodJSONData, neighbourhoodsInMunicipalityJSONData, configStore, municipalitySelection, allNeighbourhoodsJSONData } from "$lib/stores"
 
   export let indicator
 
@@ -9,20 +9,60 @@
   let options = []
   let selectedAHN
   let selectedDifference = "Difference"
+  
+  // YearSwitch is never disabled - it works at Nederland, gemeente, and buurt levels
+  $: isDisabled = false
 
   // Parse AHN versions from the indicator
   const ahnVersions = indicator.AHNversie.split(",")
 
-  // Format years consistently - sort and use commas instead of periods
+  // Format years consistently - sort and use ranges for consecutive years
   function formatYears(yearsString) {
     if (!yearsString) return ""
 
-    // Split by periods or commas, filter empty strings, sort numerically, join with commas
-    return yearsString
+    // Split by periods or commas, filter empty strings, sort numerically
+    const years = yearsString
       .split(/[.,]\s*/)
       .filter((y) => y.trim())
+      .map(y => parseInt(y))
       .sort((a, b) => a - b)
-      .join(", ")
+    
+    return formatYearRanges(years)
+  }
+
+  // Helper function to format years as ranges (e.g., "2011-2014, 2016, 2018-2020")
+  function formatYearRanges(years) {
+    if (years.length === 0) return ""
+    if (years.length === 1) return years[0].toString()
+
+    const ranges = []
+    let start = years[0]
+    let end = years[0]
+
+    for (let i = 1; i < years.length; i++) {
+      if (years[i] === end + 1) {
+        // Consecutive year, extend the range
+        end = years[i]
+      } else {
+        // Gap found, close current range
+        if (start === end) {
+          ranges.push(start.toString())
+        } else {
+          ranges.push(`${start}-${end}`)
+        }
+        start = years[i]
+        end = years[i]
+      }
+    }
+
+    // Add the final range
+    if (start === end) {
+      ranges.push(start.toString())
+    } else {
+      ranges.push(`${start}-${end}`)
+    }
+
+    return ranges.join(", ")
   }
 
   // Reactive statement to update options when data changes
@@ -33,8 +73,44 @@
         AHN: ahn,
         Jaar: formatYears($selectedNeighbourhoodJSONData.properties["Jaar" + ahn]),
       }))
+      // Set default selection if not already set
+      if (!selectedAHN && options.length > 0) {
+        selectedAHN = options[options.length - 1].AHN
+        // Update the indicator store with the default selection
+        indicatorStore.set({
+          baseYear: options[options.length - 1].AHN,
+          compareYear: null,
+          isDifference: false,
+          beb: 'hele_buurt'
+        })
+      }
     } else if ($neighbourhoodsInMunicipalityJSONData) {
       findAHNyearsWithoutDuplicatesAndSort()
+      // Set default selection if not already set
+      if (!selectedAHN && options.length > 0) {
+        selectedAHN = options[options.length - 1].AHN
+        // Update the indicator store with the default selection
+        indicatorStore.set({
+          baseYear: options[options.length - 1].AHN,
+          compareYear: null,
+          isDifference: false,
+          beb: 'hele_buurt'
+        })
+      }
+    } else if ($allNeighbourhoodsJSONData) {
+      // Nederland level - use all neighbourhoods data
+      findAHNyearsForAllNetherlands()
+      // Set default selection if not already set
+      if (!selectedAHN && options.length > 0) {
+        selectedAHN = options[options.length - 1].AHN
+        // Update the indicator store with the default selection
+        indicatorStore.set({
+          baseYear: options[options.length - 1].AHN,
+          compareYear: null,
+          isDifference: false,
+          beb: 'hele_buurt'
+        })
+      }
     }
   }
 
@@ -56,10 +132,35 @@
       })
     })
 
-    // Sort years and convert to comma-separated string
+    // Sort years and format as ranges
     options.forEach((option) => {
-      option.Jaar.sort((a, b) => a - b)
-      option.Jaar = option.Jaar.join(", ")
+      const sortedYears = option.Jaar.map(y => parseInt(y)).sort((a, b) => a - b)
+      option.Jaar = formatYearRanges(sortedYears)
+    })
+  }
+
+  function findAHNyearsForAllNetherlands() {
+    // For Nederland level, collect all unique years from all neighbourhoods
+    options = ahnVersions.map((ahn) => ({ AHN: ahn, Jaar: [] }))
+
+    $allNeighbourhoodsJSONData.features.forEach((nh) => {
+      ahnVersions.forEach((ahn) => {
+        // Use the same splitting logic as in formatYears
+        const ahnYear = nh.properties["Jaar" + ahn].split(/[.,]\s*/)
+        ahnYear
+          .filter((y) => y.trim())
+          .forEach((year) => {
+            if (!options.find((j) => j.AHN === ahn).Jaar.includes(year)) {
+              options.find((j) => j.AHN === ahn).Jaar.push(year)
+            }
+          })
+      })
+    })
+
+    // Sort years and format as ranges
+    options.forEach((option) => {
+      const sortedYears = option.Jaar.map(y => parseInt(y)).sort((a, b) => a - b)
+      option.Jaar = formatYearRanges(sortedYears)
     })
   }
 
@@ -238,7 +339,7 @@
 <!-- Replacing SVG year switch with two dropdowns -->
 <div class="year-switch-dropdowns {selectedDifference === 'Difference' ? 'less-gap' : ''}">
   <div class="dropdown-wrapper">
-    <select class="year-dropdown" bind:value={selectedAHN} on:change={yearClick} style="border: 2px solid {$configStore.mainColor};">
+    <select class="year-dropdown {isDisabled ? 'disabled' : ''}" bind:value={selectedAHN} on:change={yearClick} style="border: 2px solid {$configStore.mainColor};" disabled={isDisabled}>
       {#each options as option}
         <option value={option.AHN} selected={option.AHN == selectedAHN}>{option.Jaar}</option>
       {/each}
@@ -251,10 +352,11 @@
   {#if indicator.numerical}
     <div class="dropdown-wrapper">
       <select
-        class="year-dropdown {selectedDifference === 'Difference' ? 'pseudo-disabled' : ''}"
+        class="year-dropdown {selectedDifference === 'Difference' ? 'pseudo-disabled' : ''} {isDisabled ? 'disabled' : ''}"
         bind:value={selectedDifference}
         on:change={yearClickDifference}
         style="border: 2px solid {$configStore.mainColor};"
+        disabled={isDisabled}
       >
         {#if selectedDifference === "Difference"}
           <option value="Difference">Vergelijk jaren</option>
@@ -334,6 +436,12 @@
     color: #8d8d8d !important;
     border-style: dashed !important;
     opacity: 0.8;
+  }
+  .disabled {
+    background: #f2f2f2 !important;
+    color: #8d8d8d !important;
+    cursor: not-allowed !important;
+    opacity: 0.6 !important;
   }
   .arrow-between {
     font-size: 28px;
