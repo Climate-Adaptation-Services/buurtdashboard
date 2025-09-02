@@ -10,12 +10,14 @@
   // $: innerwidth3 = (graphWidth - 2*padding3) / 3
   // $: innerwidth2 = (graphWidth - 2*padding2) / 2
 
-  const klasseNamen = Object.keys(indicator.classes)
-  const marginTop = klasseNamen.length > 6 ? 0 : 15
-  const margin = { top: marginTop, bottom: 30, left: 30, right: 0 }
+  // Make klasseNamen reactive to ensure it updates when indicator changes
+  $: klasseNamen = indicator ? Object.keys(indicator.classes) : []
+  $: marginTop = klasseNamen.length > 6 ? 0 : 15
+  $: margin = { top: marginTop, bottom: 30, left: 30, right: 0 }
   $: legendElementWidth = (graphWidth - margin.left - margin.right) / 3
 </script>
 
+{#if indicator && indicator.classes && klasseNamen.length > 0}
 <div
   class="barplot-legend"
   style="height:26%; width:{graphWidth - margin.left - margin.right}px; margin-left:{margin.left}px; margin-top:{margin.top}px"
@@ -33,6 +35,7 @@
     {/if}
   {/each}
 </div>
+{/if}
 
 <style>
   svg {

@@ -45,6 +45,7 @@
       on:add={handleIndicatorFilterAdd}
       on:remove={handleIndicatorFilterRemove}
       on:removeAll={handleIndicatorFilterClear}
+      maxOptionsToShow={8}
     />
   </div>
 {/if}
@@ -54,5 +55,30 @@
     width: 330px;
     color: white;
     font-size: 12px;
+  }
+
+  /* Ensure dropdown doesn't get cut off at bottom of screen */
+  .multiselectdiv :global(.multiselect) {
+    position: relative;
+  }
+
+  .multiselectdiv :global(.multiselect .options) {
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+  }
+
+  /* Try to position dropdown above if close to bottom */
+  .multiselectdiv :global(.multiselect.open) {
+    position: relative;
+  }
+
+  .multiselectdiv :global(.multiselect .options) {
+    position: absolute;
+    width: 100%;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   }
 </style>
