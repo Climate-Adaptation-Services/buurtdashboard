@@ -6,7 +6,7 @@ export function loadURLParamsFromPostMessage(){
   if (window.parent !== window) {
     try {
       // Send a message to the parent window asking for the parent URL
-      window.parent.postMessage({ type: "requestParentURL" }, "*");
+      window.parent.postMessage({ message: "Requesting parent URL" }, "*");
     } catch (error) {
       // Silently ignore postMessage errors in development
       if (import.meta.env.DEV) {
@@ -26,10 +26,10 @@ export function loadURLParamsFromPostMessage(){
     ];
     
     if (trustedOrigins.includes(event.origin) || import.meta.env.DEV) {
-      // Validate that we have the expected data structure
-      if (event.data && event.data.type === "parentURL" && event.data.url && typeof event.data.url === 'string') {
-        console.log("Received URL from parent:", event.data.url);
-        const urlParts = event.data.url.split('?');
+      // Validate that we have the expected data structure - parent sends { parentURL: "..." }
+      if (event.data && event.data.parentURL && typeof event.data.parentURL === 'string') {
+        console.log("Received URL from parent:", event.data.parentURL);
+        const urlParts = event.data.parentURL.split('?');
         if (urlParts.length > 1) {
           URLParams.set(new URLSearchParams('?' + urlParts[1]));
           // Process the new URL parameters
@@ -43,7 +43,7 @@ export function loadURLParamsFromPostMessage(){
                             event.data.hello)) {
             return; // Ignore devtools messages
           }
-          console.log("Received message from parent but no valid URL:", event.data);
+          console.log("Received message from parent but no valid parentURL:", event.data);
         }
       }
     } else {
