@@ -26,7 +26,6 @@
   import { getIndicatorAttribute } from "$lib/noncomponents/getIndicatorAttribute.js"
 
   export let data
-  // Removed large object console log
 
 
 

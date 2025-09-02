@@ -28,7 +28,9 @@ export function loadURLParamsFromPostMessage(){
     if (trustedOrigins.includes(event.origin) || import.meta.env.DEV) {
       // Validate that we have the expected data structure - parent sends { parentURL: "..." }
       if (event.data && event.data.parentURL && typeof event.data.parentURL === 'string') {
-        console.log("Received URL from parent:", event.data.parentURL);
+        if (import.meta.env.DEV) {
+          console.log("Received URL from parent:", event.data.parentURL);
+        }
         const urlParts = event.data.parentURL.split('?');
         if (urlParts.length > 1) {
           URLParams.set(new URLSearchParams('?' + urlParts[1]));

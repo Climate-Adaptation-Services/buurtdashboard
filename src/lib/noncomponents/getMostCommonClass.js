@@ -1,6 +1,6 @@
 import { getIndicatorAttribute } from "./getIndicatorAttribute";
 
-// deze functie is nodig om de kleur te bepalen van een neighbourhood in de aggregatedIndicator kaart
+// Function to determine the color of a neighbourhood in aggregated indicator maps
 export function getMostCommonClass(indicator, feature) {
 
 
