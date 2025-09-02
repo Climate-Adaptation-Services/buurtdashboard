@@ -7,7 +7,7 @@ function sendPostMessage(message, data) {
     try {
       let messageData;
       if (message === "urlUpdate") {
-        messageData = { message: 'Update URL params', urlparams: window.location.pathname + '?' + data };
+        messageData = { message: 'Update URL params', urlparams: '/buurtdashboard?' + data };
       } else if (message === "requestParentURL") {
         messageData = { message: 'Requesting parent URL' };
       }
