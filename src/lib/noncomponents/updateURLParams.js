@@ -11,13 +11,13 @@ function sendPostMessage(message, data) {
       } else if (message === "requestParentURL") {
         messageData = { message: 'Requesting parent URL' };
       }
-      console.log("Sending postMessage:", messageData);
       window.parent.postMessage(messageData, "*");
     } catch (error) {
-      console.log("PostMessage failed:", error);
+      // Silently handle postMessage errors
+      if (import.meta.env.DEV) {
+        console.log("PostMessage failed:", error);
+      }
     }
-  } else {
-    console.log("Not in iframe, skipping postMessage:", { type: message, params: data });
   }
 }
 

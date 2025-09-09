@@ -26,7 +26,7 @@
     removeURLParameter()
   }
 
-  // deze styling gebeurt hier, omdat het via css niet lukte
+  // Dynamic styling applied here due to CSS limitations with third-party component
   afterUpdate(() => {
     selectAll("li").style("color", "black").style("cursor", "pointer").attr("background-color", "white").style("text-align", "left")
 
