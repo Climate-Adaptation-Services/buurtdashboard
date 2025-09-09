@@ -121,14 +121,17 @@
     $neighbourhoodsInMunicipalityJSONData.features.forEach((nh) => {
       ahnVersions.forEach((ahn) => {
         // Use the same splitting logic as in formatYears
-        const ahnYear = nh.properties["Jaar" + ahn].split(/[.,]\s*/)
-        ahnYear
-          .filter((y) => y.trim())
-          .forEach((year) => {
-            if (!options.find((j) => j.AHN === ahn).Jaar.includes(year)) {
-              options.find((j) => j.AHN === ahn).Jaar.push(year)
-            }
-          })
+        const yearData = nh.properties["Jaar" + ahn]
+        if (yearData) {
+          const ahnYear = yearData.split(/[.,]\s*/)
+          ahnYear
+            .filter((y) => y.trim())
+            .forEach((year) => {
+              if (!options.find((j) => j.AHN === ahn).Jaar.includes(year)) {
+                options.find((j) => j.AHN === ahn).Jaar.push(year)
+              }
+            })
+        }
       })
     })
 
@@ -146,14 +149,17 @@
     $allNeighbourhoodsJSONData.features.forEach((nh) => {
       ahnVersions.forEach((ahn) => {
         // Use the same splitting logic as in formatYears
-        const ahnYear = nh.properties["Jaar" + ahn].split(/[.,]\s*/)
-        ahnYear
-          .filter((y) => y.trim())
-          .forEach((year) => {
-            if (!options.find((j) => j.AHN === ahn).Jaar.includes(year)) {
-              options.find((j) => j.AHN === ahn).Jaar.push(year)
-            }
-          })
+        const yearData = nh.properties["Jaar" + ahn]
+        if (yearData) {
+          const ahnYear = yearData.split(/[.,]\s*/)
+          ahnYear
+            .filter((y) => y.trim())
+            .forEach((year) => {
+              if (!options.find((j) => j.AHN === ahn).Jaar.includes(year)) {
+                options.find((j) => j.AHN === ahn).Jaar.push(year)
+              }
+            })
+        }
       })
     })
 

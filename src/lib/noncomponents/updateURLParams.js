@@ -19,7 +19,6 @@ function sendPostMessage(message, data) {
       }
     }
   }
-  }
 }
 
 export function addURLParameter(){
