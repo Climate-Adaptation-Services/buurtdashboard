@@ -287,6 +287,25 @@
   }
 
   /**
+   * Determine if an option should be shown in the main (left) dropdown
+   * Shows all options except the one selected in the right dropdown (when in difference mode)
+   */
+  function shouldShowInMainDropdown(optionAHN, index) {
+    try {
+      if (!optionAHN) return false
+
+      // If not in difference mode, show all options
+      if (selectedDifference === "Difference") return true
+
+      // Show all options except the one selected in the right dropdown
+      return optionAHN !== selectedDifference
+    } catch (e) {
+      console.error("Error evaluating main dropdown options:", e)
+      return false
+    }
+  }
+
+  /**
    * Handle difference year selection change
    */
   function yearClickDifference(change) {
@@ -346,8 +365,10 @@
 <div class="year-switch-dropdowns {selectedDifference === 'Difference' ? 'less-gap' : ''}">
   <div class="dropdown-wrapper">
     <select class="year-dropdown {isDisabled ? 'disabled' : ''}" bind:value={selectedAHN} on:change={yearClick} style="border: 2px solid {$configStore.mainColor};" disabled={isDisabled}>
-      {#each options as option}
-        <option value={option.AHN} selected={option.AHN == selectedAHN}>{option.Jaar}</option>
+      {#each options as option, index}
+        {#if shouldShowInMainDropdown(option.AHN, index)}
+          <option value={option.AHN} selected={option.AHN == selectedAHN}>{option.Jaar}</option>
+        {/if}
       {/each}
     </select>
     <span class="dropdown-arrow">&#9662;</span>
