@@ -65,16 +65,32 @@
     return ranges.join(", ")
   }
 
+  // Track if we've initialized to avoid overriding user selections
+  let hasInitialized = false
+  let lastDataContext = null
+
   // Reactive statement to update options when data changes
   $: {
+    // Determine current data context to detect context changes
+    const currentDataContext = $selectedNeighbourhoodJSONData ? 'neighbourhood'
+      : $neighbourhoodsInMunicipalityJSONData ? 'municipality'
+      : $allNeighbourhoodsJSONData ? 'netherlands'
+      : null
+
+    // Reset initialization flag when data context changes
+    if (lastDataContext !== currentDataContext) {
+      hasInitialized = false
+      lastDataContext = currentDataContext
+    }
+
     if ($selectedNeighbourhoodJSONData) {
       // For a selected neighborhood, get years and format them consistently
       options = ahnVersions.map((ahn) => ({
         AHN: ahn,
         Jaar: formatYears($selectedNeighbourhoodJSONData.properties["Jaar" + ahn]),
       }))
-      // Set default selection if not already set
-      if (!selectedAHN && options.length > 0) {
+      // Set default selection only if not already initialized and no current selection
+      if (!hasInitialized && !selectedAHN && options.length > 0) {
         selectedAHN = options[options.length - 1].AHN
         // Update the indicator store with the default selection
         indicatorStore.set({
@@ -83,11 +99,12 @@
           isDifference: false,
           beb: 'hele_buurt'
         })
+        hasInitialized = true
       }
     } else if ($neighbourhoodsInMunicipalityJSONData) {
       findAHNyearsWithoutDuplicatesAndSort()
-      // Set default selection if not already set
-      if (!selectedAHN && options.length > 0) {
+      // Set default selection only if not already initialized and no current selection
+      if (!hasInitialized && !selectedAHN && options.length > 0) {
         selectedAHN = options[options.length - 1].AHN
         // Update the indicator store with the default selection
         indicatorStore.set({
@@ -96,12 +113,13 @@
           isDifference: false,
           beb: 'hele_buurt'
         })
+        hasInitialized = true
       }
     } else if ($allNeighbourhoodsJSONData) {
       // Nederland level - use all neighbourhoods data
       findAHNyearsForAllNetherlands()
-      // Set default selection if not already set
-      if (!selectedAHN && options.length > 0) {
+      // Set default selection only if not already initialized and no current selection
+      if (!hasInitialized && !selectedAHN && options.length > 0) {
         selectedAHN = options[options.length - 1].AHN
         // Update the indicator store with the default selection
         indicatorStore.set({
@@ -110,6 +128,7 @@
           isDifference: false,
           beb: 'hele_buurt'
         })
+        hasInitialized = true
       }
     }
   }
@@ -190,10 +209,6 @@
     updateFromSelection($indicatorStore)
   }
 
-  // Update selected AHN when neighborhood data changes
-  $: if ($selectedNeighbourhoodJSONData) {
-    updateFromSelection($indicatorStore)
-  }
 
   /**
    * Helper function to get or create a selection object
