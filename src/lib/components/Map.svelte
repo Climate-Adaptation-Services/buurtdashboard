@@ -62,7 +62,8 @@
   $: isDifferenceMode = $indicatorStore && typeof $indicatorStore === "object" && $indicatorStore.isDifference
   
   // Pre-calculate difference values for map features to match BeeswarmPlot approach
-  $: differenceValues = isDifferenceMode && indicator
+  // Watch for changes to indicatorStore to recalculate when BEB selection changes
+  $: differenceValues = isDifferenceMode && indicator && $indicatorStore
     ? $currentJSONData.features.map((d) => {
         const diffValue = getDifferenceValue(d, indicator)
         // Return the feature id and its difference value for lookup

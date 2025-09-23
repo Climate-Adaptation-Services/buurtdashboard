@@ -7,11 +7,22 @@
   const indicatorStore = getIndicatorStore(indicator.title)
 
   let options = []
-  let selectedAHN
+  let selectedAHN = ''
   let selectedDifference = "Difference"
-  
+
   // YearSwitch is never disabled - it works at Nederland, gemeente, and buurt levels
   $: isDisabled = false
+
+  // Derived current selection from store
+  $: currentSelection = $indicatorStore || { baseYear: '', compareYear: null, isDifference: false, beb: 'hele_buurt' }
+
+  // Initialize local state from store when first loaded
+  let hasLoadedFromStore = false
+  $: if (!hasLoadedFromStore && currentSelection.baseYear) {
+    selectedAHN = currentSelection.baseYear
+    selectedDifference = currentSelection.isDifference ? currentSelection.compareYear : "Difference"
+    hasLoadedFromStore = true
+  }
 
   // Parse AHN versions from the indicator
   const ahnVersions = indicator.AHNversie.split(",")
@@ -65,7 +76,7 @@
     return ranges.join(", ")
   }
 
-  // Reactive statement to update options when data changes
+  // Update options when data changes, initialize store if needed
   $: {
     if ($selectedNeighbourhoodJSONData) {
       // For a selected neighborhood, get years and format them consistently
@@ -73,44 +84,20 @@
         AHN: ahn,
         Jaar: formatYears($selectedNeighbourhoodJSONData.properties["Jaar" + ahn]),
       }))
-      // Set default selection if not already set
-      if (!selectedAHN && options.length > 0) {
-        selectedAHN = options[options.length - 1].AHN
-        // Update the indicator store with the default selection
-        indicatorStore.set({
-          baseYear: options[options.length - 1].AHN,
-          compareYear: null,
-          isDifference: false,
-          beb: 'hele_buurt'
-        })
-      }
     } else if ($neighbourhoodsInMunicipalityJSONData) {
       findAHNyearsWithoutDuplicatesAndSort()
-      // Set default selection if not already set
-      if (!selectedAHN && options.length > 0) {
-        selectedAHN = options[options.length - 1].AHN
-        // Update the indicator store with the default selection
-        indicatorStore.set({
-          baseYear: options[options.length - 1].AHN,
-          compareYear: null,
-          isDifference: false,
-          beb: 'hele_buurt'
-        })
-      }
     } else if ($allNeighbourhoodsJSONData) {
-      // Nederland level - use all neighbourhoods data
       findAHNyearsForAllNetherlands()
-      // Set default selection if not already set
-      if (!selectedAHN && options.length > 0) {
-        selectedAHN = options[options.length - 1].AHN
-        // Update the indicator store with the default selection
-        indicatorStore.set({
-          baseYear: options[options.length - 1].AHN,
-          compareYear: null,
-          isDifference: false,
-          beb: 'hele_buurt'
-        })
-      }
+    }
+
+    // Initialize store with latest available year if no selection exists
+    if (options.length > 0 && !currentSelection.baseYear) {
+      indicatorStore.set({
+        baseYear: options[options.length - 1].AHN,
+        compareYear: null,
+        isDifference: false,
+        beb: 'hele_buurt'
+      })
     }
   }
 
@@ -170,104 +157,61 @@
     })
   }
 
-  // Helper function to update local state from AHNSelecties
-  function updateFromSelection(currentSelection) {
-    if (currentSelection) {
-      if (typeof currentSelection === "object") {
-        // Use the object structure
-        selectedAHN = currentSelection.baseYear
-        selectedDifference = currentSelection.isDifference ? currentSelection.compareYear : "Difference"
-      } else {
-        // Legacy format - convert to object structure on next update
-        selectedAHN = currentSelection
-        selectedDifference = "Difference"
-      }
-    }
-  }
 
-  // React to indicator store changes - much cleaner!
-  $: {
-    updateFromSelection($indicatorStore)
-  }
 
-  // Update selected AHN when neighborhood data changes
-  $: if ($selectedNeighbourhoodJSONData) {
-    updateFromSelection($indicatorStore)
-  }
-
-  /**
-   * Helper function to get or create a selection object
-   */
-  function getSelectionObject(selection) {
-    if (!selection) {
-      return {
-        baseYear: options.length > 0 ? options[0].AHN : null,
-        compareYear: null,
-        isDifference: false,
-        beb: 'hele_buurt'
-      }
-    }
-
-    if (typeof selection === "object") {
-      return {
-        ...selection,
-        beb: selection.beb || 'hele_buurt'
-      }
-    }
-
-    // Convert string to object
-    return {
-      baseYear: selection,
-      compareYear: null,
-      isDifference: false,
-      beb: 'hele_buurt'
-    }
-  }
 
   /**
    * Handle base year selection change
    */
   function yearClick(change) {
     const newAHN = change.target.value
-
-    // Get current selection as an object
-    const selectionObj = getSelectionObject($indicatorStore)
-    const isDifferenceMode = selectionObj.isDifference
-    const compareYear = selectionObj.compareYear || null
-
-    // Update with new base year
-    let updatedSelection = {
-      baseYear: newAHN,
-      compareYear: compareYear,
-      isDifference: isDifferenceMode,
-      beb: selectionObj.beb || 'hele_buurt'
-    }
+    const isDifferenceMode = currentSelection.isDifference
+    const compareYear = currentSelection.compareYear
 
     // If in difference mode and the new base year equals the current compare year,
-    // we need to find a different compare year
-    if (isDifferenceMode && compareYear === newAHN) {
-      // Find any other available year (preferably later, but any will do)
-      const availableOption = options.find((option) => {
-        return option && option.AHN && option.AHN !== newAHN
-      })
+    // find a different compare year or turn off difference mode
+    let newCompareYear = compareYear
+    let newIsDifference = isDifferenceMode
+    let finalBaseYear = newAHN
+    let finalCompareYear = newCompareYear
 
+    if (isDifferenceMode && compareYear === newAHN) {
+      const availableOption = options.find((option) => option.AHN !== newAHN)
       if (availableOption) {
-        // Use the available option as the new compare year
-        updatedSelection.compareYear = availableOption.AHN
-        selectedDifference = availableOption.AHN
+        newCompareYear = availableOption.AHN
       } else {
-        // No other year available, turn off difference mode
-        updatedSelection.isDifference = false
-        updatedSelection.compareYear = null
-        selectedDifference = "Difference"
+        newIsDifference = false
+        newCompareYear = null
       }
-    } else if (isDifferenceMode && compareYear) {
-      // Keep the current compare year if it's different from the new base year
-      selectedDifference = compareYear
+    }
+
+    // If in difference mode, ensure chronological order
+    if (isDifferenceMode && compareYear && newCompareYear) {
+      const baseNum = parseInt(newAHN.replace(/\D/g, "") || "0", 10)
+      const compareNum = parseInt(newCompareYear.replace(/\D/g, "") || "0", 10)
+
+      if (baseNum > compareNum) {
+        // Swap them if base year is later than compare year
+        finalBaseYear = newCompareYear
+        finalCompareYear = newAHN
+      }
+    }
+
+    // Update local UI state to reflect any swapping
+    selectedAHN = finalBaseYear
+    if (newIsDifference) {
+      selectedDifference = finalCompareYear
+    } else {
+      selectedDifference = "Difference"
     }
 
     // Update the store
-    indicatorStore.set(updatedSelection)
+    indicatorStore.set({
+      baseYear: finalBaseYear,
+      compareYear: finalCompareYear,
+      isDifference: newIsDifference,
+      beb: currentSelection.beb
+    })
   }
 
   /**
@@ -287,58 +231,61 @@
   }
 
   /**
+   * Determine if an option should be shown in the main (left) dropdown
+   * Shows all options except the one selected in the right dropdown (when in difference mode)
+   */
+  function shouldShowInMainDropdown(optionAHN, index) {
+    try {
+      if (!optionAHN) return false
+
+      // If not in difference mode, show all options
+      if (selectedDifference === "Difference") return true
+
+      // Show all options except the one selected in the right dropdown
+      return optionAHN !== selectedDifference
+    } catch (e) {
+      console.error("Error evaluating main dropdown options:", e)
+      return false
+    }
+  }
+
+  /**
    * Handle difference year selection change
    */
   function yearClickDifference(change) {
     const differenceAHN = change.target.value
 
-    // Get current selection as an object
-    const selectionObj = getSelectionObject($indicatorStore)
-
-    let updatedSelection
-    
     if (differenceAHN === "Difference") {
-      // Turn off difference mode but keep the object structure
-      updatedSelection = {
-        baseYear: selectionObj.baseYear,
+      // Turn off difference mode
+      indicatorStore.set({
+        baseYear: currentSelection.baseYear,
         compareYear: null,
         isDifference: false,
-        beb: selectionObj.beb || 'hele_buurt'
-      }
+        beb: currentSelection.beb
+      })
       selectedDifference = "Difference"
     } else {
       // Extract numeric parts for comparison to ensure proper chronological order
       const compareNum = parseInt(differenceAHN.replace(/\D/g, "") || "0", 10)
-      const baseNum = parseInt(selectionObj.baseYear.replace(/\D/g, "") || "0", 10)
-
-      let newBaseYear, newCompareYear
+      const baseNum = parseInt(currentSelection.baseYear.replace(/\D/g, "") || "0", 10)
 
       // Always ensure base year is earlier and compare year is later
-      if (compareNum < baseNum) {
-        // If selected year is earlier than current base, swap them
-        newBaseYear = differenceAHN
-        newCompareYear = selectionObj.baseYear
-      } else {
-        // Normal case: selected year is later than base year
-        newBaseYear = selectionObj.baseYear
-        newCompareYear = differenceAHN
-      }
+      const [newBaseYear, newCompareYear] = compareNum < baseNum
+        ? [differenceAHN, currentSelection.baseYear]
+        : [currentSelection.baseYear, differenceAHN]
 
-      // Store both years for difference calculation
-      updatedSelection = {
+      // Update local UI state to reflect the swap
+      selectedAHN = newBaseYear
+      selectedDifference = newCompareYear
+
+      // Update the store
+      indicatorStore.set({
         baseYear: newBaseYear,
         compareYear: newCompareYear,
         isDifference: true,
-        beb: selectionObj.beb || 'hele_buurt'
-      }
-      
-      // Update the UI state
-      selectedDifference = newCompareYear
-      selectedAHN = newBaseYear
+        beb: currentSelection.beb
+      })
     }
-
-    // Update the store
-    indicatorStore.set(updatedSelection)
   }
 </script>
 
@@ -346,8 +293,10 @@
 <div class="year-switch-dropdowns {selectedDifference === 'Difference' ? 'less-gap' : ''}">
   <div class="dropdown-wrapper">
     <select class="year-dropdown {isDisabled ? 'disabled' : ''}" bind:value={selectedAHN} on:change={yearClick} style="border: 2px solid {$configStore.mainColor};" disabled={isDisabled}>
-      {#each options as option}
-        <option value={option.AHN} selected={option.AHN == selectedAHN}>{option.Jaar}</option>
+      {#each options as option, index}
+        {#if shouldShowInMainDropdown(option.AHN, index)}
+          <option value={option.AHN} selected={option.AHN == selectedAHN}>{option.Jaar}</option>
+        {/if}
       {/each}
     </select>
     <span class="dropdown-arrow">&#9662;</span>

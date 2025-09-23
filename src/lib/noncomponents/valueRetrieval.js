@@ -202,7 +202,7 @@ export function getPopupValue(feature, indicator, options = {}) {
       if (regularDiff !== null && m2Diff !== null) {
         return {
           value: regularDiff,
-          unit: '%',
+          unit: indicator.plottitle.startsWith('%') ? '%' : '',
           m2Value: m2Diff,
           hasM2: true,
           isDifference: true
@@ -210,7 +210,7 @@ export function getPopupValue(feature, indicator, options = {}) {
       }
     }
     
-    return { value: regularDiff, unit: '%', hasM2: false, isDifference: true }
+    return { value: regularDiff, unit: indicator.plottitle.startsWith('%') ? '%' : '', hasM2: false, isDifference: true }
   } else {
     // Regular mode
     const regularValue = getNumberValue(feature, indicator, options)
@@ -221,7 +221,7 @@ export function getPopupValue(feature, indicator, options = {}) {
       if (regularValue !== null && m2Value !== null) {
         return { 
           value: regularValue, 
-          unit: '%',
+          unit: indicator.plottitle.startsWith('%') ? '%' : '',
           m2Value: m2Value,
           hasM2: true,
           isDifference: false
@@ -230,7 +230,7 @@ export function getPopupValue(feature, indicator, options = {}) {
     }
     
     // Fallback to regular value with % symbol only
-    return { value: regularValue, unit: '%', hasM2: false, isDifference: false }
+    return { value: regularValue, unit: indicator.plottitle.startsWith('%') ? '%' : '', hasM2: false, isDifference: false }
   }
 }
 
