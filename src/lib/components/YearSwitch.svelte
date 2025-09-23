@@ -172,6 +172,8 @@
     // find a different compare year or turn off difference mode
     let newCompareYear = compareYear
     let newIsDifference = isDifferenceMode
+    let finalBaseYear = newAHN
+    let finalCompareYear = newCompareYear
 
     if (isDifferenceMode && compareYear === newAHN) {
       const availableOption = options.find((option) => option.AHN !== newAHN)
@@ -183,10 +185,30 @@
       }
     }
 
+    // If in difference mode, ensure chronological order
+    if (isDifferenceMode && compareYear && newCompareYear) {
+      const baseNum = parseInt(newAHN.replace(/\D/g, "") || "0", 10)
+      const compareNum = parseInt(newCompareYear.replace(/\D/g, "") || "0", 10)
+
+      if (baseNum > compareNum) {
+        // Swap them if base year is later than compare year
+        finalBaseYear = newCompareYear
+        finalCompareYear = newAHN
+      }
+    }
+
+    // Update local UI state to reflect any swapping
+    selectedAHN = finalBaseYear
+    if (newIsDifference) {
+      selectedDifference = finalCompareYear
+    } else {
+      selectedDifference = "Difference"
+    }
+
     // Update the store
     indicatorStore.set({
-      baseYear: newAHN,
-      compareYear: newCompareYear,
+      baseYear: finalBaseYear,
+      compareYear: finalCompareYear,
       isDifference: newIsDifference,
       beb: currentSelection.beb
     })
@@ -241,6 +263,7 @@
         isDifference: false,
         beb: currentSelection.beb
       })
+      selectedDifference = "Difference"
     } else {
       // Extract numeric parts for comparison to ensure proper chronological order
       const compareNum = parseInt(differenceAHN.replace(/\D/g, "") || "0", 10)
@@ -250,6 +273,10 @@
       const [newBaseYear, newCompareYear] = compareNum < baseNum
         ? [differenceAHN, currentSelection.baseYear]
         : [currentSelection.baseYear, differenceAHN]
+
+      // Update local UI state to reflect the swap
+      selectedAHN = newBaseYear
+      selectedDifference = newCompareYear
 
       // Update the store
       indicatorStore.set({
