@@ -100,7 +100,7 @@
 <div class="container" style="justify-content:{screenWidth < 800 ? 'center' : 'left'}">
   <div class="sidebar" style="position:{screenWidth > 800 ? 'fixed' : 'relative'}">
     <div class="control-panel"><ControlPanel {indicatorsSelection} {allIndicators} /></div>
-    <div class="map" bind:clientWidth={mapWidth} bind:clientHeight={mapHeight}>
+    <div class="map" class:dordrecht={$configStore.categoryPath === '-dordrecht'} bind:clientWidth={mapWidth} bind:clientHeight={mapHeight}>
       {#if data.municipalityGeoJson && data.neighbourhoodGeoJson}
         <Map JSONdata={geoJSONData} CSVdata={data.buurtCSVdata} {mapWidth} {mapHeight} mapType={"main map"} />
       {:else}
@@ -171,6 +171,10 @@
 
   .map {
     flex: 6;
+  }
+
+  .map.dordrecht {
+    flex: 3;
   }
 
   .indicator {

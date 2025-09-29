@@ -35,10 +35,30 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
       select('.' + shapeClassName).attr('fill', '#36575A')
       mousePosition.set(window.innerHeight - e.screenY)
     }
-    const mapElement = document.getElementsByClassName("main-map")[0]
-    const rectmap = mapElement.getBoundingClientRect();
-    const featureCenter = projection(center(feature).geometry.coordinates)
-    tooltipCenter = [featureCenter[0] + rectmap.left, featureCenter[1] + rectmap.top]
+
+    // More elegant tooltip positioning for main map
+    // Try to use feature center if Leaflet map is available, otherwise fall back to mouse position
+    try {
+      const mapElement = document.getElementsByClassName("main-map")[0]
+      const rectmap = mapElement.getBoundingClientRect();
+
+      // Get the center of the feature
+      const featureCenter = center(feature).geometry.coordinates;
+
+      // Check if there's a Leaflet map available to convert coordinates
+      const leafletMapContainer = document.querySelector('.leaflet-background');
+      if (leafletMapContainer && window.leafletMapInstance) {
+        // Use Leaflet map to convert lat/lng to pixel coordinates
+        const pixelPoint = window.leafletMapInstance.latLngToContainerPoint([featureCenter[1], featureCenter[0]]);
+        tooltipCenter = [pixelPoint.x + rectmap.left, pixelPoint.y + rectmap.top];
+      } else {
+        // Fallback to mouse position
+        tooltipCenter = [e.clientX, e.clientY];
+      }
+    } catch (error) {
+      // Fallback to mouse position if any error occurs
+      tooltipCenter = [e.clientX, e.clientY];
+    }
 
   } else {
     attributeWithoutYear = getIndicatorAttribute(indicator, indicator.attribute).slice(0, -4)
