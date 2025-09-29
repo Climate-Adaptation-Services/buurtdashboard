@@ -201,6 +201,8 @@
       dragging: true,
       tap: true,
       touchZoom: true,
+      // Enhanced mobile support
+      bounceAtZoomLimits: false
     })
 
     // Add a subtle tile layer
@@ -211,6 +213,9 @@
 
     // Ensure Leaflet map can receive wheel events
     leafletMap.getContainer().style.pointerEvents = 'auto'
+
+    // Make Leaflet map instance available globally for tooltip positioning
+    window.leafletMapInstance = leafletMap
 
     // Add event listeners to update D3 projection when Leaflet view changes
     leafletMap.on('zoom', updateProjection)
@@ -243,14 +248,23 @@
     }
   }
 
-  // React to municipality selection changes for zooming
-  $: if (leafletMap && $municipalitySelection && $currentJSONData) {
-    fitMapToBounds()
-  }
+  // Zoom on municipality changes, but not on neighborhood changes
+  // Track previous selections to detect what actually changed
+  let previousMunicipalitySelection = null
+  let previousNeighbourhoodSelection = null
 
-  // React to currentJSONData changes to update map bounds
-  $: if (leafletMap && $currentJSONData) {
-    fitMapToBounds()
+  $: if (leafletMap && mapType === "main map" && $currentJSONData) {
+    const municipalityChanged = $municipalitySelection !== previousMunicipalitySelection
+    const neighbourhoodChanged = $neighbourhoodSelection !== previousNeighbourhoodSelection
+
+    // Only zoom if municipality changed, or if we're selecting a municipality for the first time
+    if (municipalityChanged && ($municipalitySelection || previousMunicipalitySelection !== null)) {
+      fitMapToBounds()
+    }
+    // Don't zoom if only neighborhood changed
+
+    previousMunicipalitySelection = $municipalitySelection
+    previousNeighbourhoodSelection = $neighbourhoodSelection
   }
 </script>
 
@@ -284,6 +298,14 @@
             on:mouseover={(e) => mouseOver(e, feature, indicator, mapType, indicatorValueColorscale, projection)}
             on:mouseout={() => mouseOut(feature, indicator, mapType)}
             on:click={() => click(feature, indicator, mapType)}
+            on:touchstart={(e) => {
+              // Show tooltip on touch for mobile devices
+              mouseOver(e.touches[0], feature, indicator, mapType, indicatorValueColorscale, projection)
+            }}
+            on:touchend={() => {
+              // Hide tooltip when touch ends
+              setTimeout(() => mouseOut(feature, indicator, mapType), 1000)
+            }}
             on:wheel={(e) => {
               if (mapType === 'main map' && leafletMap) {
                 // Forward wheel events to Leaflet map for zooming
@@ -293,6 +315,42 @@
                   clientX: e.clientX,
                   clientY: e.clientY,
                   bubbles: true
+                });
+                leafletMap.getContainer().dispatchEvent(mapEvent);
+              }
+            }}
+            on:mousedown={(e) => {
+              if (mapType === 'main map' && leafletMap) {
+                // Forward mouse events to Leaflet for dragging
+                const mapEvent = new MouseEvent('mousedown', {
+                  clientX: e.clientX,
+                  clientY: e.clientY,
+                  bubbles: true,
+                  button: e.button
+                });
+                leafletMap.getContainer().dispatchEvent(mapEvent);
+              }
+            }}
+            on:mousemove={(e) => {
+              if (mapType === 'main map' && leafletMap && e.buttons > 0) {
+                // Forward mousemove when dragging
+                const mapEvent = new MouseEvent('mousemove', {
+                  clientX: e.clientX,
+                  clientY: e.clientY,
+                  bubbles: true,
+                  buttons: e.buttons
+                });
+                leafletMap.getContainer().dispatchEvent(mapEvent);
+              }
+            }}
+            on:mouseup={(e) => {
+              if (mapType === 'main map' && leafletMap) {
+                // Forward mouse up events
+                const mapEvent = new MouseEvent('mouseup', {
+                  clientX: e.clientX,
+                  clientY: e.clientY,
+                  bubbles: true,
+                  button: e.button
                 });
                 leafletMap.getContainer().dispatchEvent(mapEvent);
               }
@@ -344,6 +402,14 @@
           on:mouseover={(e) => mouseOver(e, feature, indicator, mapType, indicatorValueColorscale, projection)}
           on:mouseout={() => mouseOut(feature, indicator, mapType)}
           on:click={() => click(feature, indicator, mapType)}
+          on:touchstart={(e) => {
+            // Show tooltip on touch for mobile devices
+            mouseOver(e.touches[0], feature, indicator, mapType, indicatorValueColorscale, projection)
+          }}
+          on:touchend={() => {
+            // Hide tooltip when touch ends
+            setTimeout(() => mouseOut(feature, indicator, mapType), 1000)
+          }}
           on:wheel={(e) => {
             if (mapType === 'main map' && leafletMap) {
               // Forward wheel events to Leaflet map for zooming
@@ -353,6 +419,42 @@
                 clientX: e.clientX,
                 clientY: e.clientY,
                 bubbles: true
+              });
+              leafletMap.getContainer().dispatchEvent(mapEvent);
+            }
+          }}
+          on:mousedown={(e) => {
+            if (mapType === 'main map' && leafletMap) {
+              // Forward mouse events to Leaflet for dragging
+              const mapEvent = new MouseEvent('mousedown', {
+                clientX: e.clientX,
+                clientY: e.clientY,
+                bubbles: true,
+                button: e.button
+              });
+              leafletMap.getContainer().dispatchEvent(mapEvent);
+            }
+          }}
+          on:mousemove={(e) => {
+            if (mapType === 'main map' && leafletMap && e.buttons > 0) {
+              // Forward mousemove when dragging
+              const mapEvent = new MouseEvent('mousemove', {
+                clientX: e.clientX,
+                clientY: e.clientY,
+                bubbles: true,
+                buttons: e.buttons
+              });
+              leafletMap.getContainer().dispatchEvent(mapEvent);
+            }
+          }}
+          on:mouseup={(e) => {
+            if (mapType === 'main map' && leafletMap) {
+              // Forward mouse up events
+              const mapEvent = new MouseEvent('mouseup', {
+                clientX: e.clientX,
+                clientY: e.clientY,
+                bubbles: true,
+                button: e.button
               });
               leafletMap.getContainer().dispatchEvent(mapEvent);
             }
@@ -398,6 +500,11 @@
   }
 
   svg path {
+    pointer-events: auto;
+  }
+
+  /* Enable pointer events for info icons */
+  svg image[href="info.png"] {
     pointer-events: auto;
   }
 
@@ -478,6 +585,7 @@
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
     border-radius: 20px;
     padding: 0px 10px 0px 10px;
+    z-index: 10;
   }
 
   /* Removed transition to prevent shape animation during projection updates */

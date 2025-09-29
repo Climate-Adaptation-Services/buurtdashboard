@@ -1,7 +1,8 @@
 <script>
-  import { AHNSelecties, allMunicipalitiesJSONData, configStore, neighbourhoodsInMunicipalityJSONData } from "$lib/stores"
+  import { AHNSelecties, allMunicipalitiesJSONData, configStore, neighbourhoodsInMunicipalityJSONData, tooltipRegion } from "$lib/stores"
   import { afterUpdate } from "svelte"
   import { getIndicatorAttribute } from "$lib/noncomponents/getIndicatorAttribute"
+  import { t } from "$lib/i18n/translate.js"
 
   export let indicator
   export let graphWidth
@@ -15,12 +16,29 @@
         ? graphWidth
         : 0
   })
+
+  function handleCategoryMouseOver(e) {
+    tooltipRegion.set({
+      'region': t('Categorie'),
+      'center': [e.clientX, e.clientY],
+      'name': indicator.category
+    })
+  }
+
+  function handleCategoryMouseOut() {
+    tooltipRegion.set(null)
+  }
 </script>
 
 <h3 class="question-mark" style="background-color:{$configStore.mainColor}">i</h3>
 <!-- <h3 class="category" style="background-color:{$configStore.mainColor}">C</h3> -->
-<img class="category" src="{indicator.category + $configStore.categoryPath}.png" alt={indicator.category} />
-<div class="category-tooltip">Categorie: {indicator.category}</div>
+<img
+  class="category"
+  src="{indicator.category + $configStore.categoryPath}.png"
+  alt={indicator.category}
+  on:mouseover={handleCategoryMouseOver}
+  on:mouseout={handleCategoryMouseOut}
+/>
 <div class={"indicator-info indicator-info-" + getIndicatorAttribute(indicator, indicator.attribute)} style="left:{indicatorInfoPosition}px">
   <p class="title" style="background-color:{$configStore.mainColor}">
     <strong>{indicator.title}</strong>
@@ -87,21 +105,4 @@
     visibility: visible;
   }
 
-  .category-tooltip {
-    visibility: hidden;
-    position: absolute;
-    left: 40px;
-    top: 10px;
-    background-color: white;
-    padding: 2px 8px;
-    border-radius: 4px;
-    box-shadow: rgba(0, 0, 0, 0.15) 0px 2px 8px;
-    font-size: 0.9rem;
-    white-space: nowrap;
-    z-index: 1000;
-  }
-
-  .category:hover ~ .category-tooltip {
-    visibility: visible;
-  }
 </style>
