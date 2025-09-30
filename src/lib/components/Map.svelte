@@ -28,6 +28,10 @@
   // Force reactivity when Leaflet map view changes
   let projectionUpdateCounter = 0
 
+  // Track current operation for different transition speeds
+  let isZooming = false
+  let isPanning = false
+
   // MIGRATED: Import centralized value retrieval system
   import {
     getNumericalValue,
@@ -215,7 +219,7 @@
 
     // Add a subtle tile layer
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      opacity: 0.5,
+      opacity: 0.7,
       attribution: "",
     }).addTo(leafletMap)
 
@@ -226,12 +230,33 @@
     window.leafletMapInstance = leafletMap
 
     // Add event listeners to update D3 projection when Leaflet view changes
-    leafletMap.on("zoomstart", updateProjectionImmediate) // Immediate response when zoom begins
+    leafletMap.on("zoomstart", () => {
+      isZooming = true
+      isPanning = false
+      updateProjectionImmediate()
+    }) // Immediate response when zoom begins
     leafletMap.on("zoom", updateProjection)
     leafletMap.on("zoomanim", updateProjection) // Fires continuously during zoom animation
-    leafletMap.on("zoomend", updateProjection) // Fires when zoom animation ends
-    leafletMap.on("move", updateProjection)
-    leafletMap.on("moveend", updateProjection) // Fires when move animation ends
+    leafletMap.on("zoomend", () => {
+      isZooming = false
+      isPanning = false  // Make sure both are false after zoom ends
+      updateProjection()
+    }) // Fires when zoom animation ends
+    leafletMap.on("movestart", () => {
+      // Only set panning if we're not currently zooming
+      if (!isZooming) {
+        isPanning = true
+        updateProjectionImmediate()
+      }
+    }) // Immediate response when panning begins
+    leafletMap.on("move", updateProjection) // Throttled updates during panning
+    leafletMap.on("moveend", () => {
+      // Only reset panning if we're not zooming
+      if (!isZooming) {
+        isPanning = false
+      }
+      updateProjection()
+    }) // Fires when move animation ends
     leafletMap.on("viewreset", updateProjection)
 
     // Fit map to current data when available
@@ -302,7 +327,7 @@
     <!-- Background Leaflet map -->
     <div class="leaflet-background" bind:this={mapContainer}></div>
     <!-- SVG overlay -->
-    <svg class="main-map" style="filter:drop-shadow(0 0 15px rgb(160, 160, 160))">
+    <svg class="main-map {isZooming ? 'zooming' : ''} {isPanning ? 'panning' : ''}" style="filter:drop-shadow(0 0 15px rgb(160, 160, 160))">
       <!-- svelte-ignore a11y-mouse-events-have-key-events -->
       <!-- svelte-ignore a11y-no-static-element-interactions -->
       {#if $currentJSONData.features}
@@ -546,6 +571,24 @@
     height: 100%;
     z-index: 1;
     pointer-events: auto;
+    mask: linear-gradient(
+        to right,
+        rgba(255, 255, 255, 0.01) 0%,
+        rgba(255, 255, 255, 1) 15%,
+        rgba(255, 255, 255, 1) 85%,
+        rgba(255, 255, 255, 0.01) 100%
+      ),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.01) 0%, rgba(255, 255, 255, 1) 15%, rgba(255, 255, 255, 1) 85%, rgba(255, 255, 255, 0.01) 100%);
+    mask-composite: intersect;
+    -webkit-mask: linear-gradient(
+        to right,
+        rgba(255, 255, 255, 0.01) 0%,
+        rgba(255, 255, 255, 1) 15%,
+        rgba(255, 255, 255, 1) 85%,
+        rgba(255, 255, 255, 0.01) 100%
+      ),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.01) 0%, rgba(255, 255, 255, 1) 15%, rgba(255, 255, 255, 1) 85%, rgba(255, 255, 255, 0.01) 100%);
+    -webkit-mask-composite: source-in;
   }
 
   .transparency-control {
@@ -614,7 +657,7 @@
   }
 
   /* CSS transitions for smooth shape animation during reprojection */
-  /* Match Leaflet's default zoom animation duration of 0.25s */
+  /* Different transition speeds for zoom vs pan operations */
   svg path {
     transition: d 0.21s ease-out;
   }
@@ -629,6 +672,23 @@
     transition:
       x 0.21s ease-out,
       y 0.21s ease-out;
+  }
+
+  /* Fast transitions during panning */
+  svg.panning path {
+    transition: d 0.05s ease-out;
+  }
+
+  svg.panning circle {
+    transition:
+      cx 0.05s ease-out,
+      cy 0.05s ease-out;
+  }
+
+  svg.panning image {
+    transition:
+      x 0.05s ease-out,
+      y 0.05s ease-out;
   }
 
   /* Import Leaflet CSS when needed */
