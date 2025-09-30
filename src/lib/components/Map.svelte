@@ -230,33 +230,13 @@
     window.leafletMapInstance = leafletMap
 
     // Add event listeners to update D3 projection when Leaflet view changes
-    leafletMap.on("zoomstart", () => {
-      isZooming = true
-      isPanning = false
-      updateProjectionImmediate()
-    }) // Immediate response when zoom begins
+    leafletMap.on("zoomstart", handleZoomStart)
     leafletMap.on("zoom", updateProjection)
     leafletMap.on("zoomanim", updateProjection) // Fires continuously during zoom animation
-    leafletMap.on("zoomend", () => {
-      isZooming = false
-      isPanning = false  // Make sure both are false after zoom ends
-      updateProjection()
-    }) // Fires when zoom animation ends
-    leafletMap.on("movestart", () => {
-      // Only set panning if we're not currently zooming
-      if (!isZooming) {
-        isPanning = true
-        updateProjectionImmediate()
-      }
-    }) // Immediate response when panning begins
+    leafletMap.on("zoomend", handleZoomEnd)
+    leafletMap.on("movestart", handleMoveStart)
     leafletMap.on("move", updateProjection) // Throttled updates during panning
-    leafletMap.on("moveend", () => {
-      // Only reset panning if we're not zooming
-      if (!isZooming) {
-        isPanning = false
-      }
-      updateProjection()
-    }) // Fires when move animation ends
+    leafletMap.on("moveend", handleMoveEnd)
     leafletMap.on("viewreset", updateProjection)
 
     // Fit map to current data when available
@@ -300,6 +280,35 @@
         updateProjectionTimeout = null
       })
     }
+  }
+
+  // Event handlers for better organization
+  function handleZoomStart() {
+    isZooming = true
+    isPanning = false
+    updateProjectionImmediate()
+  }
+
+  function handleZoomEnd() {
+    isZooming = false
+    isPanning = false  // Make sure both are false after zoom ends
+    updateProjection()
+  }
+
+  function handleMoveStart() {
+    // Only set panning if we're not currently zooming
+    if (!isZooming) {
+      isPanning = true
+      updateProjectionImmediate()
+    }
+  }
+
+  function handleMoveEnd() {
+    // Only reset panning if we're not zooming
+    if (!isZooming) {
+      isPanning = false
+    }
+    updateProjection()
   }
 
   // Zoom on municipality changes, but not on neighborhood changes
