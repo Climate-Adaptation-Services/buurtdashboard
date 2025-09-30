@@ -16,7 +16,7 @@
     }
   }
   import { t } from "$lib/i18n/translate.js"
-  import { getIndicatorAttribute } from "$lib/noncomponents/getIndicatorAttribute"
+  import { getIndicatorAttribute } from "$lib/utils/getIndicatorAttribute"
 
   export let indicator
   export let bodyHeight

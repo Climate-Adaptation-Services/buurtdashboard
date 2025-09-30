@@ -4,7 +4,7 @@
   import IndicatorInfo from "./IndicatorInfo.svelte"
   import IndicatorTitle from "./IndicatorTitle.svelte"
   import IndicatorBody from "./IndicatorBody.svelte"
-  import { getIndicatorAttribute } from "$lib/noncomponents/getIndicatorAttribute"
+  import { getIndicatorAttribute } from "$lib/utils/getIndicatorAttribute"
 
   export let indicatorHeight
   export let indicator

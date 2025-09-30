@@ -1,4 +1,4 @@
-import { getRegionName } from "./getRegionName.js";
+import { getRegionName } from "../utils/getRegionName.js";
 import { tooltipValues, tooltipRegion, municipalitySelection } from "$lib/stores";
 import { select } from "d3";
 import { get } from "svelte/store";

@@ -1,13 +1,13 @@
-import { getClassName } from '$lib/noncomponents/getClassName';
+import { getClassName } from '$lib/utils/getClassName';
 import { currentCodeAbbreviation, neighbourhoodSelection, mousePosition, circleRadius, municipalitySelection, currentNameAbbreviation, URLParams, currentOverviewLevel, neighbourhoodCodeAbbreviation, tooltipValues, tooltipRegion, AHNSelecties } from '$lib/stores';
-import { addURLParameter } from './updateURLParams.js';
+import { addURLParameter } from '$lib/services/urlManager.js';
 import { get } from 'svelte/store';
 import { select, selectAll } from 'd3';
-import { getClassByIndicatorValue } from './getClassByIndicatorValue.js';
-import { getMostCommonClass } from './getMostCommonClass.js';
+import { getClassByIndicatorValue } from '$lib/utils/getClassByIndicatorValue.js';
+import { getMostCommonClass } from '$lib/utils/getMostCommonClass.js';
 import center from '@turf/center'
 import { t } from '$lib/i18n/translate.js';
-import { getIndicatorAttribute } from './getIndicatorAttribute.js';
+import { getIndicatorAttribute } from '$lib/utils/getIndicatorAttribute.js';
 
 // MIGRATED: Import centralized value retrieval system
 import {
@@ -20,7 +20,7 @@ import {
   isValidValue,
   getPopupValue,
   formatM2Value
-} from './valueRetrieval.js';
+} from '../utils/valueRetrieval.js';
 
 export function mouseOver(e, feature, indicator, mapType, indicatorValueColorscale, projection, beeswarmMargin) {
   const shapeClassName = getClassName(feature, 'path', indicator, mapType)

@@ -3,14 +3,14 @@
   import { extent, scaleLinear, scaleLog, select } from "d3"
   import XAxis from "$lib/components/XAxis.svelte"
   import { forceSimulation, forceY, forceX, forceCollide, forceManyBody } from "d3-force"
-  import { getClassName } from "$lib/noncomponents/getClassName"
-  import { click, mouseOut, mouseOver } from "$lib/noncomponents/neighbourhoodMouseEvents"
+  import { getClassName } from "$lib/utils/getClassName"
+  import { click, mouseOut, mouseOver } from "$lib/events/neighbourhoodMouseEvents"
   import { onMount } from "svelte"
-  import { getIndicatorAttribute } from "$lib/noncomponents/getIndicatorAttribute"
-  import { getGlobalExtent } from "$lib/noncomponents/getGlobalExtent"
+  import { getIndicatorAttribute } from "$lib/utils/getIndicatorAttribute"
+  import { getGlobalExtent } from "$lib/utils/getGlobalExtent"
 
   // MIGRATED: Import centralized value retrieval system
-  import { getNumericalValue, getDifferenceValue, getAHNSelection, isValidValue, getRawValue } from "$lib/noncomponents/valueRetrieval.js"
+  import { getNumericalValue, getDifferenceValue, getAHNSelection, isValidValue, getRawValue } from "$lib/utils/valueRetrieval.js"
 
   export let graphWidth
   export let indicatorHeight

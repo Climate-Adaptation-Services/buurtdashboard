@@ -2,7 +2,7 @@ import { dsvFormat } from 'd3-dsv'
 import { defaultConfig, dordrechtConfig } from '$lib/config'
 import { unzipSync, gunzipSync, strFromU8 } from 'fflate'
 import { BUURT_GEOJSON_URL, MUNICIPALITY_JSON_URL } from '$lib/datasets'
-import { prepareJSONData } from '$lib/noncomponents/prepareJSONData'
+import { prepareJSONData } from '$lib/services/prepareJSONData'
 
 export async function load({ url }) {
   // Access the URLSearchParams object

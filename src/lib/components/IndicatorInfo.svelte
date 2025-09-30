@@ -1,7 +1,7 @@
 <script>
   import { AHNSelecties, allMunicipalitiesJSONData, configStore, neighbourhoodsInMunicipalityJSONData, tooltipRegion } from "$lib/stores"
   import { afterUpdate } from "svelte"
-  import { getIndicatorAttribute } from "$lib/noncomponents/getIndicatorAttribute"
+  import { getIndicatorAttribute } from "$lib/utils/getIndicatorAttribute"
   import { t } from "$lib/i18n/translate.js"
 
   export let indicator

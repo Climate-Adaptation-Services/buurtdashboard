@@ -12,14 +12,14 @@
     getIndicatorStore,
   } from "$lib/stores"
   import { scaleLinear, scaleBand, stack } from "d3"
-  import { checkContrast } from "$lib/noncomponents/checkContrast"
-  import { getRegionName } from "$lib/noncomponents/getRegionName"
-  import { barPlotMouseOut, barPlotMouseOver } from "$lib/noncomponents/barPlotMouseEvents"
+  import { checkContrast } from "$lib/utils/checkContrast"
+  import { getRegionName } from "$lib/utils/getRegionName"
+  import { barPlotMouseOut, barPlotMouseOver } from "$lib/events/barPlotMouseEvents"
   import {
     calcPercentagesForEveryClassMultiIndicator,
     calcPercentagesForEveryClassSingleIndicator,
-  } from "$lib/noncomponents/calcPercentagesForEveryClass"
-  import { getNumericalValue } from "$lib/noncomponents/valueRetrieval.js"
+  } from "$lib/utils/calcPercentagesForEveryClass"
+  import { getNumericalValue } from "$lib/utils/valueRetrieval.js"
 
   export let graphWidth
   export let indicatorHeight

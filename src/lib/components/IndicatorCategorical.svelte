@@ -1,7 +1,7 @@
 <script>
   import BarPlot from "./BarPlot.svelte"
   import BarPlotLegend from "./BarPlotLegend.svelte"
-  import { getClassByIndicatorValue } from "$lib/noncomponents/getClassByIndicatorValue"
+  import { getClassByIndicatorValue } from "$lib/utils/getClassByIndicatorValue"
 
   export let indicator
   export let indicatorValueColorscale

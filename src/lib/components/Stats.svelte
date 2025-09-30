@@ -13,9 +13,9 @@
   } from "$lib/stores"
   import Stat from "./Stat.svelte"
   import { scaleLinear, min, max } from "d3"
-  import { calcMedian } from "$lib/noncomponents/calcMedian"
+  import { calcMedian } from "$lib/utils/calcMedian"
   // MIGRATED: Import centralized value retrieval functions
-  import { getNumericalValue, getDifferenceValue, getIndicatorAttribute, toNumber, isValidValue } from "$lib/noncomponents/valueRetrieval.js"
+  import { getNumericalValue, getDifferenceValue, getIndicatorAttribute, toNumber, isValidValue } from "$lib/utils/valueRetrieval.js"
 
   export let bodyHeight
   export let indicator

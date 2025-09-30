@@ -2,7 +2,7 @@
 
   import { neighbourhoodSelection, municipalitySelection, allNeighbourhoodsJSONData, getIndicatorStore } from "$lib/stores"
   import { onMount } from 'svelte'
-  import { getRegionName } from "$lib/noncomponents/getRegionName"
+  import { getRegionName } from "$lib/utils/getRegionName"
 
   export let graphWidth
   export let indicatorHeight

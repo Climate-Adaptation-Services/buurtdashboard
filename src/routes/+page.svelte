@@ -13,17 +13,17 @@
     allNeighbourhoodsJSONData,
     configStore,
   } from "$lib/stores"
-  import { setupIndicators } from "$lib/noncomponents/setupIndicators.js"
+  import { setupIndicators } from "$lib/services/setupIndicators.js"
   import Modal from "svelte-simple-modal"
   import { t } from "$lib/i18n/translate.js"
   import { browser } from "$app/environment"
   import LoadingIcon from "$lib/components/LoadingIcon.svelte"
-  import { setLanguage } from "$lib/noncomponents/setLanguage.js"
+  import { setLanguage } from "$lib/utils/setLanguage.js"
   // GeoJSON data now comes from page data, no need for separate fetch
-  import { processURLParameters } from "$lib/noncomponents/processURLParameters.js"
-  import { loadURLParamsFromPostMessage } from "$lib/noncomponents/loadURLParamsFromPostMessage.js"
-  import { setupAHNSelecties } from "$lib/noncomponents/setupAHNSelecties.js"
-  import { getIndicatorAttribute } from "$lib/noncomponents/getIndicatorAttribute.js"
+  import { processURLParameters } from "$lib/services/urlManager.js"
+  import { initializeURLManagement } from "$lib/services/urlManager.js"
+  import { setupAHNSelecties } from "$lib/services/setupAHNSelecties.js"
+  import { getIndicatorAttribute } from "$lib/utils/getIndicatorAttribute.js"
 
   export let data
 
@@ -57,7 +57,7 @@
   
   // Listen for postMessage from parent if iframe
   $: if (browser) {
-    loadURLParamsFromPostMessage()
+    initializeURLManagement()
   }
 
   // zodra allNeighbourhoodsJSONData geladen is, lees de url parameters

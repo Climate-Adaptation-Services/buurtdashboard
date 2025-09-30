@@ -3,7 +3,7 @@
   import { t } from "$lib/i18n/translate.js"
   import { onMount } from "svelte"
   import { URLParams, municipalitySelection, neighbourhoodSelection, configStore } from "$lib/stores"
-  import { addURLParameter, removeURLParameter } from "$lib/noncomponents/updateURLParams"
+  import { addURLParameter, removeURLParameter } from "$lib/services/urlManager"
 
   export let lijstAlleGemeentesVoorDropdown
 

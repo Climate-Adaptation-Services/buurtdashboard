@@ -1,7 +1,7 @@
 <script>
   import { tooltipRegion, mousePosition } from "$lib/stores"
   import { tooltipValues } from "$lib/stores"
-  import { checkContrast } from "$lib/noncomponents/checkContrast"
+  import { checkContrast } from "$lib/utils/checkContrast"
 
   function getTooltipTop() {
     return $mousePosition && $mousePosition < 100 ? $tooltipRegion.center[1] - 100 : $tooltipRegion.center[1]
