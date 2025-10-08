@@ -9,9 +9,23 @@ import { get } from "svelte/store"
  * @returns {string} - The complete attribute name
  */
 export function getIndicatorAttribute(indicator, attribute, specificYear) {
+  let resultAttribute = attribute
+
+  // Handle BEB variant suffix (_1) first
+  if (indicator.variants && indicator.variants.split(',').map(v => v.trim()).includes('1')) {
+    const indicatorStore = getIndicatorStore(indicator.title);
+    const ahnSelection = get(indicatorStore);
+    const bebSelection = ahnSelection?.beb || 'hele_buurt'
+
+    if (bebSelection === 'bebouwde_kom') {
+      resultAttribute = resultAttribute + '_1'
+    }
+  }
+
+  // Then handle year suffix
   // If a specific year is provided, use that directly
   if (specificYear) {
-    return attribute + '_' + specificYear;
+    return resultAttribute + '_' + specificYear;
   }
 
   // Get the indicator-specific store
@@ -19,9 +33,9 @@ export function getIndicatorAttribute(indicator, attribute, specificYear) {
   const ahnSelection = get(indicatorStore);
 
   if (!ahnSelection || !ahnSelection.baseYear || ahnSelection.baseYear === '') {
-    return attribute;
+    return resultAttribute;
   }
 
   // Use the baseYear from the indicator store
-  return attribute + '_' + ahnSelection.baseYear;
+  return resultAttribute + '_' + ahnSelection.baseYear;
 }
