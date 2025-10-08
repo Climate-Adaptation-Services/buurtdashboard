@@ -43,14 +43,12 @@
       : (() => {
           // Use weighted average if surface area is specified, otherwise use median
           if (indicator.surfaceArea) {
-            const result = calcWeightedAverage(
+            return calcWeightedAverage(
               $allNeighbourhoodsJSONData.features,
               (neighbourhood) => getNumericalValue(neighbourhood, indicator),
               indicator.surfaceArea,
               indicator
             )
-            console.log('📊 Stats Nederland result:', { indicator: indicator.title, surfaceArea: indicator.surfaceArea, result })
-            return result
           } else {
             const values = $allNeighbourhoodsJSONData.features
               .map((neighbourhood) => getNumericalValue(neighbourhood, indicator))
@@ -73,14 +71,12 @@
         : (() => {
             // Use weighted average if surface area is specified, otherwise use median
             if (indicator.surfaceArea) {
-              const result = calcWeightedAverage(
+              return calcWeightedAverage(
                 municipalityFilter,
                 (neighbourhood) => getNumericalValue(neighbourhood, indicator),
                 indicator.surfaceArea,
                 indicator
               )
-              console.log('📊 Stats Gemeente result:', { indicator: indicator.title, surfaceArea: indicator.surfaceArea, result })
-              return result
             } else {
               return calcMedian(
                 municipalityFilter

@@ -67,15 +67,6 @@ function getRawValue(feature, indicator, { year, attributeOverride, forceM2 = fa
     // Append _1 suffix based on selection (changed from _BEB)
     if (bebSelection === 'bebouwde_kom') {
       baseAttribute = baseAttribute + '_1'
-      // Debug log first few calls
-      if (Math.random() < 0.01) { // Log 1% of calls to avoid spam
-        console.log('🔍 BEB variant detected:', {
-          indicatorTitle: indicator.title,
-          originalAttribute: indicator.attribute,
-          bebSelection,
-          newAttribute: baseAttribute
-        })
-      }
     }
     // For 'hele_buurt', use the base attribute as-is (no suffix)
   }

@@ -11,8 +11,8 @@ import { defineConfig, devices } from '@playwright/test';
  */
 export default defineConfig({
 	testDir: './tests',
-	/* Only run the clean test files */
-	testMatch: ['**/smoke.spec.js', '**/integration.spec.js'],
+	/* Run core test suites */
+	testMatch: ['**/smoke.spec.js', '**/integration.spec.js', '**/surface-area-weighting.spec.js'],
 	/* Maximum time one test can run for. */
 	timeout: 60 * 1000,
 	expect: {
@@ -37,7 +37,7 @@ export default defineConfig({
 		/* Maximum time each action such as `click()` can take. Defaults to 0 (no limit). */
 		actionTimeout: 0,
 		/* Base URL to use in actions like `await page.goto('/')`. */
-		baseURL: process.env.BASE_URL || 'http://localhost:5174',
+		baseURL: process.env.BASE_URL || 'http://localhost:5175',
 
 		/* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
 		trace: 'on-first-retry',
@@ -84,7 +84,7 @@ export default defineConfig({
 	...(process.env.CI ? {} : {
 		webServer: {
 			command: 'npm run dev',
-			port: 5174,
+			port: 5175,
 			reuseExistingServer: true,
 			timeout: 120 * 1000,
 		}
