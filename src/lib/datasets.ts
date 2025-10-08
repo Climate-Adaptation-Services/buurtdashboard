@@ -17,7 +17,6 @@ export const DEFAULT_METADATA_URL =
 export const DEFAULT_METADATA_ENGLISH_URL =
   "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/metadata/EN-buurtdashboard-metadata-050825-01.csv";
 
-
 export const DEFAULT_CSV_DATA_URL =
   "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/csvdata/basiskaartGroen071025(b10Buurt2024BasiskaartGroen).csv.gz";
 
