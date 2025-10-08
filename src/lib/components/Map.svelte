@@ -274,7 +274,8 @@
     height: 100%;
     z-index: 1;
     pointer-events: auto;
-    mask: linear-gradient(
+    /* Firefox standard syntax */
+    mask-image: linear-gradient(
         to right,
         rgba(255, 255, 255, 0.01) 0%,
         rgba(255, 255, 255, 1) 15%,
@@ -283,7 +284,8 @@
       ),
       linear-gradient(to bottom, rgba(255, 255, 255, 0.01) 0%, rgba(255, 255, 255, 1) 15%, rgba(255, 255, 255, 1) 85%, rgba(255, 255, 255, 0.01) 100%);
     mask-composite: intersect;
-    -webkit-mask: linear-gradient(
+    /* Chrome/Safari webkit syntax */
+    -webkit-mask-image: linear-gradient(
         to right,
         rgba(255, 255, 255, 0.01) 0%,
         rgba(255, 255, 255, 1) 15%,
