@@ -83,14 +83,38 @@ export const calcWeightedAverage = (features, valueExtractor, surfaceAreaColumn,
     }
   })
 
+  // Calculate simple average for comparison
+  const values = []
+  const sampleData = []
+  features.forEach((feature, idx) => {
+    const value = valueExtractor(feature)
+    const surfaceArea = feature.properties?.[actualSurfaceAreaColumn]
+    if (value !== null && value !== undefined && !isNaN(+value) &&
+        surfaceArea !== null && surfaceArea !== undefined && !isNaN(+surfaceArea)) {
+      values.push(+value)
+      // Collect first 3 samples for verification
+      if (sampleData.length < 3) {
+        sampleData.push({
+          value: +value,
+          surfaceArea: +surfaceArea,
+          weighted: (+value) * (+surfaceArea)
+        })
+      }
+    }
+  })
+  const simpleAverage = values.length > 0 ? values.reduce((a, b) => a + b, 0) / values.length : null
+
   console.log('🔍 calcWeightedAverage results:', {
     surfaceAreaColumn,
     actualSurfaceAreaColumn,
     validCount,
     invalidCount,
-    totalSurfaceArea,
-    totalWeightedSum,
-    result: totalSurfaceArea > 0 ? totalWeightedSum / totalSurfaceArea : "Geen data"
+    totalSurfaceArea: totalSurfaceArea.toLocaleString(),
+    totalWeightedSum: totalWeightedSum.toLocaleString(),
+    weightedAverage: totalSurfaceArea > 0 ? (totalWeightedSum / totalSurfaceArea).toFixed(4) : "Geen data",
+    simpleAverage: simpleAverage ? simpleAverage.toFixed(4) : null,
+    difference: simpleAverage && totalSurfaceArea > 0 ? ((totalWeightedSum / totalSurfaceArea) - simpleAverage).toFixed(3) : 'N/A',
+    sampleCalculations: sampleData
   })
 
   if (totalSurfaceArea === 0) {

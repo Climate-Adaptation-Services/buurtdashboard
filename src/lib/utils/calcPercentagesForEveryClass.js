@@ -2,6 +2,7 @@ import { getClassByIndicatorValue } from "./getClassByIndicatorValue.js";
 import { t } from "$lib/i18n/translate.js"
 import { getIndicatorAttribute } from "./getIndicatorAttribute.js";
 import { getNumericalValue } from "./valueRetrieval.js";
+import { getIndicatorStore } from "$lib/stores";
 
 export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regio) {
   let totalSurfaceArea = 0
@@ -16,7 +17,23 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
   }
 
   // Get the surface area column name from the indicator's surfaceArea field
-  const surfaceAreaColumn = indicator.surfaceArea
+  let surfaceAreaColumn = indicator.surfaceArea
+
+  // Check if we need to apply BEB suffix to surface area column
+  if (surfaceAreaColumn && indicator.variants && indicator.variants.split(',').map(v => v.trim()).includes('1')) {
+    const indicatorStore = getIndicatorStore(indicator.title)
+    let ahnSelection
+
+    const unsubscribe = indicatorStore.subscribe(value => {
+      ahnSelection = value
+    })
+    unsubscribe()
+
+    const bebSelection = ahnSelection?.beb || 'hele_buurt'
+    if (bebSelection === 'bebouwde_kom') {
+      surfaceAreaColumn = surfaceAreaColumn + '_1'
+    }
+  }
 
   // voor elke neighbourhood gaan we de waardes van elke klasse bij de som van die klasse toevoegen
   data.features.forEach(neighbourhood => {
@@ -60,17 +77,43 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
     result[indicatorClass] = totalSumPerClass.filter(kl => kl.className === indicatorClass)[0].som
   });
 
-  // Log results for Bodembedekking
+  // Log results for Bodembedekking with weighted vs simple comparison
   if (indicator.title === 'Bodembedekking' || indicator.title === 'Bodembedekking ') {
-    console.log('📊 BODEMBEDEKKING CALCULATION');
+    // Calculate simple (unweighted) average for comparison
+    const simpleAverages = {}
+    const classCounts = {}
+    Object.keys(indicator.classes).forEach(kl => {
+      classCounts[kl] = { sum: 0, count: 0 }
+    })
+
+    data.features.forEach(neighbourhood => {
+      let hasData = false
+      Object.keys(indicator.classes).forEach(kl => {
+        const value = neighbourhood.properties[getIndicatorAttribute(indicator, indicator.classes[kl])]
+        if (value && !isNaN(parseFloat(value))) {
+          hasData = true
+          classCounts[kl].sum += +value
+          classCounts[kl].count++
+        }
+      })
+    })
+
+    Object.keys(indicator.classes).forEach(kl => {
+      simpleAverages[kl] = classCounts[kl].count > 0 ? classCounts[kl].sum / classCounts[kl].count : 0
+    })
+
+    console.log('📊 BODEMBEDEKKING WEIGHTED vs SIMPLE');
     console.log('Region:', regio);
     console.log('Surface area column:', surfaceAreaColumn);
     console.log('Total surface area (m²):', totalSurfaceArea.toLocaleString());
     console.log('Number of features:', data.features.length);
-    console.log('Results by class:');
+    console.log('Results comparison (Weighted | Simple | Diff):');
     Object.keys(result).forEach(key => {
       if (key !== 'group') {
-        console.log(`  ${key}: ${result[key].toFixed(2)}%`);
+        const weighted = result[key]
+        const simple = simpleAverages[key] || 0
+        const diff = weighted - simple
+        console.log(`  ${key}: ${weighted.toFixed(2)}% | ${simple.toFixed(2)}% | ${diff >= 0 ? '+' : ''}${diff.toFixed(2)}%`);
       }
     });
     console.log('---');
