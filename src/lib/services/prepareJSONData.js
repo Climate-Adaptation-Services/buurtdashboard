@@ -134,17 +134,11 @@ export async function prepareJSONData(JSONdata, CSVdata, options = {}) {
       }
     }
 
-    console.log('🔍 CSV Lookup - Preferred column:', preferredColumn);
-    console.log('🔍 CSV Lookup - Using column:', csvCodeColumn);
-    console.log('🔍 CSV Sample row:', CSVdata[0]);
-    console.log('🔍 CSV has column?', CSVdata[0]?.[csvCodeColumn]);
-
     CSVdata.forEach(item => {
       if (item[csvCodeColumn]) {
         lookup[item[csvCodeColumn]] = item;
       }
     });
-    console.log('🔍 CSV Lookup created with', Object.keys(lookup).length, 'entries');
     return lookup;
   });
 
@@ -158,19 +152,10 @@ export async function prepareJSONData(JSONdata, CSVdata, options = {}) {
   // 5. Process all neighborhoods in a single pass with optimized lookups
   neighbourhoodTopojsonFeatures = measurePerformance('Neighborhood data mapping', () => {
     const codeColumn = get(neighbourhoodCodeAbbreviation);
-    console.log('🗺️ GeoJSON - Looking for column:', codeColumn);
-    console.log('🗺️ GeoJSON Sample properties:', neighbourhoodTopojsonFeatures[0]?.properties);
 
-    let matchCount = 0;
-    let noMatchCount = 0;
-
-    return neighbourhoodTopojsonFeatures.map((neighbourhood, index) => {
+    return neighbourhoodTopojsonFeatures.map((neighbourhood) => {
       // Get the neighborhood code
       const neighborhoodCode = neighbourhood.properties[codeColumn];
-
-      if (index === 0) {
-        console.log('🗺️ First feature code:', neighborhoodCode);
-      }
 
       // Use direct lookup instead of filter (much faster)
       const matchingCSVData = csvLookup[neighborhoodCode];
@@ -181,12 +166,6 @@ export async function prepareJSONData(JSONdata, CSVdata, options = {}) {
           ...neighbourhood.properties,
           ...matchingCSVData
         };
-        matchCount++;
-      } else {
-        noMatchCount++;
-        if (noMatchCount === 1) {
-          console.warn('⚠️ No CSV match for code:', neighborhoodCode, 'Properties:', neighbourhood.properties);
-        }
       }
 
       // Convert all numeric properties in a single loop
@@ -211,10 +190,6 @@ export async function prepareJSONData(JSONdata, CSVdata, options = {}) {
 
       return neighbourhood;
     });
-
-    console.log('✅ Matched:', matchCount, 'features');
-    console.log('❌ No match:', noMatchCount, 'features');
-    return neighbourhoodTopojsonFeatures;
   });
 
   // Set the final GeoJSON data

@@ -4,7 +4,7 @@ import { getIndicatorAttribute } from "./getIndicatorAttribute.js";
 import { getNumericalValue } from "./valueRetrieval.js";
 
 export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regio) {
-  // let totalSurfaceArea = 0
+  let totalSurfaceArea = 0
   let totalSumPerClass = []
 
   // object om totale som van elke klasse in op te tellen
@@ -15,15 +15,18 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
     })
   }
 
+  // Get the surface area column name from the indicator's surfaceArea field
+  const surfaceAreaColumn = indicator.surfaceArea
+
   // voor elke neighbourhood gaan we de waardes van elke klasse bij de som van die klasse toevoegen
   data.features.forEach(neighbourhood => {
-    // let neighbourhoodShapeArea = (indicator.title === 'Functionele gebieden')
-    //   ? neighbourhood.properties['buurt_opp_incl_agrarisch']
-    //   : neighbourhood.properties['Shape_Area']
+    // Get surface area for this neighborhood from the specified column
+    let neighbourhoodShapeArea = 0
+    if (surfaceAreaColumn && neighbourhood.properties[surfaceAreaColumn]) {
+      neighbourhoodShapeArea = +neighbourhood.properties[surfaceAreaColumn]
+    }
 
-    // totalSurfaceArea += +neighbourhoodShapeArea
-
-    // if(indicator.title === t('Gevoelstemperatuur')){totalSurfaceArea -= neighbourhoodShapeArea * neighbourhood.properties['NDPETperc']}
+    totalSurfaceArea += neighbourhoodShapeArea
 
     // voor deze neighbourhood tel de waardes van elke klasse bij de totale som op
     let noData = true
@@ -32,29 +35,46 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
         noData = false
         // pak de klasse erbij in totalSumPerClass
         const tempKlasse = totalSumPerClass.filter(kl2 => kl2.className === kl)[0]
-        // we wegen ook voor het oppervlakte met neighbourhoodShapeArea
-        tempKlasse.som += +neighbourhood.properties[getIndicatorAttribute(indicator, indicator.classes[kl])]
+        // Weight by surface area
+        const value = +neighbourhood.properties[getIndicatorAttribute(indicator, indicator.classes[kl])]
+        tempKlasse.som += value * neighbourhoodShapeArea
       }
     });
     if (noData) {
       if (indicator.title !== t('Gevoelstemperatuur') && indicator.title !== 'Maximale overstromingsdiepte') {
-        totalSumPerClass.filter(kl => kl.className === 'No data')[0].som += 100
+        // Weight "No data" by surface area as well
+        totalSumPerClass.filter(kl => kl.className === 'No data')[0].som += 100 * neighbourhoodShapeArea
       }
     }
   });
 
+  // Divide by total surface area instead of number of features
   totalSumPerClass.forEach(kl => {
-    kl.som = (kl.som / data.features.length)
+    kl.som = totalSurfaceArea > 0 ? (kl.som / totalSurfaceArea) : 0
     if (indicator.title === t('Gevoelstemperatuur')) { kl.som *= 100 }
   })
-
-
 
   // we stoppen het resultaat per klasse in een dictionary
   let result = { 'group': regio }
   Object.keys(indicator.classes).forEach(indicatorClass => {
     result[indicatorClass] = totalSumPerClass.filter(kl => kl.className === indicatorClass)[0].som
   });
+
+  // Log results for Bodembedekking
+  if (indicator.title === 'Bodembedekking' || indicator.title === 'Bodembedekking ') {
+    console.log('📊 BODEMBEDEKKING CALCULATION');
+    console.log('Region:', regio);
+    console.log('Surface area column:', surfaceAreaColumn);
+    console.log('Total surface area (m²):', totalSurfaceArea.toLocaleString());
+    console.log('Number of features:', data.features.length);
+    console.log('Results by class:');
+    Object.keys(result).forEach(key => {
+      if (key !== 'group') {
+        console.log(`  ${key}: ${result[key].toFixed(2)}%`);
+      }
+    });
+    console.log('---');
+  }
 
   return result
 }

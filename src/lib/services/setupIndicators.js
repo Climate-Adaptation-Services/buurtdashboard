@@ -61,6 +61,7 @@ function addIndicatorCategory(indicatorsList, indicators) {
       source: indicator.Bron,
       description: indicator['Tekst vraagteken'],
       AHNversie: indicator['AHNversie'],
+      surfaceArea: indicator['Oppervlakte'],
       variants: indicator.Varianten
     })
 
