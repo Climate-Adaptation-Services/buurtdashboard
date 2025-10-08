@@ -7,8 +7,8 @@
   export let indicator
   export let titleHeight = 120
 
-  // Check if indicator has BEB variant (handle spaces in variants)
-  $: hasBEBVariant = indicator.variants && indicator.variants.split(",").map(v => v.trim()).includes("BEB")
+  // Check if indicator has BEB variant (1 indicates BEB switch should be shown)
+  $: hasBEBVariant = indicator.variants && indicator.variants.split(",").map(v => v.trim()).includes("1")
 </script>
 
 <div class="indicator-title" style="height: {titleHeight}px">

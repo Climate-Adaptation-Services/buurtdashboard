@@ -50,23 +50,23 @@ function formatM2Value(value) {
 function getRawValue(feature, indicator, { year, attributeOverride, forceM2 = false, forceBEB = null } = {}) {
   let baseAttribute = indicator.attribute
 
-  // Handle BEB variants using indicator store (handle spaces)
-  if (!attributeOverride && indicator.variants && indicator.variants.split(',').map(v => v.trim()).includes('BEB')) {
+  // Handle BEB variants using indicator store (1 indicates BEB variant)
+  if (!attributeOverride && indicator.variants && indicator.variants.split(',').map(v => v.trim()).includes('1')) {
     const indicatorStore = getIndicatorStore(indicator.title)
     let ahnSelection
-    
+
     // Get the current value from the store
     const unsubscribe = indicatorStore.subscribe(value => {
       ahnSelection = value
     })
     unsubscribe() // Immediately unsubscribe to avoid memory leaks
-    
+
     // Use forceBEB if provided, otherwise use store value
     const bebSelection = forceBEB || (ahnSelection?.beb) || 'hele_buurt'
-    
-    // Append BEB suffix based on selection
+
+    // Append _1 suffix based on selection (changed from _BEB)
     if (bebSelection === 'bebouwde_kom') {
-      baseAttribute = baseAttribute + '_BEB'
+      baseAttribute = baseAttribute + '_1'
     }
     // For 'hele_buurt', use the base attribute as-is (no suffix)
   }

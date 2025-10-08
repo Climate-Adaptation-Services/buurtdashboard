@@ -34,10 +34,10 @@
       
       // Create base attribute considering BEB selection
       let baseAttribute = indicator.attribute
-      if (indicator.variants && indicator.variants.split(',').map(v => v.trim()).includes('BEB')) {
+      if (indicator.variants && indicator.variants.split(',').map(v => v.trim()).includes('1')) {
         const bebSelection = ahnSelection.beb || 'hele_buurt'
         if (bebSelection === 'bebouwde_kom') {
-          baseAttribute = baseAttribute + '_BEB'
+          baseAttribute = baseAttribute + '_1'
         }
       }
       
