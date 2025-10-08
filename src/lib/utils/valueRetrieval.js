@@ -65,12 +65,11 @@ function getRawValue(feature, indicator, { year, attributeOverride, forceM2 = fa
     // Use forceBEB if provided, otherwise use store value
     const bebSelection = forceBEB || (ahnSelection?.beb) || 'hele_buurt'
 
-    // Append _1 suffix based on selection (changed from _BEB)
+    // Append _1 suffix for bebouwde kom variant
     if (bebSelection === 'bebouwde_kom') {
       baseAttribute = baseAttribute + '_1'
       hasBEBSuffix = true
     }
-    // For 'hele_buurt', use the base attribute as-is (no suffix)
   }
 
   // Only handle M2 variants for popups when explicitly requested (handle spaces)
