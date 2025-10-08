@@ -49,6 +49,7 @@ function formatM2Value(value) {
 // Property access
 function getRawValue(feature, indicator, { year, attributeOverride, forceM2 = false, forceBEB = null } = {}) {
   let baseAttribute = indicator.attribute
+  let hasBEBSuffix = false
 
   // Handle BEB variants using indicator store (1 indicates BEB variant)
   if (!attributeOverride && indicator.variants && indicator.variants.split(',').map(v => v.trim()).includes('1')) {
@@ -67,6 +68,7 @@ function getRawValue(feature, indicator, { year, attributeOverride, forceM2 = fa
     // Append _1 suffix based on selection (changed from _BEB)
     if (bebSelection === 'bebouwde_kom') {
       baseAttribute = baseAttribute + '_1'
+      hasBEBSuffix = true
     }
     // For 'hele_buurt', use the base attribute as-is (no suffix)
   }
@@ -79,7 +81,19 @@ function getRawValue(feature, indicator, { year, attributeOverride, forceM2 = fa
   const attribute = attributeOverride ||
     (year ? getIndicatorAttribute(indicator, baseAttribute, year) :
       getIndicatorAttribute(indicator, baseAttribute))
-  return feature.properties?.[attribute]
+
+  let value = feature.properties?.[attribute]
+
+  // FALLBACK: If BEB variant was requested but value is null/undefined, try base attribute
+  if (hasBEBSuffix && !isValidValue(value)) {
+    const baseAttributeWithoutSuffix = indicator.attribute
+    const fallbackAttribute = year
+      ? getIndicatorAttribute(indicator, baseAttributeWithoutSuffix, year)
+      : getIndicatorAttribute(indicator, baseAttributeWithoutSuffix)
+    value = feature.properties?.[fallbackAttribute]
+  }
+
+  return value
 }
 
 function getNumberValue(feature, indicator, options = {}) {

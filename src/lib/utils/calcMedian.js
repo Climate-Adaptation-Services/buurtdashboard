@@ -37,16 +37,13 @@ export const calcMedian = (array) => {
  */
 export const calcWeightedAverage = (features, valueExtractor, surfaceAreaColumn, indicator = null) => {
   if (!features || features.length === 0 || !surfaceAreaColumn) {
-    console.log('🔍 calcWeightedAverage: No features or surfaceAreaColumn', {
-      hasFeatures: !!features,
-      featuresLength: features?.length,
-      surfaceAreaColumn
-    })
     return "Geen data"
   }
 
   // Check if we need to apply BEB suffix to surface area column
   let actualSurfaceAreaColumn = surfaceAreaColumn
+  let shouldTryFallback = false
+
   if (indicator && indicator.variants && indicator.variants.split(',').map(v => v.trim()).includes('1')) {
     const indicatorStore = getIndicatorStore(indicator.title)
     let ahnSelection
@@ -59,6 +56,7 @@ export const calcWeightedAverage = (features, valueExtractor, surfaceAreaColumn,
     const bebSelection = ahnSelection?.beb || 'hele_buurt'
     if (bebSelection === 'bebouwde_kom') {
       actualSurfaceAreaColumn = surfaceAreaColumn + '_1'
+      shouldTryFallback = true
     }
   }
 
@@ -83,6 +81,30 @@ export const calcWeightedAverage = (features, valueExtractor, surfaceAreaColumn,
     }
   })
 
+  // If BEB variant was selected but no data found, fall back to base column
+  if (shouldTryFallback && validCount === 0 && totalSurfaceArea === 0) {
+    // Reset counters and try again with base column
+    totalWeightedSum = 0
+    totalSurfaceArea = 0
+    validCount = 0
+    invalidCount = 0
+
+    features.forEach(feature => {
+      const value = valueExtractor(feature)
+      const surfaceArea = feature.properties?.[surfaceAreaColumn]
+
+      if (value !== null && value !== undefined && !isNaN(+value) &&
+          surfaceArea !== null && surfaceArea !== undefined && !isNaN(+surfaceArea)) {
+        const numValue = +value
+        const numSurfaceArea = +surfaceArea
+        totalWeightedSum += numValue * numSurfaceArea
+        totalSurfaceArea += numSurfaceArea
+        validCount++
+      } else {
+        invalidCount++
+      }
+    })
+  }
 
   if (totalSurfaceArea === 0) {
     return "Geen data"

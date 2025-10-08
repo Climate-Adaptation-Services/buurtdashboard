@@ -103,7 +103,10 @@
   // Make xScaleExtent reactive to indicatorAttribute changes
   $: xScaleExtent = differenceValues
     ? extent(differenceValues, (d) => d.diffValue)
-    : extent(baseFilteredData, (d) => +d.properties[indicatorAttribute])
+    : extent(baseFilteredData, (d) => {
+        const rawValue = getRawValue(d, indicator)
+        return +rawValue
+      })
 
   // Ensure the domain includes zero for difference plots and has appropriate padding
   // For base year view, use the global extent to keep axis consistent across AHN selections
@@ -183,8 +186,8 @@
             // Use the pre-calculated difference value
             return xScaleBeeswarm(d.diffValue)
           } else {
-            // FIXED: Use raw property value for positioning (matches original behavior)
-            const rawValue = d.properties[indicatorAttribute]
+            // Use getRawValue to get the value with fallback support for BEB variants
+            const rawValue = getRawValue(d, indicator)
             return xScaleBeeswarm(+rawValue)
           }
         }).strength(0.5),
