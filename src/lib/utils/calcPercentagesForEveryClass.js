@@ -48,12 +48,14 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
     // voor deze neighbourhood tel de waardes van elke klasse bij de totale som op
     let noData = true
     Object.keys(indicator.classes).forEach(kl => {
-      if (neighbourhood.properties[getIndicatorAttribute(indicator, indicator.classes[kl])] && !isNaN(parseFloat(neighbourhood.properties[getIndicatorAttribute(indicator, indicator.classes[kl])]))) {
+      // getIndicatorAttribute will automatically apply BEB suffix if needed
+      const attributeName = getIndicatorAttribute(indicator, indicator.classes[kl])
+      if (neighbourhood.properties[attributeName] && !isNaN(parseFloat(neighbourhood.properties[attributeName]))) {
         noData = false
         // pak de klasse erbij in totalSumPerClass
         const tempKlasse = totalSumPerClass.filter(kl2 => kl2.className === kl)[0]
         // Weight by surface area
-        const value = +neighbourhood.properties[getIndicatorAttribute(indicator, indicator.classes[kl])]
+        const value = +neighbourhood.properties[attributeName]
         tempKlasse.som += value * neighbourhoodShapeArea
       }
     });
