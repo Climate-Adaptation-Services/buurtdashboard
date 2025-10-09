@@ -14,6 +14,9 @@ import {
 export const handle: Handle = async ({ event, resolve }) => {
   const response = await resolve(event);
 
+  // Remove X-Frame-Options to allow embedding
+  response.headers.delete('X-Frame-Options');
+
   // Add the hint only to HTML documents
   if (response.headers.get('content-type')?.startsWith('text/html')) {
     // Get config parameter to determine which URLs to preload
