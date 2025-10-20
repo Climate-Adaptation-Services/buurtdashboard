@@ -15,51 +15,25 @@ export async function load({ url }) {
   // Select the appropriate config object based on URL parameter
   const configObj = configParam === 'dordrecht' ? dordrechtConfig : defaultConfig;
 
-  // Start all fetches in parallel - including GeoJSON data
-  const [metadataPromise, metadataEnglishPromise, csvPromise, municipalityPromise, neighbourhoodPromise] = [
+  // Start lightweight fetches only (metadata and CSV)
+  // GeoJSON will be loaded client-side for progressive rendering
+  const [metadataPromise, metadataEnglishPromise, csvPromise] = [
     fetch(configObj.metadataLocation),
     fetch(configObj.metadataLocationEnglish),
-    fetch(configObj.neighbourhoodCSVdataLocation),
-    fetch(MUNICIPALITY_JSON_URL),
-    fetch(BUURT_GEOJSON_URL)
+    fetch(configObj.neighbourhoodCSVdataLocation)
   ];
 
-  // Wait for all fetches to complete
-  const [metadataResponse, metadataEnglishResponse, csvResponse, municipalityResponse, neighbourhoodResponse] = await Promise.all([
+  // Wait for lightweight data only
+  const [metadataResponse, metadataEnglishResponse, csvResponse] = await Promise.all([
     metadataPromise,
     metadataEnglishPromise,
-    csvPromise,
-    municipalityPromise,
-    neighbourhoodPromise
+    csvPromise
   ]);
 
-  // Process the responses in parallel with error handling for GeoJSON data
-  let neighbourhoodGeoJson = null;
-  let municipalityGeoJson = null;
-  let metadataText = '';
-  let metadataEnglishText = '';
-  let zipBuffer;
-
-  try {
-    // Process the responses in parallel
-    const [metadataTextResult, metadataEnglishTextResult, zipBufferResult, neighbourhoodGeoJsonResult, municipalityGeoJsonResult] = await Promise.all([
-      metadataResponse.text(),
-      metadataEnglishResponse.text(),
-      csvResponse.arrayBuffer(),
-      neighbourhoodResponse.ok ? neighbourhoodResponse.json() : Promise.resolve(null),
-      municipalityResponse.ok ? municipalityResponse.json() : Promise.resolve(null)
-    ]);
-
-    // Assign the results
-    metadataText = metadataTextResult;
-    metadataEnglishText = metadataEnglishTextResult;
-    zipBuffer = zipBufferResult;
-    neighbourhoodGeoJson = neighbourhoodGeoJsonResult;
-    municipalityGeoJson = municipalityGeoJsonResult;
-  } catch (error) {
-    console.error('Error processing responses:', error);
-    // Continue with available data
-  }
+  // Process the responses
+  const metadataText = await metadataResponse.text();
+  const metadataEnglishText = await metadataEnglishResponse.text();
+  const zipBuffer = await csvResponse.arrayBuffer();
 
   // Parse metadata
   const metadata = dsvFormat(';').parse(metadataText);
@@ -78,25 +52,13 @@ export async function load({ url }) {
 
   const buurtCSVdata = dsvFormat(';').parse(csvText);
 
-  // Process and cache the GeoJSON data if available
-  if (neighbourhoodGeoJson && municipalityGeoJson) {
-    // Pass URLs for caching purposes
-    const dataUrls = {
-      municipalityUrl: MUNICIPALITY_JSON_URL,
-      neighbourhoodUrl: BUURT_GEOJSON_URL
-    };
-
-    // Process the data with caching
-    await prepareJSONData([municipalityGeoJson, neighbourhoodGeoJson], buurtCSVdata, dataUrls);
-  }
-
-
+  // Return immediately with null GeoJSON - will be loaded client-side
   return {
     lang,
     metadata,
     metadata_english,
     buurtCSVdata,
-    neighbourhoodGeoJson,
-    municipalityGeoJson
+    neighbourhoodGeoJson: null,
+    municipalityGeoJson: null
   };
 }

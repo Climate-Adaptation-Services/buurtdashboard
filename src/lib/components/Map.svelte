@@ -30,6 +30,7 @@
   // Reactive variable for Leaflet map
   let leafletMap = null
   let leafletReady = false
+  let mapInitializedWithData = false  // Track if map has center/zoom set
   $: {
     leafletMap = mapManager.getMap()
   }
@@ -46,6 +47,7 @@
   export let mapType
   export let indicatorValueColorscale
   export let indicator
+  export let isLoading = false
 
   // Define projection and path variables
   let projection
@@ -60,9 +62,13 @@
     // Include projectionUpdateCounter to force reactivity
     projectionUpdateCounter
 
-    if (mapType === "main map" && mapManager.getMap()) {
-      // For main map: create a transform that syncs with Leaflet
-      projection = mapManager.createLeafletSyncedProjection()
+    if (mapType === "main map") {
+      // For main map: only create projection when Leaflet is fully initialized with data
+      if (mapManager.getMap() && mapInitializedWithData) {
+        projection = mapManager.createLeafletSyncedProjection()
+      } else {
+        projection = null // Don't create projection until map is ready
+      }
     } else {
       // For indicator maps: use the original static projection
       projection = geoMercator().fitExtent(
@@ -76,7 +82,7 @@
   }
 
   $: {
-    path = geoPath(projection)
+    path = projection ? geoPath(projection) : null
   }
 
   function aggregatedMapInfo() {
@@ -140,13 +146,21 @@
       const success = mapManager.initializeMap(mapContainer, mapWidth, mapHeight)
       if (success && $currentJSONData && $currentJSONData.features) {
         mapManager.initializeWithData($currentJSONData)
+        mapInitializedWithData = true
       }
     }
   }
 
+  // Initialize map with data when data arrives after map creation
+  $: {
+    if (mapManager.getMap() && mapType === "main map" && $currentJSONData && $currentJSONData.features && !mapInitializedWithData) {
+      mapManager.initializeWithData($currentJSONData)
+      mapInitializedWithData = true
+    }
+  }
 
   // Handle selection changes for zooming
-  $: if (mapManager.getMap() && mapType === "main map" && $currentJSONData) {
+  $: if (mapManager.getMap() && mapType === "main map" && $currentJSONData && mapInitializedWithData) {
     mapManager.handleSelectionChange($municipalitySelection, $neighbourhoodSelection, $currentJSONData)
   }
 </script>
@@ -155,50 +169,58 @@
   <div class="map-container">
     <!-- Background Leaflet map -->
     <div class="leaflet-background" bind:this={mapContainer}></div>
-    <!-- SVG overlay -->
-    <svg class="main-map {isZooming ? 'zooming' : ''} {isPanning ? 'panning' : ''}" style="filter:drop-shadow(0 0 15px rgb(160, 160, 160))">
-      <!-- svelte-ignore a11y-mouse-events-have-key-events -->
-      <!-- svelte-ignore a11y-no-static-element-interactions -->
-      {#if $currentJSONData.features}
-        {#each $currentJSONData.features as feature, i}
-          <MapPath
-            {feature}
-            {indicator}
-            {mapType}
-            {path}
-            {getMapFillColor}
-            {shapeOpacity}
-            {indicatorValueColorscale}
-            {projection}
-            {leafletMap}
-            {isDifferenceMode}
-            AHNSelecties={$AHNSelecties}
+    {#if isLoading || !leafletReady || !mapManager.getMap() || !mapInitializedWithData || !projection || !path}
+      <!-- Loading overlay -->
+      <div class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <p>Gegevens laden...</p>
+      </div>
+    {:else}
+      <!-- SVG overlay -->
+      <svg class="main-map {isZooming ? 'zooming' : ''} {isPanning ? 'panning' : ''}" style="filter:drop-shadow(0 0 15px rgb(160, 160, 160))">
+        <!-- svelte-ignore a11y-mouse-events-have-key-events -->
+        <!-- svelte-ignore a11y-no-static-element-interactions -->
+        {#if $currentJSONData.features}
+          {#each $currentJSONData.features as feature, i}
+            <MapPath
+              {feature}
+              {indicator}
+              {mapType}
+              {path}
+              {getMapFillColor}
+              {shapeOpacity}
+              {indicatorValueColorscale}
+              {projection}
+              {leafletMap}
+              {isDifferenceMode}
+              AHNSelecties={$AHNSelecties}
+            />
+          {/each}
+        {/if}
+        {#if indicator && indicator.aggregatedIndicator === true}
+          <image
+            href="info.png"
+            opacity="0.7"
+            width="20"
+            y="5"
+            x={mapWidth - 25}
+            on:mouseover={() => aggregatedMapInfo()}
+            on:mouseout={() => aggregatedMapInfoOut()}
           />
-        {/each}
-      {/if}
-      {#if indicator && indicator.aggregatedIndicator === true}
-        <image
-          href="info.png"
-          opacity="0.7"
-          width="20"
-          y="5"
-          x={mapWidth - 25}
-          on:mouseover={() => aggregatedMapInfo()}
-          on:mouseout={() => aggregatedMapInfoOut()}
-        />
-      {/if}
-    </svg>
-    <!-- Transparency control -->
-    <div class="transparency-control">
-      <label for="opacity-slider">Transparantie</label>
-      <input id="opacity-slider" type="range" min="0.1" max="1" step="0.1" bind:value={shapeOpacity} class="opacity-slider" />
-    </div>
+        {/if}
+      </svg>
+      <!-- Transparency control -->
+      <div class="transparency-control">
+        <label for="opacity-slider">Transparantie</label>
+        <input id="opacity-slider" type="range" min="0.1" max="1" step="0.1" bind:value={shapeOpacity} class="opacity-slider" />
+      </div>
+    {/if}
   </div>
 {:else}
   <svg class={"indicator-map-" + indicator.attribute} style="filter:drop-shadow(0 0 15px rgb(160, 160, 160))">
     <!-- svelte-ignore a11y-mouse-events-have-key-events -->
     <!-- svelte-ignore a11y-no-static-element-interactions -->
-    {#if $currentJSONData.features}
+    {#if $currentJSONData.features && path && projection}
       {#each $currentJSONData.features as feature, i}
         <MapPath
           {feature}
@@ -391,5 +413,41 @@
   /* Import Leaflet CSS when needed */
   :global(.leaflet-container) {
     background: transparent;
+  }
+
+  .loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(2px);
+  }
+
+  .loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #35575a;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .loading-overlay p {
+    margin-top: 16px;
+    color: #35575a;
+    font-weight: 500;
+    font-size: 14px;
   }
 </style>

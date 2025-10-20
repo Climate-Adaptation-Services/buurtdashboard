@@ -19,11 +19,13 @@
   import { browser } from "$app/environment"
   import LoadingIcon from "$lib/components/LoadingIcon.svelte"
   import { setLanguage } from "$lib/utils/setLanguage.js"
-  // GeoJSON data now comes from page data, no need for separate fetch
   import { processURLParameters } from "$lib/services/urlManager.js"
   import { initializeURLManagement } from "$lib/services/urlManager.js"
   import { setupAHNSelecties } from "$lib/services/setupAHNSelecties.js"
   import { getIndicatorAttribute } from "$lib/utils/getIndicatorAttribute.js"
+  import { onMount } from "svelte"
+  import { BUURT_GEOJSON_URL, MUNICIPALITY_JSON_URL } from "$lib/datasets"
+  import { prepareJSONData } from "$lib/services/prepareJSONData"
 
   export let data
 
@@ -45,10 +47,39 @@
   displayedIndicators = allIndicators
   isInitialized = true
 
+  // GeoJSON data will be loaded client-side for progressive rendering
+  let municipalityGeoJson = null
+  let neighbourhoodGeoJson = null
+  let geoJSONData = [null, null]
+  let isLoadingGeoJSON = true
 
+  // Load GeoJSON data client-side after component mounts
+  onMount(async () => {
+    try {
+      // Fetch GeoJSON data in parallel
+      const [municipalityResponse, neighbourhoodResponse] = await Promise.all([
+        fetch(MUNICIPALITY_JSON_URL),
+        fetch(BUURT_GEOJSON_URL)
+      ])
 
-  // GeoJSON data is now available directly from page data
-  const geoJSONData = [data.municipalityGeoJson, data.neighbourhoodGeoJson]
+      municipalityGeoJson = await municipalityResponse.json()
+      neighbourhoodGeoJson = await neighbourhoodResponse.json()
+      geoJSONData = [municipalityGeoJson, neighbourhoodGeoJson]
+
+      // Process and cache the GeoJSON data
+      const dataUrls = {
+        municipalityUrl: MUNICIPALITY_JSON_URL,
+        neighbourhoodUrl: BUURT_GEOJSON_URL
+      }
+
+      await prepareJSONData([municipalityGeoJson, neighbourhoodGeoJson], data.buurtCSVdata, dataUrls)
+
+      isLoadingGeoJSON = false
+    } catch (error) {
+      console.error('Error loading GeoJSON data:', error)
+      isLoadingGeoJSON = false
+    }
+  })
 
   // load URL params if standalone page
   $: if (browser) {
@@ -99,28 +130,20 @@
 
 <div class="container" style="justify-content:{screenWidth < 800 ? 'center' : 'left'}">
   <div class="sidebar" style="position:{screenWidth > 800 ? 'fixed' : 'relative'}">
-    <div class="control-panel"><ControlPanel {indicatorsSelection} {allIndicators} /></div>
+    <div class="control-panel"><ControlPanel {indicatorsSelection} {allIndicators} isLoading={isLoadingGeoJSON} /></div>
     <div class="map" class:dordrecht={$configStore.categoryPath === '-dordrecht'} bind:clientWidth={mapWidth} bind:clientHeight={mapHeight}>
-      {#if data.municipalityGeoJson && data.neighbourhoodGeoJson}
-        <Map JSONdata={geoJSONData} CSVdata={data.buurtCSVdata} {mapWidth} {mapHeight} mapType={"main map"} />
-      {:else}
-        <pre style="color:white">Kaart laden...</pre>
-      {/if}
+      <Map JSONdata={geoJSONData} CSVdata={data.buurtCSVdata} {mapWidth} {mapHeight} mapType={"main map"} isLoading={isLoadingGeoJSON} />
     </div>
   </div>
 
   <div class="indicators" style="margin-left:{screenWidth > 800 ? 400 : 0}px">
-    {#if data.municipalityGeoJson && data.neighbourhoodGeoJson}
-      {#each displayedIndicators as indicator}
-        {#if getIndicatorAttribute(indicator, indicator.attribute)}
-          <div class="indicator" style="height:{indicatorHeight}px">
-            <Indicator {indicatorHeight} {indicator} />
-          </div>
-        {/if}
-      {/each}
-    {:else}
-      <LoadingIcon />
-    {/if}
+    {#each displayedIndicators as indicator}
+      {#if getIndicatorAttribute(indicator, indicator.attribute)}
+        <div class="indicator" style="height:{indicatorHeight}px">
+          <Indicator {indicatorHeight} {indicator} isLoading={isLoadingGeoJSON} />
+        </div>
+      {/if}
+    {/each}
   </div>
 
   <Tooltip />

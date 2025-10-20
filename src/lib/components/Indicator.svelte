@@ -8,6 +8,7 @@
 
   export let indicatorHeight
   export let indicator
+  export let isLoading = false
 
   // Get the dedicated store for this specific indicator - naturally isolated!
   const indicatorStore = getIndicatorStore(indicator.title)
@@ -92,9 +93,19 @@
 </script>
 
 <div class="indicator-div">
-  <IndicatorInfo {indicator} {graphWidth} />
-  <IndicatorTitle {indicator} {titleHeight} />
-  <IndicatorBody {indicator} {graphWidth} {bodyHeight} {indicatorValueColorscale} />
+  {#if isLoading}
+    <div class="indicator-skeleton">
+      <div class="skeleton-title"></div>
+      <div class="skeleton-content">
+        <div class="skeleton-chart"></div>
+        <div class="skeleton-map"></div>
+      </div>
+    </div>
+  {:else}
+    <IndicatorInfo {indicator} {graphWidth} />
+    <IndicatorTitle {indicator} {titleHeight} />
+    <IndicatorBody {indicator} {graphWidth} {bodyHeight} {indicatorValueColorscale} />
+  {/if}
 </div>
 
 <style>
@@ -104,5 +115,53 @@
     flex-direction: column;
     box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
     position: relative;
+  }
+
+  .indicator-skeleton {
+    height: 100%;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .skeleton-title {
+    height: 50px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+    border-radius: 8px;
+  }
+
+  .skeleton-content {
+    flex: 1;
+    display: flex;
+    gap: 16px;
+    flex-direction: column;
+  }
+
+  .skeleton-chart {
+    flex: 1;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+    border-radius: 8px;
+  }
+
+  .skeleton-map {
+    height: 200px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+    border-radius: 8px;
+  }
+
+  @keyframes loading {
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
   }
 </style>
