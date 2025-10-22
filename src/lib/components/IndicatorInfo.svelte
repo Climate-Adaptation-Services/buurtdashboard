@@ -11,7 +11,7 @@
   afterUpdate(() => {
     indicatorInfoPosition =
       window.innerWidth -
-        document.getElementsByClassName("indicator-info-" + getIndicatorAttribute(indicator, indicator.attribute))[0].getBoundingClientRect().right >
+        document.getElementsByClassName("indicator-info-" + indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', ''))[0].getBoundingClientRect().right >
       180
         ? graphWidth
         : 0
@@ -39,7 +39,7 @@
   on:mouseover={handleCategoryMouseOver}
   on:mouseout={handleCategoryMouseOut}
 />
-<div class={"indicator-info indicator-info-" + getIndicatorAttribute(indicator, indicator.attribute)} style="left:{indicatorInfoPosition}px">
+<div class={"indicator-info indicator-info-" + indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', '')} style="left:{indicatorInfoPosition}px">
   <p class="title" style="background-color:{$configStore.mainColor}">
     <strong>{indicator.title}</strong>
   </p>

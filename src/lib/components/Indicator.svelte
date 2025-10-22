@@ -27,8 +27,9 @@
   $: {
     // Create color scale when we have indicator data, either for selected municipality or all Netherlands
     const relevantData = $municipalitySelection !== null ? $neighbourhoodsInMunicipalityJSONData : $allNeighbourhoodsJSONData
-    
-    if (indicator && relevantData) {
+
+    // Allow initial rendering with default color scale even without data
+    if (indicator) {
       // Get the current AHN selection including BEB
       const ahnSelection = $indicatorStore || {}
       const isDifferenceMode = ahnSelection && typeof ahnSelection === "object" && ahnSelection.isDifference
@@ -54,6 +55,7 @@
         bebSelection: ahnSelection.beb, // Include BEB selection in memo key
         // Only include the actual data values for this indicator, not the entire store reference
         dataValues: relevantData?.features?.map((d) => d.properties[indicatorAttribute]).sort(),
+        hasData: !!relevantData?.features
       })
 
       // Only recreate color scale if the key actually changed
@@ -67,7 +69,10 @@
 
           let rangeExtent = [0, 1] // default value [0,1]
 
-          rangeExtent = extent(relevantData.features, (d) => +d.properties[indicatorAttribute])
+          // Only calculate extent if we have data, otherwise use config defaults
+          if (relevantData?.features) {
+            rangeExtent = extent(relevantData.features, (d) => +d.properties[indicatorAttribute])
+          }
 
           // this can deal with any amount of colors in the scale
           const step = (rangeExtent[1] - rangeExtent[0]) / (indicator.color.range.length - 1)
@@ -94,19 +99,9 @@
 </script>
 
 <div class="indicator-div">
-  {#if isLoading}
-    <div class="indicator-skeleton">
-      <div class="skeleton-title"></div>
-      <div class="skeleton-content">
-        <div class="skeleton-chart"></div>
-        <div class="skeleton-map"></div>
-      </div>
-    </div>
-  {:else}
-    <IndicatorInfo {indicator} {graphWidth} />
-    <IndicatorTitle {indicator} {titleHeight} />
-    <IndicatorBody {indicator} {graphWidth} {bodyHeight} {indicatorValueColorscale} />
-  {/if}
+  <IndicatorInfo {indicator} {graphWidth} />
+  <IndicatorTitle {indicator} {titleHeight} />
+  <IndicatorBody {indicator} {graphWidth} {bodyHeight} {indicatorValueColorscale} {isLoading} />
 </div>
 
 <style>

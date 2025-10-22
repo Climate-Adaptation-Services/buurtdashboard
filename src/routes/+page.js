@@ -15,19 +15,21 @@ export async function load({ url }) {
   // Select the appropriate config object based on URL parameter
   const configObj = configParam === 'dordrecht' ? dordrechtConfig : defaultConfig;
 
-  // Start lightweight fetches only (metadata and CSV)
+  // Start lightweight fetches (metadata, CSV, and Nederland aggregates)
   // GeoJSON will be loaded client-side for progressive rendering
-  const [metadataPromise, metadataEnglishPromise, csvPromise] = [
+  const [metadataPromise, metadataEnglishPromise, csvPromise, nederlandAggregatesPromise] = [
     fetch(configObj.metadataLocation),
     fetch(configObj.metadataLocationEnglish),
-    fetch(configObj.neighbourhoodCSVdataLocation)
+    fetch(configObj.neighbourhoodCSVdataLocation),
+    fetch('/nederland-aggregates.json').catch(() => null) // Don't fail if file doesn't exist
   ];
 
   // Wait for lightweight data only
-  const [metadataResponse, metadataEnglishResponse, csvResponse] = await Promise.all([
+  const [metadataResponse, metadataEnglishResponse, csvResponse, nederlandAggregatesResponse] = await Promise.all([
     metadataPromise,
     metadataEnglishPromise,
-    csvPromise
+    csvPromise,
+    nederlandAggregatesPromise
   ]);
 
   // Process the responses
@@ -52,12 +54,19 @@ export async function load({ url }) {
 
   const buurtCSVdata = dsvFormat(';').parse(csvText);
 
+  // Parse Nederland aggregates if available
+  let nederlandAggregates = null;
+  if (nederlandAggregatesResponse && nederlandAggregatesResponse.ok) {
+    nederlandAggregates = await nederlandAggregatesResponse.json();
+  }
+
   // Return immediately with null GeoJSON - will be loaded client-side
   return {
     lang,
     metadata,
     metadata_english,
     buurtCSVdata,
+    nederlandAggregates,
     neighbourhoodGeoJson: null,
     municipalityGeoJson: null
   };

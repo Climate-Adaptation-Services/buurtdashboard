@@ -5,6 +5,7 @@ export const municipalitySelection = writable(null);
 export const neighbourhoodSelection = writable(null);
 export const allMunicipalitiesJSONData = writable(null)
 export const allNeighbourhoodsJSONData = writable(null)
+export const nederlandAggregates = writable(null) // Pre-calculated Nederland values for fast initial load
 export const tooltipRegion = writable(null)
 export const tooltipValues = writable(null)
 // mousePosition is used for positioning the tooltip

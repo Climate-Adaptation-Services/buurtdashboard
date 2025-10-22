@@ -172,7 +172,7 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
         color: tooltipValueColor
       })
 
-      const mapElement = document.getElementsByClassName("indicator-map-" + indicator.attribute)[0]
+      const mapElement = document.getElementsByClassName("indicator-map-" + indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', ''))[0]
       const rectmap = mapElement.getBoundingClientRect();
       const featureCenter = projection(center(feature).geometry.coordinates)
       tooltipCenter = [featureCenter[0] + rectmap.left, featureCenter[1] + rectmap.top]
@@ -238,7 +238,7 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
         })
       }
 
-      let elem = document.getElementsByClassName('beeswarm_' + indicator.attribute)[0]
+      let elem = document.getElementsByClassName('beeswarm_' + indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', ''))[0]
       let rectmap = elem.getBoundingClientRect();
       tooltipCenter = [feature.x + rectmap.left + beeswarmMargin.left, rectmap.top + beeswarmMargin.top + feature.y + 10]
     }

@@ -34,7 +34,7 @@
 </div>
 <div class="indicator-graph" style="height:{graphHeight}px" bind:clientWidth={graphWidth}>
   {#if $municipalitySelection !== null}
-    <svg class={"beeswarm_" + indicator.attribute}>
+    <svg class={"beeswarm_" + indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', '')}>
       <BeeswarmPlot
         {graphWidth}
         indicatorHeight={graphHeight}

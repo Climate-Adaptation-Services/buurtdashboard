@@ -11,6 +11,7 @@
     modal,
     URLParams,
     allNeighbourhoodsJSONData,
+    nederlandAggregates,
     configStore,
   } from "$lib/stores"
   import { setupIndicators } from "$lib/services/setupIndicators.js"
@@ -38,6 +39,11 @@
 
   setLanguage(data)
   setupAHNSelecties(data)
+
+  // Set Nederland aggregates immediately for fast initial load
+  if (data.nederlandAggregates) {
+    nederlandAggregates.set(data.nederlandAggregates)
+  }
 
   let displayedIndicators = []
   let allIndicators = []

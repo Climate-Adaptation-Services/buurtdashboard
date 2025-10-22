@@ -10,6 +10,7 @@
     AHNSelecties,
     configStore,
     getIndicatorStore,
+    nederlandAggregates,
   } from "$lib/stores"
   import { scaleLinear, scaleBand, stack } from "d3"
   import { checkContrast } from "$lib/utils/checkContrast"
@@ -41,14 +42,31 @@
   }
 
   let nederlandValues
-  $: if ($indicatorStore) {
-    nederlandValues = calcPercentagesForEveryClass(indicator, $allNeighbourhoodsJSONData, "Nederland")
+  $: {
+    // ALWAYS use cached values for Nederland - never recalculate client-side
+    if ($nederlandAggregates && $nederlandAggregates.aggregates) {
+      const cached = $nederlandAggregates.aggregates[indicator.title];
+
+      if (cached !== undefined && typeof cached === 'object') {
+        // Check if this is a year-based value or class-based aggregated value
+        const ahnSelection = $indicatorStore;
+        const selectedYear = ahnSelection?.baseYear;
+
+        // If it has a year property, it's year-based, get that year's data
+        if (selectedYear && cached[selectedYear] !== undefined) {
+          nederlandValues = cached[selectedYear];
+        } else if (!selectedYear || !Object.keys(cached).some(key => /^\d{4}$/.test(key))) {
+          // No years in keys, so it's class-based aggregated data (Landbedekking, etc)
+          nederlandValues = cached;
+        }
+      }
+    }
   }
   let barPlotData = []
   let regios = []
 
   $: {
-    if ($neighbourhoodSelection !== null && $indicatorStore) {
+    if ($neighbourhoodSelection !== null && $indicatorStore && $allNeighbourhoodsJSONData) {
       if ($selectedNeighbourhoodJSONData.properties[$districtTypeAbbreviation]) {
         barPlotData = [
           nederlandValues,
@@ -65,10 +83,11 @@
         ]
         regios = ["Nederland", "Gemeente", "Buurt"]
       }
-    } else if ($municipalitySelection !== null && $indicatorStore) {
+    } else if ($municipalitySelection !== null && $indicatorStore && $allNeighbourhoodsJSONData) {
       barPlotData = [nederlandValues, calcPercentagesForEveryClass(indicator, $neighbourhoodsInMunicipalityJSONData, "Gemeente")]
       regios = ["Nederland", "Gemeente"]
-    } else if ($indicatorStore) {
+    } else if (nederlandValues) {
+      // Show Nederland immediately - don't wait for indicatorStore
       barPlotData = [nederlandValues]
       regios = ["Nederland"]
     }
@@ -84,7 +103,7 @@
     .range([0, (indicatorHeight - margin.top - margin.bottom) * (barPlotData.length / 2)])
 </script>
 
-<svg class={"barplot_" + indicator.attribute} style="height:74%">
+<svg class={"barplot_" + indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', '')} style="height:74%">
   <g class="inner-chart-bar" transform="translate(0, {margin.top})">
     {#each stackedData as stacked, i}
       <g class="stack" fill={indicatorValueColorscale(stacked.key)}>
@@ -92,7 +111,7 @@
           <rect
             on:mouseover={() => barPlotMouseOver(indicator, indicatorValueColorscale, st, stacked)}
             on:mouseout={barPlotMouseOut(indicator, st, stacked)}
-            class={"barplot_rect" + indicator.attribute + stacked.key.replaceAll(" ", "").replaceAll(">", "") + st.data.group}
+            class={"barplot_rect" + indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', '') + stacked.key.replaceAll(" ", "").replaceAll(">", "") + st.data.group}
             x={xScale(st[0])}
             y={yScale(st.data.group)}
             width={xScale(st[1]) - xScale(st[0])}

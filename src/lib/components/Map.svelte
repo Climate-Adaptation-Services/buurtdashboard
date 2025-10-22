@@ -217,7 +217,7 @@
     {/if}
   </div>
 {:else}
-  <svg class={"indicator-map-" + indicator.attribute} style="filter:drop-shadow(0 0 15px rgb(160, 160, 160))">
+  <svg class={"indicator-map-" + indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', '')} style="filter:drop-shadow(0 0 15px rgb(160, 160, 160))">
     <!-- svelte-ignore a11y-mouse-events-have-key-events -->
     <!-- svelte-ignore a11y-no-static-element-interactions -->
     {#if $currentJSONData.features && path && projection}
@@ -252,7 +252,7 @@
 {/if}
 
 {#if indicator && indicator.aggregatedIndicator === true}
-  <div class={"tooltip-multi tooltip-multi" + indicator.attribute}>
+  <div class={"tooltip-multi tooltip-multi" + indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', '')}>
     <p>{t("multi-indicator-map-explanation")}</p>
   </div>
 {/if}

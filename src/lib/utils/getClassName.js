@@ -9,7 +9,12 @@ export function getClassName(feature, type, indicator, mapType) {
   }
 
   let className = feature.properties[get(currentCodeAbbreviation)] + "_" + type
-  if (mapType !== 'main map') { className += '_' + indicator.attribute }
+  if (mapType !== 'main map') {
+    // Use indicator title instead of attribute to ensure uniqueness for aggregated indicators
+    // (multiple indicators can share the same first attribute, e.g., "Gebouwen_PercLand")
+    className += '_' + indicator.title
+  }
 
-  return className.replaceAll(' ', '').replaceAll('(', '').replaceAll(')', '')
+  // Remove spaces, parentheses, commas, and other special characters
+  return className.replaceAll(' ', '').replaceAll('(', '').replaceAll(')', '').replaceAll(',', '_').replaceAll('/', '_')
 }

@@ -1,0 +1,30 @@
+{
+  "version": "20250619",
+  "generatedAt": "2025-10-22T12:33:28.814Z",
+  "aggregates": {
+    "Boomkroonoppervlakte": 14.409085275884358,
+    "Boomkroonoppervlakte openbaar": 42.708517261458034,
+    "Boomkroonoppervlakte niet-openbaar ": 3.4676411111130707,
+    "Groen": 23.135742961258103,
+    "Groen openbaar": 65.70560314225796,
+    "Groen niet-openbaar": 7.62350080846302,
+    "Verharding ": 8.860344522580247,
+    "Verharding openbaar": 16.54046527619733,
+    "Verharding niet-openbaar": 6.347432100632317,
+    "Water": 8.86107831929681,
+    "Landbedekking ": {
+      "Gebouwen": 4.193510735717432,
+      "Verhard": 8.862970699981746,
+      "Halfverhard": 0.36329446428603496,
+      "Onverhard": 76.35240445750559,
+      "Gras": 8.536698588694028,
+      "Struiken": 1.6911210533129875
+    },
+    "Openbaar en niet-openbaar": {
+      "Gebouwen": 4.193510735717432,
+      "Openbaar": 27.256044281133928,
+      "Nietopenbaar": 68.56423059508823
+    },
+    "Groen per inwoner": 141.6636719
+  }
+}

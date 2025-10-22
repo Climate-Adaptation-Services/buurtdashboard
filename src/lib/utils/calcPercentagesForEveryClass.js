@@ -57,19 +57,8 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
         // Weight by surface area
         let value = +neighbourhood.properties[attributeName]
 
-        // If the percentage is calculated relative to land area but we're using a different
-        // surface area (e.g., openbaar or niet-openbaar), we need to convert the percentage
-        // The value represents: (actual_area / land_area) * 100
-        // We want: (actual_area / surface_area) * 100
-        // So: new_value = value * (land_area / surface_area)
-        if (surfaceAreaColumn && surfaceAreaColumn !== 'Oppervlakte_Land_m2' && surfaceAreaColumn !== 'Shape_Area') {
-          const landAreaColumn = surfaceAreaColumn.includes('_1') ? 'Oppervlakte_Land_m2_1' : 'Oppervlakte_Land_m2'
-          const landArea = +neighbourhood.properties[landAreaColumn]
-          if (landArea > 0 && neighbourhoodShapeArea > 0) {
-            value = value * (landArea / neighbourhoodShapeArea)
-          }
-        }
-
+        // Use raw percentage values directly - no conversion needed
+        // The weighted average formula naturally accounts for surface area differences
         tempKlasse.som += value * neighbourhoodShapeArea
       }
     });
