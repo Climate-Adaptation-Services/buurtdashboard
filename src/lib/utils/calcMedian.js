@@ -139,22 +139,11 @@ export const calcWeightedAverage = (features, valueExtractor, surfaceAreaColumn,
 
     if (value !== null && value !== undefined && !isNaN(+value) &&
         surfaceArea !== null && surfaceArea !== undefined && !isNaN(+surfaceArea)) {
-      let numValue = +value
+      const numValue = +value
       const numSurfaceArea = +surfaceArea
 
-      // If the percentage is calculated relative to land area but we're using a different
-      // surface area (e.g., openbaar or niet-openbaar), we need to convert the percentage
-      // The value represents: (actual_area / land_area) * 100
-      // We want: (actual_area / surface_area) * 100
-      // So: new_value = value * (land_area / surface_area)
-      if (actualSurfaceAreaColumn && actualSurfaceAreaColumn !== 'Oppervlakte_Land_m2' && actualSurfaceAreaColumn !== 'Shape_Area') {
-        const landAreaColumn = actualSurfaceAreaColumn.includes('_1') ? 'Oppervlakte_Land_m2_1' : 'Oppervlakte_Land_m2'
-        const landArea = +feature.properties?.[landAreaColumn]
-        if (landArea > 0 && numSurfaceArea > 0) {
-          numValue = numValue * (landArea / numSurfaceArea)
-        }
-      }
-
+      // Use raw percentage values directly - no conversion needed
+      // The weighted average formula naturally accounts for surface area differences
       totalWeightedSum += numValue * numSurfaceArea
       totalSurfaceArea += numSurfaceArea
       validCount++
@@ -177,18 +166,10 @@ export const calcWeightedAverage = (features, valueExtractor, surfaceAreaColumn,
 
       if (value !== null && value !== undefined && !isNaN(+value) &&
           surfaceArea !== null && surfaceArea !== undefined && !isNaN(+surfaceArea)) {
-        let numValue = +value
+        const numValue = +value
         const numSurfaceArea = +surfaceArea
 
-        // Apply the same conversion logic for the fallback case
-        if (surfaceAreaColumn && surfaceAreaColumn !== 'Oppervlakte_Land_m2' && surfaceAreaColumn !== 'Shape_Area') {
-          const landAreaColumn = surfaceAreaColumn.includes('_1') ? 'Oppervlakte_Land_m2_1' : 'Oppervlakte_Land_m2'
-          const landArea = +feature.properties?.[landAreaColumn]
-          if (landArea > 0 && numSurfaceArea > 0) {
-            numValue = numValue * (landArea / numSurfaceArea)
-          }
-        }
-
+        // Use raw percentage values directly - no conversion needed
         totalWeightedSum += numValue * numSurfaceArea
         totalSurfaceArea += numSurfaceArea
         validCount++

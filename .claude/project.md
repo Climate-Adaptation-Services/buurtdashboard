@@ -141,31 +141,66 @@ A SvelteKit-based neighborhood dashboard application for visualizing Dutch neigh
 
 ## Recent Improvements (2025-10-22)
 
-### Surface Area Weighting - TEMPORARILY REMOVED
+### Surface Area Weighting - Hybrid Approach
 
-**History**: Initially implemented surface area weighting for both aggregated stats (Nederland/Gemeente using weighted averages) and individual values (Buurt, beeswarm dots, map colors).
+**Current Implementation**: The application now uses a **hybrid approach** that combines weighted averages for regional aggregates with raw values for individual neighborhoods.
 
-**Issue Discovered**: After implementation, values exceeding 100% appeared, indicating potential data quality issues with the underlying data or conversion formula.
+**Aggregated Stats (Nederland/Gemeente)**:
+- **Weighted averages** when `indicator.surfaceArea` is specified
+- Formula: `sum(value * surface_area) / sum(surface_area)`
+- Represents the "true regional percentage" across all land
+- Accounts for neighborhood size differences
+- Example: If small neighborhoods have 80% but large neighborhoods have 20%, the weighted average reflects where most land area actually is
 
-**Current Status** (2025-10-22): **All surface area weighting has been temporarily disabled**:
-- Nederland aggregates: Using **simple median** (not weighted average)
-- Gemeente aggregates: Using **simple median** (not weighted average)
-- Individual neighborhood values: Using **raw percentage values** (no surface area conversion)
-- All visualizations (beeswarm, map, stats): Using **raw values**
+**Individual Neighborhood Values (Buurt/Wijktype)**:
+- **Raw percentage values** from the data (no surface area conversion)
+- Displays what each neighborhood actually experiences
+- Beeswarm plot dots: Raw values for positioning and colors
+- Map colors: Raw values
+- Stat bars: Raw values for display and positioning
 
-**Helper Function Preserved**: The `applySurfaceAreaConversion` function remains in `src/lib/utils/calcMedian.js` but is **not currently called** anywhere in the application. This allows for easy re-enablement once data quality issues are resolved.
+**Technical Implementation** (`src/lib/components/Stats.svelte`):
+```javascript
+// Nederland aggregate - uses weighted average when surfaceArea specified
+if (indicator.surfaceArea) {
+  return calcWeightedAverage(
+    $allNeighbourhoodsJSONData.features,
+    (neighbourhood) => getNumericalValue(neighbourhood, indicator),
+    indicator.surfaceArea,
+    indicator
+  )
+} else {
+  return calcMedian(values)
+}
 
-**Files Modified to Remove Weighting**:
-- `src/lib/components/Stats.svelte` - Reverted to simple median for Nederland/Gemeente, removed conversion for buurt/wijktype
-- `src/lib/components/BeeswarmPlot.svelte` - Removed pre-calculation and use of converted values
-- `src/lib/utils/getGlobalExtent.js` - Removed surface area conversion from extent calculation
-- `src/lib/map/mapColorUtils.js` - Removed surface area conversion from map colors
-- `src/lib/components/Indicator.svelte` - Removed surface area conversion from color scale domain
+// Individual buurt value - uses raw value
+buurtValue = getNumericalValue(feature, indicator)
+```
 
-**Next Steps**:
-1. Investigate data quality issues causing >100% values
-2. Verify conversion formula correctness
-3. Re-enable weighting once issues are resolved
+**Example Scenario**:
+For "Boomkroonoppervlakte openbaar" (tree crown in public areas):
+- Individual neighborhood shows: `25%` (raw percentage from data)
+- Nederland aggregate shows: `28%` (weighted by public area sizes)
+- The weighted average gives more weight to neighborhoods with larger public areas
+
+**Why This Approach**:
+- **Aggregates**: Weighted averages answer "What percentage of Nederland's public areas has tree crown?"
+- **Individual values**: Raw percentages answer "What percentage does this specific neighborhood have?"
+- **Best of both worlds**: Regional truth + neighborhood-level accuracy
+
+**Files Using Weighted Averages**:
+- `src/lib/components/Stats.svelte` - Nederland and Gemeente aggregates only
+
+**Files Using Raw Values**:
+- `src/lib/components/Stats.svelte` - Buurt and Wijktype display values
+- `src/lib/components/BeeswarmPlot.svelte` - Dot positioning and colors
+- `src/lib/utils/getGlobalExtent.js` - Extent calculation
+- `src/lib/map/mapColorUtils.js` - Map colors
+- `src/lib/components/Indicator.svelte` - Color scale domain
+
+**Helper Functions Available**:
+- `calcWeightedAverage` - Used for Nederland/Gemeente aggregates
+- `applySurfaceAreaConversion` - Available but not currently used (preserved for future use)
 
 ## Development Workflow
 
