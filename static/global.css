@@ -26,3 +26,20 @@ body {
   color: white;
   margin: 5px;
 }
+
+/* Ensure svelte-select dropdown always appears on top of the map */
+:global(.svelte-select-list) {
+  z-index: 9999 !important;
+  position: absolute !important;
+}
+
+:global(.svelte-select) {
+  position: relative;
+  z-index: 100;
+}
+
+/* Ensure control panel has higher stacking context than map */
+.control-panel {
+  position: relative;
+  z-index: 1000;
+}
