@@ -27,7 +27,7 @@
   // Reactive data filtering using value retrieval system
   $: {
     if ($indicatorStore) {
-      // MIGRATED: Filter using centralized value retrieval system 
+      // MIGRATED: Filter using centralized value retrieval system
       baseFilteredData = neighbourhoodsInMunicipalityFeaturesClone.filter((d) => {
         const rawValue = getRawValue(d, indicator)
         // For beeswarm plots, we need values that exist and are not null/empty
@@ -104,8 +104,8 @@
   $: xScaleExtent = differenceValues
     ? extent(differenceValues, (d) => d.diffValue)
     : extent(baseFilteredData, (d) => {
-        const rawValue = getRawValue(d, indicator)
-        return +rawValue
+        const value = getRawValue(d, indicator)
+        return +value
       })
 
   // Ensure the domain includes zero for difference plots and has appropriate padding
@@ -186,9 +186,8 @@
             // Use the pre-calculated difference value
             return xScaleBeeswarm(d.diffValue)
           } else {
-            // Use getRawValue to get the value with fallback support for BEB variants
-            const rawValue = getRawValue(d, indicator)
-            return xScaleBeeswarm(+rawValue)
+            const value = getRawValue(d, indicator)
+            return xScaleBeeswarm(+value)
           }
         }).strength(0.5),
       )
@@ -253,7 +252,10 @@
       cx={node.x}
       cy={node.y}
       r={$circleRadius}
-      fill={differenceValues ? indicatorValueColorscale(node.diffValue) : indicatorValueColorscale(getRawValue(node, indicator))}
+      fill={differenceValues
+        ? indicatorValueColorscale(node.diffValue)
+        : indicatorValueColorscale(getRawValue(node, indicator))
+      }
       stroke-width="3"
       on:mouseover={(e) => {
         // If we're showing a difference plot, add the diffValue to the node properties

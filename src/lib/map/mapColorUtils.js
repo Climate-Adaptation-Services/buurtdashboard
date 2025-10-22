@@ -83,7 +83,7 @@ export function getMapFillColor(feature, indicator, isDifferenceMode, difference
     } else {
       // For non-difference mode, use the value retrieval system for BEB-aware coloring
       // This matches BeeswarmPlot which now uses: getRawValue(node, indicator)
-      const value = getRawValue(feature, indicator)
+      let value = getRawValue(feature, indicator)
 
       return value !== null && value !== "" && !isNaN(value) ? indicatorValueColorscale(value) : "#000000"
     }

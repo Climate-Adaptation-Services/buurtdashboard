@@ -66,6 +66,7 @@
           const indicatorAttribute = getIndicatorAttribute(indicator, indicator.attribute)
 
           let rangeExtent = [0, 1] // default value [0,1]
+
           rangeExtent = extent(relevantData.features, (d) => +d.properties[indicatorAttribute])
 
           // this can deal with any amount of colors in the scale

@@ -139,6 +139,34 @@ A SvelteKit-based neighborhood dashboard application for visualizing Dutch neigh
 - Smooth transition to full functionality
 - Dramatically improved perceived performance
 
+## Recent Improvements (2025-10-22)
+
+### Surface Area Weighting - TEMPORARILY REMOVED
+
+**History**: Initially implemented surface area weighting for both aggregated stats (Nederland/Gemeente using weighted averages) and individual values (Buurt, beeswarm dots, map colors).
+
+**Issue Discovered**: After implementation, values exceeding 100% appeared, indicating potential data quality issues with the underlying data or conversion formula.
+
+**Current Status** (2025-10-22): **All surface area weighting has been temporarily disabled**:
+- Nederland aggregates: Using **simple median** (not weighted average)
+- Gemeente aggregates: Using **simple median** (not weighted average)
+- Individual neighborhood values: Using **raw percentage values** (no surface area conversion)
+- All visualizations (beeswarm, map, stats): Using **raw values**
+
+**Helper Function Preserved**: The `applySurfaceAreaConversion` function remains in `src/lib/utils/calcMedian.js` but is **not currently called** anywhere in the application. This allows for easy re-enablement once data quality issues are resolved.
+
+**Files Modified to Remove Weighting**:
+- `src/lib/components/Stats.svelte` - Reverted to simple median for Nederland/Gemeente, removed conversion for buurt/wijktype
+- `src/lib/components/BeeswarmPlot.svelte` - Removed pre-calculation and use of converted values
+- `src/lib/utils/getGlobalExtent.js` - Removed surface area conversion from extent calculation
+- `src/lib/map/mapColorUtils.js` - Removed surface area conversion from map colors
+- `src/lib/components/Indicator.svelte` - Removed surface area conversion from color scale domain
+
+**Next Steps**:
+1. Investigate data quality issues causing >100% values
+2. Verify conversion formula correctness
+3. Re-enable weighting once issues are resolved
+
 ## Development Workflow
 
 ### Commands

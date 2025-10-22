@@ -31,8 +31,8 @@ export function getGlobalExtent(indicator, neighbourhoodFeatures, isDifferenceMo
   // Handle special case for logarithmic scale
   if (indicator.title === "Groen per inwoner") {
     const validPositiveData = validData.filter(d => {
-      const rawValue = getRawValue(d, indicator);
-      return +rawValue > 0;
+      const value = getRawValue(d, indicator);
+      return value > 0;
     });
     if (validPositiveData.length > 0) {
       try {
