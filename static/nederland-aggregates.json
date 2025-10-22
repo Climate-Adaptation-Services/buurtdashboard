@@ -1,24 +1,64 @@
 {
   "version": "20250619",
-  "generatedAt": "2025-10-22T12:33:28.814Z",
+  "generatedAt": "2025-10-22T13:40:38.079Z",
   "aggregates": {
-    "Boomkroonoppervlakte": 14.409085275884358,
-    "Boomkroonoppervlakte openbaar": 42.708517261458034,
-    "Boomkroonoppervlakte niet-openbaar ": 3.4676411111130707,
-    "Groen": 23.135742961258103,
-    "Groen openbaar": 65.70560314225796,
-    "Groen niet-openbaar": 7.62350080846302,
-    "Verharding ": 8.860344522580247,
-    "Verharding openbaar": 16.54046527619733,
-    "Verharding niet-openbaar": 6.347432100632317,
-    "Water": 8.86107831929681,
+    "Boomkroonoppervlakte": {
+      "hele_buurt": 14.409085275884358,
+      "bebouwde_kom": 15.024625759506899
+    },
+    "Boomkroonoppervlakte openbaar": {
+      "hele_buurt": 42.708517261458034,
+      "bebouwde_kom": 24.23629503663057
+    },
+    "Boomkroonoppervlakte niet-openbaar ": {
+      "hele_buurt": 3.4676411111130707,
+      "bebouwde_kom": 11.212469209152442
+    },
+    "Groen": {
+      "hele_buurt": 23.135742961258103,
+      "bebouwde_kom": 26.99211700122158
+    },
+    "Groen openbaar": {
+      "hele_buurt": 65.70560314225796,
+      "bebouwde_kom": 47.14069053335278
+    },
+    "Groen niet-openbaar": {
+      "hele_buurt": 7.62350080846302,
+      "bebouwde_kom": 18.674061884382805
+    },
+    "Verharding ": {
+      "hele_buurt": 8.860344522580247,
+      "bebouwde_kom": 37.39487723499386
+    },
+    "Verharding openbaar": {
+      "hele_buurt": 16.54046527619733,
+      "bebouwde_kom": 46.559480836477476
+    },
+    "Verharding niet-openbaar": {
+      "hele_buurt": 6.347432100632317,
+      "bebouwde_kom": 44.8064169934297
+    },
+    "Water": {
+      "hele_buurt": 8.86107831929681,
+      "bebouwde_kom": 10.25338555724393
+    },
     "Landbedekking ": {
-      "Gebouwen": 4.193510735717432,
-      "Verhard": 8.862970699981746,
-      "Halfverhard": 0.36329446428603496,
-      "Onverhard": 76.35240445750559,
-      "Gras": 8.536698588694028,
-      "Struiken": 1.6911210533129875
+      "hele_buurt": {
+        "Gebouwen": 4.193510735717432,
+        "Verhard": 8.862970699981746,
+        "Halfverhard": 0.36329446428603496,
+        "Onverhard": 76.35240445750559,
+        "Gras": 8.536698588694028,
+        "Struiken": 1.6911210533129875
+      },
+      "bebouwde_kom": {
+        "Gebouwen": 19.262258933652593,
+        "Verhard": 37.40794052082009,
+        "Halfverhard": 0.8718627150121528,
+        "Onverhard": 36.51018106705034,
+        "Gras": 9.745974893162474,
+        "Struiken": 3.9317089762446926
+      }
     },
     "Openbaar en niet-openbaar": {
       "Gebouwen": 4.193510735717432,

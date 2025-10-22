@@ -23,7 +23,14 @@ import { feature } from 'topojson-client';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Import dataset configuration
+// Dataset configuration
+// ⚠️ IMPORTANT: Keep these values in sync with src/lib/datasets.ts
+// When you update DATASET_VERSION in datasets.ts, you MUST:
+// 1. Update DATASET_VERSION here to match
+// 2. Run this script: npm run precalculate-nederland
+//
+// The application will automatically detect version mismatches and warn you in the console:
+// "Nederland aggregates cache is outdated! Please run: npm run precalculate-nederland"
 const DATASET_VERSION = '20250619';
 const BUURT_GEOJSON_URL = "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/geojsondata/buurt24IdentificationOnly.json";
 const DEFAULT_METADATA_URL = "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/metadata/TESTBASISKAARTGROEN-metadata-buurtdashboard(in)(3).csv";
@@ -167,13 +174,16 @@ function prepareJSONData(geoJson, csvData) {
 }
 
 // Calculate Nederland aggregate for a single indicator
-function calculateNederlandAggregate(indicator, jsonData, year = null) {
+function calculateNederlandAggregate(indicator, jsonData, year = null, bebOption = null) {
   const features = jsonData.features;
 
-  // Determine the attribute name with year suffix if applicable
+  // Determine the attribute name with year suffix and BEB suffix if applicable
   let attributeName = indicator.attribute;
   if (year) {
     attributeName = `${indicator.attribute}_${year}`;
+  }
+  if (bebOption === 'bebouwde_kom') {
+    attributeName = `${attributeName}_1`;
   }
 
   if (indicator.numerical) {
@@ -187,10 +197,9 @@ function calculateNederlandAggregate(indicator, jsonData, year = null) {
       // Use weighted average
       let surfaceAreaColumn = indicator.surfaceArea;
 
-      // Handle BEB variants (bebouwde kom)
-      if (indicator.variants && indicator.variants.split(',').map(v => v.trim()).includes('1')) {
-        // For BEB variant, we'd need the store value, but for pre-calculation we'll use base
-        // The UI will handle BEB selection dynamically
+      // Handle BEB variants for surface area column
+      if (bebOption === 'bebouwde_kom') {
+        surfaceAreaColumn = `${surfaceAreaColumn}_1`;
       }
 
       return calcWeightedAverage(features, valueExtractor, surfaceAreaColumn);
@@ -205,14 +214,22 @@ function calculateNederlandAggregate(indicator, jsonData, year = null) {
     // For aggregated indicators, calculate for each class
     const result = {};
     Object.keys(indicator.classes).forEach(className => {
-      const classAttribute = year ? `${indicator.classes[className]}_${year}` : indicator.classes[className];
+      let classAttribute = year ? `${indicator.classes[className]}_${year}` : indicator.classes[className];
+      if (bebOption === 'bebouwde_kom') {
+        classAttribute = `${classAttribute}_1`;
+      }
+
       const valueExtractor = (feature) => {
         const value = feature.properties[classAttribute];
         return (value !== null && value !== undefined && value !== '' && !isNaN(value)) ? +value : null;
       };
 
       if (indicator.surfaceArea) {
-        result[className] = calcWeightedAverage(features, valueExtractor, indicator.surfaceArea);
+        let surfaceAreaColumn = indicator.surfaceArea;
+        if (bebOption === 'bebouwde_kom') {
+          surfaceAreaColumn = `${surfaceAreaColumn}_1`;
+        }
+        result[className] = calcWeightedAverage(features, valueExtractor, surfaceAreaColumn);
       } else {
         const values = features.map(valueExtractor).filter(v => v !== null);
         result[className] = calcMedian(values);
@@ -286,12 +303,57 @@ async function main() {
     const nederlandAggregates = {};
 
     for (const indicator of indicators) {
+      // Check if indicator has BEB variants
+      const hasBEBVariant = indicator.variants && indicator.variants.split(',').map(v => v.trim()).includes('1');
+
       // Get available years for this indicator
       const years = getAvailableYears(csvData, indicator.attribute);
-      console.log(`   Processing: ${indicator.title} (${years.length > 0 ? years.join(', ') : 'single value'})`);
+      console.log(`   Processing: ${indicator.title} (${years.length > 0 ? years.join(', ') : 'single value'}${hasBEBVariant ? ', BEB' : ''})`);
 
-      if (years.length > 0) {
-        // Multi-year indicator
+      if (hasBEBVariant) {
+        // BEB variant indicator - calculate for both hele_buurt and bebouwde_kom
+        nederlandAggregates[indicator.title] = {
+          hele_buurt: {},
+          bebouwde_kom: {}
+        };
+
+        const bebOptions = ['hele_buurt', 'bebouwde_kom'];
+
+        for (const bebOption of bebOptions) {
+          if (years.length > 0) {
+            // Multi-year BEB indicator
+            nederlandAggregates[indicator.title][bebOption] = {};
+            for (const year of years) {
+              const value = calculateNederlandAggregate(indicator, jsonData, year, bebOption);
+              if (value !== null) {
+                nederlandAggregates[indicator.title][bebOption][year] = value;
+              }
+            }
+          } else {
+            // Single value BEB indicator
+            const value = calculateNederlandAggregate(indicator, jsonData, null, bebOption);
+            console.log(`  ${bebOption}: ${value}`);
+            if (value !== null && value !== undefined) {
+              nederlandAggregates[indicator.title][bebOption] = value;
+            }
+          }
+        }
+
+        // Clean up completely empty entries
+        const helebuurtEmpty =
+          (nederlandAggregates[indicator.title].hele_buurt === undefined) ||
+          (typeof nederlandAggregates[indicator.title].hele_buurt === 'object' &&
+           Object.keys(nederlandAggregates[indicator.title].hele_buurt).length === 0);
+        const bebouwdekomEmpty =
+          (nederlandAggregates[indicator.title].bebouwde_kom === undefined) ||
+          (typeof nederlandAggregates[indicator.title].bebouwde_kom === 'object' &&
+           Object.keys(nederlandAggregates[indicator.title].bebouwde_kom).length === 0);
+
+        if (helebuurtEmpty && bebouwdekomEmpty) {
+          delete nederlandAggregates[indicator.title];
+        }
+      } else if (years.length > 0) {
+        // Multi-year indicator (no BEB)
         nederlandAggregates[indicator.title] = {};
         for (const year of years) {
           const value = calculateNederlandAggregate(indicator, jsonData, year);
@@ -304,7 +366,7 @@ async function main() {
           delete nederlandAggregates[indicator.title];
         }
       } else {
-        // Single value indicator
+        // Single value indicator (no BEB, no years)
         const value = calculateNederlandAggregate(indicator, jsonData);
         if (value !== null) {
           nederlandAggregates[indicator.title] = value;

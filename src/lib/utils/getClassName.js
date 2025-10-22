@@ -15,6 +15,14 @@ export function getClassName(feature, type, indicator, mapType) {
     className += '_' + indicator.title
   }
 
-  // Remove spaces, parentheses, commas, and other special characters
-  return className.replaceAll(' ', '').replaceAll('(', '').replaceAll(')', '').replaceAll(',', '_').replaceAll('/', '_')
+  // Remove spaces, parentheses, commas, and other special characters that are invalid in CSS selectors
+  return className
+    .replaceAll(' ', '')
+    .replaceAll('(', '')
+    .replaceAll(')', '')
+    .replaceAll(',', '_')
+    .replaceAll('/', '_')
+    .replaceAll('%', 'pct')
+    .replaceAll('.', '_')
+    .replaceAll(':', '_')
 }

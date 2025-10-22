@@ -39,20 +39,36 @@
     let nederlandMedian = null;
 
     if ($nederlandAggregates && $nederlandAggregates.aggregates) {
-      const cached = $nederlandAggregates.aggregates[indicator.title];
+      let cached = $nederlandAggregates.aggregates[indicator.title];
+
+      console.log(`Stats Nederland lookup for ${indicator.title}:`, {
+        cached,
+        hasBEB: cached && cached.hele_buurt !== undefined,
+        bebSelection: currentAHNSelection?.beb
+      });
 
       if (cached !== undefined) {
-        // Check if it's a year-based object or a simple value
-        if (typeof cached === 'object' && !Array.isArray(cached)) {
+        // Check for BEB variants first
+        if (cached && cached.hele_buurt !== undefined && cached.bebouwde_kom !== undefined) {
+          // BEB indicator - get the correct variant
+          const bebSelection = currentAHNSelection?.beb || 'hele_buurt';
+          cached = cached[bebSelection];
+          console.log(`  Using BEB variant ${bebSelection}:`, cached);
+        }
+
+        // Now check if it's a year-based object or a simple value
+        if (cached && typeof cached === 'object' && !Array.isArray(cached)) {
           // Multi-year indicator - get the value for the selected year
           const selectedYear = currentAHNSelection?.baseYear;
           if (selectedYear && cached[selectedYear] !== undefined) {
             nederlandMedian = cached[selectedYear];
           }
-        } else if (typeof cached !== 'object' || Array.isArray(cached)) {
+        } else if (cached !== undefined && (typeof cached !== 'object' || Array.isArray(cached))) {
           // Simple value or aggregated indicator classes
           nederlandMedian = cached;
         }
+
+        console.log(`  Final nederlandMedian:`, nederlandMedian);
       }
     }
 
@@ -139,17 +155,24 @@
     let nederlandScale = null;
 
     if ($nederlandAggregates && $nederlandAggregates.aggregates) {
-      const cached = $nederlandAggregates.aggregates[indicator.title];
+      let cached = $nederlandAggregates.aggregates[indicator.title];
 
       if (cached !== undefined) {
-        // Check if it's a year-based object or a simple value
-        if (typeof cached === 'object' && !Array.isArray(cached)) {
+        // Check for BEB variants first
+        if (cached && cached.hele_buurt !== undefined && cached.bebouwde_kom !== undefined) {
+          // BEB indicator - get the correct variant
+          const bebSelection = currentAHNSelection?.beb || 'hele_buurt';
+          cached = cached[bebSelection];
+        }
+
+        // Now check if it's a year-based object or a simple value
+        if (cached && typeof cached === 'object' && !Array.isArray(cached)) {
           // Multi-year indicator - get the value for the selected year
           const selectedYear = currentAHNSelection?.baseYear;
           if (selectedYear && cached[selectedYear] !== undefined) {
             nederlandScale = cached[selectedYear];
           }
-        } else if (typeof cached !== 'object' || Array.isArray(cached)) {
+        } else if (cached !== undefined && (typeof cached !== 'object' || Array.isArray(cached))) {
           // Simple value
           nederlandScale = cached;
         }

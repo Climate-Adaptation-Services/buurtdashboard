@@ -1,7 +1,7 @@
 import { dsvFormat } from 'd3-dsv'
 import { defaultConfig, dordrechtConfig } from '$lib/config'
 import { unzipSync, gunzipSync, strFromU8 } from 'fflate'
-import { BUURT_GEOJSON_URL, MUNICIPALITY_JSON_URL } from '$lib/datasets'
+import { BUURT_GEOJSON_URL, MUNICIPALITY_JSON_URL, DATASET_VERSION } from '$lib/datasets'
 import { prepareJSONData } from '$lib/services/prepareJSONData'
 
 export async function load({ url }) {
@@ -58,6 +58,18 @@ export async function load({ url }) {
   let nederlandAggregates = null;
   if (nederlandAggregatesResponse && nederlandAggregatesResponse.ok) {
     nederlandAggregates = await nederlandAggregatesResponse.json();
+
+    // Check if cached version matches current dataset version
+    if (nederlandAggregates && nederlandAggregates.version !== DATASET_VERSION) {
+      console.warn(
+        `Nederland aggregates cache is outdated!\n` +
+        `Cached version: ${nederlandAggregates.version}\n` +
+        `Current DATASET_VERSION: ${DATASET_VERSION}\n` +
+        `Please run: npm run precalculate-nederland`
+      );
+      // Still use the cached data but mark it as potentially stale
+      nederlandAggregates._stale = true;
+    }
   }
 
   // Return immediately with null GeoJSON - will be loaded client-side

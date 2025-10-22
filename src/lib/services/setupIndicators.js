@@ -25,28 +25,34 @@ function addIndicatorCategory(indicatorsList, indicators) {
   indicatorsList.push({ title: { 'label': indicators[0].Categorie, 'disabled': true } })
 
   indicators.forEach(indicator => {
+    // Skip indicators with empty title
+    if (!indicator.Titel || indicator.Titel === '') return;
 
     let classes = { 'No data': '-10' }
     // add no data class
-    const indicatorDomein = ['No data', ...indicator.Domein.split(',')]
+    const indicatorDomein = ['No data', ...(indicator.Domein ? indicator.Domein.split(',') : [])]
     const noDataColor = '#333333'
     const indicatorColors = (indicator['kwantitatief / categoraal / aggregated'] !== 'kwantitatief')
-      ? [noDataColor, ...indicator.Kleur.split(',')]
-      : indicator.Kleur.split(',')
+      ? [noDataColor, ...(indicator.Kleur ? indicator.Kleur.split(',') : [])]
+      : (indicator.Kleur ? indicator.Kleur.split(',') : [])
 
     if (indicator['kwantitatief / categoraal / aggregated'] !== 'categoraal') {
       indicatorDomein.slice(1).forEach((d, i) => {
-        classes[d] = indicator.Indicatornaamtabel.split(',')[i]
+        if (indicator.Indicatornaamtabel) {
+          classes[d] = indicator.Indicatornaamtabel.split(',')[i]
+        }
       });
     } else {
       indicatorDomein.slice(1).forEach((d, i) => {
-        classes[d] = indicator.klassenthresholds.split(',')[i]
+        if (indicator.klassenthresholds) {
+          classes[d] = indicator.klassenthresholds.split(',')[i]
+        }
       });
     }
 
     indicatorsList.push({
       title: indicator.Titel,
-      attribute: indicator.Indicatornaamtabel.split(',')[0],
+      attribute: indicator.Indicatornaamtabel ? indicator.Indicatornaamtabel.split(',')[0] : '',
       subtitle: indicator.Subtitel,
       plottitle: indicator['Plottitel (enkel bij kwantitatief)'],
       category: indicator.Categorie,

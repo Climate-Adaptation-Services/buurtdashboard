@@ -41,23 +41,35 @@
     return Math.round(percentageValue * 10) / 10
   }
 
-  let nederlandValues
+  let nederlandValues = null
   $: {
     // ALWAYS use cached values for Nederland - never recalculate client-side
+    nederlandValues = null // Reset first
+
     if ($nederlandAggregates && $nederlandAggregates.aggregates) {
-      const cached = $nederlandAggregates.aggregates[indicator.title];
+      let cached = $nederlandAggregates.aggregates[indicator.title];
 
-      if (cached !== undefined && typeof cached === 'object') {
-        // Check if this is a year-based value or class-based aggregated value
-        const ahnSelection = $indicatorStore;
-        const selectedYear = ahnSelection?.baseYear;
+      if (cached !== undefined) {
+        // Check for BEB variants first
+        if (cached && cached.hele_buurt !== undefined && cached.bebouwde_kom !== undefined) {
+          // BEB indicator - get the correct variant
+          const ahnSelection = $indicatorStore;
+          const bebSelection = ahnSelection?.beb || 'hele_buurt';
+          cached = cached[bebSelection];
+        }
 
-        // If it has a year property, it's year-based, get that year's data
-        if (selectedYear && cached[selectedYear] !== undefined) {
-          nederlandValues = cached[selectedYear];
-        } else if (!selectedYear || !Object.keys(cached).some(key => /^\d{4}$/.test(key))) {
-          // No years in keys, so it's class-based aggregated data (Landbedekking, etc)
-          nederlandValues = cached;
+        if (cached && typeof cached === 'object' && !Array.isArray(cached)) {
+          // Check if this is a year-based value or class-based aggregated value
+          const ahnSelection = $indicatorStore;
+          const selectedYear = ahnSelection?.baseYear;
+
+          // If it has a year property, it's year-based, get that year's data
+          if (selectedYear && cached[selectedYear] !== undefined) {
+            nederlandValues = cached[selectedYear];
+          } else if (!selectedYear || !Object.keys(cached).some(key => /^\d{4}$/.test(key))) {
+            // No years in keys, so it's class-based aggregated data (Landbedekking, etc)
+            nederlandValues = cached;
+          }
         }
       }
     }
@@ -66,33 +78,72 @@
   let regios = []
 
   $: {
-    if ($neighbourhoodSelection !== null && $indicatorStore && $allNeighbourhoodsJSONData) {
-      if ($selectedNeighbourhoodJSONData.properties[$districtTypeAbbreviation]) {
-        barPlotData = [
-          nederlandValues,
-          calcPercentagesForEveryClass(indicator, $neighbourhoodsInMunicipalityJSONData, "Gemeente"),
-          calcPercentagesForEveryClass(indicator, { type: "FeatureCollection", features: [$selectedNeighbourhoodJSONData] }, "Buurt"),
-          calcPercentagesForEveryClass(indicator, $districtTypeJSONData, "Wijktype"),
-        ]
-        regios = ["Nederland", "Gemeente", "Buurt", "Wijktype"]
-      } else {
-        barPlotData = [
-          nederlandValues,
-          calcPercentagesForEveryClass(indicator, $neighbourhoodsInMunicipalityJSONData, "Gemeente"),
-          calcPercentagesForEveryClass(indicator, { type: "FeatureCollection", features: [$selectedNeighbourhoodJSONData] }, "Buurt"),
-        ]
-        regios = ["Nederland", "Gemeente", "Buurt"]
+    // Build barPlotData based on current selection state
+    const data = []
+    const regions = []
+
+    // Helper to add a level if data exists
+    const addLevel = (regio, jsonData) => {
+      if (!jsonData) {
+        console.warn(`BarPlot: No jsonData for ${regio}`)
+        return
       }
-    } else if ($municipalitySelection !== null && $indicatorStore && $allNeighbourhoodsJSONData) {
-      barPlotData = [nederlandValues, calcPercentagesForEveryClass(indicator, $neighbourhoodsInMunicipalityJSONData, "Gemeente")]
-      regios = ["Nederland", "Gemeente"]
-    } else if (nederlandValues) {
-      // Show Nederland immediately - don't wait for indicatorStore
-      barPlotData = [nederlandValues]
-      regios = ["Nederland"]
+
+      const calculated = calcPercentagesForEveryClass(indicator, jsonData, regio)
+      if (calculated && typeof calculated === 'object' && Object.keys(calculated).length > 1) {
+        data.push(calculated)
+        regions.push(regio)
+      } else {
+        console.warn(`BarPlot: Failed to calculate data for ${indicator.title} at ${regio} level`, calculated)
+      }
     }
+
+    // Add Nederland if available (not available for municipality-specific dashboards like Dordrecht)
+    if (nederlandValues) {
+      data.push(nederlandValues)
+      regions.push("Nederland")
+    }
+
+    // Add municipality level if selected
+    if ($municipalitySelection !== null && $indicatorStore && $allNeighbourhoodsJSONData) {
+      console.log(`BarPlot: Municipality selected: ${$municipalitySelection}`)
+      console.log(`BarPlot: neighbourhoodsInMunicipalityJSONData features:`, $neighbourhoodsInMunicipalityJSONData?.features?.length)
+      addLevel("Gemeente", $neighbourhoodsInMunicipalityJSONData)
+    }
+
+    // Add neighbourhood level if selected
+    if ($neighbourhoodSelection !== null && $indicatorStore && $allNeighbourhoodsJSONData) {
+      addLevel("Buurt", { type: "FeatureCollection", features: [$selectedNeighbourhoodJSONData] })
+
+      // Add district type if available
+      if ($selectedNeighbourhoodJSONData.properties[$districtTypeAbbreviation]) {
+        addLevel("Wijktype", $districtTypeJSONData)
+      }
+    }
+
+    barPlotData = data
+    regios = regions
   }
-  $: stackedData = stack().keys(Object.keys(indicator.classes))(barPlotData)
+  // Create stacked data for D3 visualization
+  $: stackedData = (() => {
+    if (!indicator.classes || barPlotData.length === 0) return []
+
+    const classKeys = Object.keys(indicator.classes)
+
+    // Validate data structure - each item should have at least one class key
+    const isValid = barPlotData.every(item =>
+      item && typeof item === 'object' && classKeys.some(key => key in item)
+    )
+
+    if (!isValid) return []
+
+    try {
+      return stack().keys(classKeys)(barPlotData)
+    } catch (error) {
+      console.warn(`Failed to create stack for "${indicator.title}":`, error)
+      return []
+    }
+  })()
 
   $: xScale = scaleLinear()
     .domain([0, 100])

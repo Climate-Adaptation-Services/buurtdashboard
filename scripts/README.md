@@ -30,6 +30,17 @@ Run the pre-calculation script whenever:
 - Indicator definitions change
 - Before deploying a new version
 
+**Important**: The script automatically imports `DATASET_VERSION` from `src/lib/datasets.ts`. When you update the dataset version, the application will automatically detect if the cached aggregates are outdated and show a warning in the console:
+
+```
+Nederland aggregates cache is outdated!
+Cached version: 20250619
+Current DATASET_VERSION: 20250620
+Please run: npm run precalculate-nederland
+```
+
+This ensures you never forget to regenerate the cached values after updating the dataset.
+
 ### How to Run
 
 ```bash
@@ -129,13 +140,54 @@ When users change the year selection, the dashboard automatically pulls the corr
 
 ## Updating Datasets
 
-When you update the dataset:
+When you update the dataset, follow these steps in order:
 
-1. Update `DATASET_VERSION` in `src/lib/datasets.ts`
+### Step 1: Update datasets.ts
+1. Update `DATASET_VERSION` in `src/lib/datasets.ts` (e.g., `'20250619'` → `'20250620'`)
 2. Update URLs if needed (metadata, CSV, GeoJSON)
-3. Run `npm run precalculate-nederland`
-4. Commit the updated `static/nederland-aggregates.json` file
-5. Deploy
+
+### Step 2: Update the pre-calculation script
+1. Open `scripts/precalculate-nederland.js`
+2. Update the `DATASET_VERSION` constant to match `datasets.ts`
+3. Update URLs if they changed
+
+### Step 3: Regenerate cached aggregates
+```bash
+npm run precalculate-nederland
+```
+
+### Step 4: Test and verify
+1. Start the dev server: `npm run dev`
+2. Open the browser console
+3. Verify NO warning appears about outdated cache
+4. Check that Nederland values display correctly
+
+### Step 5: Commit and deploy
+```bash
+git add src/lib/datasets.ts scripts/precalculate-nederland.js static/nederland-aggregates.json
+git commit -m "Update dataset to version YYYYMMDD"
+git push
+```
+
+### Automatic Version Checking
+
+The application includes automatic version mismatch detection:
+
+**What happens if versions don't match:**
+- When the app loads, `src/routes/+page.js` compares `DATASET_VERSION` from `datasets.ts` with the cached `version` in `nederland-aggregates.json`
+- If they don't match, a warning appears in the browser console:
+  ```
+  Nederland aggregates cache is outdated!
+  Cached version: 20250619
+  Current DATASET_VERSION: 20250620
+  Please run: npm run precalculate-nederland
+  ```
+- The app still uses the cached data (marked as `_stale`) but you should regenerate it ASAP
+
+**This prevents:**
+- Forgetting to regenerate cached values after updating datasets
+- Deploying with mismatched data versions
+- Inconsistent Nederland statistics
 
 ## Troubleshooting
 

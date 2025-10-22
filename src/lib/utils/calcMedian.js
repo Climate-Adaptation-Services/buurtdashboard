@@ -36,8 +36,13 @@ export const calcMedian = (array) => {
  * @returns {number|string} Weighted average or "Geen data" if no valid data
  */
 export const calcWeightedAverage = (features, valueExtractor, surfaceAreaColumn, indicator = null) => {
-  if (!features || features.length === 0 || !surfaceAreaColumn) {
+  if (!features || features.length === 0) {
     return "Geen data"
+  }
+
+  // Special handling for "Totale buurt" - map to standard column
+  if (surfaceAreaColumn === 'Totale buurt') {
+    surfaceAreaColumn = 'Oppervlakte_Land_m2'
   }
 
   // Check if we need to apply BEB suffix to surface area column
@@ -67,10 +72,14 @@ export const calcWeightedAverage = (features, valueExtractor, surfaceAreaColumn,
 
   features.forEach(feature => {
     const value = valueExtractor(feature)
-    const surfaceArea = feature.properties?.[actualSurfaceAreaColumn]
+    let surfaceArea = feature.properties?.[actualSurfaceAreaColumn]
 
-    if (value !== null && value !== undefined && !isNaN(+value) &&
-        surfaceArea !== null && surfaceArea !== undefined && !isNaN(+surfaceArea)) {
+    // If surface area column doesn't exist or is 0, default to 1 (equal weight)
+    if (surfaceArea === null || surfaceArea === undefined || isNaN(+surfaceArea) || +surfaceArea === 0) {
+      surfaceArea = 1
+    }
+
+    if (value !== null && value !== undefined && !isNaN(+value)) {
       const numValue = +value
       const numSurfaceArea = +surfaceArea
 
@@ -94,10 +103,14 @@ export const calcWeightedAverage = (features, valueExtractor, surfaceAreaColumn,
 
     features.forEach(feature => {
       const value = valueExtractor(feature)
-      const surfaceArea = feature.properties?.[surfaceAreaColumn]
+      let surfaceArea = feature.properties?.[surfaceAreaColumn]
 
-      if (value !== null && value !== undefined && !isNaN(+value) &&
-          surfaceArea !== null && surfaceArea !== undefined && !isNaN(+surfaceArea)) {
+      // If surface area column doesn't exist or is 0, default to 1 (equal weight)
+      if (surfaceArea === null || surfaceArea === undefined || isNaN(+surfaceArea) || +surfaceArea === 0) {
+        surfaceArea = 1
+      }
+
+      if (value !== null && value !== undefined && !isNaN(+value)) {
         const numValue = +value
         const numSurfaceArea = +surfaceArea
 
@@ -111,7 +124,8 @@ export const calcWeightedAverage = (features, valueExtractor, surfaceAreaColumn,
     })
   }
 
-  if (totalSurfaceArea === 0) {
+  // If still no valid data after all attempts, return "Geen data"
+  if (validCount === 0 || totalSurfaceArea === 0) {
     return "Geen data"
   }
 
