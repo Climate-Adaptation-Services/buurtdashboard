@@ -206,14 +206,12 @@
     }
 
     // Update the store
-    const newState = {
+    indicatorStore.set({
       baseYear: finalBaseYear,
       compareYear: finalCompareYear,
       isDifference: newIsDifference,
       beb: currentSelection.beb
-    };
-    console.log(`🔄 YearSwitch updating store for ${indicator.title}:`, newState);
-    indicatorStore.set(newState);
+    });
   }
 
   /**

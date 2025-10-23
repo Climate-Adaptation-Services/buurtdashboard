@@ -78,11 +78,9 @@
     // FALLBACK: If no cached value and we have all neighborhoods data, calculate client-side
     // This handles AHN version switches and other cases where cache doesn't have the exact variant
     if (!nederlandValues && $allNeighbourhoodsJSONData && $indicatorStore) {
-      console.log(`BarPlot: No cached Nederland value for ${indicator.title}, calculating client-side`);
       const calculated = calcPercentagesForEveryClass(indicator, $allNeighbourhoodsJSONData, "Nederland");
       if (calculated && typeof calculated === 'object' && Object.keys(calculated).length > 1) {
         nederlandValues = calculated;
-        console.log(`BarPlot: Calculated Nederland values:`, nederlandValues);
       }
     }
   }
@@ -118,8 +116,6 @@
 
     // Add municipality level if selected
     if ($municipalitySelection !== null && $indicatorStore && $allNeighbourhoodsJSONData) {
-      console.log(`BarPlot: Municipality selected: ${$municipalitySelection}`)
-      console.log(`BarPlot: neighbourhoodsInMunicipalityJSONData features:`, $neighbourhoodsInMunicipalityJSONData?.features?.length)
       addLevel("Gemeente", $neighbourhoodsInMunicipalityJSONData)
     }
 

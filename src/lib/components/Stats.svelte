@@ -37,7 +37,6 @@
   $: medianValuesDict = (() => {
     // Read the store directly to ensure Svelte tracks this dependency
     const _storeValue = $indicatorStore
-    console.log(`🔄 Stats medianValuesDict re-calculating for ${indicator.title}`, currentAHNSelection);
 
     // Nederland calculation - DISPLAY VALUES (weighted average when surface area specified)
     // Try cached values first, fall back to client-side calculation if needed
@@ -46,20 +45,12 @@
     if ($nederlandAggregates && $nederlandAggregates.aggregates) {
       let cached = $nederlandAggregates.aggregates[indicator.title];
 
-      console.log(`Stats Nederland lookup for ${indicator.title}:`, {
-        cached,
-        hasBEB: cached && cached.hele_buurt !== undefined,
-        bebSelection: currentAHNSelection?.beb,
-        selectedYear: currentAHNSelection?.baseYear
-      });
-
       if (cached !== undefined) {
         // Check for BEB variants first
         if (cached && cached.hele_buurt !== undefined && cached.bebouwde_kom !== undefined) {
           // BEB indicator - get the correct variant
           const bebSelection = currentAHNSelection?.beb || 'hele_buurt';
           cached = cached[bebSelection];
-          console.log(`  Using BEB variant ${bebSelection}:`, cached);
         }
 
         // Now check if it's a year-based object or a simple value
@@ -73,15 +64,12 @@
           // Simple value or aggregated indicator classes
           nederlandMedian = cached;
         }
-
-        console.log(`  Final nederlandMedian from cache:`, nederlandMedian);
       }
     }
 
     // FALLBACK: If no cached value and we have all neighborhoods data, calculate client-side
     // This handles AHN version switches and other cases where cache doesn't have the exact variant
     if (nederlandMedian === null && $allNeighbourhoodsJSONData && $allNeighbourhoodsJSONData.features && currentAHNSelection) {
-      console.log(`  No cached value, calculating Nederland client-side for ${indicator.title}`);
 
       if (isDifferenceMode) {
         nederlandMedian = calcMedian(
@@ -106,8 +94,6 @@
           )
         }
       }
-
-      console.log(`  Calculated Nederland value:`, nederlandMedian);
     }
 
     // Municipality calculation - DISPLAY VALUES (weighted average when surface area specified)
@@ -187,7 +173,6 @@
   $: scaleValuesDict = (() => {
     // Read the store directly to ensure Svelte tracks this dependency
     const _storeValue = $indicatorStore
-    console.log(`🔄 Stats scaleValuesDict re-calculating for ${indicator.title}`, currentAHNSelection);
 
     // Get the original attribute (always percentage, no unit conversion)
     const originalAttribute = getIndicatorAttribute(indicator, indicator.attribute)
