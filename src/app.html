@@ -41,6 +41,17 @@
 		%sveltekit.head%
 	</head>
 	<body data-sveltekit-preload-data="hover">
+		<!-- Pure HTML loading screen - shows immediately -->
+		<div id="app-loading" style="position:fixed;top:0;left:0;width:100vw;height:100vh;display:flex;justify-content:center;align-items:center;z-index:9999;">
+			<div style="text-align:center;">
+				<div style="width:60px;height:60px;margin:0 auto 20px;border:5px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:spin 1s linear infinite;"></div>
+				<p style="font-size:18px;color:white;font-weight:500;margin:0;font-family:Roboto,Arial,sans-serif;">Dashboard wordt geladen...</p>
+			</div>
+		</div>
+		<style>
+			@keyframes spin { to { transform: rotate(360deg); } }
+			body.app-ready #app-loading { display: none; }
+		</style>
 		<div style="display: contents">%sveltekit.body%</div>
 	</body>
 </html>
