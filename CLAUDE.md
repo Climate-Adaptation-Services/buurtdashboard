@@ -30,22 +30,59 @@ npx playwright test --debug   # Debug mode
 - Tests located in `/tests/`
 - Screenshots for visual regression in `/tests/screenshots/`
 
-## Recent Improvements (2025-10-20)
+## Recent Improvements
 
-### Progressive Loading Implementation
+### Full-Page Loading Screen (2025-10-23)
 
-The app now uses **progressive loading** for dramatically improved perceived performance:
+The app now features an **immediate full-page loading screen** for better user experience:
 
-- ✅ **UI appears in <100ms** - Side panel, map container, and indicator skeletons show immediately
+- ✅ **Instant feedback** - Loading screen appears in <50ms (pure HTML, no JavaScript required)
+- ✅ **Smooth transition** - Loading screen disappears when UI elements are ready to be shown
+- ✅ **Component-level loading** - Individual maps and charts show loading spinners while data loads
+- ✅ **No artificial delays** - All timing is based on actual rendering and data loading
+
+**Technical implementation:**
+- `src/app.html` - Static HTML loading screen with spinner and text
+- `src/routes/+page.svelte` - Removes loading screen after UI renders using `tick()` and `requestAnimationFrame()`
+- Client-side SSR disabled (`ssr = false` in `+layout.js`) for SPA behavior
+
+### AHN Version Reactivity & Nederland Aggregates (2025-10-23)
+
+Improved performance and reactivity for AHN (height data) version switching:
+
+- ✅ **Per-indicator stores** - Each indicator has isolated state for AHN version, year, and BEB selection
+- ✅ **Memoized color scales** - Color scales only recreate when relevant data changes
+- ✅ **Precalculated Nederland aggregates** - Server-side precalculation for instant Nederland-level statistics
+- ✅ **Reactive Stats component** - Stats bars update immediately when switching AHN versions or years
+- ✅ **Reactive BarPlot** - Bar charts recalculate only when their specific indicator data changes
+
+**Technical implementation:**
+- `src/lib/stores.js` - Added `getIndicatorStore()` factory for per-indicator reactive stores
+- `src/lib/services/precalculate-nederland.js` - Precalculates all Nederland aggregates at build time
+- `src/routes/+page.server.js` - Loads precalculated aggregates from JSON file
+- `src/lib/components/Stats.svelte` - Uses cached Nederland values with reactive fallback
+- `src/lib/components/BarPlot.svelte` - Reactive to indicator-specific store changes
+- `src/lib/components/Indicator.svelte` - Memoized color scale creation with proper dependencies
+
+**Performance gains:**
+- Nederland stats load instantly (no client-side calculation for 13,000+ neighborhoods)
+- Switching AHN versions only updates affected components
+- Color scales don't recreate on unrelated state changes
+
+### Progressive Loading Implementation (2025-10-20)
+
+The app uses **progressive loading** for optimal perceived performance:
+
+- ✅ **UI appears quickly** - Side panel, map container, and indicators show immediately with loading states
 - ✅ **Background data loading** - GeoJSON loads client-side without blocking page render
 - ✅ **Smooth transitions** - Components fill with real data as it becomes available
-- ✅ **Loading states** - Skeleton loaders with shimmer effects, spinners, and progress indicators
+- ✅ **Loading states** - Spinners and progress indicators throughout
 
 **Technical changes:**
 - `src/routes/+page.js` - Removed blocking GeoJSON fetch
 - `src/routes/+page.svelte` - Added client-side data loading in `onMount()`
 - `src/lib/components/Map.svelte` - Progressive map rendering with initialization guards
-- All components - Added loading state props and skeleton UI
+- `src/lib/components/IndicatorBody.svelte` - Loading spinners for maps
 
 See [.claude/project.md](.claude/project.md) for complete details.
 
