@@ -43,7 +43,10 @@
 
   let nederlandValues = null
   $: {
-    // ALWAYS use cached values for Nederland - never recalculate client-side
+    // Force reactivity by reading the indicator store
+    const ahnSelection = $indicatorStore;
+
+    // Try cached values first, fall back to client-side calculation if needed
     nederlandValues = null // Reset first
 
     if ($nederlandAggregates && $nederlandAggregates.aggregates) {
@@ -53,24 +56,33 @@
         // Check for BEB variants first
         if (cached && cached.hele_buurt !== undefined && cached.bebouwde_kom !== undefined) {
           // BEB indicator - get the correct variant
-          const ahnSelection = $indicatorStore;
           const bebSelection = ahnSelection?.beb || 'hele_buurt';
           cached = cached[bebSelection];
         }
 
         if (cached && typeof cached === 'object' && !Array.isArray(cached)) {
-          // Check if this is a year-based value or class-based aggregated value
-          const ahnSelection = $indicatorStore;
+          // Check if this is a year-based value, AHN-based value, or class-based aggregated value
           const selectedYear = ahnSelection?.baseYear;
 
-          // If it has a year property, it's year-based, get that year's data
+          // If selectedYear is specified and exists in cache, use it (handles both years like "2020" and AHN versions like "AHN2")
           if (selectedYear && cached[selectedYear] !== undefined) {
             nederlandValues = cached[selectedYear];
-          } else if (!selectedYear || !Object.keys(cached).some(key => /^\d{4}$/.test(key))) {
-            // No years in keys, so it's class-based aggregated data (Landbedekking, etc)
+          } else if (!selectedYear || !Object.keys(cached).some(key => /^\d{4}$/.test(key) || /^AHN\d+$/.test(key))) {
+            // No years or AHN versions in keys, so it's class-based aggregated data (Landbedekking, etc)
             nederlandValues = cached;
           }
         }
+      }
+    }
+
+    // FALLBACK: If no cached value and we have all neighborhoods data, calculate client-side
+    // This handles AHN version switches and other cases where cache doesn't have the exact variant
+    if (!nederlandValues && $allNeighbourhoodsJSONData && $indicatorStore) {
+      console.log(`BarPlot: No cached Nederland value for ${indicator.title}, calculating client-side`);
+      const calculated = calcPercentagesForEveryClass(indicator, $allNeighbourhoodsJSONData, "Nederland");
+      if (calculated && typeof calculated === 'object' && Object.keys(calculated).length > 1) {
+        nederlandValues = calculated;
+        console.log(`BarPlot: Calculated Nederland values:`, nederlandValues);
       }
     }
   }

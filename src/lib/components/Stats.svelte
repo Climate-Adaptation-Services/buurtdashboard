@@ -25,17 +25,22 @@
   let statsWidth
 
   // MIGRATED: Use centralized AHN selection handling with reactive store dependency
-  $: indicatorStore = getIndicatorStore(indicator.title)
+  const indicatorStore = getIndicatorStore(indicator.title)
+
+  // Keep these at top level for template access
   $: currentAHNSelection = $indicatorStore
   $: isDifferenceMode = currentAHNSelection && currentAHNSelection.isDifference
-
-  // MIGRATED: Make attribute calculation reactive to store changes
   $: currentAttribute = getIndicatorAttribute(indicator, indicator.attribute)
 
   // MIGRATED: Calculate display values (unit-converted) and scale values (original %) separately
+  // Force reactivity by reading $indicatorStore directly at the start
   $: medianValuesDict = (() => {
+    // Read the store directly to ensure Svelte tracks this dependency
+    const _storeValue = $indicatorStore
+    console.log(`🔄 Stats medianValuesDict re-calculating for ${indicator.title}`, currentAHNSelection);
+
     // Nederland calculation - DISPLAY VALUES (weighted average when surface area specified)
-    // ALWAYS use cached values - never recalculate client-side
+    // Try cached values first, fall back to client-side calculation if needed
     let nederlandMedian = null;
 
     if ($nederlandAggregates && $nederlandAggregates.aggregates) {
@@ -44,7 +49,8 @@
       console.log(`Stats Nederland lookup for ${indicator.title}:`, {
         cached,
         hasBEB: cached && cached.hele_buurt !== undefined,
-        bebSelection: currentAHNSelection?.beb
+        bebSelection: currentAHNSelection?.beb,
+        selectedYear: currentAHNSelection?.baseYear
       });
 
       if (cached !== undefined) {
@@ -68,8 +74,40 @@
           nederlandMedian = cached;
         }
 
-        console.log(`  Final nederlandMedian:`, nederlandMedian);
+        console.log(`  Final nederlandMedian from cache:`, nederlandMedian);
       }
+    }
+
+    // FALLBACK: If no cached value and we have all neighborhoods data, calculate client-side
+    // This handles AHN version switches and other cases where cache doesn't have the exact variant
+    if (nederlandMedian === null && $allNeighbourhoodsJSONData && $allNeighbourhoodsJSONData.features && currentAHNSelection) {
+      console.log(`  No cached value, calculating Nederland client-side for ${indicator.title}`);
+
+      if (isDifferenceMode) {
+        nederlandMedian = calcMedian(
+          $allNeighbourhoodsJSONData.features
+            .map((neighbourhood) => getDifferenceValue(neighbourhood, indicator))
+            .filter((value) => value !== null)
+        )
+      } else {
+        // Use weighted average if surface area is specified, otherwise use median
+        if (indicator.surfaceArea) {
+          nederlandMedian = calcWeightedAverage(
+            $allNeighbourhoodsJSONData.features,
+            (neighbourhood) => getNumericalValue(neighbourhood, indicator),
+            indicator.surfaceArea,
+            indicator
+          )
+        } else {
+          nederlandMedian = calcMedian(
+            $allNeighbourhoodsJSONData.features
+              .map((neighbourhood) => getNumericalValue(neighbourhood, indicator))
+              .filter((value) => value !== null)
+          )
+        }
+      }
+
+      console.log(`  Calculated Nederland value:`, nederlandMedian);
     }
 
     // Municipality calculation - DISPLAY VALUES (weighted average when surface area specified)
@@ -147,11 +185,15 @@
   
   // SCALE VALUES: Calculate using original percentage values for consistent positioning/colors
   $: scaleValuesDict = (() => {
+    // Read the store directly to ensure Svelte tracks this dependency
+    const _storeValue = $indicatorStore
+    console.log(`🔄 Stats scaleValuesDict re-calculating for ${indicator.title}`, currentAHNSelection);
+
     // Get the original attribute (always percentage, no unit conversion)
     const originalAttribute = getIndicatorAttribute(indicator, indicator.attribute)
 
     // Nederland scale calculation - ORIGINAL VALUES (weighted average when surface area specified)
-    // ALWAYS use cached values - never recalculate client-side
+    // Try cached values first, fall back to client-side calculation if needed
     let nederlandScale = null;
 
     if ($nederlandAggregates && $nederlandAggregates.aggregates) {
@@ -175,6 +217,32 @@
         } else if (cached !== undefined && (typeof cached !== 'object' || Array.isArray(cached))) {
           // Simple value
           nederlandScale = cached;
+        }
+      }
+    }
+
+    // FALLBACK: Calculate client-side if no cached value (e.g., different AHN version)
+    if (nederlandScale === null && $allNeighbourhoodsJSONData && $allNeighbourhoodsJSONData.features && currentAHNSelection) {
+      if (isDifferenceMode) {
+        nederlandScale = calcMedian(
+          $allNeighbourhoodsJSONData.features
+            .map((neighbourhood) => getDifferenceValue(neighbourhood, indicator))
+            .filter((value) => value !== null)
+        )
+      } else {
+        if (indicator.surfaceArea) {
+          nederlandScale = calcWeightedAverage(
+            $allNeighbourhoodsJSONData.features,
+            (neighbourhood) => getNumericalValue(neighbourhood, indicator),
+            indicator.surfaceArea,
+            indicator
+          )
+        } else {
+          nederlandScale = calcMedian(
+            $allNeighbourhoodsJSONData.features
+              .map((neighbourhood) => getNumericalValue(neighbourhood, indicator))
+              .filter((value) => value !== null)
+          )
         }
       }
     }

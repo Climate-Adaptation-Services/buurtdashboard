@@ -216,7 +216,9 @@ export class LeafletMapManager {
     const municipalityChanged = municipalitySelection !== this.previousMunicipalitySelection
     const neighbourhoodChanged = neighbourhoodSelection !== this.previousNeighbourhoodSelection
 
-    // Only zoom if municipality changed, NOT if only neighborhood changed
+    // Zoom to fit bounds when:
+    // 1. Municipality changed (selected a different one)
+    // 2. Municipality was deselected (set to null) - return to Nederland view
     if (municipalityChanged && !neighbourhoodChanged) {
       this.fitMapToBounds(currentJSONData)
     }

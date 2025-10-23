@@ -22,20 +22,26 @@ export function getIndicatorAttribute(indicator, attribute, specificYear) {
     }
   }
 
-  // Then handle year suffix
-  // If a specific year is provided, use that directly
-  if (specificYear) {
-    return resultAttribute + '_' + specificYear;
+  // Then handle year/AHN suffix
+  // Determine the year to use
+  let yearToUse = specificYear;
+  if (!yearToUse) {
+    const indicatorStore = getIndicatorStore(indicator.title);
+    const ahnSelection = get(indicatorStore);
+    yearToUse = ahnSelection?.baseYear;
   }
 
-  // Get the indicator-specific store
-  const indicatorStore = getIndicatorStore(indicator.title);
-  const ahnSelection = get(indicatorStore);
-
-  if (!ahnSelection || !ahnSelection.baseYear || ahnSelection.baseYear === '') {
+  // If no year/AHN version, return as is
+  if (!yearToUse || yearToUse === '') {
     return resultAttribute;
   }
 
-  // Use the baseYear from the indicator store
-  return resultAttribute + '_' + ahnSelection.baseYear;
+  // Check if this is an AHN version (starts with "AHN") or a regular year (numeric)
+  // AHN versions are concatenated directly (no underscore): PET29tm34pAHN4
+  // Regular years use underscore: attribute_2020
+  if (yearToUse.startsWith('AHN')) {
+    return resultAttribute + yearToUse; // Direct concatenation for AHN
+  } else {
+    return resultAttribute + '_' + yearToUse; // Underscore for regular years
+  }
 }

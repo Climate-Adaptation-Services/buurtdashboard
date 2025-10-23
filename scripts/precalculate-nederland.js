@@ -31,10 +31,10 @@ const __dirname = dirname(__filename);
 //
 // The application will automatically detect version mismatches and warn you in the console:
 // "Nederland aggregates cache is outdated! Please run: npm run precalculate-nederland"
-const DATASET_VERSION = '20250619';
+const DATASET_VERSION = '20251023';
 const BUURT_GEOJSON_URL = "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/geojsondata/buurt24IdentificationOnly.json";
-const DEFAULT_METADATA_URL = "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/metadata/TESTBASISKAARTGROEN-metadata-buurtdashboard(in)(3).csv";
-const DEFAULT_CSV_DATA_URL = "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/csvdata/basiskaartGroen211025(b10Buurt2024BasiskaartGroen).csv.gz";
+const DEFAULT_METADATA_URL = "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/metadata/OFFICIALPREPNOV25-metadata-buurtdashboard(in).csv";
+const DEFAULT_CSV_DATA_URL = "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/csvdata/combined_dashboard_data.csv.gz";
 
 // Calculation utilities (copied from calcMedian.js)
 function calcMedian(array) {
@@ -111,6 +111,12 @@ function setupIndicators(metadata) {
       });
     }
 
+    // Get ALL AHN versions (not just the latest)
+    let ahnVersions = [];
+    if (indicator.AHNversie && indicator.AHNversie !== '') {
+      ahnVersions = indicator.AHNversie.split(',').map(v => v.trim());
+    }
+
     indicatorsList.push({
       title: indicator.Titel,
       attribute: indicator.Indicatornaamtabel.split(',')[0],
@@ -118,7 +124,8 @@ function setupIndicators(metadata) {
       aggregatedIndicator: (indicator['kwantitatief / categoraal / aggregated'] === 'aggregated') ? true : false,
       surfaceArea: indicator['Oppervlakte'],
       variants: indicator.Varianten,
-      classes: classes
+      classes: classes,
+      ahnVersions: ahnVersions  // Changed to plural to store all versions
     });
   });
 
@@ -173,18 +180,41 @@ function prepareJSONData(geoJson, csvData) {
   };
 }
 
-// Calculate Nederland aggregate for a single indicator
-function calculateNederlandAggregate(indicator, jsonData, year = null, bebOption = null) {
-  const features = jsonData.features;
+// Helper function to build attribute name with proper suffixes
+function buildAttributeName(baseAttribute, { year, bebOption, ahnVersion }) {
+  let attributeName = baseAttribute;
 
-  // Determine the attribute name with year suffix and BEB suffix if applicable
-  let attributeName = indicator.attribute;
+  // Add year suffix (with underscore)
   if (year) {
-    attributeName = `${indicator.attribute}_${year}`;
+    attributeName = `${attributeName}_${year}`;
   }
+
+  // Add AHN suffix (direct concatenation, no underscore)
+  if (ahnVersion && ahnVersion !== '') {
+    attributeName = `${attributeName}${ahnVersion}`;
+  }
+
+  // Add BEB suffix (with underscore)
   if (bebOption === 'bebouwde_kom') {
     attributeName = `${attributeName}_1`;
   }
+
+  return attributeName;
+}
+
+// Calculate Nederland aggregate for a single indicator
+function calculateNederlandAggregate(indicator, jsonData, year = null, bebOption = null, ahnVersion = null) {
+  const features = jsonData.features;
+
+  // Use passed ahnVersion, or fallback to first version in indicator's ahnVersions array
+  const effectiveAhnVersion = ahnVersion || (indicator.ahnVersions && indicator.ahnVersions.length > 0 ? indicator.ahnVersions[0] : null);
+
+  // Determine the attribute name with all applicable suffixes
+  const attributeName = buildAttributeName(indicator.attribute, {
+    year,
+    bebOption,
+    ahnVersion: effectiveAhnVersion
+  });
 
   if (indicator.numerical) {
     // For numerical indicators
@@ -214,10 +244,11 @@ function calculateNederlandAggregate(indicator, jsonData, year = null, bebOption
     // For aggregated indicators, calculate for each class
     const result = {};
     Object.keys(indicator.classes).forEach(className => {
-      let classAttribute = year ? `${indicator.classes[className]}_${year}` : indicator.classes[className];
-      if (bebOption === 'bebouwde_kom') {
-        classAttribute = `${classAttribute}_1`;
-      }
+      const classAttribute = buildAttributeName(indicator.classes[className], {
+        year,
+        bebOption,
+        ahnVersion: effectiveAhnVersion
+      });
 
       const valueExtractor = (feature) => {
         const value = feature.properties[classAttribute];
@@ -235,6 +266,18 @@ function calculateNederlandAggregate(indicator, jsonData, year = null, bebOption
         result[className] = calcMedian(values);
       }
     });
+
+    // Special handling for indicators stored as decimals - multiply by 100
+    // The CSV stores values as decimals (0.10667 = 10.667%), but client expects percentages
+    const indicatorsNeedingConversion = ['Gevoelstemperatuur', 'Waterdiepte bij hevige bui'];
+    if (indicatorsNeedingConversion.includes(indicator.title)) {
+      Object.keys(result).forEach(className => {
+        if (result[className] !== null && result[className] !== undefined) {
+          result[className] = result[className] * 100;
+        }
+      });
+    }
+
     return result;
   } else {
     // For categorical indicators, we can't really pre-calculate a single value
@@ -308,7 +351,11 @@ async function main() {
 
       // Get available years for this indicator
       const years = getAvailableYears(csvData, indicator.attribute);
-      console.log(`   Processing: ${indicator.title} (${years.length > 0 ? years.join(', ') : 'single value'}${hasBEBVariant ? ', BEB' : ''})`);
+
+      // Check if indicator has AHN versions
+      const hasAHNVersions = indicator.ahnVersions && indicator.ahnVersions.length > 0;
+
+      console.log(`   Processing: ${indicator.title} (${years.length > 0 ? years.join(', ') : 'single value'}${hasBEBVariant ? ', BEB' : ''}${hasAHNVersions ? `, AHN: ${indicator.ahnVersions.join(', ')}` : ''})`);
 
       if (hasBEBVariant) {
         // BEB variant indicator - calculate for both hele_buurt and bebouwde_kom
@@ -352,8 +399,23 @@ async function main() {
         if (helebuurtEmpty && bebouwdekomEmpty) {
           delete nederlandAggregates[indicator.title];
         }
+      } else if (hasAHNVersions) {
+        // Indicator with AHN versions (e.g., Gevoelstemperatuur)
+        nederlandAggregates[indicator.title] = {};
+        for (const ahnVersion of indicator.ahnVersions) {
+          // Create a modified indicator with single AHN version for calculation
+          const indicatorWithAHN = { ...indicator, ahnVersions: [ahnVersion] };
+          const value = calculateNederlandAggregate(indicatorWithAHN, jsonData, null, null, ahnVersion);
+          if (value !== null) {
+            nederlandAggregates[indicator.title][ahnVersion] = value;
+          }
+        }
+        // Only add to aggregates if we got at least one version's data
+        if (Object.keys(nederlandAggregates[indicator.title]).length === 0) {
+          delete nederlandAggregates[indicator.title];
+        }
       } else if (years.length > 0) {
-        // Multi-year indicator (no BEB)
+        // Multi-year indicator (no BEB, no AHN)
         nederlandAggregates[indicator.title] = {};
         for (const year of years) {
           const value = calculateNederlandAggregate(indicator, jsonData, year);
@@ -366,7 +428,7 @@ async function main() {
           delete nederlandAggregates[indicator.title];
         }
       } else {
-        // Single value indicator (no BEB, no years)
+        // Single value indicator (no BEB, no years, no AHN)
         const value = calculateNederlandAggregate(indicator, jsonData);
         if (value !== null) {
           nederlandAggregates[indicator.title] = value;
