@@ -86,11 +86,13 @@
   }
 
   function aggregatedMapInfo() {
-    select(".tooltip-multi" + indicator.attribute).style("visibility", "visible")
+    const className = ".tooltip-multi" + indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', '').replaceAll('|', '_')
+    select(className).style("visibility", "visible")
   }
 
   function aggregatedMapInfoOut() {
-    select(".tooltip-multi" + indicator.attribute).style("visibility", "hidden")
+    const className = ".tooltip-multi" + indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', '').replaceAll('|', '_')
+    select(className).style("visibility", "hidden")
   }
 
   // Use dedicated indicator store for difference mode detection (naturally isolated)
@@ -262,7 +264,7 @@
 {/if}
 
 {#if indicator && indicator.aggregatedIndicator === true}
-  <div class={"tooltip-multi tooltip-multi" + indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', '')}>
+  <div class={"tooltip-multi tooltip-multi" + indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', '').replaceAll('|', '_')}>
     <p>{t("multi-indicator-map-explanation")}</p>
   </div>
 {/if}
