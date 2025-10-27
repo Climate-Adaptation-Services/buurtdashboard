@@ -240,33 +240,18 @@ function getSurfaceAreaM2(feature, indicator) {
   return toNumber(surfaceArea)
 }
 
-// Special function for popup tooltips that can show both percentage and M2 values when variant is M2
+// Special function for popup tooltips that can show both percentage and M2 values
+// M2 values are calculated from percentage × surfaceArea when surfaceArea is defined
 export function getPopupValue(feature, indicator, options = {}) {
   const ahnSelection = getAHNSelection(indicator)
   const isDifferenceMode = ahnSelection && ahnSelection.isDifference
 
   if (isDifferenceMode) {
-    // Handle difference mode for both regular and M2 values
+    // Handle difference mode with M2 calculation
     const regularDiff = getDifferenceValue(feature, indicator, options)
 
-    // Check if we have M2 variant OR surfaceArea column defined
-    const hasM2Variant = indicator.variants && indicator.variants.split(',').map(v => v.trim()).includes('M2')
-    const hasSurfaceArea = indicator.surfaceArea
-
-    if (hasM2Variant) {
-      // Use M2 variant from data
-      const m2Diff = getDifferenceValue(feature, indicator, { ...options, forceM2: true })
-      if (regularDiff !== null && m2Diff !== null) {
-        return {
-          value: regularDiff,
-          unit: indicator.plottitle.startsWith('%') ? '%' : '',
-          m2Value: m2Diff,
-          hasM2: true,
-          isDifference: true
-        }
-      }
-    } else if (hasSurfaceArea && regularDiff !== null) {
-      // Calculate M2 from percentage difference × surface area (ONLY if surfaceArea is defined)
+    // Calculate M2 from percentage difference × surface area (ONLY if surfaceArea is defined)
+    if (indicator.surfaceArea && regularDiff !== null) {
       const surfaceAreaM2 = getSurfaceAreaM2(feature, indicator)
       if (surfaceAreaM2 !== null) {
         const m2Diff = (regularDiff / 100) * surfaceAreaM2
@@ -285,24 +270,8 @@ export function getPopupValue(feature, indicator, options = {}) {
     // Regular mode
     const regularValue = getNumberValue(feature, indicator, options)
 
-    // Check if we have M2 variant OR surfaceArea column defined
-    const hasM2Variant = indicator.variants && indicator.variants.split(',').map(v => v.trim()).includes('M2')
-    const hasSurfaceArea = indicator.surfaceArea
-
-    if (hasM2Variant) {
-      // Use M2 variant from data (existing behavior)
-      const m2Value = getNumberValue(feature, indicator, { ...options, forceM2: true })
-      if (regularValue !== null && m2Value !== null) {
-        return {
-          value: regularValue,
-          unit: indicator.plottitle.startsWith('%') ? '%' : '',
-          m2Value: m2Value,
-          hasM2: true,
-          isDifference: false
-        }
-      }
-    } else if (hasSurfaceArea && regularValue !== null) {
-      // Calculate M2 from percentage × surface area (ONLY if surfaceArea is defined)
+    // Calculate M2 from percentage × surface area (ONLY if surfaceArea is defined)
+    if (indicator.surfaceArea && regularValue !== null) {
       const surfaceAreaM2 = getSurfaceAreaM2(feature, indicator)
       if (surfaceAreaM2 !== null) {
         const m2Value = (regularValue / 100) * surfaceAreaM2

@@ -8,13 +8,31 @@
   export let graphWidth
 
   let indicatorInfoPosition
+  let isRightmost = false
+
   afterUpdate(() => {
-    indicatorInfoPosition =
-      window.innerWidth -
-        document.getElementsByClassName("indicator-info-" + indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', ''))[0].getBoundingClientRect().right >
-      180
-        ? graphWidth
-        : 0
+    const className = "indicator-info-" + indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', '').replaceAll('|', '_')
+    const infoElement = document.getElementsByClassName(className)[0]
+    if (!infoElement) return
+
+    const rect = infoElement.getBoundingClientRect()
+    const spaceToRight = window.innerWidth - rect.right
+
+    // If there's less than 310px space to the right (tooltip width 300px + small margin),
+    // indicator is rightmost -> position tooltip flush with RIGHT edge (overlapping)
+    // Otherwise -> position tooltip to the right of indicator (not overlapping)
+    isRightmost = spaceToRight < 310
+
+    // Get the actual indicator element width from the DOM
+    const indicatorElement = infoElement.closest('.indicator-div')
+    const indicatorRect = indicatorElement ? indicatorElement.getBoundingClientRect() : null
+    const actualIndicatorWidth = indicatorRect ? indicatorRect.width : (graphWidth || 400)
+
+    // Position flush with indicator borders:
+    // - If rightmost: position at left edge (0px) flush with left side
+    // - If not rightmost: position at indicator's right edge (actualIndicatorWidth) to be flush
+    const tooltipWidth = 300
+    indicatorInfoPosition = isRightmost ? 0 : actualIndicatorWidth
   })
 
   function handleCategoryMouseOver(e) {
@@ -39,7 +57,7 @@
   on:mouseover={handleCategoryMouseOver}
   on:mouseout={handleCategoryMouseOut}
 />
-<div class={"indicator-info indicator-info-" + indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', '')} style="left:{indicatorInfoPosition}px">
+<div class={"indicator-info indicator-info-" + indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', '').replaceAll('|', '_')} style="left:{indicatorInfoPosition}px">
   <p class="title" style="background-color:{$configStore.mainColor}">
     <strong>{indicator.title}</strong>
   </p>

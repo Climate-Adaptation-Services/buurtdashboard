@@ -22,6 +22,7 @@ export function getClassName(feature, type, indicator, mapType) {
     .replaceAll(')', '')
     .replaceAll(',', '_')
     .replaceAll('/', '_')
+    .replaceAll('|', '_')
     .replaceAll('%', 'pct')
     .replaceAll('.', '_')
     .replaceAll(':', '_')
