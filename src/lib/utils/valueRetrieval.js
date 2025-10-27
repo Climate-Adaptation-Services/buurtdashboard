@@ -201,16 +201,60 @@ export function getMultipleValues(feature, indicator, { types = ['number', 'cate
   return result
 }
 
+// Helper function to get surface area from feature based on indicator.surfaceArea column
+function getSurfaceAreaM2(feature, indicator) {
+  // Only return surface area if indicator has surfaceArea defined
+  if (!indicator.surfaceArea || !feature.properties) {
+    return null
+  }
+
+  let surfaceAreaColumn = indicator.surfaceArea
+
+  // Special handling for "Totale buurt" - map to standard column
+  if (surfaceAreaColumn === 'Totale buurt') {
+    surfaceAreaColumn = 'Oppervlakte_Land_m2'
+  }
+
+  // Check if we need to apply BEB suffix to surface area column
+  if (indicator.variants && indicator.variants.split(',').map(v => v.trim()).includes('1')) {
+    const indicatorStore = getIndicatorStore(indicator.title)
+    let ahnSelection
+
+    const unsubscribe = indicatorStore.subscribe(value => {
+      ahnSelection = value
+    })
+    unsubscribe()
+
+    const bebSelection = ahnSelection?.beb || 'hele_buurt'
+    if (bebSelection === 'bebouwde_kom') {
+      const bebColumn = surfaceAreaColumn + '_1'
+      // Try BEB variant first, fall back to base column if not available
+      const bebValue = feature.properties[bebColumn]
+      if (bebValue !== null && bebValue !== undefined && !isNaN(bebValue)) {
+        surfaceAreaColumn = bebColumn
+      }
+    }
+  }
+
+  const surfaceArea = feature.properties[surfaceAreaColumn]
+  return toNumber(surfaceArea)
+}
+
 // Special function for popup tooltips that can show both percentage and M2 values when variant is M2
 export function getPopupValue(feature, indicator, options = {}) {
   const ahnSelection = getAHNSelection(indicator)
   const isDifferenceMode = ahnSelection && ahnSelection.isDifference
-  
+
   if (isDifferenceMode) {
     // Handle difference mode for both regular and M2 values
     const regularDiff = getDifferenceValue(feature, indicator, options)
-    
-    if (indicator.variants && indicator.variants.split(',').map(v => v.trim()).includes('M2')) {
+
+    // Check if we have M2 variant OR surfaceArea column defined
+    const hasM2Variant = indicator.variants && indicator.variants.split(',').map(v => v.trim()).includes('M2')
+    const hasSurfaceArea = indicator.surfaceArea
+
+    if (hasM2Variant) {
+      // Use M2 variant from data
       const m2Diff = getDifferenceValue(feature, indicator, { ...options, forceM2: true })
       if (regularDiff !== null && m2Diff !== null) {
         return {
@@ -221,19 +265,49 @@ export function getPopupValue(feature, indicator, options = {}) {
           isDifference: true
         }
       }
+    } else if (hasSurfaceArea && regularDiff !== null) {
+      // Calculate M2 from percentage difference × surface area (ONLY if surfaceArea is defined)
+      const surfaceAreaM2 = getSurfaceAreaM2(feature, indicator)
+      if (surfaceAreaM2 !== null) {
+        const m2Diff = (regularDiff / 100) * surfaceAreaM2
+        return {
+          value: regularDiff,
+          unit: indicator.plottitle.startsWith('%') ? '%' : '',
+          m2Value: m2Diff,
+          hasM2: true,
+          isDifference: true
+        }
+      }
     }
-    
+
     return { value: regularDiff, unit: indicator.plottitle.startsWith('%') ? '%' : '', hasM2: false, isDifference: true }
   } else {
     // Regular mode
     const regularValue = getNumberValue(feature, indicator, options)
-    
-    // For M2 variants, show both percentage and M2 values (handle spaces)
-    if (indicator.variants && indicator.variants.split(',').map(v => v.trim()).includes('M2')) {
+
+    // Check if we have M2 variant OR surfaceArea column defined
+    const hasM2Variant = indicator.variants && indicator.variants.split(',').map(v => v.trim()).includes('M2')
+    const hasSurfaceArea = indicator.surfaceArea
+
+    if (hasM2Variant) {
+      // Use M2 variant from data (existing behavior)
       const m2Value = getNumberValue(feature, indicator, { ...options, forceM2: true })
       if (regularValue !== null && m2Value !== null) {
-        return { 
-          value: regularValue, 
+        return {
+          value: regularValue,
+          unit: indicator.plottitle.startsWith('%') ? '%' : '',
+          m2Value: m2Value,
+          hasM2: true,
+          isDifference: false
+        }
+      }
+    } else if (hasSurfaceArea && regularValue !== null) {
+      // Calculate M2 from percentage × surface area (ONLY if surfaceArea is defined)
+      const surfaceAreaM2 = getSurfaceAreaM2(feature, indicator)
+      if (surfaceAreaM2 !== null) {
+        const m2Value = (regularValue / 100) * surfaceAreaM2
+        return {
+          value: regularValue,
           unit: indicator.plottitle.startsWith('%') ? '%' : '',
           m2Value: m2Value,
           hasM2: true,
@@ -241,7 +315,7 @@ export function getPopupValue(feature, indicator, options = {}) {
         }
       }
     }
-    
+
     // Fallback to regular value with % symbol only
     return { value: regularValue, unit: indicator.plottitle.startsWith('%') ? '%' : '', hasM2: false, isDifference: false }
   }
