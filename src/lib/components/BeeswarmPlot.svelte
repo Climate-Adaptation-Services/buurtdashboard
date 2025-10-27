@@ -5,7 +5,7 @@
   import { forceSimulation, forceY, forceX, forceCollide, forceManyBody } from "d3-force"
   import { getClassName } from "$lib/utils/getClassName"
   import { click, mouseOut, mouseOver } from "$lib/events/neighbourhoodMouseEvents"
-  import { onMount } from "svelte"
+  import { onMount, tick } from "svelte"
   import { getIndicatorAttribute } from "$lib/utils/getIndicatorAttribute"
   import { getGlobalExtent } from "$lib/utils/getGlobalExtent"
 
@@ -228,11 +228,22 @@
     }, 10)
   })
 
-  // raise node on mount, hacky solution could be better
-  $: if ($selectedNeighbourhoodJSONData && $selectedNeighbourhoodJSONData.properties) {
-    setTimeout(() => {
-      select("." + getClassName($selectedNeighbourhoodJSONData, "node", indicator, "indicator map")).raise()
-    }, 1000)
+  // Raise selected node whenever selection changes - reactive to ensure visibility on top
+  $: if ($selectedNeighbourhoodJSONData && $selectedNeighbourhoodJSONData.properties && nodes && nodes.length > 0) {
+    tick().then(() => {
+      requestAnimationFrame(() => {
+        try {
+          const className = getClassName($selectedNeighbourhoodJSONData, "node", indicator, "indicator map")
+          const element = select("." + className)
+          if (element && element.node()) {
+            element.raise()
+          }
+        } catch (e) {
+          // Silently fail if element not found yet
+          console.log('Could not raise beeswarm node yet:', e)
+        }
+      })
+    })
   }
 </script>
 

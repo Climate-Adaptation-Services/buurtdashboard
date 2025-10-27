@@ -7,10 +7,10 @@
     getIndicatorStore,
     municipalitySelection,
   } from "$lib/stores"
-  import { geoMercator, geoPath, select } from "d3"
+  import { geoMercator, geoPath, select, selectAll } from "d3"
   import { t } from "$lib/i18n/translate.js"
   import MapPath from "./MapPath.svelte"
-  import { onMount } from "svelte"
+  import { onMount, tick } from "svelte"
   import { LeafletMapManager } from "$lib/map/LeafletMapManager.js"
 
   // Leaflet map manager
@@ -162,6 +162,16 @@
   // Handle selection changes for zooming
   $: if (mapManager.getMap() && mapType === "main map" && $currentJSONData && mapInitializedWithData) {
     mapManager.handleSelectionChange($municipalitySelection, $neighbourhoodSelection, $currentJSONData)
+  }
+
+  // Raise selected neighborhood elements to ensure they appear on top
+  $: if ($neighbourhoodSelection) {
+    tick().then(() => {
+      requestAnimationFrame(() => {
+        // Raise all SVG elements with the selected neighborhood code
+        selectAll(`.svgelements_${$neighbourhoodSelection}`).raise()
+      })
+    })
   }
 </script>
 
