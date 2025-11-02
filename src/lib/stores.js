@@ -164,7 +164,11 @@ export const circleRadius = derived(
   [neighbourhoodsInMunicipalityJSONData],
   ([$neighbourhoodsInMunicipalityJSONData]) => {
     if ($neighbourhoodsInMunicipalityJSONData) {
-      return ($neighbourhoodsInMunicipalityJSONData.features.length > 150) ? 3 : 4.5
+      const count = $neighbourhoodsInMunicipalityJSONData.features.length
+      // Smaller circles for very large datasets to reduce collision complexity
+      if (count > 150) return 2.5
+      if (count > 100) return 3
+      return 4.5
     } else {
       return 0
     }

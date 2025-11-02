@@ -176,25 +176,36 @@
     // Stop any existing simulation
     simulation.stop()
 
+    // Adaptive simulation parameters based on dataset size - DECLARE FIRST
+    const nodeCount = plotData.length
+    const isLargeDataset = nodeCount > 50
+    const isVeryLargeDataset = nodeCount > 100
+
     // Apply previous positions to new data if available
+    // For very large datasets, initialize directly at target position
     plotData.forEach((d) => {
       const id = d.properties && d.properties[$neighbourhoodCodeAbbreviation]
       if (id && previousNodePositions[id]) {
         d.x = previousNodePositions[id].x
         d.y = previousNodePositions[id].y
+      } else if (isVeryLargeDataset) {
+        // Pre-position nodes at their target X location to avoid sliding in
+        if (differenceValues) {
+          d.x = xScaleBeeswarm(d.diffValue)
+        } else {
+          const value = getRawValue(d, indicator)
+          d.x = xScaleBeeswarm(+value)
+        }
+        d.y = 70  // Start at center Y
       }
     })
 
-    // Adaptive simulation parameters based on dataset size
-    const nodeCount = plotData.length
-    const isLargeDataset = nodeCount > 50
-    const isVeryLargeDataset = nodeCount > 100
-
     // Adjust parameters for large datasets to improve performance
-    const xStrength = isVeryLargeDataset ? 0.7 : isLargeDataset ? 0.6 : 0.5
-    const alphaValue = isVeryLargeDataset ? 0.3 : 0.4
-    const alphaDecayRate = isVeryLargeDataset ? 0.03 : isLargeDataset ? 0.02 : 0.015
-    const maxTicks = isVeryLargeDataset ? 10 : isLargeDataset ? 12 : 15
+    // For very large datasets: Minimal simulation - almost static placement
+    const xStrength = isVeryLargeDataset ? 1.0 : isLargeDataset ? 0.6 : 0.5
+    const alphaValue = isVeryLargeDataset ? 0.1 : 0.4  // Very low energy
+    const alphaDecayRate = isVeryLargeDataset ? 0.9 : isLargeDataset ? 0.02 : 0.015  // 90% decay per tick
+    const maxTicks = isVeryLargeDataset ? 3 : isLargeDataset ? 12 : 15  // Force stop after 3 ticks
 
     // Create a new simulation with the nodes
     simulation = forceSimulation(plotData)
@@ -210,11 +221,12 @@
           }
         }).strength(xStrength), // Increased strength for large datasets for faster convergence
       )
-      .force("y", forceY().y(70).strength(0.05))
-      .force("charge", forceManyBody().strength(0.3))
+      .force("y", forceY().y(70).strength(0.05))  // Keep original Y force
+      .force("charge", forceManyBody().strength(0.3))  // Keep original charge force
       .force("collide", forceCollide().radius($circleRadius * 1.25))
-      .alpha(alphaValue) // Lower alpha for large datasets
-      .alphaDecay(alphaDecayRate) // Faster decay for large datasets
+      .alpha(alphaValue)
+      .alphaDecay(alphaDecayRate)
+      .alphaMin(0.001)
 
     // Set up the tick handler with adaptive tick limit
     let tickCount = 0
@@ -223,11 +235,18 @@
       // Update nodes array to trigger Svelte reactivity
       nodes = simulation.nodes()
 
+      tickCount++
+
+      // For very large datasets, force stop after max ticks to prevent jiggling
+      if (isVeryLargeDataset && tickCount >= maxTicks) {
+        simulation.stop()
+        return
+      }
+
       // Apply extra force only during the first few ticks
       if (tickCount < maxTicks) {
-        tickCount++
-        // Moderate reheat only for the first few ticks (fewer for large datasets)
-        const reheatTicks = isVeryLargeDataset ? 3 : 5
+        // NO reheat for very large datasets - let them cool instantly
+        const reheatTicks = isVeryLargeDataset ? 0 : 5
         if (tickCount < reheatTicks) {
           simulation.alpha(alphaValue)
         }
