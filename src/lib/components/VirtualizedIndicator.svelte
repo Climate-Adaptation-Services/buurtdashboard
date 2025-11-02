@@ -10,34 +10,25 @@
   let hasBeenVisible = false
   let containerElement
 
-  // Check if element is too far from viewport to keep rendered
-  function checkDistance() {
-    if (!containerElement || !isVisible) return
-
-    const rect = containerElement.getBoundingClientRect()
-    const viewportHeight = window.innerHeight
-
-    // Only unmount if VERY far away (more than 2 viewports)
-    // This ensures we don't unmount things that are just out of the margin
-    const isVeryFarAway = rect.top > viewportHeight * 2 || rect.bottom < -viewportHeight * 2
-
-    if (hasBeenVisible && isVeryFarAway) {
-      isVisible = false
-    }
-  }
-
   // Intersection Observer to detect when indicator enters viewport
   onMount(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
+          // Mark as visible when it enters viewport with some margin
           if (entry.isIntersecting) {
-            // Element is in the expanded viewport - render it
             isVisible = true
             hasBeenVisible = true
+          } else {
+            // Unmount if it's far away to stop expensive simulations
+            const rect = entry.boundingClientRect
+            const viewportHeight = window.innerHeight
+
+            // Unrender if it's more than 2 viewports away
+            if (hasBeenVisible && (rect.top > viewportHeight * 2 || rect.bottom < -viewportHeight * 2)) {
+              isVisible = false
+            }
           }
-          // Always check distance after intersection change
-          checkDistance()
         })
       },
       {
@@ -47,10 +38,6 @@
       },
     )
 
-    // Periodically check distance for aggressive cleanup
-    // This catches elements that scrolled far away between intersection events
-    const cleanupInterval = setInterval(checkDistance, 500)
-
     if (containerElement) {
       observer.observe(containerElement)
     }
@@ -59,7 +46,6 @@
       if (containerElement) {
         observer.unobserve(containerElement)
       }
-      clearInterval(cleanupInterval)
     }
   })
 </script>

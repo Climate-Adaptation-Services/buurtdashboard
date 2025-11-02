@@ -5,7 +5,7 @@
   import { forceSimulation, forceY, forceX, forceCollide, forceManyBody } from "d3-force"
   import { getClassName } from "$lib/utils/getClassName"
   import { click, mouseOut, mouseOver } from "$lib/events/neighbourhoodMouseEvents"
-  import { onMount, tick } from "svelte"
+  import { onMount, onDestroy, tick } from "svelte"
   import { getIndicatorAttribute } from "$lib/utils/getIndicatorAttribute"
   import { getGlobalExtent } from "$lib/utils/getGlobalExtent"
 
@@ -134,6 +134,9 @@
 
   let alpha = 0.5
 
+  // Debounce timer for simulation restarts
+  let simulationDebounceTimer = null
+
   // FIXED: Let Svelte handle reactivity naturally - run simulation when AHN selection changes
   $: {
     // This reactive block will trigger whenever this indicator's store changes OR indicatorAttribute changes
@@ -142,10 +145,15 @@
 
     // Only restart simulation if we have a valid indicator attribute
     if (currentIndicatorAttribute) {
-      // Restart the simulation with new data
-      setTimeout(() => {
+      // Debounce simulation restarts to prevent multiple rapid restarts
+      if (simulationDebounceTimer) {
+        clearTimeout(simulationDebounceTimer)
+      }
+
+      simulationDebounceTimer = setTimeout(() => {
         runSimulation()
-      }, 50) // Small delay to ensure reactive values have updated
+        simulationDebounceTimer = null
+      }, 100) // Increased delay to debounce rapid changes
     }
   }
 
@@ -177,6 +185,17 @@
       }
     })
 
+    // Adaptive simulation parameters based on dataset size
+    const nodeCount = plotData.length
+    const isLargeDataset = nodeCount > 50
+    const isVeryLargeDataset = nodeCount > 100
+
+    // Adjust parameters for large datasets to improve performance
+    const xStrength = isVeryLargeDataset ? 0.7 : isLargeDataset ? 0.6 : 0.5
+    const alphaValue = isVeryLargeDataset ? 0.3 : 0.4
+    const alphaDecayRate = isVeryLargeDataset ? 0.03 : isLargeDataset ? 0.02 : 0.015
+    const maxTicks = isVeryLargeDataset ? 10 : isLargeDataset ? 12 : 15
+
     // Create a new simulation with the nodes
     simulation = forceSimulation(plotData)
       .force(
@@ -189,28 +208,28 @@
             const value = getRawValue(d, indicator)
             return xScaleBeeswarm(+value)
           }
-        }).strength(0.5),
+        }).strength(xStrength), // Increased strength for large datasets for faster convergence
       )
       .force("y", forceY().y(70).strength(0.05))
-      .force("charge", forceManyBody().strength(0.3)) // Moderate increase for initial repulsion
+      .force("charge", forceManyBody().strength(0.3))
       .force("collide", forceCollide().radius($circleRadius * 1.25))
-      .alpha(0.4) // Lower initial energy for smoother transitions
-      .alphaDecay(0.015) // Balanced decay rate
+      .alpha(alphaValue) // Lower alpha for large datasets
+      .alphaDecay(alphaDecayRate) // Faster decay for large datasets
 
-    // Set up the tick handler with a moderate boost at initialization only
+    // Set up the tick handler with adaptive tick limit
     let tickCount = 0
-    const maxInitialTicks = 15 // Fewer boosted ticks
 
     simulation.on("tick", () => {
       // Update nodes array to trigger Svelte reactivity
       nodes = simulation.nodes()
 
       // Apply extra force only during the first few ticks
-      if (tickCount < maxInitialTicks) {
+      if (tickCount < maxTicks) {
         tickCount++
-        // Moderate reheat only for the first 5 ticks
-        if (tickCount < 5) {
-          simulation.alpha(0.4) // Less aggressive reheat
+        // Moderate reheat only for the first few ticks (fewer for large datasets)
+        const reheatTicks = isVeryLargeDataset ? 3 : 5
+        if (tickCount < reheatTicks) {
+          simulation.alpha(alphaValue)
         }
       }
     })
@@ -226,6 +245,22 @@
     setTimeout(() => {
       runSimulation()
     }, 10)
+  })
+
+  // CRITICAL: Stop simulation when component unmounts
+  onDestroy(() => {
+    // Clear any pending debounce timer
+    if (simulationDebounceTimer) {
+      clearTimeout(simulationDebounceTimer)
+      simulationDebounceTimer = null
+    }
+
+    // Stop the simulation completely
+    if (simulation) {
+      simulation.stop()
+      // Remove all nodes to free memory
+      simulation.nodes([])
+    }
   })
 
   // Raise selected node whenever selection changes - reactive to ensure visibility on top
