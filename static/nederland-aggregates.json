@@ -1,6 +1,6 @@
 {
   "version": "20251104",
-  "generatedAt": "2025-11-04T09:41:07.944Z",
+  "generatedAt": "2025-11-04T10:51:53.016Z",
   "aggregates": {
     "Waterdiepte bij hevige bui": {
       "5 - 10cm": 8.839722205293619,
@@ -91,7 +91,7 @@
         "Gebouwen": 19.26293080794523,
         "Verhard": 37.40708185236031,
         "Halfverhard": 0.8718651861297095,
-        "Onverhard": 36.51040453521982,
+        "Onverhard": 2.7929886744040438e+31,
         "Gras": 9.745733922296035,
         "Struiken": 3.931790669844204
       }

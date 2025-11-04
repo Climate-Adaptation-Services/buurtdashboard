@@ -18,7 +18,7 @@ export const DEFAULT_METADATA_ENGLISH_URL =
   "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/metadata/EN-buurtdashboard-metadata-050825-01.csv";
 
 export const DEFAULT_CSV_DATA_URL =
-  "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/csvdata/Buurt2024BuurtdashboardDataset20251103(c02Buurt2024BuurtdashboardDatas).csv.gz";
+  "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/csvdata/Buurt2024BuurtdashboardDataset20251104.csv.gz";
 
 // Dordrecht config URLs
 export const DORDRECHT_METADATA_URL =
