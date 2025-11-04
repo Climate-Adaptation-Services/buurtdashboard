@@ -1,6 +1,6 @@
 {
-  "version": "20251023",
-  "generatedAt": "2025-10-23T08:52:02.133Z",
+  "version": "20251104",
+  "generatedAt": "2025-11-04T09:41:07.944Z",
   "aggregates": {
     "Waterdiepte bij hevige bui": {
       "5 - 10cm": 8.839722205293619,
@@ -25,9 +25,9 @@
         "51°C": 0.015121321480738033
       }
     },
-    "Lage grondwaterstand": 1.8060023570000001,
-    "Lage grondwaterstand | 2050 hoog": -0.05982564,
-    "Extreem lage grondwaterstand ": 2.051936808,
+    "Lage grondwaterstand": 1.744941962,
+    "Lage grondwaterstand | 2050 hoog": -0.035739432,
+    "Extreem lage grondwaterstand ": 1.8777691275000001,
     "Hoge grondwaterstand ": 1.098987579,
     "Extreem hoge grondwaterstand ": 0.733189174,
     "Schaduw wandel- en fietspaden": 40.833796245,
@@ -39,44 +39,44 @@
     },
     "Droge verdiepingen": 94,
     "Boomkroonoppervlakte": {
-      "hele_buurt": 14.409085275884358,
-      "bebouwde_kom": 15.024625759506899
+      "hele_buurt": 13.983367521893298,
+      "bebouwde_kom": 13.41718769617858
     },
     "Boomkroonoppervlakte openbaar": {
-      "hele_buurt": 42.708517261458034,
-      "bebouwde_kom": 24.23629503663057
+      "hele_buurt": 42.51200680719335,
+      "bebouwde_kom": 24.30786642304208
     },
     "Boomkroonoppervlakte niet-openbaar ": {
-      "hele_buurt": 3.4676411111130707,
-      "bebouwde_kom": 11.212469209152442
+      "hele_buurt": 3.445330188071561,
+      "bebouwde_kom": {}
     },
     "Groen": {
-      "hele_buurt": 23.135742961258103,
-      "bebouwde_kom": 26.99211700122158
+      "hele_buurt": 23.143397399514047,
+      "bebouwde_kom": 24.845045402332808
     },
     "Groen openbaar": {
-      "hele_buurt": 65.70560314225796,
-      "bebouwde_kom": 47.14069053335278
+      "hele_buurt": 65.93972545973591,
+      "bebouwde_kom": 47.17855683155388
     },
     "Groen niet-openbaar": {
-      "hele_buurt": 7.62350080846302,
-      "bebouwde_kom": 18.674061884382805
+      "hele_buurt": 7.612856574898359,
+      "bebouwde_kom": {}
     },
     "Verharding ": {
-      "hele_buurt": 8.860344522580247,
-      "bebouwde_kom": 37.39487723499386
+      "hele_buurt": 8.858440077153729,
+      "bebouwde_kom": 34.80257378686035
     },
     "Verharding openbaar": {
-      "hele_buurt": 16.54046527619733,
-      "bebouwde_kom": 46.559480836477476
+      "hele_buurt": 17.01864646277816,
+      "bebouwde_kom": 47.1269629483673
     },
     "Verharding niet-openbaar": {
-      "hele_buurt": 6.347432100632317,
-      "bebouwde_kom": 44.8064169934297
+      "hele_buurt": 6.3114896608723585,
+      "bebouwde_kom": {}
     },
     "Water": {
-      "hele_buurt": 8.86107831929681,
-      "bebouwde_kom": 10.25338555724393
+      "hele_buurt": 6.25145776422948,
+      "bebouwde_kom": 0.07188778634231256
     },
     "Landbedekking ": {
       "hele_buurt": {
@@ -88,20 +88,20 @@
         "Struiken": 1.6911210533129875
       },
       "bebouwde_kom": {
-        "Gebouwen": 19.262258933652593,
-        "Verhard": 37.40794052082009,
-        "Halfverhard": 0.8718627150121528,
-        "Onverhard": 36.51018106705034,
-        "Gras": 9.745974893162474,
-        "Struiken": 3.9317089762446926
+        "Gebouwen": 19.26293080794523,
+        "Verhard": 37.40708185236031,
+        "Halfverhard": 0.8718651861297095,
+        "Onverhard": 36.51040453521982,
+        "Gras": 9.745733922296035,
+        "Struiken": 3.931790669844204
       }
     },
     "Openbaar en niet-openbaar": {
-      "Gebouwen": 4.193510735717432,
-      "Openbaar": 27.256044281133928,
-      "Niet openbaar": 68.56423059508823
+      "Gebouwen": 4.184126809081431,
+      "Openbaar": 26.563848613346398,
+      "Niet openbaar": 69.25202457759308
     },
-    "Groen per inwoner": 141.6636719,
+    "Groen per inwoner": 124.2244537,
     "Bevolkingsdichtheid": 1662.5,
     "Gemiddelde WOZ-waarde": 337,
     "Sociaal minimum huishoudens": 4,

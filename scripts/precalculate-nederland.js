@@ -18,23 +18,23 @@ import { fileURLToPath } from 'url';
 import { dsvFormat } from 'd3-dsv';
 import { gunzipSync, unzipSync, strFromU8 } from 'fflate';
 import { feature } from 'topojson-client';
+import {
+  DATASET_VERSION,
+  BUURT_GEOJSON_URL,
+  DEFAULT_METADATA_URL,
+  DEFAULT_CSV_DATA_URL
+} from '../src/lib/datasets.js';
 
 // Get __dirname equivalent in ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Dataset configuration
-// ⚠️ IMPORTANT: Keep these values in sync with src/lib/datasets.ts
-// When you update DATASET_VERSION in datasets.ts, you MUST:
-// 1. Update DATASET_VERSION here to match
-// 2. Run this script: npm run precalculate-nederland
+// Dataset configuration imported from datasets.ts
+// ⚠️ IMPORTANT: When you update data URLs or version in datasets.ts, you MUST:
+// 1. Run this script: npm run precalculate-nederland
 //
 // The application will automatically detect version mismatches and warn you in the console:
 // "Nederland aggregates cache is outdated! Please run: npm run precalculate-nederland"
-const DATASET_VERSION = '20251023';
-const BUURT_GEOJSON_URL = "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/geojsondata/buurt24IdentificationOnly.json";
-const DEFAULT_METADATA_URL = "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/metadata/OFFICIALPREPNOV25-metadata-buurtdashboard(in).csv";
-const DEFAULT_CSV_DATA_URL = "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/csvdata/combined_dashboard_data.csv.gz";
 
 // Calculation utilities (copied from calcMedian.js)
 function calcMedian(array) {
