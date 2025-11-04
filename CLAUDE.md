@@ -18,6 +18,7 @@ npm run dev          # Start development server (http://localhost:5173)
 - `npm run preview` - Preview production build
 - `npm run check` - Run Svelte type checking
 - `npm run check:watch` - Run type checking in watch mode
+- `npm run precalculate-nederland` - Regenerate Nederland aggregates (after data updates)
 
 ## Testing
 
@@ -32,6 +33,26 @@ npx playwright test --debug   # Debug mode
 
 ## Recent Improvements
 
+### Dataset Version Management (2025-11-04)
+
+**Centralized configuration** and **precalculated aggregates** for better maintainability:
+
+- ✅ **Single source of truth** - `src/lib/datasets.js` (renamed from .ts) contains all data URLs and version
+- ✅ **Precalculation script** - `scripts/precalculate-nederland.js` imports from datasets.js
+- ✅ **Version stamping** - Aggregates include version number for automatic cache validation
+- ✅ **Instant Nederland stats** - No runtime calculation for 13,000+ neighborhoods
+
+**Workflow for data updates:**
+1. Update `DATASET_VERSION` and URLs in `src/lib/datasets.js`
+2. Run `npm run precalculate-nederland`
+3. Commit `datasets.js` and `nederland-aggregates.json`
+4. Deploy with automatic version sync
+
+**Technical files:**
+- `src/lib/datasets.js` - Centralized data configuration (current version: `20251104`)
+- `scripts/precalculate-nederland.js` - Aggregates precalculation script
+- `static/nederland-aggregates.json` - Generated aggregates cache
+
 ### Amsterdam Performance Optimization (2025-11-02)
 
 Massive performance improvements for large municipalities (100+ neighborhoods):
@@ -39,9 +60,10 @@ Massive performance improvements for large municipalities (100+ neighborhoods):
 - ✅ **Viewport virtualization** - Only renders indicators near viewport (within 1 viewport distance)
 - ✅ **Aggressive cleanup** - Unmounts far-away indicators (>2 viewports) every 500ms
 - ✅ **Force simulation cleanup** - `onDestroy()` stops simulations and clears memory
-- ✅ **Adaptive circle sizing** - Smaller circles (2.5-3px) for large datasets reduce collision complexity
-- ✅ **Pre-positioned nodes** - Large datasets initialize at target position (no sliding animation)
-- ✅ **Minimal simulation** - Alpha 0.1, decay 0.9, force-stop after 3 ticks (~50ms)
+- ✅ **Adaptive circle sizing** - Tiered sizing (2.5-4.5px) based on dataset size
+- ✅ **Pre-positioned nodes** - Large/very large datasets initialize at target position (no sliding animation)
+- ✅ **Tiered simulation** - Parameters adapt: very large (>100) uses 3 ticks, large (70-100) uses 5 ticks, etc.
+- ✅ **Frozen positions** - Large datasets freeze after maxTicks with zero velocity to prevent jiggling
 
 **Performance results:**
 - Before: 3-5 seconds page freeze, progressive slowdown when scrolling
@@ -50,8 +72,8 @@ Massive performance improvements for large municipalities (100+ neighborhoods):
 **Technical implementation:**
 - `src/lib/components/Indicator.svelte` - Virtualization wrapper with Intersection Observer
 - `src/lib/components/IndicatorContent.svelte` - Original indicator (renamed)
-- `src/lib/components/BeeswarmPlot.svelte` - Cleanup, adaptive parameters, pre-positioning
-- `src/lib/stores.js` - Adaptive circle radius (2.5-3px for 100+ neighborhoods)
+- `src/lib/components/BeeswarmPlot.svelte` - Cleanup, tiered simulation parameters, pre-positioning, frozen positions
+- `src/lib/stores.js` - Adaptive circle radius (2.5-4.5px tiered by neighborhood count)
 
 ### Full-Page Loading Screen (2025-10-23)
 
@@ -79,8 +101,8 @@ Improved performance and reactivity for AHN (height data) version switching:
 
 **Technical implementation:**
 - `src/lib/stores.js` - Added `getIndicatorStore()` factory for per-indicator reactive stores
-- `src/lib/services/precalculate-nederland.js` - Precalculates all Nederland aggregates at build time
-- `src/routes/+page.server.js` - Loads precalculated aggregates from JSON file
+- `scripts/precalculate-nederland.js` - Precalculates all Nederland aggregates (imports from datasets.js)
+- `static/nederland-aggregates.json` - Cached aggregates loaded at runtime
 - `src/lib/components/Stats.svelte` - Uses cached Nederland values with reactive fallback
 - `src/lib/components/BarPlot.svelte` - Reactive to indicator-specific store changes
 - `src/lib/components/Indicator.svelte` - Memoized color scale creation with proper dependencies

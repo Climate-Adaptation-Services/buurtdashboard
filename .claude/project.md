@@ -108,6 +108,58 @@ A SvelteKit-based neighborhood dashboard application for visualizing Dutch neigh
 4. Projection created (only after step 3)
 5. Paths rendered
 
+## Recent Improvements (2025-11-04)
+
+### Dataset Version Management & Nederland Aggregates Precalculation
+
+**Problem**: Data source URLs and version numbers were hardcoded in multiple places, requiring manual synchronization when updating datasets. Additionally, calculating Nederland-level aggregates from 13,000+ neighborhoods at runtime was expensive.
+
+**Solution**: Centralized dataset configuration and server-side precalculation of Nederland aggregates:
+
+1. **Single Source of Truth** (`src/lib/datasets.js`):
+   - Renamed from `datasets.ts` to `.js` to enable Node.js imports
+   - All data URLs and version number defined in one place
+   - Both client and server code import from this file
+   - Eliminates duplication and sync issues
+
+```javascript
+// src/lib/datasets.js
+export const DATASET_VERSION = '20251104'
+export const DEFAULT_METADATA_URL = "https://..."
+export const DEFAULT_CSV_DATA_URL = "https://..."
+export const BUURT_GEOJSON_URL = "https://..."
+```
+
+2. **Precalculation Script** (`scripts/precalculate-nederland.js`):
+   - Runs during build or on-demand via `npm run precalculate-nederland`
+   - Fetches all data (metadata, CSV, GeoJSON)
+   - Calculates Nederland aggregates for all indicators (median or weighted average)
+   - Saves to `static/nederland-aggregates.json` with version stamp
+   - Supports multi-year, BEB variants, and AHN version indicators
+
+3. **Automatic Version Detection**:
+   - Client checks if cached aggregates match current `DATASET_VERSION`
+   - Console warning if version mismatch detected
+   - Forces precalculation when dataset updated
+
+4. **Performance Impact**:
+   - Nederland stats load instantly (no runtime calculation)
+   - Reduces client-side CPU usage
+   - Smaller memory footprint during initialization
+
+**Workflow When Updating Data**:
+1. Update URLs and `DATASET_VERSION` in `src/lib/datasets.js`
+2. Run `npm run precalculate-nederland`
+3. Commit both `datasets.js` and `nederland-aggregates.json`
+4. Deploy - version automatically syncs
+
+**Files Modified**:
+- `src/lib/datasets.ts` → `src/lib/datasets.js` - Centralized configuration
+- `scripts/precalculate-nederland.js` - Imports from datasets.js
+- `static/nederland-aggregates.json` - Generated aggregates with version stamp
+
+**Current Dataset Version**: `20251104`
+
 ## Recent Improvements (2025-11-02)
 
 ### Amsterdam Performance Optimization - Viewport Virtualization
@@ -131,17 +183,20 @@ A SvelteKit-based neighborhood dashboard application for visualizing Dutch neigh
    - Prevents memory leaks and accumulating background processes
    - Debounced simulation restarts (100ms) to prevent rapid re-initialization
 
-4. **Adaptive Simulation for Large Datasets** (100+ neighborhoods):
-   - **Pre-positioning**: Nodes initialized at target X coordinate (no sliding animation)
-   - **Smaller circles**: 2.5-3px radius (vs 4.5px) reduces collision complexity
-   - **Minimal energy**: Alpha 0.1 with 90% decay per tick
-   - **Fast stop**: Force-stops after 3 ticks (~50ms total)
-   - **Result**: Almost instant placement with tiny collision adjustment
+4. **Adaptive Simulation Parameters** (tiered by dataset size):
+   - **Very large (100+ neighborhoods)**: Pre-positioned at target X, alpha 0.2, decay 0.95, 3 ticks, 2.5-3px circles
+   - **Large (70-100 neighborhoods)**: Pre-positioned, alpha 0.15, decay 0.3, 5 ticks, 4px circles
+   - **Medium (40-70 neighborhoods)**: Alpha 0.3, decay 0.03, 10 ticks, 4.3px circles
+   - **Small (≤40 neighborhoods)**: Alpha 0.4, decay 0.015, 15 ticks, 4.5px circles
+   - **Frozen positions**: Large/very large datasets freeze after maxTicks with vx=0, vy=0 to prevent jiggling
+   - **Result**: Fast rendering with minimal collision artifacts across all municipality sizes
 
 5. **Adaptive Circle Sizing** (`src/lib/stores.js`):
-   - 100-150 neighborhoods: 3px radius
    - 150+ neighborhoods: 2.5px radius
-   - Default: 4.5px radius
+   - 100-150 neighborhoods: 3px radius
+   - 70-100 neighborhoods: 4px radius
+   - 40-70 neighborhoods: 4.3px radius
+   - ≤40 neighborhoods: 4.5px radius (default)
 
 **Performance Results**:
 - **Before**: 3-5 seconds page freeze, progressive slowdown when scrolling
@@ -264,12 +319,33 @@ For "Boomkroonoppervlakte openbaar" (tree crown in public areas):
 ### Commands
 
 ```bash
-npm run dev          # Start development server (localhost:5173)
-npm run build        # Build for production
-npm run preview      # Preview production build
-npm run check        # Run Svelte type checking
-npm run check:watch  # Type checking in watch mode
+npm run dev                      # Start development server (localhost:5173)
+npm run build                    # Build for production
+npm run preview                  # Preview production build
+npm run check                    # Run Svelte type checking
+npm run check:watch              # Type checking in watch mode
+npm run precalculate-nederland   # Precalculate Nederland aggregates (required after data updates)
 ```
+
+### Updating Data Sources
+
+When updating dataset URLs or metadata:
+
+1. **Update centralized configuration** in `src/lib/datasets.js`:
+   - Increment `DATASET_VERSION` (e.g., `'20251104'`)
+   - Update URLs if needed (`DEFAULT_METADATA_URL`, `DEFAULT_CSV_DATA_URL`, etc.)
+
+2. **Regenerate Nederland aggregates**:
+   ```bash
+   npm run precalculate-nederland
+   ```
+   This fetches all data and calculates pre-aggregated values for instant loading.
+
+3. **Commit changes**:
+   - `src/lib/datasets.js` (updated version and URLs)
+   - `static/nederland-aggregates.json` (regenerated aggregates)
+
+4. **Deploy**: Version automatically syncs between code and aggregates
 
 ### Testing
 
@@ -789,8 +865,12 @@ export const defaultConfig = {
 
 ### Configuration
 - `src/lib/config.js` - App configuration
-- `src/lib/datasets.ts` - Data source URLs
+- `src/lib/datasets.js` - **Single source of truth** for data URLs and version (updated from datasets.ts)
 - `vercel.json` - Deployment config
+
+### Data Management
+- `scripts/precalculate-nederland.js` - Precalculates Nederland aggregates from source data
+- `static/nederland-aggregates.json` - Cached aggregates with version stamp (generated, not hand-edited)
 
 ### Core Services
 - `src/lib/services/prepareJSONData.js` - Data processing pipeline
@@ -1151,21 +1231,24 @@ export function t(key) {
 **Adaptive Parameters** (see `BeeswarmPlot.svelte`):
 ```javascript
 const nodeCount = data.length
+const isMediumDataset = nodeCount > 40
+const isLargeDataset = nodeCount > 70
 const isVeryLargeDataset = nodeCount > 100
 
 const params = {
-  alpha: isVeryLargeDataset ? 0.1 : 0.4,        // Low energy for large sets
-  alphaDecay: isVeryLargeDataset ? 0.9 : 0.015, // Fast cooldown
-  maxTicks: isVeryLargeDataset ? 3 : 15,        // Force stop early
+  alpha: isVeryLargeDataset ? 0.2 : isLargeDataset ? 0.15 : isMediumDataset ? 0.3 : 0.4,
+  alphaDecay: isVeryLargeDataset ? 0.95 : isLargeDataset ? 0.3 : isMediumDataset ? 0.03 : 0.015,
+  maxTicks: isVeryLargeDataset ? 3 : isLargeDataset ? 5 : isMediumDataset ? 10 : 15,
+  xStrength: isVeryLargeDataset ? 1.0 : isLargeDataset ? 0.9 : isMediumDataset ? 0.7 : 0.5,
 }
 ```
 
 **Pre-positioning for Large Datasets**:
 ```javascript
-if (isVeryLargeDataset) {
+if (isLargeDataset || isVeryLargeDataset) {
   plotData.forEach(d => {
     d.x = xScale(getValue(d))  // Start at target X
-    d.y = centerY              // Start at center Y
+    d.y = 70                   // Start at center Y
   })
 }
 ```
@@ -1187,11 +1270,13 @@ onDestroy(() => {
 
 **Adaptive Radius** (`src/lib/stores.js`):
 ```javascript
-export const circleRadius = derived([data], ([$data]) => {
+export const circleRadius = derived([neighbourhoodsInMunicipalityJSONData], ([$data]) => {
   const count = $data?.features?.length || 0
-  if (count > 150) return 2.5  // Very dense
-  if (count > 100) return 3.0  // Dense
-  return 4.5                    // Normal
+  if (count > 150) return 2.5  // Very large datasets
+  if (count > 100) return 3.0  // Large datasets (100-150)
+  if (count > 70)  return 4.0  // Large datasets (70-100)
+  if (count > 40)  return 4.3  // Medium datasets (40-70)
+  return 4.5                    // Small datasets (≤40)
 })
 ```
 
@@ -1199,6 +1284,7 @@ export const circleRadius = derived([data], ([$data]) => {
 - Smaller circles = less collision detection work
 - Fewer overlaps = faster convergence
 - Better visual density for large datasets
+- Tiered approach matches simulation parameter tiers
 
 ## Error Handling
 
