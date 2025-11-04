@@ -2,7 +2,7 @@
 // Centralized location for all dataset URLs and versions
 
 // Current dataset version
-export const DATASET_VERSION = '20251104';
+export const DATASET_VERSION = '20251104-2';
 
 // URLs for different datasets
 export const BUURT_GEOJSON_URL = "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/geojsondata/buurt24IdentificationOnly.json";
@@ -18,7 +18,7 @@ export const DEFAULT_METADATA_ENGLISH_URL =
   "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/metadata/EN-buurtdashboard-metadata-050825-01.csv";
 
 export const DEFAULT_CSV_DATA_URL =
-  "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/csvdata/Buurt2024BuurtdashboardDataset20251104.csv.gz";
+  "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/csvdata/Buurt2024BuurtdashboardDataset20251104-2.csv.gz";
 
 // Dordrecht config URLs
 export const DORDRECHT_METADATA_URL =
