@@ -16,7 +16,7 @@
   import { scaleLinear, min, max } from "d3"
   import { calcMedian, calcWeightedAverage } from "$lib/utils/calcMedian"
   // MIGRATED: Import centralized value retrieval functions
-  import { getNumericalValue, getDifferenceValue, getIndicatorAttribute, toNumber, isValidValue } from "$lib/utils/valueRetrieval.js"
+  import { getNumericalValue, getDifferenceValue, getIndicatorAttribute, toNumber, isValidValue, getRawValue } from "$lib/utils/valueRetrieval.js"
 
   export let bodyHeight
   export let indicator
@@ -282,14 +282,16 @@
         )
       } else {
         const feature = neighbourhoodFilter[0]
-        let buurtRawValue = feature.properties[originalAttribute]
+        // Use getRawValue to handle Dordrecht's AHN underscore naming (e.g., "BKB_AHN3" vs "BKBAHN3")
+        let buurtRawValue = getRawValue(feature, indicator)
 
         buurtScale = (buurtRawValue !== null && buurtRawValue !== "" && !isNaN(buurtRawValue))
           ? +buurtRawValue : 0
 
         wijktypeScale = calcMedian(
           $districtTypeJSONData.features
-            .map((neighbourhood) => neighbourhood.properties[originalAttribute])
+            // Use getRawValue to handle Dordrecht's AHN underscore naming
+            .map((neighbourhood) => getRawValue(neighbourhood, indicator))
             .filter((value) => value !== null && value !== "" && !isNaN(value))
             .map((value) => +value)
         )

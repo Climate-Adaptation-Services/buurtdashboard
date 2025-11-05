@@ -81,6 +81,8 @@
         <img src="./uitleg-grafieken.png" width="40px" />
         <p class="download-and-about-text">{t("Uitleg_grafieken")}</p>
       </div>
+      <!-- TODO: Download data option hidden temporarily -->
+      <!--
       <div class="download">
         <a
           href={$configStore.neighbourhoodCSVdataLocation}
@@ -88,6 +90,7 @@
         >
         <p class="download-and-about-text">Download data</p>
       </div>
+      -->
     </div>
     <br />
     {#if isLoading}

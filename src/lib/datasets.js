@@ -12,7 +12,7 @@ export const MUNICIPALITY_JSON_URL = "https://buurtdashboard-data.s3.eu-north-1.
 
 // Default config URLs
 export const DEFAULT_METADATA_URL =
-  "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/metadata/buurtdashboard-metadata-041125-03.csv";
+  "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/metadata/OFFICIALPREPNOV25-metadata-buurtdashboard(in)(1).csv";
 
 export const DEFAULT_METADATA_ENGLISH_URL =
   "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/metadata/EN-buurtdashboard-metadata-050825-01.csv";

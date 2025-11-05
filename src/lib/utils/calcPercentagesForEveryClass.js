@@ -1,7 +1,7 @@
 import { getClassByIndicatorValue } from "./getClassByIndicatorValue.js";
 import { t } from "$lib/i18n/translate.js"
 import { getIndicatorAttribute } from "./getIndicatorAttribute.js";
-import { getNumericalValue } from "./valueRetrieval.js";
+import { getNumericalValue, getRawValue } from "./valueRetrieval.js";
 import { getIndicatorStore } from "$lib/stores";
 
 export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regio) {
@@ -89,7 +89,16 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
     Object.keys(indicator.classes).forEach(kl => {
       // getIndicatorAttribute will automatically apply BEB suffix if needed
       const attributeName = getIndicatorAttribute(indicator, indicator.classes[kl])
-      const propertyValue = neighbourhood.properties[attributeName]
+      let propertyValue = neighbourhood.properties[attributeName]
+
+      // FALLBACK: Handle Dordrecht's AHN underscore naming (e.g., "BKB_AHN3" vs "BKBAHN3")
+      if ((propertyValue === null || propertyValue === undefined || propertyValue === '') && attributeName.includes('AHN')) {
+        const ahnPattern = /(AHN\d+)$/
+        const fallbackAttribute = attributeName.replace(ahnPattern, '_$1')
+        if (fallbackAttribute !== attributeName) {
+          propertyValue = neighbourhood.properties[fallbackAttribute]
+        }
+      }
 
       if (propertyValue !== undefined && propertyValue !== null && propertyValue !== '' && !isNaN(parseFloat(propertyValue))) {
         noData = false
@@ -149,8 +158,8 @@ export function calcPercentagesForEveryClassSingleIndicator(indicator, data, reg
   }
 
   data.features.forEach(neighbourhoodOrMunicipality => {
-
-    classesTotal.filter(kl => kl.className === getClassByIndicatorValue(indicator, neighbourhoodOrMunicipality.properties[getIndicatorAttribute(indicator, indicator.attribute)]))[0].waarde += 1
+    // Use getRawValue to handle Dordrecht's AHN underscore naming (e.g., "BKB_AHN3" vs "BKBAHN3")
+    classesTotal.filter(kl => kl.className === getClassByIndicatorValue(indicator, getRawValue(neighbourhoodOrMunicipality, indicator)))[0].waarde += 1
     totalAmount += 1
   });
 

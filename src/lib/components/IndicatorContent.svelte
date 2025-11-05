@@ -5,6 +5,7 @@
   import IndicatorTitle from "./IndicatorTitle.svelte"
   import IndicatorBody from "./IndicatorBody.svelte"
   import { getIndicatorAttribute } from "$lib/utils/getIndicatorAttribute"
+  import { getRawValue } from "$lib/utils/valueRetrieval"
 
   export let indicatorHeight
   export let indicator
@@ -53,8 +54,8 @@
         isDifferenceMode,
         municipalitySelection: $municipalitySelection,
         bebSelection: ahnSelection.beb, // Include BEB selection in memo key
-        // Only include the actual data values for this indicator, not the entire store reference
-        dataValues: relevantData?.features?.map((d) => d.properties[indicatorAttribute]).sort(),
+        // Use getRawValue to handle Dordrecht's AHN underscore naming (e.g., "BKB_AHN3" vs "BKBAHN3")
+        dataValues: relevantData?.features?.map((d) => getRawValue(d, indicator)).sort(),
         hasData: !!relevantData?.features
       })
 
@@ -70,8 +71,9 @@
           let rangeExtent = [0, 1] // default value [0,1]
 
           // Only calculate extent if we have data, otherwise use config defaults
+          // Use getRawValue to handle Dordrecht's AHN underscore naming
           if (relevantData?.features) {
-            rangeExtent = extent(relevantData.features, (d) => +d.properties[indicatorAttribute])
+            rangeExtent = extent(relevantData.features, (d) => +getRawValue(d, indicator))
           }
 
           // this can deal with any amount of colors in the scale

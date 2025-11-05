@@ -122,10 +122,9 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
         } else {
           // Use popup value to potentially show both percentage and M2 values for M2 variants
           const popupResult = getPopupValue(feature, indicator)
-          
-          // Get original value for consistent color calculation (force original attribute, no unit conversion)
-          const originalAttribute = getIndicatorAttribute(indicator, indicator.attribute)
-          const originalValue = feature.properties[originalAttribute]
+
+          // Get original value for consistent color calculation (use getRawValue for Dordrecht AHN underscore naming)
+          const originalValue = getRawValue(feature, indicator)
           
           // Format the value with proper rounding and unit
           if (popupResult.value !== null && !isNaN(popupResult.value)) {
@@ -156,10 +155,10 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
           tooltipValue = 'Geen'
         }
         
-        // Get color for categorical value
+        // Get color for categorical value (use getRawValue for Dordrecht AHN underscore naming)
         const categoricalValue = indicator.aggregatedIndicator
           ? getMostCommonClass(indicator, feature)
-          : getClassByIndicatorValue(indicator, feature.properties[getIndicatorAttribute(indicator, indicator.attribute)])
+          : getClassByIndicatorValue(indicator, getRawValue(feature, indicator))
         
         tooltipValueColor = indicatorValueColorscale(categoricalValue)
         tooltipIndicator = indicator.title
