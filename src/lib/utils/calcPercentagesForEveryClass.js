@@ -89,13 +89,13 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
     Object.keys(indicator.classes).forEach(kl => {
       // getIndicatorAttribute will automatically apply BEB suffix if needed
       const attributeName = getIndicatorAttribute(indicator, indicator.classes[kl])
-      let propertyValue = neighbourhood.properties[attributeName]
+      let propertyValue = neighbourhood.properties?.[attributeName]
 
       // FALLBACK: Handle Dordrecht's AHN underscore naming (e.g., "BKB_AHN3" vs "BKBAHN3")
-      if ((propertyValue === null || propertyValue === undefined || propertyValue === '') && attributeName.includes('AHN')) {
+      if ((propertyValue === null || propertyValue === undefined || propertyValue === '') && attributeName && typeof attributeName === 'string' && attributeName.includes('AHN')) {
         const ahnPattern = /(AHN\d+)$/
         const fallbackAttribute = attributeName.replace(ahnPattern, '_$1')
-        if (fallbackAttribute !== attributeName) {
+        if (fallbackAttribute !== attributeName && neighbourhood.properties) {
           propertyValue = neighbourhood.properties[fallbackAttribute]
         }
       }

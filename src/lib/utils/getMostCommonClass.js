@@ -9,13 +9,13 @@ export function getMostCommonClass(indicator, feature) {
   let highestValue = 0
   Object.keys(indicator.classes).forEach(key => {
     const attribute = getIndicatorAttribute(indicator, indicator.classes[key])
-    let value = feature.properties[attribute]
+    let value = feature.properties?.[attribute]
 
     // FALLBACK: Handle Dordrecht's AHN underscore naming (e.g., "BKB_AHN3" vs "BKBAHN3")
-    if ((value === null || value === undefined || value === '') && attribute.includes('AHN')) {
+    if ((value === null || value === undefined || value === '') && attribute && typeof attribute === 'string' && attribute.includes('AHN')) {
       const ahnPattern = /(AHN\d+)$/
       const fallbackAttribute = attribute.replace(ahnPattern, '_$1')
-      if (fallbackAttribute !== attribute) {
+      if (fallbackAttribute !== attribute && feature.properties) {
         value = feature.properties[fallbackAttribute]
       }
     }

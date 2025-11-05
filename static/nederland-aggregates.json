@@ -1,6 +1,6 @@
 {
-  "version": "20251104-2",
-  "generatedAt": "2025-11-04T16:18:24.463Z",
+  "version": "20251105",
+  "generatedAt": "2025-11-05T12:42:33.369Z",
   "aggregates": {
     "Waterdiepte bij hevige bui": {
       "5 - 10cm": 8.839722205293619,
@@ -48,7 +48,7 @@
     },
     "Boomkroonoppervlakte niet-openbaar ": {
       "hele_buurt": 3.445330188071561,
-      "bebouwde_kom": {}
+      "bebouwde_kom": 11.276428169561175
     },
     "Groen": {
       "hele_buurt": 23.143397399514047,
@@ -60,7 +60,7 @@
     },
     "Groen niet-openbaar": {
       "hele_buurt": 7.612856574898359,
-      "bebouwde_kom": {}
+      "bebouwde_kom": 18.96259343794778
     },
     "Verharding ": {
       "hele_buurt": 8.858440077153729,
@@ -72,7 +72,7 @@
     },
     "Verharding niet-openbaar": {
       "hele_buurt": 6.3114896608723585,
-      "bebouwde_kom": {}
+      "bebouwde_kom": 45.616891832489145
     },
     "Water": {
       "hele_buurt": 6.25145776422948,
