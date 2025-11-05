@@ -12,17 +12,34 @@
   const indicators = allIndicators.map((d) => d.title)
 
   function handleIndicatorFilterAdd(e) {
-    $URLParams.append("indicator", e.detail.option)
+    // Create new URLSearchParams from current one to preserve all other parameters
+    const newParams = new URLSearchParams($URLParams)
+    newParams.append("indicator", e.detail.option)
+    $URLParams = newParams
     addURLParameter()
   }
 
   function handleIndicatorFilterRemove(e) {
-    $URLParams.delete("indicator", e.detail.option)
+    // Create new URLSearchParams from current one to preserve all other parameters
+    const newParams = new URLSearchParams($URLParams)
+    // Get all current indicator values and filter out the one to remove
+    const currentIndicators = newParams.getAll("indicator")
+    newParams.delete("indicator")
+    // Re-add all indicators except the one we're removing
+    currentIndicators.forEach(indicator => {
+      if (indicator !== e.detail.option) {
+        newParams.append("indicator", indicator)
+      }
+    })
+    $URLParams = newParams
     removeURLParameter()
   }
 
   function handleIndicatorFilterClear() {
-    $URLParams.delete("indicator")
+    // Create new URLSearchParams from current one to preserve all other parameters
+    const newParams = new URLSearchParams($URLParams)
+    newParams.delete("indicator")
+    $URLParams = newParams
     removeURLParameter()
   }
 

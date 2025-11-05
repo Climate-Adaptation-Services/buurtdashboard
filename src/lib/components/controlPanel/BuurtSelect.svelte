@@ -10,7 +10,16 @@
   // Removed neighborhood list console log
 
   function handleBuurtChange(e) {
-    $URLParams.set("buurt", e.detail.value)
+    // Don't update URL params or selection if the value is being set programmatically from URL
+    // (i.e., if it's already the same as what we're setting)
+    if ($neighbourhoodSelection === e.detail.value) {
+      return
+    }
+
+    // Create new URLSearchParams from current one to preserve all other parameters
+    const newParams = new URLSearchParams($URLParams)
+    newParams.set("buurt", e.detail.value)
+    $URLParams = newParams
     addURLParameter()
 
     neighbourhoodSelection.set(e.detail.value)
@@ -18,7 +27,10 @@
   }
 
   function handleBuurtClear(e) {
-    $URLParams.delete("buurt")
+    // Create new URLSearchParams from current one to preserve all other parameters (e.g., indicators)
+    const newParams = new URLSearchParams($URLParams)
+    newParams.delete("buurt")
+    $URLParams = newParams
     removeURLParameter()
 
     neighbourhoodSelection.set(null)

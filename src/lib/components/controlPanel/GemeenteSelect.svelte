@@ -8,7 +8,25 @@
   export let lijstAlleGemeentesVoorDropdown
 
   function handleGemeenteChange(e) {
-    $URLParams.set("gemeente", e.detail.value)
+    // Don't update URL params or selection if the value is being set programmatically from URL
+    // (i.e., if it's already the same as what we're setting)
+    if ($municipalitySelection === e.detail.value) {
+      if (import.meta.env.DEV) {
+        console.log('GemeenteSelect: Skipping change handler - value already set:', e.detail.value);
+      }
+      return
+    }
+
+    if (import.meta.env.DEV) {
+      console.log('GemeenteSelect: User changed gemeente to:', e.detail.value);
+    }
+
+    // Create new URLSearchParams from current one to preserve all other parameters
+    const newParams = new URLSearchParams($URLParams)
+    newParams.set("gemeente", e.detail.value)
+    // Delete buurt since it's no longer valid for the new municipality
+    newParams.delete("buurt")
+    $URLParams = newParams
     addURLParameter()
 
     // Clear neighbourhood first since it's no longer valid for the new municipality
@@ -18,8 +36,11 @@
   }
 
   function handleGemeenteClear(e) {
-    $URLParams.delete("gemeente")
-    $URLParams.delete("buurt")
+    // Create new URLSearchParams from current one to preserve all other parameters (e.g., indicators)
+    const newParams = new URLSearchParams($URLParams)
+    newParams.delete("gemeente")
+    newParams.delete("buurt")
+    $URLParams = newParams
     removeURLParameter()
 
     municipalitySelection.set(null)

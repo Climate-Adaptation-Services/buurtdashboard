@@ -116,8 +116,10 @@
   }
 
   // zodra allNeighbourhoodsJSONData geladen is, lees de url parameters
-  $: if ($allNeighbourhoodsJSONData) {
+  let urlParametersProcessed = false
+  $: if ($allNeighbourhoodsJSONData && !urlParametersProcessed) {
     processURLParameters()
+    urlParametersProcessed = true
   }
 
 
