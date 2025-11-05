@@ -4,24 +4,12 @@
   import MultiSelect from "svelte-multiselect?client"
   import { browser } from "$app/environment"
   import { selectAll } from "d3"
-  import { afterUpdate, onMount } from "svelte"
+  import { afterUpdate } from "svelte"
   import { t } from "$lib/i18n/translate.js"
 
   export let allIndicators
 
   const indicators = allIndicators.map((d) => d.title)
-
-  // Debug logging
-  onMount(() => {
-    console.log('📊 IndicatorFilter mounted. Current selection:', $indicatorsSelection);
-  })
-
-  // Watch for changes to indicatorsSelection
-  $: {
-    if (browser) {
-      console.log('📊 IndicatorFilter sees indicatorsSelection changed to:', $indicatorsSelection);
-    }
-  }
 
   function handleIndicatorFilterAdd(e) {
     // Create new URLSearchParams from current one to preserve all other parameters

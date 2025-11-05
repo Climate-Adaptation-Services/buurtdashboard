@@ -113,13 +113,7 @@ export const selectedNeighbourhoodJSONData = derived(
     if ($allNeighbourhoodsJSONData?.features && $neighbourhoodSelection !== null) {
       // Use find() instead of filter()[0] for better performance
       // Add null check for neighbourhood before accessing properties
-      const result = $allNeighbourhoodsJSONData.features.find(neighbourhood => neighbourhood?.properties && neighbourhood.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection) || null
-
-      if (!result) {
-        console.warn(`⚠️ selectedNeighbourhoodJSONData: Could not find neighbourhood with code "${$neighbourhoodSelection}" in ${$allNeighbourhoodsJSONData.features.length} features`)
-      }
-
-      return result
+      return $allNeighbourhoodsJSONData.features.find(neighbourhood => neighbourhood?.properties && neighbourhood.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection) || null
     } else {
       return null
     }

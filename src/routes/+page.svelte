@@ -109,13 +109,10 @@
   const isIframe = browser && window.parent !== window
 
   // Version marker for debugging
-  if (browser) {
+  if (browser && import.meta.env.DEV) {
     console.log('%c🔧 Buurtdashboard Version Check', 'background: #222; color: #bada55; font-size: 14px; padding: 4px;');
-    console.log('Build timestamp: 2025-11-05 17:35 [DEBUG]');
     console.log('Mode:', isIframe ? '🖼️ IFRAME' : '🌐 STANDALONE');
     console.log('Cache version: 6');
-    console.log('Iframe fix: ✅ ACTIVE');
-    console.log('Debug logging: ✅ ENABLED');
   }
 
   // Load URL params if standalone page (not in iframe)
@@ -134,7 +131,6 @@
   // zodra allNeighbourhoodsJSONData geladen is, lees de url parameters
   let urlParametersProcessed = false
   $: if ($allNeighbourhoodsJSONData && !urlParametersProcessed) {
-    console.log('📍 Processing URL parameters with', $allNeighbourhoodsJSONData.features?.length, 'neighbourhood features loaded')
     processURLParameters()
     urlParametersProcessed = true
   }

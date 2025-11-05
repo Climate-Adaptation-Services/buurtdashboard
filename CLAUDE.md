@@ -33,6 +33,33 @@ npx playwright test --debug   # Debug mode
 
 ## Recent Improvements
 
+### Iframe Embedding & Null Safety Fixes (2025-11-05)
+
+**Fixed iframe embedding issues** and **production crash bugs**:
+
+- ✅ **Iframe race condition fixed** - Standalone and iframe modes now properly isolated
+  - Standalone: Loads URL params from window.location.search once on mount
+  - Iframe: Receives URL params via postMessage from parent, never overwritten
+- ✅ **Null safety throughout** - Added comprehensive null checks for data access
+  - `selectedNeighbourhoodJSONData` null checks in ControlPanel, Stats, BarPlot
+  - Null feature filtering in prepareJSONData before processing
+  - Safe property access throughout derived stores
+- ✅ **Multiple URL parameters preserved** - Fixed URLSearchParams handling
+  - GemeenteSelect, BuurtSelect, indicatorFilter now create fresh URLSearchParams
+  - Properly preserves all parameters when adding/removing values
+
+**Known Issue - Parent Page:**
+- Multiple indicator selection works in standalone mode but only last indicator appears in iframe
+- **Root cause:** Parent page (klimaateffectatlas.nl) uses `.set()` instead of `.append()` for indicators
+- **Fix required:** Modify parent page JavaScript to use `params.append('indicator', value)` instead of `params.set('indicator', value)`
+
+**Technical implementation:**
+- `src/routes/+page.svelte:108-130` - Iframe detection and conditional URL loading
+- `src/lib/services/urlManager.js` - PostMessage handling and URL processing
+- `src/lib/stores.js:110-121` - Null-safe selectedNeighbourhoodJSONData derivation
+- `src/lib/services/prepareJSONData.js:177` - Final null filter before processing
+- `src/lib/components/controlPanel/*` - Preserved URL parameter handling
+
 ### Dataset Version Management (2025-11-04)
 
 **Centralized configuration** and **precalculated aggregates** for better maintainability:

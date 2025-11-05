@@ -75,9 +75,6 @@ export function processURLParameters() {
     const buurt = get(URLParams).get("buurt");
     const indicators = get(URLParams).getAll("indicator");
 
-    // Debug logging for indicator params (production-visible)
-    console.log('📊 processURLParameters - indicators from URL:', indicators);
-
     // Set municipality first, then neighborhood (order matters for derived stores)
     if (gemeente) {
       municipalitySelection.set(gemeente);
@@ -87,18 +84,6 @@ export function processURLParameters() {
     }
     if (indicators.length > 0) {
       indicatorsSelection.set(indicators);
-      console.log('📊 Set indicatorsSelection store to:', indicators);
-
-      // Verify the store was actually set
-      setTimeout(() => {
-        const currentSelection = get(indicatorsSelection);
-        console.log('📊 indicatorsSelection store after 100ms:', currentSelection);
-        if (JSON.stringify(currentSelection) !== JSON.stringify(indicators)) {
-          console.warn('⚠️ indicatorsSelection was modified after being set!');
-          console.warn('   Expected:', indicators);
-          console.warn('   Got:', currentSelection);
-        }
-      }, 100);
     }
   }, 10);
 }
@@ -127,20 +112,13 @@ export function setupURLListener() {
     if (TRUSTED_ORIGINS.includes(event.origin) || import.meta.env.DEV) {
       // Validate expected data structure
       if (event.data && event.data.parentURL && typeof event.data.parentURL === 'string') {
-        // Production-visible logging to debug indicator issue
-        console.log("📨 Received URL from parent:", event.data.parentURL);
+        if (import.meta.env.DEV) {
+          console.log("Received URL from parent:", event.data.parentURL);
+        }
 
         const urlParts = event.data.parentURL.split('?');
         if (urlParts.length > 1) {
-          const queryString = urlParts[1];
-          console.log("📨 Query string:", queryString);
-
-          // Parse and log all parameters
-          const params = new URLSearchParams('?' + queryString);
-          const indicators = params.getAll('indicator');
-          console.log("📨 Indicators in parent URL:", indicators);
-
-          URLParams.set(new URLSearchParams('?' + queryString));
+          URLParams.set(new URLSearchParams('?' + urlParts[1]));
           processURLParameters();
         }
       } else {
