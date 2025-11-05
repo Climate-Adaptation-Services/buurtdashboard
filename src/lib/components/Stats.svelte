@@ -418,7 +418,7 @@
       {xScaleStats}
     />
   </div>
-  {#if $selectedNeighbourhoodJSONData.properties[$districtTypeAbbreviation]}
+  {#if $selectedNeighbourhoodJSONData && $selectedNeighbourhoodJSONData.properties[$districtTypeAbbreviation]}
     <div class="indicator-stats" style="height: {bodyHeight * 0.2 * 0.25}px">
       <Stat
         {indicatorValueColorscale}

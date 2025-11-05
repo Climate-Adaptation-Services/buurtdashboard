@@ -56,7 +56,7 @@
   }
 
   $: districtType =
-    $allNeighbourhoodsJSONData && $neighbourhoodSelection !== null && $selectedNeighbourhoodJSONData.properties[$districtTypeAbbreviation]
+    $allNeighbourhoodsJSONData && $neighbourhoodSelection !== null && $selectedNeighbourhoodJSONData && $selectedNeighbourhoodJSONData.properties[$districtTypeAbbreviation]
       ? $selectedNeighbourhoodJSONData.properties[$districtTypeAbbreviation]
       : t("geen_wijktype")
 

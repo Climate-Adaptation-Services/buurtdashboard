@@ -120,7 +120,7 @@
     }
 
     // Add neighbourhood level if selected
-    if ($neighbourhoodSelection !== null && $indicatorStore && $allNeighbourhoodsJSONData) {
+    if ($neighbourhoodSelection !== null && $indicatorStore && $allNeighbourhoodsJSONData && $selectedNeighbourhoodJSONData) {
       addLevel("Buurt", { type: "FeatureCollection", features: [$selectedNeighbourhoodJSONData] })
 
       // Add district type if available
