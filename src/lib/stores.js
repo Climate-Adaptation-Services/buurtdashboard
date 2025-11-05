@@ -24,6 +24,7 @@ export const districtTypeAbbreviation = readable('Wijktype')
 export const indicatorsSelection = writable([])
 export const alleIndicatoren = writable([])
 export const AHNSelecties = writable({})
+export const isUpdatingIndicators = writable(false) // Flag to prevent zoom during indicator updates
 
 const indicatorStores = new Map()
 

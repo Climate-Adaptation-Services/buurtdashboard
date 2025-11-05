@@ -6,6 +6,7 @@
     AHNSelecties,
     getIndicatorStore,
     municipalitySelection,
+    isUpdatingIndicators,
   } from "$lib/stores"
   import { geoMercator, geoPath, select, selectAll } from "d3"
   import { t } from "$lib/i18n/translate.js"
@@ -163,7 +164,7 @@
 
   // Handle selection changes for zooming
   $: if (mapManager.getMap() && mapType === "main map" && $currentJSONData && mapInitializedWithData) {
-    mapManager.handleSelectionChange($municipalitySelection, $neighbourhoodSelection, $currentJSONData)
+    mapManager.handleSelectionChange($municipalitySelection, $neighbourhoodSelection, $currentJSONData, $isUpdatingIndicators)
   }
 
   // Raise selected neighborhood elements to ensure they appear on top

@@ -210,8 +210,11 @@ export class LeafletMapManager {
   /**
    * Handle municipality/neighborhood selection changes
    */
-  handleSelectionChange(municipalitySelection, neighbourhoodSelection, currentJSONData) {
+  handleSelectionChange(municipalitySelection, neighbourhoodSelection, currentJSONData, isUpdatingIndicators = false) {
     if (!this.leafletMap || !currentJSONData) return
+
+    // Skip zoom if we're in the middle of updating indicators (temporary clear/restore)
+    if (isUpdatingIndicators) return
 
     const municipalityChanged = municipalitySelection !== this.previousMunicipalitySelection
     const neighbourhoodChanged = neighbourhoodSelection !== this.previousNeighbourhoodSelection

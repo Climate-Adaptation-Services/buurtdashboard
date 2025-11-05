@@ -13,6 +13,7 @@
     allNeighbourhoodsJSONData,
     nederlandAggregates,
     configStore,
+    isUpdatingIndicators,
   } from "$lib/stores"
   import { setupIndicators } from "$lib/services/setupIndicators.js"
   import Modal from "svelte-simple-modal"
@@ -128,11 +129,15 @@
   function onChangeIndicatorenSelectie(_) {
     // Directly update displayed indicators without clearing first
     const newDisplayedIndicators = $indicatorsSelection.length === 0 ? allIndicators : allIndicators.filter((d) => $indicatorsSelection.includes(d["title"]))
-    
+
     // Only do the complex reset if indicators actually changed
     if (JSON.stringify(displayedIndicators.map(d => d.title)) !== JSON.stringify(newDisplayedIndicators.map(d => d.title))) {
       const tempGemeenteSelection = $municipalitySelection
       const tempBuurtSelection = $neighbourhoodSelection
+
+      // Set flag to prevent zoom during this temporary change
+      isUpdatingIndicators.set(true)
+
       municipalitySelection.set(null)
       neighbourhoodSelection.set(null)
 
@@ -142,6 +147,8 @@
       setTimeout(() => {
         municipalitySelection.set(tempGemeenteSelection)
         neighbourhoodSelection.set(tempBuurtSelection)
+        // Clear flag after restoration completes
+        setTimeout(() => isUpdatingIndicators.set(false), 10)
       }, 1)
     }
   }

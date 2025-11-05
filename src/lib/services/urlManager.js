@@ -75,6 +75,11 @@ export function processURLParameters() {
     const buurt = get(URLParams).get("buurt");
     const indicators = get(URLParams).getAll("indicator");
 
+    // Debug logging for indicator params
+    if (import.meta.env.DEV) {
+      console.log('processURLParameters - indicators:', indicators);
+    }
+
     // Set municipality first, then neighborhood (order matters for derived stores)
     if (gemeente) {
       municipalitySelection.set(gemeente);
@@ -84,6 +89,9 @@ export function processURLParameters() {
     }
     if (indicators.length > 0) {
       indicatorsSelection.set(indicators);
+      if (import.meta.env.DEV) {
+        console.log('Set indicatorsSelection to:', indicators);
+      }
     }
   }, 10);
 }
