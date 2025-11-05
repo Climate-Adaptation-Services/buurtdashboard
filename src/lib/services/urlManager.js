@@ -127,13 +127,20 @@ export function setupURLListener() {
     if (TRUSTED_ORIGINS.includes(event.origin) || import.meta.env.DEV) {
       // Validate expected data structure
       if (event.data && event.data.parentURL && typeof event.data.parentURL === 'string') {
-        if (import.meta.env.DEV) {
-          console.log("Received URL from parent:", event.data.parentURL);
-        }
+        // Production-visible logging to debug indicator issue
+        console.log("📨 Received URL from parent:", event.data.parentURL);
 
         const urlParts = event.data.parentURL.split('?');
         if (urlParts.length > 1) {
-          URLParams.set(new URLSearchParams('?' + urlParts[1]));
+          const queryString = urlParts[1];
+          console.log("📨 Query string:", queryString);
+
+          // Parse and log all parameters
+          const params = new URLSearchParams('?' + queryString);
+          const indicators = params.getAll('indicator');
+          console.log("📨 Indicators in parent URL:", indicators);
+
+          URLParams.set(new URLSearchParams('?' + queryString));
           processURLParameters();
         }
       } else {
