@@ -4,7 +4,7 @@
  */
 
 const CACHE_NAME = 'buurtdashboard-topojson-cache';
-const CACHE_VERSION = '5'; // Increment this when data structure changes
+const CACHE_VERSION = '6'; // Increment this when data structure changes - v6: Added null feature filtering
 const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
 /**

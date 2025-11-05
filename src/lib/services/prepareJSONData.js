@@ -53,13 +53,27 @@ export async function prepareJSONData(JSONdata, CSVdata, options = {}) {
     municipalityTopojson = measurePerformance('Municipality TopoJSON processing', () => {
       // Apply presimplify and convert to feature
       let topoData = topojsonsimplify.presimplify(JSONdata[0]);
-      return topojson.feature(topoData, topoData.objects.GemeenteGrenzen2023);
+      const converted = topojson.feature(topoData, topoData.objects.GemeenteGrenzen2023);
+
+      // Filter out null/invalid features before caching
+      return {
+        ...converted,
+        features: converted.features.filter(f => f?.properties)
+      };
     });
 
     // Cache the processed data if URL is provided
     if (municipalityUrl) {
       saveToCache(municipalityUrl, municipalityTopojson);
     }
+  }
+
+  // Also filter cached data as a safety measure
+  if (municipalityTopojson?.features) {
+    municipalityTopojson = {
+      ...municipalityTopojson,
+      features: municipalityTopojson.features.filter(f => f?.properties)
+    };
   }
 
   allMunicipalitiesJSONData.set(municipalityTopojson)
@@ -96,11 +110,14 @@ export async function prepareJSONData(JSONdata, CSVdata, options = {}) {
           neighbourhoodTopojson = topojsonsimplify.presimplify(neighbourhoodTopojson);
           neighbourhoodTopojson = topojsonsimplify.simplify(neighbourhoodTopojson, 0.00001); // Small value preserves most details
           neighbourhoodTopojson = topojson.feature(neighbourhoodTopojson, neighbourhoodTopojson.objects[objectName]);
-          return neighbourhoodTopojson.features;
+
+          // Filter out null/invalid features before caching
+          return neighbourhoodTopojson.features.filter(f => f?.properties);
         } else if (neighbourhoodTopojson && neighbourhoodTopojson.type === 'FeatureCollection') {
           // It's already a GeoJSON FeatureCollection, use features directly
           console.warn('Neighborhood data is already GeoJSON, skipping TopoJSON processing');
-          return neighbourhoodTopojson.features || [];
+          // Filter out null/invalid features
+          return (neighbourhoodTopojson.features || []).filter(f => f?.properties);
         } else {
           console.error('Neighborhood data in unexpected format', neighbourhoodTopojson);
           return [];
@@ -113,6 +130,9 @@ export async function prepareJSONData(JSONdata, CSVdata, options = {}) {
         saveToCache(neighbourhoodUrl, featureCollection);
       }
     }
+
+    // Also filter cached data as a safety measure
+    neighbourhoodTopojsonFeatures = neighbourhoodTopojsonFeatures.filter(f => f?.properties);
   } catch (error) {
     console.error('Error processing neighborhood data:', error);
     neighbourhoodTopojsonFeatures = [];

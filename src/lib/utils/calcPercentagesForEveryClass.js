@@ -163,6 +163,9 @@ export function calcPercentagesForEveryClassSingleIndicator(indicator, data, reg
   }
 
   data.features.forEach(neighbourhoodOrMunicipality => {
+    // Skip null/invalid features
+    if (!neighbourhoodOrMunicipality?.properties) return
+
     // Use getRawValue to handle Dordrecht's AHN underscore naming (e.g., "BKB_AHN3" vs "BKBAHN3")
     classesTotal.filter(kl => kl.className === getClassByIndicatorValue(indicator, getRawValue(neighbourhoodOrMunicipality, indicator)))[0].waarde += 1
     totalAmount += 1
