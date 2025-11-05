@@ -138,11 +138,11 @@ export const currentJSONData = derived(
       return $allMunicipalitiesJSONData
     } else if ($currentOverviewLevel === 'Gemeente') {
       if (!$allNeighbourhoodsJSONData?.features) return null
-      const newFeatures = $allNeighbourhoodsJSONData.features.filter(neighbourhood => neighbourhood.properties[$municipalityCodeAbbreviation] === $municipalitySelection)
+      const newFeatures = $allNeighbourhoodsJSONData.features.filter(neighbourhood => neighbourhood?.properties && neighbourhood.properties[$municipalityCodeAbbreviation] === $municipalitySelection)
       return { type: 'FeatureCollection', features: newFeatures }
     } else {
       if (!$allNeighbourhoodsJSONData?.features) return null
-      const newFeatures = $allNeighbourhoodsJSONData.features.filter(neighbourhood => neighbourhood.properties[$municipalityCodeAbbreviation] === $municipalitySelection)
+      const newFeatures = $allNeighbourhoodsJSONData.features.filter(neighbourhood => neighbourhood?.properties && neighbourhood.properties[$municipalityCodeAbbreviation] === $municipalitySelection)
       return { type: 'FeatureCollection', features: newFeatures }
       // const newFeatures = $allNeighbourhoodsJSONData.features.filter(neighbourhood => neighbourhood.properties['bu_code'] === $neighbourhoodSelection)
       // return {type: 'FeatureCollection', features: newFeatures}
@@ -154,7 +154,7 @@ export const neighbourhoodsInMunicipalityJSONData = derived(
   [municipalitySelection, allNeighbourhoodsJSONData, municipalityCodeAbbreviation],
   ([$municipalitySelection, $allNeighbourhoodsJSONData, $municipalityCodeAbbreviation]) => {
     if ($municipalitySelection !== null && $allNeighbourhoodsJSONData?.features) {
-      const newFeatures = $allNeighbourhoodsJSONData.features.filter(neighbourhood => neighbourhood.properties[$municipalityCodeAbbreviation] === $municipalitySelection)
+      const newFeatures = $allNeighbourhoodsJSONData.features.filter(neighbourhood => neighbourhood?.properties && neighbourhood.properties[$municipalityCodeAbbreviation] === $municipalitySelection)
       return { type: 'FeatureCollection', features: newFeatures }
     } else {
       return null
@@ -183,7 +183,7 @@ export const districtTypeJSONData = derived(
   [neighbourhoodSelection, allNeighbourhoodsJSONData, selectedNeighbourhoodJSONData, districtTypeAbbreviation],
   ([$neighbourhoodSelection, $allNeighbourhoodsJSONData, $selectedNeighbourhoodJSONData, $districtTypeAbbreviation]) => {
     if ($neighbourhoodSelection !== null && $allNeighbourhoodsJSONData?.features && $selectedNeighbourhoodJSONData?.properties) {
-      return { type: 'FeatureCollection', features: $allNeighbourhoodsJSONData.features.filter(neighbourhood => neighbourhood.properties[$districtTypeAbbreviation] === $selectedNeighbourhoodJSONData.properties[$districtTypeAbbreviation]) }
+      return { type: 'FeatureCollection', features: $allNeighbourhoodsJSONData.features.filter(neighbourhood => neighbourhood?.properties && neighbourhood.properties[$districtTypeAbbreviation] === $selectedNeighbourhoodJSONData.properties[$districtTypeAbbreviation]) }
     } else {
       return null
     }

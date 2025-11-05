@@ -107,6 +107,7 @@
 
     if (!$neighbourhoodsInMunicipalityJSONData?.features) return
     $neighbourhoodsInMunicipalityJSONData.features.forEach((nh) => {
+      if (!nh?.properties) return // Skip null/invalid features
       ahnVersions.forEach((ahn) => {
         // Use the same splitting logic as in formatYears
         const yearData = nh.properties["Jaar" + ahn]
@@ -136,6 +137,7 @@
 
     if (!$allNeighbourhoodsJSONData?.features) return
     $allNeighbourhoodsJSONData.features.forEach((nh) => {
+      if (!nh?.properties) return // Skip null/invalid features
       ahnVersions.forEach((ahn) => {
         // Use the same splitting logic as in formatYears
         const yearData = nh.properties["Jaar" + ahn]

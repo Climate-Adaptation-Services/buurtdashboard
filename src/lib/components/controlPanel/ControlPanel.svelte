@@ -29,21 +29,25 @@
   let lijstAlleGemeentesVoorDropdown
   let lijstAlleBuurtenInMunicipalityVoorDropdown
   $: if ($allMunicipalitiesJSONData?.features) {
-    lijstAlleGemeentesVoorDropdown = $allMunicipalitiesJSONData.features.map((municipality) => {
-      return {
-        value: municipality.properties[$municipalityCodeAbbreviation],
-        label: limitDropdownLabelLength(municipality.properties[$municipalityNameAbbreviation]),
-      }
-    })
+    lijstAlleGemeentesVoorDropdown = $allMunicipalitiesJSONData.features
+      .filter(municipality => municipality?.properties) // Filter out null/invalid features
+      .map((municipality) => {
+        return {
+          value: municipality.properties[$municipalityCodeAbbreviation],
+          label: limitDropdownLabelLength(municipality.properties[$municipalityNameAbbreviation]),
+        }
+      })
     lijstAlleGemeentesVoorDropdown = orderBy(lijstAlleGemeentesVoorDropdown, [(municipality) => municipality.label], ["asc"])
   }
   $: if ($municipalitySelection !== null && $neighbourhoodsInMunicipalityJSONData?.features) {
-    lijstAlleBuurtenInMunicipalityVoorDropdown = $neighbourhoodsInMunicipalityJSONData.features.map((neighbourhood) => {
-      return {
-        value: neighbourhood.properties[$neighbourhoodCodeAbbreviation],
-        label: limitDropdownLabelLength(neighbourhood.properties[$neighbourhoodNameAbbreviation]),
-      }
-    })
+    lijstAlleBuurtenInMunicipalityVoorDropdown = $neighbourhoodsInMunicipalityJSONData.features
+      .filter(neighbourhood => neighbourhood?.properties) // Filter out null/invalid features
+      .map((neighbourhood) => {
+        return {
+          value: neighbourhood.properties[$neighbourhoodCodeAbbreviation],
+          label: limitDropdownLabelLength(neighbourhood.properties[$neighbourhoodNameAbbreviation]),
+        }
+      })
     lijstAlleBuurtenInMunicipalityVoorDropdown = orderBy(
       lijstAlleBuurtenInMunicipalityVoorDropdown,
       [(neighbourhood) => neighbourhood.label],

@@ -99,7 +99,7 @@
     // Municipality calculation - DISPLAY VALUES (weighted average when surface area specified)
     const gemeenteMedian = ($municipalitySelection !== null && $allNeighbourhoodsJSONData && $allNeighbourhoodsJSONData.features && currentAHNSelection) ? (() => {
       const municipalityFilter = $allNeighbourhoodsJSONData.features.filter(
-        (neighbourhood) => neighbourhood.properties[$municipalityCodeAbbreviation] === $municipalitySelection
+        (neighbourhood) => neighbourhood?.properties && neighbourhood.properties[$municipalityCodeAbbreviation] === $municipalitySelection
       )
       return isDifferenceMode
         ? calcMedian(
@@ -132,7 +132,7 @@
 
     if ($neighbourhoodSelection !== null && $allNeighbourhoodsJSONData && $allNeighbourhoodsJSONData.features && currentAHNSelection) {
       const neighbourhoodFilter = $allNeighbourhoodsJSONData.features.filter(
-        (neighbourhood) => neighbourhood.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection
+        (neighbourhood) => neighbourhood?.properties && neighbourhood.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection
       )
       
       if (isDifferenceMode) {
@@ -235,7 +235,7 @@
     // Municipality scale calculation - ORIGINAL VALUES (weighted average when surface area specified)
     const gemeenteScale = ($municipalitySelection !== null && $allNeighbourhoodsJSONData && $allNeighbourhoodsJSONData.features && currentAHNSelection) ? (() => {
       const municipalityFilter = $allNeighbourhoodsJSONData.features.filter(
-        (neighbourhood) => neighbourhood.properties[$municipalityCodeAbbreviation] === $municipalitySelection
+        (neighbourhood) => neighbourhood?.properties && neighbourhood.properties[$municipalityCodeAbbreviation] === $municipalitySelection
       )
       return isDifferenceMode
         ? calcMedian(
@@ -268,7 +268,7 @@
 
     if ($neighbourhoodSelection !== null && $allNeighbourhoodsJSONData && $allNeighbourhoodsJSONData.features && currentAHNSelection) {
       const neighbourhoodFilter = $allNeighbourhoodsJSONData.features.filter(
-        (neighbourhood) => neighbourhood.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection
+        (neighbourhood) => neighbourhood?.properties && neighbourhood.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection
       )
       
       if (isDifferenceMode) {
