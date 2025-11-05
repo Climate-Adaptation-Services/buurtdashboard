@@ -18,7 +18,7 @@ import { getIndicatorAttribute } from "../utils/getIndicatorAttribute.js"
 export function calculateDifferenceValues(currentJSONData, indicator, indicatorStore, neighbourhoodCodeAbbreviation) {
   const isDifferenceMode = indicatorStore && typeof indicatorStore === "object" && indicatorStore.isDifference
 
-  if (!isDifferenceMode || !indicator || !indicatorStore) {
+  if (!isDifferenceMode || !indicator || !indicatorStore || !currentJSONData?.features) {
     return null
   }
 

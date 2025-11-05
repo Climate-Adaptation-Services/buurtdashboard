@@ -216,12 +216,21 @@ export class LeafletMapManager {
     const municipalityChanged = municipalitySelection !== this.previousMunicipalitySelection
     const neighbourhoodChanged = neighbourhoodSelection !== this.previousNeighbourhoodSelection
 
+    // Check if this is initial load (both previous values were null/undefined)
+    const isInitialLoad = (this.previousMunicipalitySelection === null || this.previousMunicipalitySelection === undefined) &&
+                          (this.previousNeighbourhoodSelection === null || this.previousNeighbourhoodSelection === undefined)
+
     // Zoom to fit bounds when:
-    // 1. Municipality was deselected (set to null) - return to Nederland view (always, even if neighborhood changed)
-    // 2. Municipality changed to a different value AND neighborhood didn't change
+    // 1. Municipality was deselected (set to null) - return to Nederland view (always)
+    // 2. Initial load with URL params (both previous were null) - zoom to selected area
+    // 3. Municipality changed to a different value AND neighborhood didn't change
     if (municipalityChanged) {
       // If municipality was deselected (null), always zoom out to Nederland
       if (municipalitySelection === null) {
+        this.fitMapToBounds(currentJSONData)
+      }
+      // If initial load (from URL params), always zoom to the selected area
+      else if (isInitialLoad) {
         this.fitMapToBounds(currentJSONData)
       }
       // If municipality was selected/changed to a new value, only zoom if neighborhood didn't change

@@ -28,7 +28,7 @@
 
   let lijstAlleGemeentesVoorDropdown
   let lijstAlleBuurtenInMunicipalityVoorDropdown
-  $: if ($allMunicipalitiesJSONData !== null) {
+  $: if ($allMunicipalitiesJSONData?.features) {
     lijstAlleGemeentesVoorDropdown = $allMunicipalitiesJSONData.features.map((municipality) => {
       return {
         value: municipality.properties[$municipalityCodeAbbreviation],
@@ -37,7 +37,7 @@
     })
     lijstAlleGemeentesVoorDropdown = orderBy(lijstAlleGemeentesVoorDropdown, [(municipality) => municipality.label], ["asc"])
   }
-  $: if ($municipalitySelection !== null) {
+  $: if ($municipalitySelection !== null && $neighbourhoodsInMunicipalityJSONData?.features) {
     lijstAlleBuurtenInMunicipalityVoorDropdown = $neighbourhoodsInMunicipalityJSONData.features.map((neighbourhood) => {
       return {
         value: neighbourhood.properties[$neighbourhoodCodeAbbreviation],

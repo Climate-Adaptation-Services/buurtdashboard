@@ -55,6 +55,7 @@ export function removeURLParameter() {
 
 /**
  * Process URL parameters and update stores
+ * Note: Only call this after allNeighbourhoodsJSONData is loaded
  */
 export function processURLParameters() {
   const configParam = get(URLParams).get("config") || "default";
@@ -68,12 +69,23 @@ export function processURLParameters() {
     }
   }, 10);
 
-  // Update other parameters
-  let gemeente = '';
-  setTimeout(() => { gemeente = get(URLParams).get("gemeente") || get(configStore).defaultMunicipality; }, 10);
-  setTimeout(() => { municipalitySelection.set(gemeente) }, 10);
-  setTimeout(() => { neighbourhoodSelection.set(get(URLParams).get("buurt")) }, 10);
-  setTimeout(() => { indicatorsSelection.set(get(URLParams).getAll("indicator")) }, 10);
+  // Update other parameters - sequential to avoid race conditions
+  setTimeout(() => {
+    const gemeente = get(URLParams).get("gemeente") || get(configStore).defaultMunicipality;
+    const buurt = get(URLParams).get("buurt");
+    const indicators = get(URLParams).getAll("indicator");
+
+    // Set municipality first, then neighborhood (order matters for derived stores)
+    if (gemeente) {
+      municipalitySelection.set(gemeente);
+    }
+    if (buurt) {
+      neighbourhoodSelection.set(buurt);
+    }
+    if (indicators.length > 0) {
+      indicatorsSelection.set(indicators);
+    }
+  }, 10);
 }
 
 /**

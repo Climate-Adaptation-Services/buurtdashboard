@@ -105,6 +105,7 @@
     // For municipality view, collect all unique years
     options = ahnVersions.map((ahn) => ({ AHN: ahn, Jaar: [] }))
 
+    if (!$neighbourhoodsInMunicipalityJSONData?.features) return
     $neighbourhoodsInMunicipalityJSONData.features.forEach((nh) => {
       ahnVersions.forEach((ahn) => {
         // Use the same splitting logic as in formatYears
@@ -133,6 +134,7 @@
     // For Nederland level, collect all unique years from all neighbourhoods
     options = ahnVersions.map((ahn) => ({ AHN: ahn, Jaar: [] }))
 
+    if (!$allNeighbourhoodsJSONData?.features) return
     $allNeighbourhoodsJSONData.features.forEach((nh) => {
       ahnVersions.forEach((ahn) => {
         // Use the same splitting logic as in formatYears
