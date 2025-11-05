@@ -121,9 +121,22 @@ export async function prepareJSONData(JSONdata, CSVdata, options = {}) {
   // 3. Create a fast lookup table for CSV data instead of using filter
   const csvLookup = measurePerformance('CSV lookup creation', () => {
     const lookup = {};
+    const preferredColumn = get(neighbourhoodCodeAbbreviation); // e.g. 'buurtcode2024'
+
+    // Detect which buurtcode column the CSV actually has
+    let csvCodeColumn = preferredColumn;
+    if (CSVdata[0] && !CSVdata[0][preferredColumn]) {
+      // Try alternative column names
+      if (CSVdata[0]['buurtcode']) {
+        csvCodeColumn = 'buurtcode';
+      } else if (CSVdata[0]['buurtcode2024']) {
+        csvCodeColumn = 'buurtcode2024';
+      }
+    }
+
     CSVdata.forEach(item => {
-      if (item[get(neighbourhoodCodeAbbreviation)]) {
-        lookup[item[get(neighbourhoodCodeAbbreviation)]] = item;
+      if (item[csvCodeColumn]) {
+        lookup[item[csvCodeColumn]] = item;
       }
     });
     return lookup;
@@ -138,15 +151,21 @@ export async function prepareJSONData(JSONdata, CSVdata, options = {}) {
 
   // 5. Process all neighborhoods in a single pass with optimized lookups
   neighbourhoodTopojsonFeatures = measurePerformance('Neighborhood data mapping', () => {
-    return neighbourhoodTopojsonFeatures.map(neighbourhood => {
+    const codeColumn = get(neighbourhoodCodeAbbreviation);
+
+    return neighbourhoodTopojsonFeatures.map((neighbourhood) => {
       // Get the neighborhood code
-      const neighborhoodCode = neighbourhood.properties[get(neighbourhoodCodeAbbreviation)];
+      const neighborhoodCode = neighbourhood.properties[codeColumn];
 
       // Use direct lookup instead of filter (much faster)
       const matchingCSVData = csvLookup[neighborhoodCode];
-      // If we found a match, use it; otherwise, keep the original properties
+      // If we found a match, merge it with existing properties
       if (matchingCSVData) {
-        neighbourhood.properties = matchingCSVData;
+        // Preserve the buurtcode2024 from GeoJSON and merge with CSV data
+        neighbourhood.properties = {
+          ...neighbourhood.properties,
+          ...matchingCSVData
+        };
       }
 
       // Convert all numeric properties in a single loop

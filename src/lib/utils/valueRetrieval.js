@@ -31,16 +31,17 @@ export function formatValue(value, { decimals = 2, showSign = false, nullText = 
 // Helper function to format M2 values for better readability
 function formatM2Value(value) {
   if (value === null || value === undefined || isNaN(value)) return null
-  
+
   const absValue = Math.abs(value)
-  
-  // Format large numbers with thousand separators and appropriate units
-  if (absValue >= 1000000) {
-    const millions = value / 1000000
-    return `${millions.toFixed(1).replace(/\.0$/, '')}M`
-  } else if (absValue >= 1000) {
-    const thousands = value / 1000
-    return `${thousands.toFixed(1).replace(/\.0$/, '')}k`
+  const isNegative = value < 0
+
+  // Format large numbers with thousand separators (Dutch format: dots as thousand separator)
+  if (absValue >= 1000) {
+    // Round to whole number for readability
+    const rounded = Math.round(absValue)
+    // Add thousand separators (dots in Dutch format)
+    const formatted = rounded.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+    return isNegative ? `-${formatted}` : formatted
   } else {
     return Math.round(value * 100) / 100
   }
@@ -49,26 +50,27 @@ function formatM2Value(value) {
 // Property access
 function getRawValue(feature, indicator, { year, attributeOverride, forceM2 = false, forceBEB = null } = {}) {
   let baseAttribute = indicator.attribute
+  let hasBEBSuffix = false
 
-  // Handle BEB variants using indicator store (handle spaces)
-  if (!attributeOverride && indicator.variants && indicator.variants.split(',').map(v => v.trim()).includes('BEB')) {
+  // Handle BEB variants using indicator store (1 indicates BEB variant)
+  if (!attributeOverride && indicator.variants && indicator.variants.split(',').map(v => v.trim()).includes('1')) {
     const indicatorStore = getIndicatorStore(indicator.title)
     let ahnSelection
-    
+
     // Get the current value from the store
     const unsubscribe = indicatorStore.subscribe(value => {
       ahnSelection = value
     })
     unsubscribe() // Immediately unsubscribe to avoid memory leaks
-    
+
     // Use forceBEB if provided, otherwise use store value
     const bebSelection = forceBEB || (ahnSelection?.beb) || 'hele_buurt'
-    
-    // Append BEB suffix based on selection
+
+    // Append _1 suffix for bebouwde kom variant
     if (bebSelection === 'bebouwde_kom') {
-      baseAttribute = baseAttribute + '_BEB'
+      baseAttribute = baseAttribute + '_1'
+      hasBEBSuffix = true
     }
-    // For 'hele_buurt', use the base attribute as-is (no suffix)
   }
 
   // Only handle M2 variants for popups when explicitly requested (handle spaces)
@@ -79,7 +81,31 @@ function getRawValue(feature, indicator, { year, attributeOverride, forceM2 = fa
   const attribute = attributeOverride ||
     (year ? getIndicatorAttribute(indicator, baseAttribute, year) :
       getIndicatorAttribute(indicator, baseAttribute))
-  return feature.properties?.[attribute]
+
+  let value = feature.properties?.[attribute]
+
+  // FALLBACK: If BEB variant was requested but value is null/undefined, try base attribute
+  if (hasBEBSuffix && !isValidValue(value)) {
+    const baseAttributeWithoutSuffix = indicator.attribute
+    const fallbackAttribute = year
+      ? getIndicatorAttribute(indicator, baseAttributeWithoutSuffix, year)
+      : getIndicatorAttribute(indicator, baseAttributeWithoutSuffix)
+    value = feature.properties?.[fallbackAttribute]
+  }
+
+  // FALLBACK: If AHN version attribute doesn't exist, try with underscore before AHN
+  // NOTE: This is a workaround for Dordrecht data which uses "BKB_AHN3" instead of "BKBAHN3"
+  // TODO: Standardize Dordrecht CSV column naming to match default dataset (remove underscores before AHN)
+  if (!isValidValue(value) && attribute.includes('AHN')) {
+    // Try adding underscore before AHN (e.g., "PET29tm34pAHN4" -> "PET29tm34p_AHN4")
+    const ahnPattern = /(AHN\d+)$/
+    const fallbackAttribute = attribute.replace(ahnPattern, '_$1')
+    if (fallbackAttribute !== attribute) {
+      value = feature.properties?.[fallbackAttribute]
+    }
+  }
+
+  return value
 }
 
 function getNumberValue(feature, indicator, options = {}) {
@@ -188,18 +214,60 @@ export function getMultipleValues(feature, indicator, { types = ['number', 'cate
   return result
 }
 
-// Special function for popup tooltips that can show both percentage and M2 values when variant is M2
+// Helper function to get surface area from feature based on indicator.surfaceArea column
+function getSurfaceAreaM2(feature, indicator) {
+  // Only return surface area if indicator has surfaceArea defined
+  if (!indicator.surfaceArea || !feature.properties) {
+    return null
+  }
+
+  let surfaceAreaColumn = indicator.surfaceArea
+
+  // Special handling for "Totale buurt" - map to standard column
+  if (surfaceAreaColumn === 'Totale buurt') {
+    surfaceAreaColumn = 'Oppervlakte_Land_m2'
+  }
+
+  // Check if we need to apply BEB suffix to surface area column
+  if (indicator.variants && indicator.variants.split(',').map(v => v.trim()).includes('1')) {
+    const indicatorStore = getIndicatorStore(indicator.title)
+    let ahnSelection
+
+    const unsubscribe = indicatorStore.subscribe(value => {
+      ahnSelection = value
+    })
+    unsubscribe()
+
+    const bebSelection = ahnSelection?.beb || 'hele_buurt'
+    if (bebSelection === 'bebouwde_kom') {
+      const bebColumn = surfaceAreaColumn + '_1'
+      // Try BEB variant first, fall back to base column if not available
+      const bebValue = feature.properties[bebColumn]
+      if (bebValue !== null && bebValue !== undefined && !isNaN(bebValue)) {
+        surfaceAreaColumn = bebColumn
+      }
+    }
+  }
+
+  const surfaceArea = feature.properties[surfaceAreaColumn]
+  return toNumber(surfaceArea)
+}
+
+// Special function for popup tooltips that can show both percentage and M2 values
+// M2 values are calculated from percentage × surfaceArea when surfaceArea is defined
 export function getPopupValue(feature, indicator, options = {}) {
   const ahnSelection = getAHNSelection(indicator)
   const isDifferenceMode = ahnSelection && ahnSelection.isDifference
-  
+
   if (isDifferenceMode) {
-    // Handle difference mode for both regular and M2 values
+    // Handle difference mode with M2 calculation
     const regularDiff = getDifferenceValue(feature, indicator, options)
-    
-    if (indicator.variants && indicator.variants.split(',').map(v => v.trim()).includes('M2')) {
-      const m2Diff = getDifferenceValue(feature, indicator, { ...options, forceM2: true })
-      if (regularDiff !== null && m2Diff !== null) {
+
+    // Calculate M2 from percentage difference × surface area (ONLY if surfaceArea is defined)
+    if (indicator.surfaceArea && regularDiff !== null) {
+      const surfaceAreaM2 = getSurfaceAreaM2(feature, indicator)
+      if (surfaceAreaM2 !== null) {
+        const m2Diff = (regularDiff / 100) * surfaceAreaM2
         return {
           value: regularDiff,
           unit: indicator.plottitle.startsWith('%') ? '%' : '',
@@ -209,18 +277,19 @@ export function getPopupValue(feature, indicator, options = {}) {
         }
       }
     }
-    
+
     return { value: regularDiff, unit: indicator.plottitle.startsWith('%') ? '%' : '', hasM2: false, isDifference: true }
   } else {
     // Regular mode
     const regularValue = getNumberValue(feature, indicator, options)
-    
-    // For M2 variants, show both percentage and M2 values (handle spaces)
-    if (indicator.variants && indicator.variants.split(',').map(v => v.trim()).includes('M2')) {
-      const m2Value = getNumberValue(feature, indicator, { ...options, forceM2: true })
-      if (regularValue !== null && m2Value !== null) {
-        return { 
-          value: regularValue, 
+
+    // Calculate M2 from percentage × surface area (ONLY if surfaceArea is defined)
+    if (indicator.surfaceArea && regularValue !== null) {
+      const surfaceAreaM2 = getSurfaceAreaM2(feature, indicator)
+      if (surfaceAreaM2 !== null) {
+        const m2Value = (regularValue / 100) * surfaceAreaM2
+        return {
+          value: regularValue,
           unit: indicator.plottitle.startsWith('%') ? '%' : '',
           m2Value: m2Value,
           hasM2: true,
@@ -228,7 +297,7 @@ export function getPopupValue(feature, indicator, options = {}) {
         }
       }
     }
-    
+
     // Fallback to regular value with % symbol only
     return { value: regularValue, unit: indicator.plottitle.startsWith('%') ? '%' : '', hasM2: false, isDifference: false }
   }

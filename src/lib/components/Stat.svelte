@@ -2,7 +2,7 @@
 
   import { neighbourhoodSelection, municipalitySelection, allNeighbourhoodsJSONData, getIndicatorStore } from "$lib/stores"
   import { onMount } from 'svelte'
-  import { getRegionName } from "$lib/noncomponents/getRegionName"
+  import { getRegionName } from "$lib/utils/getRegionName"
 
   export let graphWidth
   export let indicatorHeight
@@ -112,7 +112,19 @@
   $: barColor =
     medianValue !== "Geen data"
       ? indicatorValueColorscale
-        ? indicatorValueColorscale(scaleValue) // Use scaleValue for consistent colors
+        ? (() => {
+            // For Nederland when no municipality/neighbourhood selected, use middle of color scale
+            if (regio === "Nederland" && $municipalitySelection === null && $neighbourhoodSelection === null && !isDifferenceMode) {
+              // Calculate middle value of the indicator's domain
+              const domain = indicatorValueColorscale.domain();
+              if (domain && domain.length > 0) {
+                const middleValue = domain[Math.floor(domain.length / 2)];
+                return indicatorValueColorscale(middleValue);
+              }
+            }
+            // Otherwise use actual value for color
+            return indicatorValueColorscale(scaleValue);
+          })()
         : isDifferenceMode
           ? scaleValue > 0 // Use scaleValue for consistent color logic
             ? "#4682b4" // Blue for positive differences (fallback)

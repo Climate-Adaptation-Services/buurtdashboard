@@ -9,13 +9,14 @@
     municipalityCodeAbbreviation,
     selectedNeighbourhoodJSONData,
     getIndicatorStore,
+    nederlandAggregates,
     configStore,
   } from "$lib/stores"
   import Stat from "./Stat.svelte"
   import { scaleLinear, min, max } from "d3"
-  import { calcMedian } from "$lib/noncomponents/calcMedian"
+  import { calcMedian, calcWeightedAverage } from "$lib/utils/calcMedian"
   // MIGRATED: Import centralized value retrieval functions
-  import { getNumericalValue, getDifferenceValue, getIndicatorAttribute, toNumber, isValidValue } from "$lib/noncomponents/valueRetrieval.js"
+  import { getNumericalValue, getDifferenceValue, getIndicatorAttribute, toNumber, isValidValue, getRawValue } from "$lib/utils/valueRetrieval.js"
 
   export let bodyHeight
   export let indicator
@@ -24,31 +25,79 @@
   let statsWidth
 
   // MIGRATED: Use centralized AHN selection handling with reactive store dependency
-  $: indicatorStore = getIndicatorStore(indicator.title)
+  const indicatorStore = getIndicatorStore(indicator.title)
+
+  // Keep these at top level for template access
   $: currentAHNSelection = $indicatorStore
   $: isDifferenceMode = currentAHNSelection && currentAHNSelection.isDifference
-
-  // MIGRATED: Make attribute calculation reactive to store changes
   $: currentAttribute = getIndicatorAttribute(indicator, indicator.attribute)
 
   // MIGRATED: Calculate display values (unit-converted) and scale values (original %) separately
-  $: medianValuesDict = currentAHNSelection && (() => {
-    // Nederland calculation - DISPLAY VALUES (unit-converted)
-    const nederlandMedian = isDifferenceMode
-      ? calcMedian(
+  // Force reactivity by reading $indicatorStore directly at the start
+  $: medianValuesDict = (() => {
+    // Read the store directly to ensure Svelte tracks this dependency
+    const _storeValue = $indicatorStore
+
+    // Nederland calculation - DISPLAY VALUES (weighted average when surface area specified)
+    // Try cached values first, fall back to client-side calculation if needed
+    let nederlandMedian = null;
+
+    if ($nederlandAggregates && $nederlandAggregates.aggregates) {
+      let cached = $nederlandAggregates.aggregates[indicator.title];
+
+      if (cached !== undefined) {
+        // Check for BEB variants first
+        if (cached && cached.hele_buurt !== undefined && cached.bebouwde_kom !== undefined) {
+          // BEB indicator - get the correct variant
+          const bebSelection = currentAHNSelection?.beb || 'hele_buurt';
+          cached = cached[bebSelection];
+        }
+
+        // Now check if it's a year-based object or a simple value
+        if (cached && typeof cached === 'object' && !Array.isArray(cached)) {
+          // Multi-year indicator - get the value for the selected year
+          const selectedYear = currentAHNSelection?.baseYear;
+          if (selectedYear && cached[selectedYear] !== undefined) {
+            nederlandMedian = cached[selectedYear];
+          }
+        } else if (cached !== undefined && (typeof cached !== 'object' || Array.isArray(cached))) {
+          // Simple value or aggregated indicator classes
+          nederlandMedian = cached;
+        }
+      }
+    }
+
+    // FALLBACK: If no cached value and we have all neighborhoods data, calculate client-side
+    // This handles AHN version switches and other cases where cache doesn't have the exact variant
+    if (nederlandMedian === null && $allNeighbourhoodsJSONData && $allNeighbourhoodsJSONData.features && currentAHNSelection) {
+
+      if (isDifferenceMode) {
+        nederlandMedian = calcMedian(
           $allNeighbourhoodsJSONData.features
             .map((neighbourhood) => getDifferenceValue(neighbourhood, indicator))
             .filter((value) => value !== null)
         )
-      : (() => {
-          const values = $allNeighbourhoodsJSONData.features
-            .map((neighbourhood) => getNumericalValue(neighbourhood, indicator))
-            .filter((value) => value !== null)
-          return calcMedian(values)
-        })()
-    
-    // Municipality calculation - DISPLAY VALUES (unit-converted)
-    const gemeenteMedian = $municipalitySelection !== null ? (() => {
+      } else {
+        // Use weighted average if surface area is specified, otherwise use median
+        if (indicator.surfaceArea) {
+          nederlandMedian = calcWeightedAverage(
+            $allNeighbourhoodsJSONData.features,
+            (neighbourhood) => getNumericalValue(neighbourhood, indicator),
+            indicator.surfaceArea,
+            indicator
+          )
+        } else {
+          nederlandMedian = calcMedian(
+            $allNeighbourhoodsJSONData.features
+              .map((neighbourhood) => getNumericalValue(neighbourhood, indicator))
+              .filter((value) => value !== null)
+          )
+        }
+      }
+    }
+
+    // Municipality calculation - DISPLAY VALUES (weighted average when surface area specified)
+    const gemeenteMedian = ($municipalitySelection !== null && $allNeighbourhoodsJSONData && $allNeighbourhoodsJSONData.features && currentAHNSelection) ? (() => {
       const municipalityFilter = $allNeighbourhoodsJSONData.features.filter(
         (neighbourhood) => neighbourhood.properties[$municipalityCodeAbbreviation] === $municipalitySelection
       )
@@ -58,18 +107,30 @@
               .map((neighbourhood) => getDifferenceValue(neighbourhood, indicator))
               .filter((value) => value !== null)
           )
-        : calcMedian(
-            municipalityFilter
-              .map((neighbourhood) => getNumericalValue(neighbourhood, indicator))
-              .filter((value) => value !== null)
-          )
+        : (() => {
+            // Use weighted average if surface area is specified, otherwise use median
+            if (indicator.surfaceArea) {
+              return calcWeightedAverage(
+                municipalityFilter,
+                (neighbourhood) => getNumericalValue(neighbourhood, indicator),
+                indicator.surfaceArea,
+                indicator
+              )
+            } else {
+              return calcMedian(
+                municipalityFilter
+                  .map((neighbourhood) => getNumericalValue(neighbourhood, indicator))
+                  .filter((value) => value !== null)
+              )
+            }
+          })()
     })() : 0
     
     // Neighborhood and district type calculations - DISPLAY VALUES (unit-converted)
     let buurtValue = 0
     let wijktypeMedian = 0
-    
-    if ($neighbourhoodSelection !== null && currentAHNSelection) {
+
+    if ($neighbourhoodSelection !== null && $allNeighbourhoodsJSONData && $allNeighbourhoodsJSONData.features && currentAHNSelection) {
       const neighbourhoodFilter = $allNeighbourhoodsJSONData.features.filter(
         (neighbourhood) => neighbourhood.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection
       )
@@ -85,11 +146,12 @@
         )
       } else {
         const feature = neighbourhoodFilter[0]
-        const buurtRawValue = getNumericalValue(feature, indicator)
+        let buurtRawValue = getNumericalValue(feature, indicator)
+
         buurtValue = buurtRawValue !== null
           ? Math.round(buurtRawValue * 100) / 100
           : "Geen data"
-        
+
         wijktypeMedian = calcMedian(
           $districtTypeJSONData.features
             .map((neighbourhood) => getNumericalValue(neighbourhood, indicator))
@@ -108,27 +170,70 @@
   })()
   
   // SCALE VALUES: Calculate using original percentage values for consistent positioning/colors
-  $: scaleValuesDict = currentAHNSelection && (() => {
+  $: scaleValuesDict = (() => {
+    // Read the store directly to ensure Svelte tracks this dependency
+    const _storeValue = $indicatorStore
+
     // Get the original attribute (always percentage, no unit conversion)
     const originalAttribute = getIndicatorAttribute(indicator, indicator.attribute)
-    
-    // Nederland scale calculation - ORIGINAL VALUES (for positioning)
-    const nederlandScale = isDifferenceMode
-      ? calcMedian(
+
+    // Nederland scale calculation - ORIGINAL VALUES (weighted average when surface area specified)
+    // Try cached values first, fall back to client-side calculation if needed
+    let nederlandScale = null;
+
+    if ($nederlandAggregates && $nederlandAggregates.aggregates) {
+      let cached = $nederlandAggregates.aggregates[indicator.title];
+
+      if (cached !== undefined) {
+        // Check for BEB variants first
+        if (cached && cached.hele_buurt !== undefined && cached.bebouwde_kom !== undefined) {
+          // BEB indicator - get the correct variant
+          const bebSelection = currentAHNSelection?.beb || 'hele_buurt';
+          cached = cached[bebSelection];
+        }
+
+        // Now check if it's a year-based object or a simple value
+        if (cached && typeof cached === 'object' && !Array.isArray(cached)) {
+          // Multi-year indicator - get the value for the selected year
+          const selectedYear = currentAHNSelection?.baseYear;
+          if (selectedYear && cached[selectedYear] !== undefined) {
+            nederlandScale = cached[selectedYear];
+          }
+        } else if (cached !== undefined && (typeof cached !== 'object' || Array.isArray(cached))) {
+          // Simple value
+          nederlandScale = cached;
+        }
+      }
+    }
+
+    // FALLBACK: Calculate client-side if no cached value (e.g., different AHN version)
+    if (nederlandScale === null && $allNeighbourhoodsJSONData && $allNeighbourhoodsJSONData.features && currentAHNSelection) {
+      if (isDifferenceMode) {
+        nederlandScale = calcMedian(
           $allNeighbourhoodsJSONData.features
             .map((neighbourhood) => getDifferenceValue(neighbourhood, indicator))
             .filter((value) => value !== null)
         )
-      : (() => {
-          const values = $allNeighbourhoodsJSONData.features
-            .map((neighbourhood) => neighbourhood.properties[originalAttribute])
-            .filter((value) => value !== null && value !== "" && !isNaN(value))
-            .map((value) => +value)
-          return calcMedian(values)
-        })()
-    
-    // Municipality scale calculation - ORIGINAL VALUES (for positioning)
-    const gemeenteScale = $municipalitySelection !== null ? (() => {
+      } else {
+        if (indicator.surfaceArea) {
+          nederlandScale = calcWeightedAverage(
+            $allNeighbourhoodsJSONData.features,
+            (neighbourhood) => getNumericalValue(neighbourhood, indicator),
+            indicator.surfaceArea,
+            indicator
+          )
+        } else {
+          nederlandScale = calcMedian(
+            $allNeighbourhoodsJSONData.features
+              .map((neighbourhood) => getNumericalValue(neighbourhood, indicator))
+              .filter((value) => value !== null)
+          )
+        }
+      }
+    }
+
+    // Municipality scale calculation - ORIGINAL VALUES (weighted average when surface area specified)
+    const gemeenteScale = ($municipalitySelection !== null && $allNeighbourhoodsJSONData && $allNeighbourhoodsJSONData.features && currentAHNSelection) ? (() => {
       const municipalityFilter = $allNeighbourhoodsJSONData.features.filter(
         (neighbourhood) => neighbourhood.properties[$municipalityCodeAbbreviation] === $municipalitySelection
       )
@@ -138,19 +243,30 @@
               .map((neighbourhood) => getDifferenceValue(neighbourhood, indicator))
               .filter((value) => value !== null)
           )
-        : calcMedian(
-            municipalityFilter
-              .map((neighbourhood) => neighbourhood.properties[originalAttribute])
-              .filter((value) => value !== null && value !== "" && !isNaN(value))
-              .map((value) => +value)
-          )
+        : (() => {
+            // Use weighted average if surface area is specified, otherwise use median
+            if (indicator.surfaceArea) {
+              return calcWeightedAverage(
+                municipalityFilter,
+                (neighbourhood) => getNumericalValue(neighbourhood, indicator),
+                indicator.surfaceArea,
+                indicator
+              )
+            } else {
+              return calcMedian(
+                municipalityFilter
+                  .map((neighbourhood) => getNumericalValue(neighbourhood, indicator))
+                  .filter((value) => value !== null)
+              )
+            }
+          })()
     })() : 0
     
     // Neighborhood and district type scale calculations - ORIGINAL VALUES (for positioning)
     let buurtScale = 0
     let wijktypeScale = 0
-    
-    if ($neighbourhoodSelection !== null && currentAHNSelection) {
+
+    if ($neighbourhoodSelection !== null && $allNeighbourhoodsJSONData && $allNeighbourhoodsJSONData.features && currentAHNSelection) {
       const neighbourhoodFilter = $allNeighbourhoodsJSONData.features.filter(
         (neighbourhood) => neighbourhood.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection
       )
@@ -166,13 +282,16 @@
         )
       } else {
         const feature = neighbourhoodFilter[0]
-        const buurtRawValue = feature.properties[originalAttribute]
-        buurtScale = (buurtRawValue !== null && buurtRawValue !== "" && !isNaN(buurtRawValue)) 
+        // Use getRawValue to handle Dordrecht's AHN underscore naming (e.g., "BKB_AHN3" vs "BKBAHN3")
+        let buurtRawValue = getRawValue(feature, indicator)
+
+        buurtScale = (buurtRawValue !== null && buurtRawValue !== "" && !isNaN(buurtRawValue))
           ? +buurtRawValue : 0
-        
+
         wijktypeScale = calcMedian(
           $districtTypeJSONData.features
-            .map((neighbourhood) => neighbourhood.properties[originalAttribute])
+            // Use getRawValue to handle Dordrecht's AHN underscore naming
+            .map((neighbourhood) => getRawValue(neighbourhood, indicator))
             .filter((value) => value !== null && value !== "" && !isNaN(value))
             .map((value) => +value)
         )

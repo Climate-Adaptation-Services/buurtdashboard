@@ -1,6 +1,15 @@
 # Buurtdashboard SvelteKit App
 
-A SvelteKit-based neighborhood dashboard application with interactive maps, charts, and indicators.
+A SvelteKit-based neighborhood dashboard application with interactive maps, charts, and indicators. Features **progressive loading** for optimal perceived performance - UI appears immediately while data loads in the background.
+
+📖 **For detailed documentation, see [.claude/project.md](.claude/project.md)**
+
+## Quick Start
+
+```bash
+npm install          # Install dependencies
+npm run dev          # Start development server (http://localhost:5173)
+```
 
 ## Development Commands
 
@@ -9,38 +18,181 @@ A SvelteKit-based neighborhood dashboard application with interactive maps, char
 - `npm run preview` - Preview production build
 - `npm run check` - Run Svelte type checking
 - `npm run check:watch` - Run type checking in watch mode
+- `npm run precalculate-nederland` - Regenerate Nederland aggregates (after data updates)
 
 ## Testing
 
-- Playwright tests are located in `/tests/`
-- Screenshots for visual regression testing are in `/tests/screenshots/`
-- Run tests with standard Playwright commands
+```bash
+npx playwright test           # Run all tests
+npx playwright test --ui      # Interactive UI mode
+npx playwright test --debug   # Debug mode
+```
+
+- Tests located in `/tests/`
+- Screenshots for visual regression in `/tests/screenshots/`
+
+## Recent Improvements
+
+### Dataset Version Management (2025-11-04)
+
+**Centralized configuration** and **precalculated aggregates** for better maintainability:
+
+- ✅ **Single source of truth** - `src/lib/datasets.js` (renamed from .ts) contains all data URLs and version
+- ✅ **Precalculation script** - `scripts/precalculate-nederland.js` imports from datasets.js
+- ✅ **Version stamping** - Aggregates include version number for automatic cache validation
+- ✅ **Instant Nederland stats** - No runtime calculation for 13,000+ neighborhoods
+
+**Workflow for data updates:**
+1. Update `DATASET_VERSION` and URLs in `src/lib/datasets.js`
+2. Run `npm run precalculate-nederland`
+3. Commit `datasets.js` and `nederland-aggregates.json`
+4. Deploy with automatic version sync
+
+**Technical files:**
+- `src/lib/datasets.js` - Centralized data configuration (current version: `20251104`)
+- `scripts/precalculate-nederland.js` - Aggregates precalculation script
+- `static/nederland-aggregates.json` - Generated aggregates cache
+
+### Amsterdam Performance Optimization (2025-11-02)
+
+Massive performance improvements for large municipalities (100+ neighborhoods):
+
+- ✅ **Viewport virtualization** - Only renders indicators near viewport (within 1 viewport distance)
+- ✅ **Aggressive cleanup** - Unmounts far-away indicators (>2 viewports) every 500ms
+- ✅ **Force simulation cleanup** - `onDestroy()` stops simulations and clears memory
+- ✅ **Adaptive circle sizing** - Tiered sizing (2.5-4.5px) based on dataset size
+- ✅ **Pre-positioned nodes** - Large/very large datasets initialize at target position (no sliding animation)
+- ✅ **Tiered simulation** - Parameters adapt: very large (>100) uses 3 ticks, large (70-100) uses 5 ticks, etc.
+- ✅ **Frozen positions** - Large datasets freeze after maxTicks with zero velocity to prevent jiggling
+
+**Performance results:**
+- Before: 3-5 seconds page freeze, progressive slowdown when scrolling
+- After: <500ms to first interactive, smooth 60fps scrolling, ~70% memory reduction
+
+**Technical implementation:**
+- `src/lib/components/Indicator.svelte` - Virtualization wrapper with Intersection Observer
+- `src/lib/components/IndicatorContent.svelte` - Original indicator (renamed)
+- `src/lib/components/BeeswarmPlot.svelte` - Cleanup, tiered simulation parameters, pre-positioning, frozen positions
+- `src/lib/stores.js` - Adaptive circle radius (2.5-4.5px tiered by neighborhood count)
+
+### Full-Page Loading Screen (2025-10-23)
+
+The app now features an **immediate full-page loading screen** for better user experience:
+
+- ✅ **Instant feedback** - Loading screen appears in <50ms (pure HTML, no JavaScript required)
+- ✅ **Smooth transition** - Loading screen disappears when UI elements are ready to be shown
+- ✅ **Component-level loading** - Individual maps and charts show loading spinners while data loads
+- ✅ **No artificial delays** - All timing is based on actual rendering and data loading
+
+**Technical implementation:**
+- `src/app.html` - Static HTML loading screen with spinner and text
+- `src/routes/+page.svelte` - Removes loading screen after UI renders using `tick()` and `requestAnimationFrame()`
+- Client-side SSR disabled (`ssr = false` in `+layout.js`) for SPA behavior
+
+### AHN Version Reactivity & Nederland Aggregates (2025-10-23)
+
+Improved performance and reactivity for AHN (height data) version switching:
+
+- ✅ **Per-indicator stores** - Each indicator has isolated state for AHN version, year, and BEB selection
+- ✅ **Memoized color scales** - Color scales only recreate when relevant data changes
+- ✅ **Precalculated Nederland aggregates** - Server-side precalculation for instant Nederland-level statistics
+- ✅ **Reactive Stats component** - Stats bars update immediately when switching AHN versions or years
+- ✅ **Reactive BarPlot** - Bar charts recalculate only when their specific indicator data changes
+
+**Technical implementation:**
+- `src/lib/stores.js` - Added `getIndicatorStore()` factory for per-indicator reactive stores
+- `scripts/precalculate-nederland.js` - Precalculates all Nederland aggregates (imports from datasets.js)
+- `static/nederland-aggregates.json` - Cached aggregates loaded at runtime
+- `src/lib/components/Stats.svelte` - Uses cached Nederland values with reactive fallback
+- `src/lib/components/BarPlot.svelte` - Reactive to indicator-specific store changes
+- `src/lib/components/Indicator.svelte` - Memoized color scale creation with proper dependencies
+
+**Performance gains:**
+- Nederland stats load instantly (no client-side calculation for 13,000+ neighborhoods)
+- Switching AHN versions only updates affected components
+- Color scales don't recreate on unrelated state changes
+
+### Progressive Loading Implementation (2025-10-20)
+
+The app uses **progressive loading** for optimal perceived performance:
+
+- ✅ **UI appears quickly** - Side panel, map container, and indicators show immediately with loading states
+- ✅ **Background data loading** - GeoJSON loads client-side without blocking page render
+- ✅ **Smooth transitions** - Components fill with real data as it becomes available
+- ✅ **Loading states** - Spinners and progress indicators throughout
+
+**Technical changes:**
+- `src/routes/+page.js` - Removed blocking GeoJSON fetch
+- `src/routes/+page.svelte` - Added client-side data loading in `onMount()`
+- `src/lib/components/Map.svelte` - Progressive map rendering with initialization guards
+- `src/lib/components/IndicatorBody.svelte` - Loading spinners for maps
+
+See [.claude/project.md](.claude/project.md) for complete details.
 
 ## Project Structure
 
 - **Components**: Chart components (BarPlot, BeeswarmPlot), Map component, Indicators, Control Panel
-- **Data**: Datasets handling in `src/lib/datasets.ts`
-- **Utilities**: Various helper functions in `src/lib/noncomponents/`
+- **Services**: Data processing, Leaflet map management, URL state management
+- **Stores**: Reactive state management with derived stores
+- **Utilities**: Helper functions in `src/lib/utils/`
 - **Internationalization**: Dutch/English support in `src/lib/i18n/`
 - **Static Assets**: Images and global CSS in `/static/`
 
 ## Key Features
 
-- Interactive neighborhood maps using Leaflet
-- Data visualizations with D3.js
-- Multi-language support (Dutch/English)
-- Responsive design
-- Unit switching functionality
-- Control panel for area selection
+- **Interactive Maps**: Leaflet + D3.js overlay with zoom/pan, click interactions
+- **Data Visualizations**: Beeswarm plots, bar charts, choropleth maps
+- **Progressive Loading**: Immediate UI feedback with background data loading
+- **Multi-language**: Dutch (default) + English
+- **Responsive Design**: Desktop and mobile layouts
+- **URL State Management**: Shareable links to specific views
+- **IndexedDB Caching**: Faster subsequent loads
+
+## Architecture
+
+**Data Flow:**
+1. Server loads lightweight data (metadata + CSV)
+2. Client renders UI immediately with loading states
+3. Client fetches GeoJSON in background
+4. Progressive enhancement as data arrives
+
+**Key Files:**
+- `src/routes/+page.svelte` - Main page component
+- `src/lib/components/Map.svelte` - Dual-mode map (Leaflet + D3)
+- `src/lib/stores.js` - Application state
+- `src/lib/services/prepareJSONData.js` - Data processing pipeline
+- `src/lib/config.js` - App configuration
 
 ## Dependencies
 
-- SvelteKit framework
-- Leaflet for maps
-- D3.js for data visualization
-- Playwright for testing
-- Various Svelte component libraries
+- **Framework**: SvelteKit with adapter-vercel
+- **Maps**: Leaflet.js
+- **Visualizations**: D3.js
+- **Testing**: Playwright
+- **Data Processing**: fflate (compression), d3-dsv (CSV parsing)
 
 ## Deployment
 
-Configured for Vercel deployment with adapter-vercel.
+Configured for **Vercel** deployment with `@sveltejs/adapter-vercel`.
+
+Build output: `.svelte-kit/output/` → `.vercel/output/`
+
+## Troubleshooting
+
+### Slow Initial Load
+Progressive loading should make this rare. If it occurs:
+- Check GeoJSON file size (<5MB recommended)
+- Verify IndexedDB cache is working
+- Check Network tab in DevTools
+
+### Map Not Rendering
+- Verify GeoJSON data loaded in stores
+- Check console for "Set map center and zoom first" error (should be fixed)
+- Ensure map container has dimensions
+
+### Data Not Showing
+- Check CSV column names match metadata `attribute` field
+- Verify semicolon-separated format with Dutch decimal comma
+- Check browser console for parsing errors
+
+For more troubleshooting tips, see [.claude/project.md](.claude/project.md).

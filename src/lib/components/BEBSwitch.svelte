@@ -6,28 +6,20 @@
   // Get the dedicated store for this specific indicator
   const indicatorStore = getIndicatorStore(indicator.title)
 
-  let selectedBEB = "hele_buurt"
-
-  // Subscribe to this indicator's store changes
-  $: {
-    selectedBEB = $indicatorStore.beb || "hele_buurt"
-  }
-
   /**
-   * Handle BEB selection change
+   * Handle BEB selection change from user interaction
    */
-  function bebChange(event) {
-    const newBEB = event.target.value
-    indicatorStore.update(selection => ({ ...selection, beb: newBEB }))
+  function handleChange(event) {
+    indicatorStore.update(selection => ({ ...selection, beb: event.target.value }))
   }
 </script>
 
 <div class="beb-switch">
   <span class="beb-label">Gebied</span>
   <div class="dropdown-wrapper">
-    <select class="beb-dropdown" bind:value={selectedBEB} on:change={bebChange} style="border-color: {$configStore.mainColor};">
-      <option value="hele_buurt" selected={selectedBEB === "hele_buurt"}>Hele buurt</option>
-      <option value="bebouwde_kom" selected={selectedBEB === "bebouwde_kom"}>Bebouwde kom</option>
+    <select class="beb-dropdown" value={$indicatorStore.beb || "hele_buurt"} on:change={handleChange} style="border-color: {$configStore.mainColor};">
+      <option value="hele_buurt">Hele buurt</option>
+      <option value="bebouwde_kom">Bebouwde kom</option>
     </select>
     <span class="dropdown-arrow">&#9662;</span>
   </div>

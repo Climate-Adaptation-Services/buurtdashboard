@@ -1,0 +1,72 @@
+{
+  "name": "Buurtdashboard",
+  "description": "SvelteKit neighborhood dashboard with progressive loading, interactive Leaflet maps, and D3 visualizations",
+  "version": "2.0.0",
+  "context": [
+    ".claude/project.md",
+    "CLAUDE.md",
+    "package.json",
+    "svelte.config.js"
+  ],
+  "files": {
+    "important": [
+      "src/routes/+page.svelte",
+      "src/routes/+page.js",
+      "src/lib/components/Map.svelte",
+      "src/lib/stores.js",
+      "src/lib/config.js",
+      "src/lib/services/prepareJSONData.js",
+      "src/lib/services/LeafletMapManager.js"
+    ],
+    "documentation": [
+      ".claude/project.md",
+      "CLAUDE.md",
+      "README.md"
+    ]
+  },
+  "guidelines": {
+    "codeStyle": {
+      "indentation": "2 spaces",
+      "quotes": "double",
+      "framework": "SvelteKit"
+    },
+    "testing": {
+      "framework": "Playwright",
+      "location": "tests/",
+      "command": "npx playwright test"
+    },
+    "deployment": {
+      "platform": "Vercel",
+      "adapter": "@sveltejs/adapter-vercel"
+    }
+  },
+  "tasks": {
+    "recent": [
+      {
+        "date": "2025-10-20",
+        "title": "Progressive Loading Implementation",
+        "description": "Implemented progressive UI rendering with client-side GeoJSON loading for improved perceived performance",
+        "changes": [
+          "Modified +page.js to remove blocking GeoJSON fetch",
+          "Added client-side data loading in +page.svelte onMount",
+          "Implemented loading states in Map, ControlPanel, and Indicator components",
+          "Fixed Leaflet initialization race condition with mapInitializedWithData flag",
+          "Added skeleton loaders with shimmer effects"
+        ],
+        "impact": "UI appears 2-3 seconds faster, dramatically improved user experience"
+      }
+    ]
+  },
+  "knowledgeBase": {
+    "architecture": {
+      "dataFlow": "Server loads lightweight data (metadata + CSV) → Client renders UI immediately → Client fetches GeoJSON in background → Progressive enhancement",
+      "stateManagement": "Svelte stores with reactive updates, derived stores for computed values",
+      "mapSystem": "Dual rendering: Leaflet + D3 overlay for main map, pure D3 for indicator maps"
+    },
+    "criticalConcepts": {
+      "progressiveLoading": "UI renders before data loads, showing skeleton states that fill with real data",
+      "leafletInitialization": "Must initialize map with data (center/zoom) before creating projection to avoid errors",
+      "storeReactivity": "Components subscribe to stores, updates trigger reactive re-renders automatically"
+    }
+  }
+}

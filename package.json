@@ -12,7 +12,8 @@
     "test:smoke": "playwright test smoke.spec.js",
     "test:integration": "playwright test integration.spec.js",
     "test:ui": "playwright test --ui",
-    "test:debug": "playwright test --debug"
+    "test:debug": "playwright test --debug",
+    "precalculate-nederland": "node scripts/precalculate-nederland.js"
   },
   "engines": {
     "node": "22.x"

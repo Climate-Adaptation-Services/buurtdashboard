@@ -211,7 +211,7 @@
       compareYear: finalCompareYear,
       isDifference: newIsDifference,
       beb: currentSelection.beb
-    })
+    });
   }
 
   /**

@@ -3,14 +3,14 @@
   import { extent, scaleLinear, scaleLog, select } from "d3"
   import XAxis from "$lib/components/XAxis.svelte"
   import { forceSimulation, forceY, forceX, forceCollide, forceManyBody } from "d3-force"
-  import { getClassName } from "$lib/noncomponents/getClassName"
-  import { click, mouseOut, mouseOver } from "$lib/noncomponents/neighbourhoodMouseEvents"
-  import { onMount } from "svelte"
-  import { getIndicatorAttribute } from "$lib/noncomponents/getIndicatorAttribute"
-  import { getGlobalExtent } from "$lib/noncomponents/getGlobalExtent"
+  import { getClassName } from "$lib/utils/getClassName"
+  import { click, mouseOut, mouseOver } from "$lib/events/neighbourhoodMouseEvents"
+  import { onMount, onDestroy, tick } from "svelte"
+  import { getIndicatorAttribute } from "$lib/utils/getIndicatorAttribute"
+  import { getGlobalExtent } from "$lib/utils/getGlobalExtent"
 
   // MIGRATED: Import centralized value retrieval system
-  import { getNumericalValue, getDifferenceValue, getAHNSelection, isValidValue, getRawValue } from "$lib/noncomponents/valueRetrieval.js"
+  import { getNumericalValue, getDifferenceValue, getAHNSelection, isValidValue, getRawValue } from "$lib/utils/valueRetrieval.js"
 
   export let graphWidth
   export let indicatorHeight
@@ -27,7 +27,7 @@
   // Reactive data filtering using value retrieval system
   $: {
     if ($indicatorStore) {
-      // MIGRATED: Filter using centralized value retrieval system 
+      // MIGRATED: Filter using centralized value retrieval system
       baseFilteredData = neighbourhoodsInMunicipalityFeaturesClone.filter((d) => {
         const rawValue = getRawValue(d, indicator)
         // For beeswarm plots, we need values that exist and are not null/empty
@@ -58,10 +58,10 @@
     
     // Create base attribute considering BEB selection
     let baseAttribute = indicator.attribute
-    if (indicator.variants && indicator.variants.split(',').map(v => v.trim()).includes('BEB')) {
+    if (indicator.variants && indicator.variants.split(',').map(v => v.trim()).includes('1')) {
       const bebSelection = ahnSelection.beb || 'hele_buurt'
       if (bebSelection === 'bebouwde_kom') {
-        baseAttribute = baseAttribute + '_BEB'
+        baseAttribute = baseAttribute + '_1'
       }
     }
     
@@ -103,7 +103,10 @@
   // Make xScaleExtent reactive to indicatorAttribute changes
   $: xScaleExtent = differenceValues
     ? extent(differenceValues, (d) => d.diffValue)
-    : extent(baseFilteredData, (d) => +d.properties[indicatorAttribute])
+    : extent(baseFilteredData, (d) => {
+        const value = getRawValue(d, indicator)
+        return +value
+      })
 
   // Ensure the domain includes zero for difference plots and has appropriate padding
   // For base year view, use the global extent to keep axis consistent across AHN selections
@@ -131,6 +134,9 @@
 
   let alpha = 0.5
 
+  // Debounce timer for simulation restarts
+  let simulationDebounceTimer = null
+
   // FIXED: Let Svelte handle reactivity naturally - run simulation when AHN selection changes
   $: {
     // This reactive block will trigger whenever this indicator's store changes OR indicatorAttribute changes
@@ -139,10 +145,15 @@
 
     // Only restart simulation if we have a valid indicator attribute
     if (currentIndicatorAttribute) {
-      // Restart the simulation with new data
-      setTimeout(() => {
+      // Debounce simulation restarts to prevent multiple rapid restarts
+      if (simulationDebounceTimer) {
+        clearTimeout(simulationDebounceTimer)
+      }
+
+      simulationDebounceTimer = setTimeout(() => {
         runSimulation()
-      }, 50) // Small delay to ensure reactive values have updated
+        simulationDebounceTimer = null
+      }, 100) // Increased delay to debounce rapid changes
     }
   }
 
@@ -165,16 +176,48 @@
     // Stop any existing simulation
     simulation.stop()
 
+    // Adaptive simulation parameters based on dataset size - DECLARE FIRST
+    const nodeCount = plotData.length
+    const isMediumDataset = nodeCount > 40   // Medium: 40-70 neighborhoods
+    const isLargeDataset = nodeCount > 70    // Large: 70-100 neighborhoods
+    const isVeryLargeDataset = nodeCount > 100  // Very large: 100+ neighborhoods
+
     // Apply previous positions to new data if available
+    // For large and very large datasets, initialize directly at target position
     plotData.forEach((d) => {
       const id = d.properties && d.properties[$neighbourhoodCodeAbbreviation]
       if (id && previousNodePositions[id]) {
         d.x = previousNodePositions[id].x
         d.y = previousNodePositions[id].y
+      } else if (isLargeDataset || isVeryLargeDataset) {
+        // Pre-position nodes at their target X location to avoid sliding in
+        if (differenceValues) {
+          d.x = xScaleBeeswarm(d.diffValue)
+        } else {
+          const value = getRawValue(d, indicator)
+          d.x = xScaleBeeswarm(+value)
+        }
+        d.y = 70  // Start at center Y
       }
     })
 
+    // Adjust parameters for large datasets to improve performance
+    // Very large (>100): Moderate energy with very fast decay and hard stop at 3 ticks
+    // Large (70-100): Quick freeze to prevent jiggling
+    // Medium (40-70): Moderate optimization - balance speed and smoothness
+    const xStrength = isVeryLargeDataset ? 1.0 : isLargeDataset ? 0.9 : isMediumDataset ? 0.7 : 0.5
+    const yStrength = isVeryLargeDataset ? 0.02 : isLargeDataset ? 0.02 : 0.05  // Weak Y force for large datasets
+    const alphaValue = isVeryLargeDataset ? 0.2 : isLargeDataset ? 0.15 : isMediumDataset ? 0.3 : 0.4
+    const alphaDecayRate = isVeryLargeDataset ? 0.95 : isLargeDataset ? 0.3 : isMediumDataset ? 0.03 : 0.015
+    const maxTicks = isVeryLargeDataset ? 3 : isLargeDataset ? 5 : isMediumDataset ? 10 : 15
+
     // Create a new simulation with the nodes
+    // For very large datasets, use higher collision strength for quick separation
+    // For large datasets, use weaker collision to prevent jiggling
+    const collisionStrength = isVeryLargeDataset ? 0.8 : isLargeDataset ? 0.15 : 1.0
+    const collisionGap = isVeryLargeDataset ? 1.0 : isLargeDataset ? 2.0 : 1.5  // Tighter gap for very large datasets
+    const collisionRadius = $circleRadius + collisionGap
+
     simulation = forceSimulation(plotData)
       .force(
         "x",
@@ -183,32 +226,53 @@
             // Use the pre-calculated difference value
             return xScaleBeeswarm(d.diffValue)
           } else {
-            // FIXED: Use raw property value for positioning (matches original behavior)
-            const rawValue = d.properties[indicatorAttribute]
-            return xScaleBeeswarm(+rawValue)
+            const value = getRawValue(d, indicator)
+            return xScaleBeeswarm(+value)
           }
-        }).strength(0.5),
+        }).strength(xStrength), // Increased strength for large datasets for faster convergence
       )
-      .force("y", forceY().y(70).strength(0.05))
-      .force("charge", forceManyBody().strength(0.3)) // Moderate increase for initial repulsion
-      .force("collide", forceCollide().radius($circleRadius * 1.25))
-      .alpha(0.4) // Lower initial energy for smoother transitions
-      .alphaDecay(0.015) // Balanced decay rate
+      .force("y", forceY().y(70).strength(yStrength))  // Adaptive Y force
+      .force("charge", forceManyBody().strength(0.3))  // Keep original charge force
+      .force("collide", forceCollide().radius(collisionRadius).strength(collisionStrength))
+      .alpha(alphaValue)
+      .alphaDecay(alphaDecayRate)
+      .alphaMin(0.001)
 
-    // Set up the tick handler with a moderate boost at initialization only
+    // Set up the tick handler with adaptive tick limit
     let tickCount = 0
-    const maxInitialTicks = 15 // Fewer boosted ticks
 
     simulation.on("tick", () => {
-      // Update nodes array to trigger Svelte reactivity
+      tickCount++
+
+      // For large and very large datasets, force stop after max ticks to prevent jiggling
+      if ((isLargeDataset || isVeryLargeDataset) && tickCount >= maxTicks) {
+        // Freeze positions by copying to a new array to prevent further updates
+        const frozenNodes = simulation.nodes().map(node => ({
+          ...node,
+          x: node.x,
+          y: node.y,
+          vx: 0,  // Zero out velocity
+          vy: 0   // Zero out velocity
+        }))
+
+        // Completely kill the simulation
+        simulation.alpha(0)
+        simulation.stop()
+
+        // Update with frozen positions
+        nodes = frozenNodes
+        return
+      }
+
+      // Update nodes array to trigger Svelte reactivity (only if simulation continues)
       nodes = simulation.nodes()
 
       // Apply extra force only during the first few ticks
-      if (tickCount < maxInitialTicks) {
-        tickCount++
-        // Moderate reheat only for the first 5 ticks
-        if (tickCount < 5) {
-          simulation.alpha(0.4) // Less aggressive reheat
+      if (tickCount < maxTicks) {
+        // NO reheat for large/very large datasets - let them cool quickly
+        const reheatTicks = isVeryLargeDataset ? 0 : isLargeDataset ? 2 : 5
+        if (tickCount < reheatTicks) {
+          simulation.alpha(alphaValue)
         }
       }
     })
@@ -226,11 +290,38 @@
     }, 10)
   })
 
-  // raise node on mount, hacky solution could be better
-  $: if ($selectedNeighbourhoodJSONData && $selectedNeighbourhoodJSONData.properties) {
-    setTimeout(() => {
-      select("." + getClassName($selectedNeighbourhoodJSONData, "node", indicator, "indicator map")).raise()
-    }, 1000)
+  // CRITICAL: Stop simulation when component unmounts
+  onDestroy(() => {
+    // Clear any pending debounce timer
+    if (simulationDebounceTimer) {
+      clearTimeout(simulationDebounceTimer)
+      simulationDebounceTimer = null
+    }
+
+    // Stop the simulation completely
+    if (simulation) {
+      simulation.stop()
+      // Remove all nodes to free memory
+      simulation.nodes([])
+    }
+  })
+
+  // Raise selected node whenever selection changes - reactive to ensure visibility on top
+  $: if ($selectedNeighbourhoodJSONData && $selectedNeighbourhoodJSONData.properties && nodes && nodes.length > 0) {
+    tick().then(() => {
+      requestAnimationFrame(() => {
+        try {
+          const className = getClassName($selectedNeighbourhoodJSONData, "node", indicator, "indicator map")
+          const element = select("." + className)
+          if (element && element.node()) {
+            element.raise()
+          }
+        } catch (e) {
+          // Silently fail if element not found yet
+          console.log('Could not raise beeswarm node yet:', e)
+        }
+      })
+    })
   }
 </script>
 
@@ -250,7 +341,10 @@
       cx={node.x}
       cy={node.y}
       r={$circleRadius}
-      fill={differenceValues ? indicatorValueColorscale(node.diffValue) : indicatorValueColorscale(getRawValue(node, indicator))}
+      fill={differenceValues
+        ? indicatorValueColorscale(node.diffValue)
+        : indicatorValueColorscale(getRawValue(node, indicator))
+      }
       stroke-width="3"
       on:mouseover={(e) => {
         // If we're showing a difference plot, add the diffValue to the node properties

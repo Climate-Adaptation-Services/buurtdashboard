@@ -1,6 +1,6 @@
 <script>
   import { municipalitySelection, neighbourhoodSelection, URLParams } from "$lib/stores"
-  import { addURLParameter, removeURLParameter } from "$lib/noncomponents/updateURLParams"
+  import { addURLParameter, removeURLParameter } from "$lib/services/urlManager"
   import { selectAll } from "d3"
   import Select from "svelte-select"
   import { t } from "$lib/i18n/translate.js"

@@ -1,6 +1,6 @@
 <script>
   import { indicatorsSelection, URLParams } from "$lib/stores"
-  import { addURLParameter, removeURLParameter } from "$lib/noncomponents/updateURLParams"
+  import { addURLParameter, removeURLParameter } from "$lib/services/urlManager"
   import MultiSelect from "svelte-multiselect?client"
   import { browser } from "$app/environment"
   import { selectAll } from "d3"

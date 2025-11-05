@@ -5,6 +5,7 @@ export const municipalitySelection = writable(null);
 export const neighbourhoodSelection = writable(null);
 export const allMunicipalitiesJSONData = writable(null)
 export const allNeighbourhoodsJSONData = writable(null)
+export const nederlandAggregates = writable(null) // Pre-calculated Nederland values for fast initial load
 export const tooltipRegion = writable(null)
 export const tooltipValues = writable(null)
 // mousePosition is used for positioning the tooltip
@@ -163,7 +164,13 @@ export const circleRadius = derived(
   [neighbourhoodsInMunicipalityJSONData],
   ([$neighbourhoodsInMunicipalityJSONData]) => {
     if ($neighbourhoodsInMunicipalityJSONData) {
-      return ($neighbourhoodsInMunicipalityJSONData.features.length > 150) ? 3 : 4.5
+      const count = $neighbourhoodsInMunicipalityJSONData.features.length
+      // Smaller circles for larger datasets to reduce collision complexity
+      if (count > 150) return 2.5
+      if (count > 100) return 3.0
+      if (count > 70) return 4.0  // Large datasets (70-100) - Steenwijkerland
+      if (count > 40) return 4.3   // Medium datasets (40-70)
+      return 4.5                   // Small datasets (<40)
     } else {
       return 0
     }

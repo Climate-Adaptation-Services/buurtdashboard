@@ -7,19 +7,14 @@
     getIndicatorStore,
     municipalitySelection,
   } from "$lib/stores"
-  import { geoMercator, geoPath, select } from "d3"
-  import { prepareJSONData } from "$lib/noncomponents/prepareJSONData.js"
+  import { geoMercator, geoPath, select, selectAll } from "d3"
   import { t } from "$lib/i18n/translate.js"
-  import { getClassName } from "$lib/noncomponents/getClassName"
-  import { click, mouseOver, mouseOut } from "$lib/noncomponents/neighbourhoodMouseEvents"
-  import { getMostCommonClass } from "$lib/noncomponents/getMostCommonClass"
-  import { getClassByIndicatorValue } from "$lib/noncomponents/getClassByIndicatorValue"
-  import { getIndicatorAttribute } from "$lib/noncomponents/getIndicatorAttribute"
-  import { onMount } from "svelte"
+  import MapPath from "./MapPath.svelte"
+  import { onMount, tick } from "svelte"
+  import { LeafletMapManager } from "$lib/map/LeafletMapManager.js"
 
-  // Leaflet imports for background map (only when main map)
-  let L
-  let leafletMap
+  // Leaflet map manager
+  let mapManager = new LeafletMapManager()
   let mapContainer
 
   // Transparency and zoom controls
@@ -32,15 +27,19 @@
   let isZooming = false
   let isPanning = false
 
-  // MIGRATED: Import centralized value retrieval system
+  // Reactive variable for Leaflet map
+  let leafletMap = null
+  let leafletReady = false
+  let mapInitializedWithData = false  // Track if map has center/zoom set
+  $: {
+    leafletMap = mapManager.getMap()
+  }
+
   import {
-    getNumericalValue,
-    getCategoricalValue,
-    getDifferenceValue,
-    getAHNSelection,
-    isValidValue,
-    getRawValue,
-  } from "$lib/noncomponents/valueRetrieval.js"
+    calculateDifferenceValues,
+    calculateIndicatorAttributes,
+    getMapFillColor as getMapFillColorUtil
+  } from "$lib/map/mapColorUtils.js"
 
   // Removed unused exports for JSONdata and CSVdata
   export let mapWidth
@@ -48,13 +47,13 @@
   export let mapType
   export let indicatorValueColorscale
   export let indicator
+  export let isLoading = false
 
   // Define projection and path variables
   let projection
   let path
 
   // Data preparation is now handled in +page.js
-  // No need to call prepareJSONData here
 
   $: topYPosition = mapType === "main map" ? 20 : 15
 
@@ -63,9 +62,13 @@
     // Include projectionUpdateCounter to force reactivity
     projectionUpdateCounter
 
-    if (mapType === "main map" && leafletMap) {
-      // For main map: create a transform that syncs with Leaflet
-      projection = createLeafletSyncedProjection()
+    if (mapType === "main map") {
+      // For main map: only create projection when Leaflet is fully initialized with data
+      if (mapManager.getMap() && mapInitializedWithData) {
+        projection = mapManager.createLeafletSyncedProjection()
+      } else {
+        projection = null // Don't create projection until map is ready
+      }
     } else {
       // For indicator maps: use the original static projection
       projection = geoMercator().fitExtent(
@@ -79,40 +82,17 @@
   }
 
   $: {
-    path = geoPath(projection)
-  }
-
-  function createLeafletSyncedProjection() {
-    return {
-      stream: function (stream) {
-        return {
-          point: function (x, y) {
-            const point = leafletMap.latLngToContainerPoint([y, x])
-            stream.point(point.x, point.y)
-          },
-          lineStart: function () {
-            stream.lineStart()
-          },
-          lineEnd: function () {
-            stream.lineEnd()
-          },
-          polygonStart: function () {
-            stream.polygonStart()
-          },
-          polygonEnd: function () {
-            stream.polygonEnd()
-          },
-        }
-      },
-    }
+    path = projection ? geoPath(projection) : null
   }
 
   function aggregatedMapInfo() {
-    select(".tooltip-multi" + indicator.attribute).style("visibility", "visible")
+    const className = ".tooltip-multi" + indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', '').replaceAll('|', '_')
+    select(className).style("visibility", "visible")
   }
 
   function aggregatedMapInfoOut() {
-    select(".tooltip-multi" + indicator.attribute).style("visibility", "hidden")
+    const className = ".tooltip-multi" + indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', '').replaceAll('|', '_')
+    select(className).style("visibility", "hidden")
   }
 
   // Use dedicated indicator store for difference mode detection (naturally isolated)
@@ -121,213 +101,79 @@
 
   // Pre-calculate difference values for map features to match BeeswarmPlot approach
   // Watch for changes to indicatorStore to recalculate when BEB selection changes
-  $: differenceValues =
-    isDifferenceMode && indicator && $indicatorStore
-      ? $currentJSONData.features.map((d) => {
-          const diffValue = getDifferenceValue(d, indicator)
-          // Return the feature id and its difference value for lookup
-          return {
-            id: d.properties[$neighbourhoodCodeAbbreviation],
-            diffValue: diffValue,
-          }
-        })
-      : null
+  $: differenceValues = calculateDifferenceValues(
+    $currentJSONData,
+    indicator,
+    $indicatorStore,
+    $neighbourhoodCodeAbbreviation
+  )
 
-  // Declare both display attribute and original attribute variables
-  let indicatorAttribute = null
-  let originalAttribute = null
-
-  // Set attributes for both display and coloring, matching BeeswarmPlot's approach
-  $: {
-    if (indicator && $indicatorStore) {
-      // For display: use reactive attribute (may include _M2 suffix based on unit selection)
-      indicatorAttribute = getIndicatorAttribute(indicator, indicator.attribute)
-
-      // For colors: always use original percentage attribute (consistent with BeeswarmPlot)
-      if ($indicatorStore && $indicatorStore.baseYear) {
-        originalAttribute = indicator.attribute + "_" + $indicatorStore.baseYear
-      } else {
-        originalAttribute = indicator.attribute
-      }
-    } else {
-      indicatorAttribute = null
-      originalAttribute = null
-    }
-  }
+  // Calculate indicator attributes for both display and coloring
+  $: ({ indicatorAttribute, originalAttribute } = calculateIndicatorAttributes(indicator, $indicatorStore))
 
   // ALIGNED: Match BeeswarmPlot's color logic precisely for consistency
   function getMapFillColor(feature) {
-    // Check if this is the main map (no indicator) - use whitesmoke
-    if (!indicator) {
-      return $neighbourhoodSelection === feature.properties[$neighbourhoodCodeAbbreviation] ? "#E1575A" : "whitesmoke"
-    }
-
-    if (indicator.numerical) {
-      // Get feature ID for difference value lookup
-      const featureId = feature.properties[$neighbourhoodCodeAbbreviation]
-
-      if (isDifferenceMode && differenceValues) {
-        // Find pre-calculated difference value from our lookup array
-        const diffRecord = differenceValues.find((d) => d.id === featureId)
-        const diffValue = diffRecord ? diffRecord.diffValue : null
-
-        // Color based on difference value, matching BeeswarmPlot behavior
-        return diffValue !== null && diffValue !== "" && !isNaN(diffValue) ? indicatorValueColorscale(diffValue) : "#000000"
-      } else {
-        // For non-difference mode, use the value retrieval system for BEB-aware coloring
-        // This matches BeeswarmPlot which now uses: getRawValue(node, indicator)
-        const value = getRawValue(feature, indicator)
-
-        return value !== null && value !== "" && !isNaN(value) ? indicatorValueColorscale(value) : "#000000"
-      }
-    } else {
-      // MIGRATED: Use centralized categorical value retrieval
-      const categoricalValue = getCategoricalValue(feature, indicator)
-      return categoricalValue !== null ? indicatorValueColorscale(categoricalValue) : "#000000"
-    }
+    return getMapFillColorUtil(
+      feature,
+      indicator,
+      isDifferenceMode,
+      differenceValues,
+      $neighbourhoodSelection,
+      $neighbourhoodCodeAbbreviation,
+      indicatorValueColorscale
+    )
   }
 
   // Leaflet background map setup for main map only
   onMount(async () => {
     if (mapType === "main map") {
-      // Dynamically import Leaflet to avoid SSR issues
-      L = (await import("leaflet")).default
+      await mapManager.initializeLeaflet()
+
+      // Set up callbacks
+      mapManager.setProjectionUpdateCallback((counter) => {
+        projectionUpdateCounter = counter
+      })
+
+      mapManager.setStateChangeCallback((state) => {
+        isZooming = state.isZooming
+        isPanning = state.isPanning
+      })
+      leafletReady = true
     }
   })
 
   // Initialize map when container and dimensions are available
-  $: if (L && mapContainer && mapWidth && mapHeight && mapType === "main map" && !leafletMap) {
-    initializeLeafletMap()
-  }
-
-  function initializeLeafletMap() {
-    if (!L || !mapContainer || leafletMap) return
-
-    leafletMap = L.map(mapContainer, {
-      zoomControl: false,
-      attributionControl: false,
-      scrollWheelZoom: true,
-      doubleClickZoom: true,
-      boxZoom: true,
-      keyboard: true,
-      dragging: true,
-      tap: true,
-      touchZoom: true,
-      // Enhanced mobile support
-      bounceAtZoomLimits: false,
-    })
-
-    // Add a subtle tile layer
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      opacity: 0.7,
-      attribution: "",
-    }).addTo(leafletMap)
-
-    // Ensure Leaflet map can receive wheel events
-    leafletMap.getContainer().style.pointerEvents = "auto"
-
-    // Make Leaflet map instance available globally for tooltip positioning
-    window.leafletMapInstance = leafletMap
-
-    // Add event listeners to update D3 projection when Leaflet view changes
-    leafletMap.on("zoomstart", handleZoomStart)
-    leafletMap.on("zoom", updateProjection)
-    leafletMap.on("zoomanim", updateProjection) // Fires continuously during zoom animation
-    leafletMap.on("zoomend", handleZoomEnd)
-    leafletMap.on("movestart", handleMoveStart)
-    leafletMap.on("move", updateProjection) // Throttled updates during panning
-    leafletMap.on("moveend", handleMoveEnd)
-    leafletMap.on("viewreset", updateProjection)
-
-    // Fit map to current data when available
-    if ($currentJSONData && $currentJSONData.features) {
-      fitMapToBounds()
-      // Trigger initial projection update after fitting bounds
-      setTimeout(() => {
-        updateProjection()
-      }, 100)
-    }
-  }
-
-  function fitMapToBounds() {
-    if (!leafletMap || !$currentJSONData) return
-
-    const bounds = L.geoJSON($currentJSONData).getBounds()
-    if (bounds.isValid()) {
-      leafletMap.fitBounds(bounds, { padding: [10, 10] })
-    }
-  }
-
-  let updateProjectionTimeout
-
-  // Immediate update for zoom start - no delay
-  function updateProjectionImmediate() {
-    if (mapType === "main map") {
-      projectionUpdateCounter++
-    }
-  }
-
-  // Throttled update for continuous events
-  function updateProjection() {
-    if (mapType === "main map") {
-      // Use requestAnimationFrame for smooth updates during animation
-      if (updateProjectionTimeout) {
-        cancelAnimationFrame(updateProjectionTimeout)
+  $: {
+    if (leafletReady && mapContainer && mapWidth && mapHeight && mapType === "main map" && !mapManager.getMap()) {
+      const success = mapManager.initializeMap(mapContainer, mapWidth, mapHeight)
+      if (success && $currentJSONData && $currentJSONData.features) {
+        mapManager.initializeWithData($currentJSONData)
+        mapInitializedWithData = true
       }
-      updateProjectionTimeout = requestAnimationFrame(() => {
-        // Trigger reactive update by incrementing counter
-        projectionUpdateCounter++
-        updateProjectionTimeout = null
+    }
+  }
+
+  // Initialize map with data when data arrives after map creation
+  $: {
+    if (mapManager.getMap() && mapType === "main map" && $currentJSONData && $currentJSONData.features && !mapInitializedWithData) {
+      mapManager.initializeWithData($currentJSONData)
+      mapInitializedWithData = true
+    }
+  }
+
+  // Handle selection changes for zooming
+  $: if (mapManager.getMap() && mapType === "main map" && $currentJSONData && mapInitializedWithData) {
+    mapManager.handleSelectionChange($municipalitySelection, $neighbourhoodSelection, $currentJSONData)
+  }
+
+  // Raise selected neighborhood elements to ensure they appear on top
+  $: if ($neighbourhoodSelection) {
+    tick().then(() => {
+      requestAnimationFrame(() => {
+        // Raise all SVG elements with the selected neighborhood code
+        selectAll(`.svgelements_${$neighbourhoodSelection}`).raise()
       })
-    }
-  }
-
-  // Event handlers for better organization
-  function handleZoomStart() {
-    isZooming = true
-    isPanning = false
-    updateProjectionImmediate()
-  }
-
-  function handleZoomEnd() {
-    isZooming = false
-    isPanning = false  // Make sure both are false after zoom ends
-    updateProjection()
-  }
-
-  function handleMoveStart() {
-    // Only set panning if we're not currently zooming
-    if (!isZooming) {
-      isPanning = true
-      updateProjectionImmediate()
-    }
-  }
-
-  function handleMoveEnd() {
-    // Only reset panning if we're not zooming
-    if (!isZooming) {
-      isPanning = false
-    }
-    updateProjection()
-  }
-
-  // Zoom on municipality changes, but not on neighborhood changes
-  // Track previous selections to detect what actually changed
-  let previousMunicipalitySelection = null
-  let previousNeighbourhoodSelection = null
-
-  $: if (leafletMap && mapType === "main map" && $currentJSONData) {
-    const municipalityChanged = $municipalitySelection !== previousMunicipalitySelection
-    const neighbourhoodChanged = $neighbourhoodSelection !== previousNeighbourhoodSelection
-
-    // Only zoom if municipality changed, or if we're selecting a municipality for the first time
-    if (municipalityChanged && ($municipalitySelection || previousMunicipalitySelection !== null)) {
-      fitMapToBounds()
-    }
-    // Don't zoom if only neighborhood changed
-
-    previousMunicipalitySelection = $municipalitySelection
-    previousNeighbourhoodSelection = $neighbourhoodSelection
+    })
   }
 </script>
 
@@ -335,189 +181,71 @@
   <div class="map-container">
     <!-- Background Leaflet map -->
     <div class="leaflet-background" bind:this={mapContainer}></div>
-    <!-- SVG overlay -->
-    <svg class="main-map {isZooming ? 'zooming' : ''} {isPanning ? 'panning' : ''}" style="filter:drop-shadow(0 0 15px rgb(160, 160, 160))">
-      <!-- svelte-ignore a11y-mouse-events-have-key-events -->
-      <!-- svelte-ignore a11y-no-static-element-interactions -->
-      {#if $currentJSONData.features}
-        {#each $currentJSONData.features as feature, i}
-          <!-- svelte-ignore a11y-click-events-have-key-events -->
-          <!-- svelte-ignore a11y-mouse-events-have-key-events -->
-          <path
-            d={path(feature)}
-            class={getClassName(feature, "path", indicator, mapType) + " " + "svgelements_" + feature.properties[$neighbourhoodCodeAbbreviation]}
-            fill={(isDifferenceMode, indicatorValueColorscale, $AHNSelecties, getMapFillColor(feature))}
-            stroke={mapType === "main map"
-              ? "grey"
-              : feature.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection
-                ? "#E1575A"
-                : "white"}
-            style="filter:{feature.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection ? 'drop-shadow(0 0 15px black)' : 'none'}"
-            fill-opacity={mapType === "main map" ? shapeOpacity : 1}
-            stroke-width={mapType === "main map" ? "1" : feature.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection ? "3" : "0.5"}
-            cursor="pointer"
-            on:mouseover={(e) => mouseOver(e, feature, indicator, mapType, indicatorValueColorscale, projection)}
-            on:mouseout={() => mouseOut(feature, indicator, mapType)}
-            on:click={() => click(feature, indicator, mapType)}
-            on:touchstart={(e) => {
-              // Show tooltip on touch for mobile devices
-              mouseOver(e.touches[0], feature, indicator, mapType, indicatorValueColorscale, projection)
-            }}
-            on:touchend={() => {
-              // Hide tooltip when touch ends
-              setTimeout(() => mouseOut(feature, indicator, mapType), 1000)
-            }}
-            on:wheel={(e) => {
-              if (mapType === "main map" && leafletMap) {
-                // Forward wheel events to Leaflet map for zooming
-                e.preventDefault()
-                const mapEvent = new WheelEvent("wheel", {
-                  deltaY: e.deltaY,
-                  clientX: e.clientX,
-                  clientY: e.clientY,
-                  bubbles: true,
-                })
-                leafletMap.getContainer().dispatchEvent(mapEvent)
-              }
-            }}
-            on:mousedown={(e) => {
-              if (mapType === "main map" && leafletMap) {
-                // Forward mouse events to Leaflet for dragging
-                const mapEvent = new MouseEvent("mousedown", {
-                  clientX: e.clientX,
-                  clientY: e.clientY,
-                  bubbles: true,
-                  button: e.button,
-                })
-                leafletMap.getContainer().dispatchEvent(mapEvent)
-              }
-            }}
-            on:mousemove={(e) => {
-              if (mapType === "main map" && leafletMap && e.buttons > 0) {
-                // Forward mousemove when dragging
-                const mapEvent = new MouseEvent("mousemove", {
-                  clientX: e.clientX,
-                  clientY: e.clientY,
-                  bubbles: true,
-                  buttons: e.buttons,
-                })
-                leafletMap.getContainer().dispatchEvent(mapEvent)
-              }
-            }}
-            on:mouseup={(e) => {
-              if (mapType === "main map" && leafletMap) {
-                // Forward mouse up events
-                const mapEvent = new MouseEvent("mouseup", {
-                  clientX: e.clientX,
-                  clientY: e.clientY,
-                  bubbles: true,
-                  button: e.button,
-                })
-                leafletMap.getContainer().dispatchEvent(mapEvent)
-              }
-            }}
+    {#if isLoading || !leafletReady || !mapManager.getMap() || !mapInitializedWithData || !projection || !path}
+      <!-- Loading overlay -->
+      <div class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <p>Gegevens laden...</p>
+      </div>
+    {:else}
+      <!-- SVG overlay -->
+      <svg class="main-map {isZooming ? 'zooming' : ''} {isPanning ? 'panning' : ''}" style="filter:drop-shadow(0 0 15px rgb(160, 160, 160))">
+        <!-- svelte-ignore a11y-mouse-events-have-key-events -->
+        <!-- svelte-ignore a11y-no-static-element-interactions -->
+        {#if $currentJSONData.features}
+          {#each $currentJSONData.features as feature, i}
+            <MapPath
+              {feature}
+              {indicator}
+              {mapType}
+              {path}
+              {getMapFillColor}
+              {shapeOpacity}
+              {indicatorValueColorscale}
+              {projection}
+              {leafletMap}
+              {isDifferenceMode}
+              AHNSelecties={$AHNSelecties}
+            />
+          {/each}
+        {/if}
+        {#if indicator && indicator.aggregatedIndicator === true}
+          <image
+            href="info.png"
+            opacity="0.7"
+            width="20"
+            y="5"
+            x={mapWidth - 25}
+            on:mouseover={() => aggregatedMapInfo()}
+            on:mouseout={() => aggregatedMapInfoOut()}
           />
-        {/each}
-      {/if}
-      {#if indicator && indicator.aggregatedIndicator === true}
-        <image
-          href="info.png"
-          opacity="0.7"
-          width="20"
-          y="5"
-          x={mapWidth - 25}
-          on:mouseover={() => aggregatedMapInfo()}
-          on:mouseout={() => aggregatedMapInfoOut()}
-        />
-      {/if}
-    </svg>
-    <!-- Transparency control -->
-    <div class="transparency-control">
-      <label for="opacity-slider">Transparantie</label>
-      <input id="opacity-slider" type="range" min="0.1" max="1" step="0.1" bind:value={shapeOpacity} class="opacity-slider" />
-    </div>
+        {/if}
+      </svg>
+      <!-- Transparency control -->
+      <div class="transparency-control">
+        <label for="opacity-slider">Transparantie</label>
+        <input id="opacity-slider" type="range" min="0.1" max="1" step="0.1" bind:value={shapeOpacity} class="opacity-slider" />
+      </div>
+    {/if}
   </div>
 {:else}
-  <svg class={"indicator-map-" + indicator.attribute} style="filter:drop-shadow(0 0 15px rgb(160, 160, 160))">
+  <svg class={"indicator-map-" + indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', '')} style="filter:drop-shadow(0 0 15px rgb(160, 160, 160))">
     <!-- svelte-ignore a11y-mouse-events-have-key-events -->
     <!-- svelte-ignore a11y-no-static-element-interactions -->
-    {#if $currentJSONData.features}
+    {#if $currentJSONData.features && path && projection}
       {#each $currentJSONData.features as feature, i}
-        <!-- svelte-ignore a11y-click-events-have-key-events -->
-        <!-- svelte-ignore a11y-mouse-events-have-key-events -->
-        <path
-          d={path(feature)}
-          class={getClassName(feature, "path", indicator, mapType) + " " + "svgelements_" + feature.properties[$neighbourhoodCodeAbbreviation]}
-          fill={(isDifferenceMode, indicatorValueColorscale, $AHNSelecties, getMapFillColor(feature))}
-          stroke={mapType === "main map"
-            ? "grey"
-            : feature.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection
-              ? "#E1575A"
-              : "white"}
-          style="filter:{feature.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection ? 'drop-shadow(0 0 15px black)' : 'none'}"
-          fill-opacity={mapType === "main map" ? shapeOpacity : 1}
-          stroke-width={mapType === "main map" ? "1" : feature.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection ? "3" : "0.5"}
-          cursor="pointer"
-          on:mouseover={(e) => mouseOver(e, feature, indicator, mapType, indicatorValueColorscale, projection)}
-          on:mouseout={() => mouseOut(feature, indicator, mapType)}
-          on:click={() => click(feature, indicator, mapType)}
-          on:touchstart={(e) => {
-            // Show tooltip on touch for mobile devices
-            mouseOver(e.touches[0], feature, indicator, mapType, indicatorValueColorscale, projection)
-          }}
-          on:touchend={() => {
-            // Hide tooltip when touch ends
-            setTimeout(() => mouseOut(feature, indicator, mapType), 1000)
-          }}
-          on:wheel={(e) => {
-            if (mapType === "main map" && leafletMap) {
-              // Forward wheel events to Leaflet map for zooming
-              e.preventDefault()
-              const mapEvent = new WheelEvent("wheel", {
-                deltaY: e.deltaY,
-                clientX: e.clientX,
-                clientY: e.clientY,
-                bubbles: true,
-              })
-              leafletMap.getContainer().dispatchEvent(mapEvent)
-            }
-          }}
-          on:mousedown={(e) => {
-            if (mapType === "main map" && leafletMap) {
-              // Forward mouse events to Leaflet for dragging
-              const mapEvent = new MouseEvent("mousedown", {
-                clientX: e.clientX,
-                clientY: e.clientY,
-                bubbles: true,
-                button: e.button,
-              })
-              leafletMap.getContainer().dispatchEvent(mapEvent)
-            }
-          }}
-          on:mousemove={(e) => {
-            if (mapType === "main map" && leafletMap && e.buttons > 0) {
-              // Forward mousemove when dragging
-              const mapEvent = new MouseEvent("mousemove", {
-                clientX: e.clientX,
-                clientY: e.clientY,
-                bubbles: true,
-                buttons: e.buttons,
-              })
-              leafletMap.getContainer().dispatchEvent(mapEvent)
-            }
-          }}
-          on:mouseup={(e) => {
-            if (mapType === "main map" && leafletMap) {
-              // Forward mouse up events
-              const mapEvent = new MouseEvent("mouseup", {
-                clientX: e.clientX,
-                clientY: e.clientY,
-                bubbles: true,
-                button: e.button,
-              })
-              leafletMap.getContainer().dispatchEvent(mapEvent)
-            }
-          }}
+        <MapPath
+          {feature}
+          {indicator}
+          {mapType}
+          {path}
+          {getMapFillColor}
+          {shapeOpacity}
+          {indicatorValueColorscale}
+          {projection}
+          leafletMap={null}
+          {isDifferenceMode}
+          AHNSelecties={$AHNSelecties}
         />
       {/each}
     {/if}
@@ -536,7 +264,7 @@
 {/if}
 
 {#if indicator && indicator.aggregatedIndicator === true}
-  <div class={"tooltip-multi tooltip-multi" + indicator.attribute}>
+  <div class={"tooltip-multi tooltip-multi" + indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', '').replaceAll('|', '_')}>
     <p>{t("multi-indicator-map-explanation")}</p>
   </div>
 {/if}
@@ -558,16 +286,16 @@
     pointer-events: none;
   }
 
+  /* Enable pointer events for paths and info icons */
   svg path {
     pointer-events: auto;
   }
 
-  /* Enable pointer events for info icons */
   svg image[href="info.png"] {
     pointer-events: auto;
   }
 
-  /* Ensure mouse wheel events pass through shapes to Leaflet map */
+  /* Ensure wheel events can pass through shapes to Leaflet map */
   svg path:hover {
     fill-opacity: 1 !important;
   }
@@ -580,7 +308,8 @@
     height: 100%;
     z-index: 1;
     pointer-events: auto;
-    mask: linear-gradient(
+    /* Firefox standard syntax */
+    mask-image: linear-gradient(
         to right,
         rgba(255, 255, 255, 0.01) 0%,
         rgba(255, 255, 255, 1) 15%,
@@ -589,7 +318,8 @@
       ),
       linear-gradient(to bottom, rgba(255, 255, 255, 0.01) 0%, rgba(255, 255, 255, 1) 15%, rgba(255, 255, 255, 1) 85%, rgba(255, 255, 255, 0.01) 100%);
     mask-composite: intersect;
-    -webkit-mask: linear-gradient(
+    /* Chrome/Safari webkit syntax */
+    -webkit-mask-image: linear-gradient(
         to right,
         rgba(255, 255, 255, 0.01) 0%,
         rgba(255, 255, 255, 1) 15%,
@@ -667,10 +397,6 @@
 
   /* CSS transitions for smooth shape animation during reprojection */
   /* Different transition speeds for zoom vs pan operations */
-  svg path {
-    transition: d 0.21s ease-out;
-  }
-
   svg circle {
     transition:
       cx 0.21s ease-out,
@@ -684,10 +410,6 @@
   }
 
   /* Fast transitions during panning */
-  svg.panning path {
-    transition: d 0.05s ease-out;
-  }
-
   svg.panning circle {
     transition:
       cx 0.05s ease-out,
@@ -703,5 +425,41 @@
   /* Import Leaflet CSS when needed */
   :global(.leaflet-container) {
     background: transparent;
+  }
+
+  .loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(2px);
+  }
+
+  .loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #35575a;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .loading-overlay p {
+    margin-top: 16px;
+    color: #35575a;
+    font-weight: 500;
+    font-size: 14px;
   }
 </style>

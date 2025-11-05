@@ -1,13 +1,13 @@
-import { getClassName } from '$lib/noncomponents/getClassName';
+import { getClassName } from '$lib/utils/getClassName';
 import { currentCodeAbbreviation, neighbourhoodSelection, mousePosition, circleRadius, municipalitySelection, currentNameAbbreviation, URLParams, currentOverviewLevel, neighbourhoodCodeAbbreviation, tooltipValues, tooltipRegion, AHNSelecties } from '$lib/stores';
-import { addURLParameter } from './updateURLParams.js';
+import { addURLParameter } from '$lib/services/urlManager.js';
 import { get } from 'svelte/store';
 import { select, selectAll } from 'd3';
-import { getClassByIndicatorValue } from './getClassByIndicatorValue.js';
-import { getMostCommonClass } from './getMostCommonClass.js';
+import { getClassByIndicatorValue } from '$lib/utils/getClassByIndicatorValue.js';
+import { getMostCommonClass } from '$lib/utils/getMostCommonClass.js';
 import center from '@turf/center'
 import { t } from '$lib/i18n/translate.js';
-import { getIndicatorAttribute } from './getIndicatorAttribute.js';
+import { getIndicatorAttribute } from '$lib/utils/getIndicatorAttribute.js';
 
 // MIGRATED: Import centralized value retrieval system
 import {
@@ -20,7 +20,7 @@ import {
   isValidValue,
   getPopupValue,
   formatM2Value
-} from './valueRetrieval.js';
+} from '../utils/valueRetrieval.js';
 
 export function mouseOver(e, feature, indicator, mapType, indicatorValueColorscale, projection, beeswarmMargin) {
   const shapeClassName = getClassName(feature, 'path', indicator, mapType)
@@ -122,10 +122,9 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
         } else {
           // Use popup value to potentially show both percentage and M2 values for M2 variants
           const popupResult = getPopupValue(feature, indicator)
-          
-          // Get original value for consistent color calculation (force original attribute, no unit conversion)
-          const originalAttribute = getIndicatorAttribute(indicator, indicator.attribute)
-          const originalValue = feature.properties[originalAttribute]
+
+          // Get original value for consistent color calculation (use getRawValue for Dordrecht AHN underscore naming)
+          const originalValue = getRawValue(feature, indicator)
           
           // Format the value with proper rounding and unit
           if (popupResult.value !== null && !isNaN(popupResult.value)) {
@@ -156,10 +155,10 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
           tooltipValue = 'Geen'
         }
         
-        // Get color for categorical value
+        // Get color for categorical value (use getRawValue for Dordrecht AHN underscore naming)
         const categoricalValue = indicator.aggregatedIndicator
           ? getMostCommonClass(indicator, feature)
-          : getClassByIndicatorValue(indicator, feature.properties[getIndicatorAttribute(indicator, indicator.attribute)])
+          : getClassByIndicatorValue(indicator, getRawValue(feature, indicator))
         
         tooltipValueColor = indicatorValueColorscale(categoricalValue)
         tooltipIndicator = indicator.title
@@ -172,7 +171,7 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
         color: tooltipValueColor
       })
 
-      const mapElement = document.getElementsByClassName("indicator-map-" + indicator.attribute)[0]
+      const mapElement = document.getElementsByClassName("indicator-map-" + indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', ''))[0]
       const rectmap = mapElement.getBoundingClientRect();
       const featureCenter = projection(center(feature).geometry.coordinates)
       tooltipCenter = [featureCenter[0] + rectmap.left, featureCenter[1] + rectmap.top]
@@ -238,7 +237,7 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
         })
       }
 
-      let elem = document.getElementsByClassName('beeswarm_' + indicator.attribute)[0]
+      let elem = document.getElementsByClassName('beeswarm_' + indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', ''))[0]
       let rectmap = elem.getBoundingClientRect();
       tooltipCenter = [feature.x + rectmap.left + beeswarmMargin.left, rectmap.top + beeswarmMargin.top + feature.y + 10]
     }

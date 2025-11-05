@@ -10,16 +10,17 @@
     AHNSelecties,
     configStore,
     getIndicatorStore,
+    nederlandAggregates,
   } from "$lib/stores"
   import { scaleLinear, scaleBand, stack } from "d3"
-  import { checkContrast } from "$lib/noncomponents/checkContrast"
-  import { getRegionName } from "$lib/noncomponents/getRegionName"
-  import { barPlotMouseOut, barPlotMouseOver } from "$lib/noncomponents/barPlotMouseEvents"
+  import { checkContrast } from "$lib/utils/checkContrast"
+  import { getRegionName } from "$lib/utils/getRegionName"
+  import { barPlotMouseOut, barPlotMouseOver } from "$lib/events/barPlotMouseEvents"
   import {
     calcPercentagesForEveryClassMultiIndicator,
     calcPercentagesForEveryClassSingleIndicator,
-  } from "$lib/noncomponents/calcPercentagesForEveryClass"
-  import { getNumericalValue } from "$lib/noncomponents/valueRetrieval.js"
+  } from "$lib/utils/calcPercentagesForEveryClass"
+  import { getNumericalValue } from "$lib/utils/valueRetrieval.js"
 
   export let graphWidth
   export let indicatorHeight
@@ -40,40 +41,117 @@
     return Math.round(percentageValue * 10) / 10
   }
 
-  let nederlandValues
-  $: if ($indicatorStore) {
-    nederlandValues = calcPercentagesForEveryClass(indicator, $allNeighbourhoodsJSONData, "Nederland")
+  let nederlandValues = null
+  $: {
+    // Force reactivity by reading the indicator store
+    const ahnSelection = $indicatorStore;
+
+    // Try cached values first, fall back to client-side calculation if needed
+    nederlandValues = null // Reset first
+
+    if ($nederlandAggregates && $nederlandAggregates.aggregates) {
+      let cached = $nederlandAggregates.aggregates[indicator.title];
+
+      if (cached !== undefined) {
+        // Check for BEB variants first
+        if (cached && cached.hele_buurt !== undefined && cached.bebouwde_kom !== undefined) {
+          // BEB indicator - get the correct variant
+          const bebSelection = ahnSelection?.beb || 'hele_buurt';
+          cached = cached[bebSelection];
+        }
+
+        if (cached && typeof cached === 'object' && !Array.isArray(cached)) {
+          // Check if this is a year-based value, AHN-based value, or class-based aggregated value
+          const selectedYear = ahnSelection?.baseYear;
+
+          // If selectedYear is specified and exists in cache, use it (handles both years like "2020" and AHN versions like "AHN2")
+          if (selectedYear && cached[selectedYear] !== undefined) {
+            nederlandValues = cached[selectedYear];
+          } else if (!selectedYear || !Object.keys(cached).some(key => /^\d{4}$/.test(key) || /^AHN\d+$/.test(key))) {
+            // No years or AHN versions in keys, so it's class-based aggregated data (Landbedekking, etc)
+            nederlandValues = cached;
+          }
+        }
+      }
+    }
+
+    // FALLBACK: If no cached value and we have all neighborhoods data, calculate client-side
+    // This handles AHN version switches and other cases where cache doesn't have the exact variant
+    if (!nederlandValues && $allNeighbourhoodsJSONData && $indicatorStore) {
+      const calculated = calcPercentagesForEveryClass(indicator, $allNeighbourhoodsJSONData, "Nederland");
+      if (calculated && typeof calculated === 'object' && Object.keys(calculated).length > 1) {
+        nederlandValues = calculated;
+      }
+    }
   }
   let barPlotData = []
   let regios = []
 
   $: {
-    if ($neighbourhoodSelection !== null && $indicatorStore) {
-      if ($selectedNeighbourhoodJSONData.properties[$districtTypeAbbreviation]) {
-        barPlotData = [
-          nederlandValues,
-          calcPercentagesForEveryClass(indicator, $neighbourhoodsInMunicipalityJSONData, "Gemeente"),
-          calcPercentagesForEveryClass(indicator, { type: "FeatureCollection", features: [$selectedNeighbourhoodJSONData] }, "Buurt"),
-          calcPercentagesForEveryClass(indicator, $districtTypeJSONData, "Wijktype"),
-        ]
-        regios = ["Nederland", "Gemeente", "Buurt", "Wijktype"]
-      } else {
-        barPlotData = [
-          nederlandValues,
-          calcPercentagesForEveryClass(indicator, $neighbourhoodsInMunicipalityJSONData, "Gemeente"),
-          calcPercentagesForEveryClass(indicator, { type: "FeatureCollection", features: [$selectedNeighbourhoodJSONData] }, "Buurt"),
-        ]
-        regios = ["Nederland", "Gemeente", "Buurt"]
+    // Build barPlotData based on current selection state
+    const data = []
+    const regions = []
+
+    // Helper to add a level if data exists
+    const addLevel = (regio, jsonData) => {
+      if (!jsonData) {
+        console.warn(`BarPlot: No jsonData for ${regio}`)
+        return
       }
-    } else if ($municipalitySelection !== null && $indicatorStore) {
-      barPlotData = [nederlandValues, calcPercentagesForEveryClass(indicator, $neighbourhoodsInMunicipalityJSONData, "Gemeente")]
-      regios = ["Nederland", "Gemeente"]
-    } else if ($indicatorStore) {
-      barPlotData = [nederlandValues]
-      regios = ["Nederland"]
+
+      const calculated = calcPercentagesForEveryClass(indicator, jsonData, regio)
+      if (calculated && typeof calculated === 'object' && Object.keys(calculated).length > 1) {
+        data.push(calculated)
+        regions.push(regio)
+      } else {
+        console.warn(`BarPlot: Failed to calculate data for ${indicator.title} at ${regio} level`, calculated)
+      }
     }
+
+    // Add Nederland if available (not available for municipality-specific dashboards like Dordrecht)
+    if (nederlandValues) {
+      data.push(nederlandValues)
+      regions.push("Nederland")
+    }
+
+    // Add municipality level if selected
+    if ($municipalitySelection !== null && $indicatorStore && $allNeighbourhoodsJSONData) {
+      addLevel("Gemeente", $neighbourhoodsInMunicipalityJSONData)
+    }
+
+    // Add neighbourhood level if selected
+    if ($neighbourhoodSelection !== null && $indicatorStore && $allNeighbourhoodsJSONData) {
+      addLevel("Buurt", { type: "FeatureCollection", features: [$selectedNeighbourhoodJSONData] })
+
+      // Add district type if available
+      if ($selectedNeighbourhoodJSONData.properties[$districtTypeAbbreviation]) {
+        addLevel("Wijktype", $districtTypeJSONData)
+      }
+    }
+
+    barPlotData = data
+    regios = regions
   }
-  $: stackedData = stack().keys(Object.keys(indicator.classes))(barPlotData)
+  // Create stacked data for D3 visualization
+  $: stackedData = (() => {
+    if (!indicator.classes || barPlotData.length === 0) return []
+
+    const classKeys = Object.keys(indicator.classes)
+
+    // Validate data structure - each item should have at least one class key
+    const isValid = barPlotData.every(item =>
+      item && typeof item === 'object' && classKeys.some(key => key in item)
+    )
+
+    if (!isValid) return []
+
+    try {
+      return stack().keys(classKeys)(barPlotData)
+    } catch (error) {
+      console.warn(`Failed to create stack for "${indicator.title}":`, error)
+      return []
+    }
+  })()
 
   $: xScale = scaleLinear()
     .domain([0, 100])
@@ -84,7 +162,7 @@
     .range([0, (indicatorHeight - margin.top - margin.bottom) * (barPlotData.length / 2)])
 </script>
 
-<svg class={"barplot_" + indicator.attribute} style="height:74%">
+<svg class={"barplot_" + indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', '')} style="height:74%">
   <g class="inner-chart-bar" transform="translate(0, {margin.top})">
     {#each stackedData as stacked, i}
       <g class="stack" fill={indicatorValueColorscale(stacked.key)}>
@@ -92,7 +170,7 @@
           <rect
             on:mouseover={() => barPlotMouseOver(indicator, indicatorValueColorscale, st, stacked)}
             on:mouseout={barPlotMouseOut(indicator, st, stacked)}
-            class={"barplot_rect" + indicator.attribute + stacked.key.replaceAll(" ", "").replaceAll(">", "") + st.data.group}
+            class={"barplot_rect" + indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', '') + stacked.key.replaceAll(" ", "").replaceAll(">", "") + st.data.group}
             x={xScale(st[0])}
             y={yScale(st.data.group)}
             width={xScale(st[1]) - xScale(st[0])}

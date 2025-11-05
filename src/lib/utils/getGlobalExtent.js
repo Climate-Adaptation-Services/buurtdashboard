@@ -1,9 +1,10 @@
 import { extent } from "d3";
 import { getIndicatorAttribute } from "./getIndicatorAttribute";
+import { getRawValue } from "./valueRetrieval";
 
 /**
  * Calculate the extent values for the current indicator and AHN version
- * 
+ *
  * @param {Object} indicator - The indicator object
  * @param {Array} neighbourhoodFeatures - Array of neighborhood features with properties
  * @param {Boolean} isDifferenceMode - Whether we're in difference mode
@@ -21,31 +22,31 @@ export function getGlobalExtent(indicator, neighbourhoodFeatures, isDifferenceMo
     return [0, 1]; // Default fallback
   }
 
-  // Use the provided indicator attribute
-  const currentAttribute = indicatorAttribute;
-  
-  // Filter out null and empty values
-  const validData = neighbourhoodFeatures.filter(
-    d => d.properties[currentAttribute] !== null && 
-         d.properties[currentAttribute] !== ""
-  );
+  // Filter out null and empty values using getRawValue (which has BEB fallback)
+  const validData = neighbourhoodFeatures.filter(d => {
+    const rawValue = getRawValue(d, indicator);
+    return rawValue !== null && rawValue !== "";
+  });
 
   // Handle special case for logarithmic scale
   if (indicator.title === "Groen per inwoner") {
-    const validPositiveData = validData.filter(d => +d.properties[currentAttribute] > 0);
+    const validPositiveData = validData.filter(d => {
+      const value = getRawValue(d, indicator);
+      return value > 0;
+    });
     if (validPositiveData.length > 0) {
       try {
-        return extent(validPositiveData, d => +d.properties[currentAttribute]);
+        return extent(validPositiveData, d => +getRawValue(d, indicator));
       } catch (e) {
-        console.error("Error calculating extent for", currentAttribute, e);
+        console.error("Error calculating extent for", indicatorAttribute, e);
         return [0, 1];
       }
     }
   } else if (validData.length > 0) {
     try {
-      return extent(validData, d => +d.properties[currentAttribute]);
+      return extent(validData, d => +getRawValue(d, indicator));
     } catch (e) {
-      console.error("Error calculating extent for", currentAttribute, e);
+      console.error("Error calculating extent for", indicatorAttribute, e);
       return [0, 1];
     }
   }

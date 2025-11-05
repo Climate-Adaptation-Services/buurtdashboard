@@ -1,0 +1,463 @@
+#!/usr/bin/env node
+/**
+ * Pre-calculation script for Nederland (Netherlands) aggregate values
+ *
+ * This script:
+ * 1. Fetches all necessary data (metadata, CSV, GeoJSON)
+ * 2. Processes indicators
+ * 3. Calculates Nederland aggregate values (median or weighted average)
+ * 4. Saves results to static/nederland-aggregates.json
+ *
+ * Run this script whenever dataset updates occur in datasets.ts
+ * Usage: npm run precalculate-nederland
+ */
+
+import { writeFileSync, mkdirSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+import { dsvFormat } from 'd3-dsv';
+import { gunzipSync, unzipSync, strFromU8 } from 'fflate';
+import { feature } from 'topojson-client';
+import {
+  DATASET_VERSION,
+  BUURT_GEOJSON_URL,
+  DEFAULT_METADATA_URL,
+  DEFAULT_CSV_DATA_URL
+} from '../src/lib/datasets.js';
+
+// Get __dirname equivalent in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Dataset configuration imported from datasets.ts
+// ⚠️ IMPORTANT: When you update data URLs or version in datasets.ts, you MUST:
+// 1. Run this script: npm run precalculate-nederland
+//
+// The application will automatically detect version mismatches and warn you in the console:
+// "Nederland aggregates cache is outdated! Please run: npm run precalculate-nederland"
+
+// Calculation utilities (copied from calcMedian.js)
+function calcMedian(array) {
+  if (!array || array.length === 0) {
+    return null;
+  }
+
+  const OnlyNumbers = array
+    .filter(d => d !== null && d !== undefined && !isNaN(+d) && isFinite(+d))
+    .map(d => +d);
+
+  if (OnlyNumbers.length === 0) {
+    return null;
+  }
+
+  OnlyNumbers.sort((a, b) => a - b);
+  const length = OnlyNumbers.length;
+
+  if (length % 2 === 0) {
+    return (OnlyNumbers[length / 2] + OnlyNumbers[(length / 2) - 1]) / 2;
+  } else {
+    return OnlyNumbers[Math.floor(length / 2)];
+  }
+}
+
+function calcWeightedAverage(features, valueExtractor, surfaceAreaColumn) {
+  if (!features || features.length === 0 || !surfaceAreaColumn) {
+    return null;
+  }
+
+  let totalWeightedSum = 0;
+  let totalSurfaceArea = 0;
+  let validCount = 0;
+
+  features.forEach(feature => {
+    const value = valueExtractor(feature);
+    const surfaceArea = feature.properties?.[surfaceAreaColumn];
+
+    if (value !== null && value !== undefined && !isNaN(+value) &&
+        surfaceArea !== null && surfaceArea !== undefined && !isNaN(+surfaceArea)) {
+      const numValue = +value;
+      const numSurfaceArea = +surfaceArea;
+
+      totalWeightedSum += numValue * numSurfaceArea;
+      totalSurfaceArea += numSurfaceArea;
+      validCount++;
+    }
+  });
+
+  if (totalSurfaceArea === 0) {
+    return null;
+  }
+
+  return totalWeightedSum / totalSurfaceArea;
+}
+
+// Setup indicators (simplified from setupIndicators.js)
+function setupIndicators(metadata) {
+  const indicatorsList = [];
+
+  metadata.forEach(indicator => {
+    if (indicator.Titel === '') return;
+
+    const classes = {};
+    const indicatorDomein = ['No data', ...indicator.Domein.split(',')];
+
+    if (indicator['kwantitatief / categoraal / aggregated'] !== 'categoraal') {
+      indicatorDomein.slice(1).forEach((d, i) => {
+        classes[d] = indicator.Indicatornaamtabel.split(',')[i];
+      });
+    } else {
+      indicatorDomein.slice(1).forEach((d, i) => {
+        classes[d] = indicator.klassenthresholds.split(',')[i];
+      });
+    }
+
+    // Get ALL AHN versions (not just the latest)
+    let ahnVersions = [];
+    if (indicator.AHNversie && indicator.AHNversie !== '') {
+      ahnVersions = indicator.AHNversie.split(',').map(v => v.trim());
+    }
+
+    indicatorsList.push({
+      title: indicator.Titel,
+      attribute: indicator.Indicatornaamtabel.split(',')[0],
+      numerical: (indicator['kwantitatief / categoraal / aggregated'] === 'kwantitatief') ? true : false,
+      aggregatedIndicator: (indicator['kwantitatief / categoraal / aggregated'] === 'aggregated') ? true : false,
+      surfaceArea: indicator['Oppervlakte'],
+      variants: indicator.Varianten,
+      classes: classes,
+      ahnVersions: ahnVersions  // Changed to plural to store all versions
+    });
+  });
+
+  return indicatorsList;
+}
+
+// Get available years for an indicator
+function getAvailableYears(csvData, attributeBase) {
+  const years = new Set();
+  const columns = Object.keys(csvData[0] || {});
+
+  columns.forEach(col => {
+    if (col.startsWith(attributeBase)) {
+      const match = col.match(/_(\d{4})$/);
+      if (match) {
+        years.add(match[1]);
+      }
+    }
+  });
+
+  return Array.from(years).sort();
+}
+
+// Prepare JSON data (simplified from prepareJSONData.js)
+function prepareJSONData(geoJson, csvData) {
+  if (!geoJson || !csvData) {
+    console.error('Missing geoJson or csvData');
+    return null;
+  }
+
+  if (!geoJson.features || !Array.isArray(geoJson.features)) {
+    console.error('Invalid geoJson structure:', Object.keys(geoJson));
+    return null;
+  }
+
+  const features = geoJson.features.map(feature => {
+    const buurtcode = feature.properties.buurtcode2024 || feature.properties.buurtcode;
+    const csvRow = csvData.find(row => row.buurtcode2024 === buurtcode || row.buurtcode === buurtcode);
+
+    return {
+      ...feature,
+      properties: {
+        ...feature.properties,
+        ...(csvRow || {})
+      }
+    };
+  });
+
+  return {
+    type: 'FeatureCollection',
+    features
+  };
+}
+
+// Helper function to build attribute name with proper suffixes
+function buildAttributeName(baseAttribute, { year, bebOption, ahnVersion }) {
+  let attributeName = baseAttribute;
+
+  // Add year suffix (with underscore)
+  if (year) {
+    attributeName = `${attributeName}_${year}`;
+  }
+
+  // Add AHN suffix (direct concatenation, no underscore)
+  if (ahnVersion && ahnVersion !== '') {
+    attributeName = `${attributeName}${ahnVersion}`;
+  }
+
+  // Add BEB suffix (with underscore)
+  if (bebOption === 'bebouwde_kom') {
+    attributeName = `${attributeName}_1`;
+  }
+
+  return attributeName;
+}
+
+// Calculate Nederland aggregate for a single indicator
+function calculateNederlandAggregate(indicator, jsonData, year = null, bebOption = null, ahnVersion = null) {
+  const features = jsonData.features;
+
+  // Use passed ahnVersion, or fallback to first version in indicator's ahnVersions array
+  const effectiveAhnVersion = ahnVersion || (indicator.ahnVersions && indicator.ahnVersions.length > 0 ? indicator.ahnVersions[0] : null);
+
+  // Determine the attribute name with all applicable suffixes
+  const attributeName = buildAttributeName(indicator.attribute, {
+    year,
+    bebOption,
+    ahnVersion: effectiveAhnVersion
+  });
+
+  if (indicator.numerical) {
+    // For numerical indicators
+    const valueExtractor = (feature) => {
+      const value = feature.properties[attributeName];
+      return (value !== null && value !== undefined && value !== '' && !isNaN(value)) ? +value : null;
+    };
+
+    if (indicator.surfaceArea) {
+      // Use weighted average
+      let surfaceAreaColumn = indicator.surfaceArea;
+
+      // Handle BEB variants for surface area column
+      if (bebOption === 'bebouwde_kom') {
+        surfaceAreaColumn = `${surfaceAreaColumn}_1`;
+      }
+
+      return calcWeightedAverage(features, valueExtractor, surfaceAreaColumn);
+    } else {
+      // Use median
+      const values = features
+        .map(valueExtractor)
+        .filter(v => v !== null);
+      return calcMedian(values);
+    }
+  } else if (indicator.aggregatedIndicator) {
+    // For aggregated indicators, calculate for each class
+    const result = {};
+    Object.keys(indicator.classes).forEach(className => {
+      const classAttribute = buildAttributeName(indicator.classes[className], {
+        year,
+        bebOption,
+        ahnVersion: effectiveAhnVersion
+      });
+
+      const valueExtractor = (feature) => {
+        const value = feature.properties[classAttribute];
+        return (value !== null && value !== undefined && value !== '' && !isNaN(value)) ? +value : null;
+      };
+
+      if (indicator.surfaceArea) {
+        let surfaceAreaColumn = indicator.surfaceArea;
+        if (bebOption === 'bebouwde_kom') {
+          surfaceAreaColumn = `${surfaceAreaColumn}_1`;
+        }
+        result[className] = calcWeightedAverage(features, valueExtractor, surfaceAreaColumn);
+      } else {
+        const values = features.map(valueExtractor).filter(v => v !== null);
+        result[className] = calcMedian(values);
+      }
+    });
+
+    // Special handling for indicators stored as decimals - multiply by 100
+    // The CSV stores values as decimals (0.10667 = 10.667%), but client expects percentages
+    const indicatorsNeedingConversion = ['Gevoelstemperatuur', 'Waterdiepte bij hevige bui'];
+    if (indicatorsNeedingConversion.includes(indicator.title)) {
+      Object.keys(result).forEach(className => {
+        if (result[className] !== null && result[className] !== undefined) {
+          result[className] = result[className] * 100;
+        }
+      });
+    }
+
+    return result;
+  } else {
+    // For categorical indicators, we can't really pre-calculate a single value
+    // Return null for now - these will be calculated dynamically
+    return null;
+  }
+}
+
+// Main function
+async function main() {
+  console.log('🚀 Starting Nederland aggregates pre-calculation...');
+  console.log(`📦 Dataset version: ${DATASET_VERSION}`);
+
+  try {
+    // 1. Fetch all data
+    console.log('\n📥 Fetching data...');
+    const [metadataResponse, geoJsonResponse, csvResponse] = await Promise.all([
+      fetch(DEFAULT_METADATA_URL),
+      fetch(BUURT_GEOJSON_URL),
+      fetch(DEFAULT_CSV_DATA_URL)
+    ]);
+
+    // 2. Process metadata
+    console.log('📊 Processing metadata...');
+    const metadataText = await metadataResponse.text();
+    const metadata = dsvFormat(';').parse(metadataText);
+
+    // 3. Process CSV
+    console.log('📄 Processing CSV data...');
+    const zipBuffer = await csvResponse.arrayBuffer();
+    let csvText;
+    if (DEFAULT_CSV_DATA_URL.endsWith('.gz')) {
+      const decompressed = gunzipSync(new Uint8Array(zipBuffer));
+      csvText = strFromU8(decompressed);
+    } else {
+      const files = unzipSync(new Uint8Array(zipBuffer));
+      const fileName = Object.keys(files).find(name => name.endsWith('.csv'));
+      csvText = strFromU8(files[fileName]);
+    }
+    const csvData = dsvFormat(';').parse(csvText);
+
+    // 4. Process GeoJSON (convert from TopoJSON if needed)
+    console.log('🗺️  Processing GeoJSON...');
+    const topoJson = await geoJsonResponse.json();
+
+    // Convert TopoJSON to GeoJSON
+    let geoJson;
+    if (topoJson.type === 'Topology') {
+      // It's TopoJSON, convert to GeoJSON
+      const objectKey = Object.keys(topoJson.objects)[0];
+      geoJson = feature(topoJson, topoJson.objects[objectKey]);
+    } else {
+      // Already GeoJSON
+      geoJson = topoJson;
+    }
+
+    const jsonData = prepareJSONData(geoJson, csvData);
+
+    // 5. Setup indicators
+    console.log('🔧 Setting up indicators...');
+    const indicators = setupIndicators(metadata);
+    console.log(`   Found ${indicators.length} indicators`);
+
+    // 6. Calculate Nederland aggregates
+    console.log('\n🧮 Calculating Nederland aggregates...');
+    const nederlandAggregates = {};
+
+    for (const indicator of indicators) {
+      // Check if indicator has BEB variants
+      const hasBEBVariant = indicator.variants && indicator.variants.split(',').map(v => v.trim()).includes('1');
+
+      // Get available years for this indicator
+      const years = getAvailableYears(csvData, indicator.attribute);
+
+      // Check if indicator has AHN versions
+      const hasAHNVersions = indicator.ahnVersions && indicator.ahnVersions.length > 0;
+
+      console.log(`   Processing: ${indicator.title} (${years.length > 0 ? years.join(', ') : 'single value'}${hasBEBVariant ? ', BEB' : ''}${hasAHNVersions ? `, AHN: ${indicator.ahnVersions.join(', ')}` : ''})`);
+
+      if (hasBEBVariant) {
+        // BEB variant indicator - calculate for both hele_buurt and bebouwde_kom
+        nederlandAggregates[indicator.title] = {
+          hele_buurt: {},
+          bebouwde_kom: {}
+        };
+
+        const bebOptions = ['hele_buurt', 'bebouwde_kom'];
+
+        for (const bebOption of bebOptions) {
+          if (years.length > 0) {
+            // Multi-year BEB indicator
+            nederlandAggregates[indicator.title][bebOption] = {};
+            for (const year of years) {
+              const value = calculateNederlandAggregate(indicator, jsonData, year, bebOption);
+              if (value !== null) {
+                nederlandAggregates[indicator.title][bebOption][year] = value;
+              }
+            }
+          } else {
+            // Single value BEB indicator
+            const value = calculateNederlandAggregate(indicator, jsonData, null, bebOption);
+            console.log(`  ${bebOption}: ${value}`);
+            if (value !== null && value !== undefined) {
+              nederlandAggregates[indicator.title][bebOption] = value;
+            }
+          }
+        }
+
+        // Clean up completely empty entries
+        const helebuurtEmpty =
+          (nederlandAggregates[indicator.title].hele_buurt === undefined) ||
+          (typeof nederlandAggregates[indicator.title].hele_buurt === 'object' &&
+           Object.keys(nederlandAggregates[indicator.title].hele_buurt).length === 0);
+        const bebouwdekomEmpty =
+          (nederlandAggregates[indicator.title].bebouwde_kom === undefined) ||
+          (typeof nederlandAggregates[indicator.title].bebouwde_kom === 'object' &&
+           Object.keys(nederlandAggregates[indicator.title].bebouwde_kom).length === 0);
+
+        if (helebuurtEmpty && bebouwdekomEmpty) {
+          delete nederlandAggregates[indicator.title];
+        }
+      } else if (hasAHNVersions) {
+        // Indicator with AHN versions (e.g., Gevoelstemperatuur)
+        nederlandAggregates[indicator.title] = {};
+        for (const ahnVersion of indicator.ahnVersions) {
+          // Create a modified indicator with single AHN version for calculation
+          const indicatorWithAHN = { ...indicator, ahnVersions: [ahnVersion] };
+          const value = calculateNederlandAggregate(indicatorWithAHN, jsonData, null, null, ahnVersion);
+          if (value !== null) {
+            nederlandAggregates[indicator.title][ahnVersion] = value;
+          }
+        }
+        // Only add to aggregates if we got at least one version's data
+        if (Object.keys(nederlandAggregates[indicator.title]).length === 0) {
+          delete nederlandAggregates[indicator.title];
+        }
+      } else if (years.length > 0) {
+        // Multi-year indicator (no BEB, no AHN)
+        nederlandAggregates[indicator.title] = {};
+        for (const year of years) {
+          const value = calculateNederlandAggregate(indicator, jsonData, year);
+          if (value !== null) {
+            nederlandAggregates[indicator.title][year] = value;
+          }
+        }
+        // Only add to aggregates if we got at least one year's data
+        if (Object.keys(nederlandAggregates[indicator.title]).length === 0) {
+          delete nederlandAggregates[indicator.title];
+        }
+      } else {
+        // Single value indicator (no BEB, no years, no AHN)
+        const value = calculateNederlandAggregate(indicator, jsonData);
+        if (value !== null) {
+          nederlandAggregates[indicator.title] = value;
+        }
+      }
+    }
+
+    // 7. Save to file
+    const outputPath = join(__dirname, '..', 'static', 'nederland-aggregates.json');
+    const output = {
+      version: DATASET_VERSION,
+      generatedAt: new Date().toISOString(),
+      aggregates: nederlandAggregates
+    };
+
+    // Ensure static directory exists
+    mkdirSync(join(__dirname, '..', 'static'), { recursive: true });
+
+    writeFileSync(outputPath, JSON.stringify(output, null, 2), 'utf-8');
+
+    console.log('\n✅ Success!');
+    console.log(`   Aggregates saved to: static/nederland-aggregates.json`);
+    console.log(`   Total indicators processed: ${Object.keys(nederlandAggregates).length}`);
+
+  } catch (error) {
+    console.error('\n❌ Error:', error);
+    process.exit(1);
+  }
+}
+
+// Run the script
+main();
