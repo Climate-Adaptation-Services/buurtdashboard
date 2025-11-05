@@ -96,7 +96,7 @@ function getRawValue(feature, indicator, { year, attributeOverride, forceM2 = fa
   // FALLBACK: If AHN version attribute doesn't exist, try with underscore before AHN
   // NOTE: This is a workaround for Dordrecht data which uses "BKB_AHN3" instead of "BKBAHN3"
   // TODO: Standardize Dordrecht CSV column naming to match default dataset (remove underscores before AHN)
-  if (!isValidValue(value) && attribute.includes('AHN')) {
+  if (!isValidValue(value) && attribute && typeof attribute === 'string' && attribute.includes('AHN')) {
     // Try adding underscore before AHN (e.g., "PET29tm34pAHN4" -> "PET29tm34p_AHN4")
     const ahnPattern = /(AHN\d+)$/
     const fallbackAttribute = attribute.replace(ahnPattern, '_$1')
