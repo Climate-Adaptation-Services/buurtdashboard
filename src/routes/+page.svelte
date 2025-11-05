@@ -105,13 +105,19 @@
     })()
   })
 
-  // load URL params if standalone page
-  $: if (browser) {
+  // Check if we're in an iframe
+  const isIframe = browser && window.parent !== window
+
+  // Load URL params if standalone page (not in iframe)
+  // Only run once on mount to avoid overwriting postMessage params
+  let hasLoadedStandaloneParams = false
+  $: if (browser && !isIframe && !hasLoadedStandaloneParams) {
     URLParams.set(new URLSearchParams(window.location.search))
+    hasLoadedStandaloneParams = true
   }
-  
+
   // Listen for postMessage from parent if iframe
-  $: if (browser) {
+  $: if (browser && isIframe) {
     initializeURLManagement()
   }
 
