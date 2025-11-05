@@ -120,12 +120,16 @@
     }
 
     // Add neighbourhood level if selected
-    if ($neighbourhoodSelection !== null && $indicatorStore && $allNeighbourhoodsJSONData && $selectedNeighbourhoodJSONData) {
-      addLevel("Buurt", { type: "FeatureCollection", features: [$selectedNeighbourhoodJSONData] })
+    if ($neighbourhoodSelection !== null && $indicatorStore && $allNeighbourhoodsJSONData) {
+      if (!$selectedNeighbourhoodJSONData) {
+        console.warn(`⚠️ BarPlot: neighbourhoodSelection is "${$neighbourhoodSelection}" but selectedNeighbourhoodJSONData is null`)
+      } else {
+        addLevel("Buurt", { type: "FeatureCollection", features: [$selectedNeighbourhoodJSONData] })
 
-      // Add district type if available
-      if ($selectedNeighbourhoodJSONData.properties[$districtTypeAbbreviation]) {
-        addLevel("Wijktype", $districtTypeJSONData)
+        // Add district type if available
+        if ($selectedNeighbourhoodJSONData.properties[$districtTypeAbbreviation]) {
+          addLevel("Wijktype", $districtTypeJSONData)
+        }
       }
     }
 

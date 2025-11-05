@@ -173,6 +173,12 @@ export async function prepareJSONData(JSONdata, CSVdata, options = {}) {
   neighbourhoodTopojsonFeatures = measurePerformance('Neighborhood data mapping', () => {
     const codeColumn = get(neighbourhoodCodeAbbreviation);
 
+    // Debug: Check for null features before filtering
+    const nullCount = neighbourhoodTopojsonFeatures.filter(f => !f?.properties).length
+    if (nullCount > 0) {
+      console.warn(`⚠️ Found ${nullCount} null/invalid features before final filter`)
+    }
+
     return neighbourhoodTopojsonFeatures
       .filter(neighbourhood => neighbourhood?.properties) // Final safety filter before processing
       .map((neighbourhood) => {
