@@ -29,11 +29,13 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
     surfaceAreaColumn = 'Oppervlakte_Land_m2' // Standard surface area column
 
     // Check if this column exists in the data, if not, try alternatives
-    if (data.features.length > 0 && !data.features[0].properties[surfaceAreaColumn]) {
+    // Find first non-null feature for checking column names
+    const firstValidFeature = data.features.find(f => f?.properties)
+    if (firstValidFeature && !firstValidFeature.properties[surfaceAreaColumn]) {
       // Try common alternatives
       const alternatives = ['Oppervlakte_m2', 'oppervlakte', 'area', 'surface_area']
       for (const alt of alternatives) {
-        if (data.features[0].properties[alt]) {
+        if (firstValidFeature.properties[alt]) {
           surfaceAreaColumn = alt
           console.log(`Surface area column not found, using alternative: ${alt}`)
           break
@@ -43,10 +45,10 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
   }
 
   // Debug: log first feature's available properties for this indicator
-  if (data.features.length > 0) {
-    const firstFeature = data.features[0]
+  const firstValidFeature = data.features.find(f => f?.properties)
+  if (firstValidFeature) {
     const lookingForAttributes = Object.values(indicator.classes).map(v => getIndicatorAttribute(indicator, v))
-    const availableAttributes = Object.keys(firstFeature.properties).filter(key =>
+    const availableAttributes = Object.keys(firstValidFeature.properties).filter(key =>
       lookingForAttributes.some(attr => key.includes(attr.substring(0, 10)))
     )
     console.log(`${indicator.title} for ${regio}: Looking for [${lookingForAttributes.join(', ')}], found similar: [${availableAttributes.join(', ')}]`)
