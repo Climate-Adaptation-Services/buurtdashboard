@@ -173,9 +173,11 @@ export async function prepareJSONData(JSONdata, CSVdata, options = {}) {
   neighbourhoodTopojsonFeatures = measurePerformance('Neighborhood data mapping', () => {
     const codeColumn = get(neighbourhoodCodeAbbreviation);
 
-    return neighbourhoodTopojsonFeatures.map((neighbourhood) => {
-      // Get the neighborhood code
-      const neighborhoodCode = neighbourhood.properties[codeColumn];
+    return neighbourhoodTopojsonFeatures
+      .filter(neighbourhood => neighbourhood?.properties) // Final safety filter before processing
+      .map((neighbourhood) => {
+        // Get the neighborhood code
+        const neighborhoodCode = neighbourhood.properties[codeColumn];
 
       // Use direct lookup instead of filter (much faster)
       const matchingCSVData = csvLookup[neighborhoodCode];
