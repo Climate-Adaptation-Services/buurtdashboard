@@ -22,14 +22,16 @@ export function calculateDifferenceValues(currentJSONData, indicator, indicatorS
     return null
   }
 
-  return currentJSONData.features.map((d) => {
-    const diffValue = getDifferenceValue(d, indicator)
-    // Return the feature id and its difference value for lookup
-    return {
-      id: d.properties[neighbourhoodCodeAbbreviation],
-      diffValue: diffValue,
-    }
-  })
+  return currentJSONData.features
+    .filter(d => d?.properties) // Filter out null/invalid features
+    .map((d) => {
+      const diffValue = getDifferenceValue(d, indicator)
+      // Return the feature id and its difference value for lookup
+      return {
+        id: d.properties[neighbourhoodCodeAbbreviation],
+        diffValue: diffValue,
+      }
+    })
 }
 
 /**

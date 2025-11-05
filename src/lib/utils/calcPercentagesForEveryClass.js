@@ -70,6 +70,9 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
 
   // voor elke neighbourhood gaan we de waardes van elke klasse bij de som van die klasse toevoegen
   data.features.forEach(neighbourhood => {
+    // Skip null/invalid features
+    if (!neighbourhood?.properties) return
+
     // Get surface area for this neighborhood from the specified column
     let neighbourhoodShapeArea = 1 // Default to 1 (equal weight for all neighbourhoods)
 
