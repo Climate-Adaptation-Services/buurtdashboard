@@ -108,6 +108,15 @@
   // Check if we're in an iframe
   const isIframe = browser && window.parent !== window
 
+  // Version marker for debugging
+  if (browser) {
+    console.log('%c🔧 Buurtdashboard Version Check', 'background: #222; color: #bada55; font-size: 14px; padding: 4px;');
+    console.log('Build timestamp: 2025-11-05 17:55');
+    console.log('Mode:', isIframe ? '🖼️ IFRAME' : '🌐 STANDALONE');
+    console.log('Cache version: 6');
+    console.log('Iframe fix: ✅ ACTIVE');
+  }
+
   // Load URL params if standalone page (not in iframe)
   // Only run once on mount to avoid overwriting postMessage params
   let hasLoadedStandaloneParams = false
