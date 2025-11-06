@@ -45,9 +45,6 @@ function sendPostMessage(message, data) {
  */
 export function addURLParameter() {
   const urlString = get(URLParams).toString();
-  const fullURL = parentPath + '?' + urlString;
-  console.log('📤 Sending to parent:', fullURL);
-  console.log('📤 Indicator count:', get(URLParams).getAll('indicator').length);
   window.history.pushState(null, '', '?' + urlString);
   sendPostMessage("urlUpdate", urlString);
 }
@@ -65,10 +62,6 @@ export function removeURLParameter() {
  * Note: Only call this after allNeighbourhoodsJSONData is loaded
  */
 export function processURLParameters() {
-  console.log('🔄 processURLParameters called');
-  console.log('   Full URL string:', get(URLParams).toString());
-  console.log('   All indicators:', get(URLParams).getAll('indicator'));
-
   const configParam = get(URLParams).get("config") || "default";
 
   // Set the config object in the configStore
@@ -85,8 +78,6 @@ export function processURLParameters() {
     const gemeente = get(URLParams).get("gemeente") || get(configStore).defaultMunicipality;
     const buurt = get(URLParams).get("buurt");
     const indicators = get(URLParams).getAll("indicator");
-
-    console.log('📝 Setting indicators to store:', indicators);
 
     // Set municipality first, then neighborhood (order matters for derived stores)
     if (gemeente) {
@@ -125,21 +116,19 @@ export function setupURLListener() {
     if (TRUSTED_ORIGINS.includes(event.origin) || import.meta.env.DEV) {
       // Validate expected data structure
       if (event.data && event.data.parentURL && typeof event.data.parentURL === 'string') {
-        console.log("📨 Received URL from parent:", event.data.parentURL);
-
         // Extract the full URL to get the path (including language prefix like /nl/)
         try {
           const url = new URL(event.data.parentURL);
           parentPath = url.pathname; // Store path like "/nl/buurtdashboard"
-          console.log('📨 Stored parent path:', parentPath);
         } catch (e) {
-          console.warn('Failed to parse parent URL, using default path');
+          if (import.meta.env.DEV) {
+            console.warn('Failed to parse parent URL, using default path');
+          }
         }
 
         const urlParts = event.data.parentURL.split('?');
         if (urlParts.length > 1) {
           const newParams = new URLSearchParams('?' + urlParts[1]);
-          console.log('📨 Parsed indicators from parent:', newParams.getAll('indicator'));
           URLParams.set(newParams);
           processURLParameters();
         }

@@ -33,7 +33,7 @@ npx playwright test --debug   # Debug mode
 
 ## Recent Improvements
 
-### Iframe Embedding & Null Safety Fixes (2025-11-05)
+### Iframe Embedding & Null Safety Fixes (2025-11-06)
 
 **Fixed iframe embedding issues** and **production crash bugs**:
 
@@ -47,15 +47,23 @@ npx playwright test --debug   # Debug mode
 - ✅ **Multiple URL parameters preserved** - Fixed URLSearchParams handling
   - GemeenteSelect, BuurtSelect, indicatorFilter now create fresh URLSearchParams
   - Properly preserves all parameters when adding/removing values
+- ✅ **Multiple indicators persist on reload** - Fixed parent path preservation
+  - Issue: Iframe sent `/buurtdashboard?...` but parent page is at `/nl/buurtdashboard`
+  - Server redirect `/buurtdashboard` → `/nl/buurtdashboard` lost multi-value parameters
+  - Fix: Store parent's pathname (including language prefix) and reuse when sending updates
+  - Result: No redirect needed, all indicators survive reload
 
-**Known Issue - Parent Page:**
-- Multiple indicator selection works in standalone mode but only last indicator appears in iframe
-- **Root cause:** Parent page (klimaateffectatlas.nl) uses `.set()` instead of `.append()` for indicators
-- **Fix required:** Modify parent page JavaScript to use `params.append('indicator', value)` instead of `params.set('indicator', value)`
+**Root Cause Analysis (Multiple Indicators):**
+- **Problem:** After selecting 3 indicators and reloading, only the first remained
+- **Why gemeente/buurt worked:** Single-value parameters (`gemeente=GM0344`) survived redirect
+- **Why indicators didn't:** Multi-value parameters lost all but first during server redirect
+- **The redirect culprit:** Server's redirect logic used `.get('indicator')` instead of `.getAll('indicator')`
+- **Solution:** Send correct path from start (`/nl/buurtdashboard`) to avoid redirect entirely
 
 **Technical implementation:**
 - `src/routes/+page.svelte:108-130` - Iframe detection and conditional URL loading
-- `src/lib/services/urlManager.js` - PostMessage handling and URL processing
+- `src/lib/services/urlManager.js:19-40` - Parent path storage and preservation
+- `src/lib/services/urlManager.js:129-136` - Extract and store parent pathname from URL
 - `src/lib/stores.js:110-121` - Null-safe selectedNeighbourhoodJSONData derivation
 - `src/lib/services/prepareJSONData.js:177` - Final null filter before processing
 - `src/lib/components/controlPanel/*` - Preserved URL parameter handling
