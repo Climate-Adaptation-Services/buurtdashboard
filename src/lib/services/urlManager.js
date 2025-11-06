@@ -16,6 +16,9 @@ const TRUSTED_ORIGINS = [
   "http://127.0.0.1:5173"
 ];
 
+// Store the parent's path (including language prefix) to preserve it when sending updates
+let parentPath = '/buurtdashboard'; // Default fallback
+
 /**
  * Send PostMessage to parent window (when in iframe)
  */
@@ -24,7 +27,7 @@ function sendPostMessage(message, data) {
     try {
       let messageData;
       if (message === "urlUpdate") {
-        messageData = { message: 'Update URL params', urlparams: '/buurtdashboard?' + data };
+        messageData = { message: 'Update URL params', urlparams: parentPath + '?' + data };
       } else if (message === "requestParentURL") {
         messageData = { message: 'Requesting parent URL' };
       }
@@ -42,7 +45,8 @@ function sendPostMessage(message, data) {
  */
 export function addURLParameter() {
   const urlString = get(URLParams).toString();
-  console.log('📤 Sending to parent:', urlString);
+  const fullURL = parentPath + '?' + urlString;
+  console.log('📤 Sending to parent:', fullURL);
   console.log('📤 Indicator count:', get(URLParams).getAll('indicator').length);
   window.history.pushState(null, '', '?' + urlString);
   sendPostMessage("urlUpdate", urlString);
@@ -122,6 +126,15 @@ export function setupURLListener() {
       // Validate expected data structure
       if (event.data && event.data.parentURL && typeof event.data.parentURL === 'string') {
         console.log("📨 Received URL from parent:", event.data.parentURL);
+
+        // Extract the full URL to get the path (including language prefix like /nl/)
+        try {
+          const url = new URL(event.data.parentURL);
+          parentPath = url.pathname; // Store path like "/nl/buurtdashboard"
+          console.log('📨 Stored parent path:', parentPath);
+        } catch (e) {
+          console.warn('Failed to parse parent URL, using default path');
+        }
 
         const urlParts = event.data.parentURL.split('?');
         if (urlParts.length > 1) {
