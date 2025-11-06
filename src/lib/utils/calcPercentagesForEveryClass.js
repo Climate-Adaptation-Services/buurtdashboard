@@ -7,7 +7,6 @@ import { getIndicatorStore } from "$lib/stores";
 export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regio) {
   // Check if data exists
   if (!data || !data.features || data.features.length === 0) {
-    console.warn(`calcPercentagesForEveryClassMultiIndicator: No data for ${indicator.title} at ${regio} level`)
     return null
   }
 
@@ -37,21 +36,10 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
       for (const alt of alternatives) {
         if (firstValidFeature.properties[alt]) {
           surfaceAreaColumn = alt
-          console.log(`Surface area column not found, using alternative: ${alt}`)
           break
         }
       }
     }
-  }
-
-  // Debug: log first feature's available properties for this indicator
-  const firstValidFeature = data.features.find(f => f?.properties)
-  if (firstValidFeature) {
-    const lookingForAttributes = Object.values(indicator.classes).map(v => getIndicatorAttribute(indicator, v))
-    const availableAttributes = Object.keys(firstValidFeature.properties).filter(key =>
-      lookingForAttributes.some(attr => key.includes(attr.substring(0, 10)))
-    )
-    console.log(`${indicator.title} for ${regio}: Looking for [${lookingForAttributes.join(', ')}], found similar: [${availableAttributes.join(', ')}]`)
   }
 
   // Check if we need to apply BEB suffix to surface area column
@@ -89,8 +77,6 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
 
     // voor deze neighbourhood tel de waardes van elke klasse bij de totale som op
     let noData = true
-    let foundAttributes = []
-    let debugValues = []
     Object.keys(indicator.classes).forEach(kl => {
       // getIndicatorAttribute will automatically apply BEB suffix if needed
       const attributeName = getIndicatorAttribute(indicator, indicator.classes[kl])
@@ -107,28 +93,16 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
 
       if (propertyValue !== undefined && propertyValue !== null && propertyValue !== '' && !isNaN(parseFloat(propertyValue))) {
         noData = false
-        foundAttributes.push(attributeName)
         // pak de klasse erbij in totalSumPerClass
         const tempKlasse = totalSumPerClass.filter(kl2 => kl2.className === kl)[0]
         // Weight by surface area
         let value = +propertyValue
-
-        debugValues.push({attr: attributeName, value, area: neighbourhoodShapeArea, weighted: value * neighbourhoodShapeArea})
 
         // Use raw percentage values directly - no conversion needed
         // The weighted average formula naturally accounts for surface area differences
         tempKlasse.som += value * neighbourhoodShapeArea
       }
     });
-
-    // Debug first neighbourhood
-    if (debugValues.length > 0 && data.features.indexOf(neighbourhood) === 0) {
-      console.log(`First neighbourhood values for ${indicator.title}:`, debugValues, `Total surface area: ${totalSurfaceArea}`)
-    }
-
-    if (noData && Object.keys(indicator.classes).length > 0) {
-      console.warn(`No data found for ${indicator.title} in neighbourhood. Looking for attributes:`, Object.values(indicator.classes).map(v => getIndicatorAttribute(indicator, v)))
-    }
     if (noData) {
       if (indicator.title !== t('Gevoelstemperatuur') && indicator.title !== 'Maximale overstromingsdiepte') {
         // Weight "No data" by surface area as well
@@ -151,7 +125,6 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
     result[indicatorClass] = totalSumPerClass.filter(kl => kl.className === indicatorClass)[0].som
   });
 
-  console.log(`${indicator.title} for ${regio} result:`, result)
   return result
 }
 
