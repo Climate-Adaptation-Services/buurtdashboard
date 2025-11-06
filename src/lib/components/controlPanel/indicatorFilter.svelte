@@ -14,7 +14,10 @@
   function handleIndicatorFilterAdd(e) {
     // Create new URLSearchParams from current one to preserve all other parameters
     const newParams = new URLSearchParams($URLParams)
+    console.log('➕ Adding indicator:', e.detail.option);
+    console.log('   Before:', newParams.getAll('indicator'));
     newParams.append("indicator", e.detail.option)
+    console.log('   After:', newParams.getAll('indicator'));
     $URLParams = newParams
     addURLParameter()
   }
