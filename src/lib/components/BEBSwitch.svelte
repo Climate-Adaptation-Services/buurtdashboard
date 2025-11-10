@@ -15,7 +15,7 @@
 </script>
 
 <div class="beb-switch">
-  <span class="beb-label">Gebied</span>
+  <span class="beb-label">Gebied:</span>
   <div class="dropdown-wrapper">
     <select class="beb-dropdown" value={$indicatorStore.beb || "hele_buurt"} on:change={handleChange} style="border-color: {$configStore.mainColor};">
       <option value="hele_buurt">Hele buurt</option>
@@ -28,15 +28,20 @@
 <style>
   .beb-switch {
     display: inline-flex;
+    flex-direction: column;
     align-items: center;
-    gap: 8px;
+    gap: 4px;
     margin-left: 8px;
+    background-color: #e8e8e8;
+    padding: 8px 12px;
+    border-radius: 8px;
   }
 
   .beb-label {
     font-size: 18px;
     color: #333;
     font-weight: normal;
+    text-align: center;
   }
 
   .dropdown-wrapper {
