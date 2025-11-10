@@ -33,9 +33,9 @@
     flex-direction: column;
     background-color: whitesmoke;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     border-radius: 10px;
-    /* padding-top: 10px; */
+    padding-top: 25px;
   }
 
   .category {
@@ -45,7 +45,7 @@
 
   .title {
     padding: 5px 15px;
-    margin: 10px 40px 7px 40px;
+    margin: 0px 40px 7px 40px;
     border-radius: 15px;
     color: white;
     text-align: center;
