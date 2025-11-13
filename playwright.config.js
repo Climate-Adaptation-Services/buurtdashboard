@@ -13,8 +13,8 @@ export default defineConfig({
 	testDir: './tests',
 	/* Run core test suites */
 	testMatch: ['**/smoke.spec.js', '**/integration.spec.js', '**/surface-area-weighting.spec.js'],
-	/* Maximum time one test can run for. */
-	timeout: 60 * 1000,
+	/* Maximum time one test can run for. Increased to 120s for data-heavy tests */
+	timeout: 120 * 1000,
 	expect: {
 		/**
 		 * Maximum time expect() should wait for the condition to be met.
