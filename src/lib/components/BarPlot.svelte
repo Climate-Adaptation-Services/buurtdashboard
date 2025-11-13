@@ -197,7 +197,7 @@
     {/each}
     {#each regios as regio, i}
       {#if regio !== "Nederland" || !($configStore && $configStore.dashboardTitle === "Buurtdashboard Dordrecht")}
-        {#if graphWidth > 0}
+        {#if graphWidth > 0 && !isNaN(yScale.bandwidth())}
           <text style="fill:#645F5E" x={graphWidth / 2} text-anchor="middle" font-size="15px" y={i * yScale.bandwidth() - 5}
             >{getRegionName(regio)}</text
           >
