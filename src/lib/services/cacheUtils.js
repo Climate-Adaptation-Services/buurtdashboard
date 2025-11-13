@@ -3,8 +3,11 @@
  * Uses the Cache API to store simplified TopoJSON data
  */
 
+import { DATASET_VERSION } from '$lib/datasets';
+
 const CACHE_NAME = 'buurtdashboard-topojson-cache';
-const CACHE_VERSION = '6'; // Increment this when data structure changes - v6: Added null feature filtering
+// Cache version is tied to dataset version - when data updates, cache auto-invalidates
+const CACHE_VERSION = DATASET_VERSION;
 const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
 /**
