@@ -49,7 +49,10 @@ export const calcWeightedAverage = (features, valueExtractor, surfaceAreaColumn,
   let actualSurfaceAreaColumn = surfaceAreaColumn
   let shouldTryFallback = false
 
-  if (indicator && indicator.variants && indicator.variants.split(',').map(v => v.trim()).includes('1')) {
+  const variants = indicator && indicator.variants ? indicator.variants.split(',').map(v => v.trim()) : []
+  const bebVariant = variants.find(v => v !== 'M2' && v !== '') // Find the BEB variant (not M2)
+
+  if (bebVariant) {
     const indicatorStore = getIndicatorStore(indicator.title)
     let ahnSelection
 
@@ -60,7 +63,7 @@ export const calcWeightedAverage = (features, valueExtractor, surfaceAreaColumn,
 
     const bebSelection = ahnSelection?.beb || 'hele_buurt'
     if (bebSelection === 'bebouwde_kom') {
-      actualSurfaceAreaColumn = surfaceAreaColumn + '_1'
+      actualSurfaceAreaColumn = surfaceAreaColumn + '_' + bebVariant
       shouldTryFallback = true
     }
   }

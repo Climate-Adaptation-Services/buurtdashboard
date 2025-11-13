@@ -1,6 +1,6 @@
 {
   "version": "20251105",
-  "generatedAt": "2025-11-05T12:42:33.369Z",
+  "generatedAt": "2025-11-13T14:00:24.356Z",
   "aggregates": {
     "Waterdiepte bij hevige bui": {
       "5 - 10cm": 8.839722205293619,
@@ -108,7 +108,7 @@
     "Hitte en broze 65-plussers": 24.3,
     "Ernstige eenzaamheid": 8.7,
     "Moeite met rondkomen": 9.7,
-    "Ernstig overgewicht": 13.9,
+    "Ernstig overgewicht": 14.4,
     "Percentage huurwoningen": 26
   }
 }

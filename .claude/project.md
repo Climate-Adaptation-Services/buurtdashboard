@@ -30,7 +30,7 @@ A SvelteKit-based neighborhood dashboard application for visualizing Dutch neigh
 ### Data Flow
 
 1. **Server-Side (Lightweight)**: `src/routes/+page.js`
-   - Fetches metadata and CSV data only
+   - Fetches indicators config and CSV data only
    - Returns immediately for fast page rendering
    - No blocking GeoJSON fetch
 
@@ -125,14 +125,14 @@ A SvelteKit-based neighborhood dashboard application for visualizing Dutch neigh
 ```javascript
 // src/lib/datasets.js
 export const DATASET_VERSION = '20251104'
-export const DEFAULT_METADATA_URL = "https://..."
+export const DEFAULT_INDICATORS_CONFIG_URL = "https://..."
 export const DEFAULT_CSV_DATA_URL = "https://..."
 export const BUURT_GEOJSON_URL = "https://..."
 ```
 
 2. **Precalculation Script** (`scripts/precalculate-nederland.js`):
    - Runs during build or on-demand via `npm run precalculate-nederland`
-   - Fetches all data (metadata, CSV, GeoJSON)
+   - Fetches all data (indicators config, CSV, GeoJSON)
    - Calculates Nederland aggregates for all indicators (median or weighted average)
    - Saves to `static/nederland-aggregates.json` with version stamp
    - Supports multi-year, BEB variants, and AHN version indicators
@@ -227,7 +227,7 @@ export const BUURT_GEOJSON_URL = "https://..."
 
 1. **Modified `src/routes/+page.js`**:
    - Removed blocking GeoJSON fetch from server-side load
-   - Only loads lightweight metadata and CSV
+   - Only loads lightweight indicators config and CSV
    - Page renders ~2-3 seconds faster
 
 2. **Updated `src/routes/+page.svelte`**:
@@ -329,11 +329,11 @@ npm run precalculate-nederland   # Precalculate Nederland aggregates (required a
 
 ### Updating Data Sources
 
-When updating dataset URLs or metadata:
+When updating dataset URLs or indicators config:
 
 1. **Update centralized configuration** in `src/lib/datasets.js`:
    - Increment `DATASET_VERSION` (e.g., `'20251104'`)
-   - Update URLs if needed (`DEFAULT_METADATA_URL`, `DEFAULT_CSV_DATA_URL`, etc.)
+   - Update URLs if needed (`DEFAULT_INDICATORS_CONFIG_URL`, `DEFAULT_CSV_DATA_URL`, etc.)
 
 2. **Regenerate Nederland aggregates**:
    ```bash
@@ -366,8 +366,8 @@ npx playwright test <test-file>        # Run specific test
 - Dordrecht config for custom instance
 
 **Data Files**:
-- **Metadata**: CSV with indicator definitions (Dutch/English)
-  - Location: `metadata.csv` and `metadata_english.csv`
+- **Indicators Config**: CSV with indicator definitions (Dutch/English)
+  - Location: `metadata.csv` and `metadata_english.csv` (CSV filenames unchanged)
   - Format: Semicolon-separated (`;`)
   - Contains: indicator titles, descriptions, categories, units, data types
 
@@ -386,7 +386,7 @@ npx playwright test <test-file>        # Run specific test
 
 ### Data Model
 
-#### Metadata CSV Structure
+#### Indicators Config CSV Structure
 ```csv
 title;plottitle;description;category;attribute;unit;datatype;reverse;ymin;ymax;aggregatedIndicator
 Hittestress;Hittestress (%);Percentage inwoners met hittestress;Effecten;hittestress;%;quantitative;false;0;100;false
@@ -643,8 +643,8 @@ http://localhost:5173/?config=dordrecht
   categoryPath: "",               // Category icon path suffix
 
   // Data URLs (S3 bucket)
-  metadataLocation: "https://.../metadata.csv",
-  metadataLocationEnglish: "https://.../metadata_english.csv",
+  indicatorsConfigLocation: "https://.../metadata.csv",
+  indicatorsConfigLocationEnglish: "https://.../metadata_english.csv",
   neighbourhoodCSVdataLocation: "https://.../data.csv.gz",
 
   // Feature toggles
@@ -692,8 +692,8 @@ export const customConfig = {
 1. **Data arrives** from `+page.js`:
 ```javascript
 {
-  metadata: Array,
-  metadata_english: Array,
+  indicatorsConfig: Array,
+  indicatorsConfig_english: Array,
   buurtCSVdata: Array,
   neighbourhoodGeoJson: Object,  // May be null initially
   municipalityGeoJson: Object    // May be null initially
@@ -765,9 +765,9 @@ $indicatorStore.isBEB         // BEB mode for THIS indicator
 
 ### Adding a New Indicator
 
-1. Add indicator metadata to CSV files:
-   - `metadataLocation` (Dutch)
-   - `metadataLocationEnglish`
+1. Add indicator definition to CSV files:
+   - `indicatorsConfigLocation` (Dutch)
+   - `indicatorsConfigLocationEnglish`
 
 2. Ensure data exists in neighborhood CSV with matching column name
 
@@ -841,7 +841,7 @@ export const defaultConfig = {
 
 ### Data Not Showing
 **Check**:
-1. CSV column names match metadata `attribute` field
+1. CSV column names match indicators config `attribute` field
 2. Data format (semicolon-separated, Dutch decimal comma)
 3. Browser console for parsing errors
 4. Network tab for failed fetches
@@ -896,7 +896,7 @@ export const defaultConfig = {
 - Time to Interactive (TTI): < 3s (with skeleton UI at 500ms)
 
 **Data Loading**:
-- Metadata + CSV: 300-800ms
+- Indicators config + CSV: 300-800ms
 - GeoJSON: 1-2s (background, non-blocking)
 - Total data: 2-5MB compressed
 

@@ -52,8 +52,11 @@ function getRawValue(feature, indicator, { year, attributeOverride, forceM2 = fa
   let baseAttribute = indicator.attribute
   let hasBEBSuffix = false
 
-  // Handle BEB variants using indicator store (1 indicates BEB variant)
-  if (!attributeOverride && indicator.variants && indicator.variants.split(',').map(v => v.trim()).includes('1')) {
+  // Handle BEB variants using indicator store (read variant from config, not hardcoded)
+  const variants = !attributeOverride && indicator.variants ? indicator.variants.split(',').map(v => v.trim()) : []
+  const bebVariant = variants.find(v => v !== 'M2' && v !== '') // Find the BEB variant (not M2)
+
+  if (bebVariant) {
     const indicatorStore = getIndicatorStore(indicator.title)
     let ahnSelection
 
@@ -66,9 +69,9 @@ function getRawValue(feature, indicator, { year, attributeOverride, forceM2 = fa
     // Use forceBEB if provided, otherwise use store value
     const bebSelection = forceBEB || (ahnSelection?.beb) || 'hele_buurt'
 
-    // Append _1 suffix for bebouwde kom variant
+    // Append BEB variant suffix for bebouwde kom variant
     if (bebSelection === 'bebouwde_kom') {
-      baseAttribute = baseAttribute + '_1'
+      baseAttribute = baseAttribute + '_' + bebVariant
       hasBEBSuffix = true
     }
   }
@@ -229,7 +232,10 @@ function getSurfaceAreaM2(feature, indicator) {
   }
 
   // Check if we need to apply BEB suffix to surface area column
-  if (indicator.variants && indicator.variants.split(',').map(v => v.trim()).includes('1')) {
+  const surfaceVariants = indicator.variants ? indicator.variants.split(',').map(v => v.trim()) : []
+  const surfaceBebVariant = surfaceVariants.find(v => v !== 'M2' && v !== '') // Find the BEB variant (not M2)
+
+  if (surfaceBebVariant) {
     const indicatorStore = getIndicatorStore(indicator.title)
     let ahnSelection
 
@@ -240,7 +246,7 @@ function getSurfaceAreaM2(feature, indicator) {
 
     const bebSelection = ahnSelection?.beb || 'hele_buurt'
     if (bebSelection === 'bebouwde_kom') {
-      const bebColumn = surfaceAreaColumn + '_1'
+      const bebColumn = surfaceAreaColumn + '_' + surfaceBebVariant
       // Try BEB variant first, fall back to base column if not available
       const bebValue = feature.properties[bebColumn]
       if (bebValue !== null && bebValue !== undefined && !isNaN(bebValue)) {

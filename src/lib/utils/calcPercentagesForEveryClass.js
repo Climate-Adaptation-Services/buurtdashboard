@@ -43,7 +43,10 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
   }
 
   // Check if we need to apply BEB suffix to surface area column
-  if (surfaceAreaColumn && indicator.variants && indicator.variants.split(',').map(v => v.trim()).includes('1')) {
+  const variants = surfaceAreaColumn && indicator.variants ? indicator.variants.split(',').map(v => v.trim()) : []
+  const bebVariant = variants.find(v => v !== 'M2' && v !== '') // Find the BEB variant (not M2)
+
+  if (bebVariant) {
     const indicatorStore = getIndicatorStore(indicator.title)
     let ahnSelection
 
@@ -54,7 +57,7 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
 
     const bebSelection = ahnSelection?.beb || 'hele_buurt'
     if (bebSelection === 'bebouwde_kom') {
-      surfaceAreaColumn = surfaceAreaColumn + '_1'
+      surfaceAreaColumn = surfaceAreaColumn + '_' + bebVariant
     }
   }
 

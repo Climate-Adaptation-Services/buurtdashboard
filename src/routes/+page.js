@@ -15,31 +15,31 @@ export async function load({ url }) {
   // Select the appropriate config object based on URL parameter
   const configObj = configParam === 'dordrecht' ? dordrechtConfig : defaultConfig;
 
-  // Start lightweight fetches (metadata, CSV, and Nederland aggregates)
+  // Start lightweight fetches (indicators config, CSV, and Nederland aggregates)
   // GeoJSON will be loaded client-side for progressive rendering
-  const [metadataPromise, metadataEnglishPromise, csvPromise, nederlandAggregatesPromise] = [
-    fetch(configObj.metadataLocation),
-    fetch(configObj.metadataLocationEnglish),
+  const [indicatorsConfigPromise, indicatorsConfigEnglishPromise, csvPromise, nederlandAggregatesPromise] = [
+    fetch(configObj.indicatorsConfigLocation),
+    fetch(configObj.indicatorsConfigLocationEnglish),
     fetch(configObj.neighbourhoodCSVdataLocation),
     fetch('/nederland-aggregates.json').catch(() => null) // Don't fail if file doesn't exist
   ];
 
   // Wait for lightweight data only
-  const [metadataResponse, metadataEnglishResponse, csvResponse, nederlandAggregatesResponse] = await Promise.all([
-    metadataPromise,
-    metadataEnglishPromise,
+  const [indicatorsConfigResponse, indicatorsConfigEnglishResponse, csvResponse, nederlandAggregatesResponse] = await Promise.all([
+    indicatorsConfigPromise,
+    indicatorsConfigEnglishPromise,
     csvPromise,
     nederlandAggregatesPromise
   ]);
 
   // Process the responses
-  const metadataText = await metadataResponse.text();
-  const metadataEnglishText = await metadataEnglishResponse.text();
+  const indicatorsConfigText = await indicatorsConfigResponse.text();
+  const indicatorsConfigEnglishText = await indicatorsConfigEnglishResponse.text();
   const zipBuffer = await csvResponse.arrayBuffer();
 
-  // Parse metadata
-  const metadata = dsvFormat(';').parse(metadataText);
-  const metadata_english = dsvFormat(';').parse(metadataEnglishText);
+  // Parse indicators config
+  const indicatorsConfig = dsvFormat(';').parse(indicatorsConfigText);
+  const indicatorsConfig_english = dsvFormat(';').parse(indicatorsConfigEnglishText);
 
   // Handle both zip and gzip formats
   let csvText;
@@ -75,8 +75,8 @@ export async function load({ url }) {
   // Return immediately with null GeoJSON - will be loaded client-side
   return {
     lang,
-    metadata,
-    metadata_english,
+    indicatorsConfig,
+    indicatorsConfig_english,
     buurtCSVdata,
     nederlandAggregates,
     neighbourhoodGeoJson: null,

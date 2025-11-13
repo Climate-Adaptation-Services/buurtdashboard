@@ -11,14 +11,17 @@ import { get } from "svelte/store"
 export function getIndicatorAttribute(indicator, attribute, specificYear) {
   let resultAttribute = attribute
 
-  // Handle BEB variant suffix (_1) first
-  if (indicator.variants && indicator.variants.split(',').map(v => v.trim()).includes('1')) {
+  // Handle BEB variant suffix (read from variants column, not hardcoded)
+  const variants = indicator.variants ? indicator.variants.split(',').map(v => v.trim()) : []
+  const bebVariant = variants.find(v => v !== 'M2' && v !== '') // Find the BEB variant (not M2)
+
+  if (bebVariant) {
     const indicatorStore = getIndicatorStore(indicator.title);
     const ahnSelection = get(indicatorStore);
     const bebSelection = ahnSelection?.beb || 'hele_buurt'
 
     if (bebSelection === 'bebouwde_kom') {
-      resultAttribute = resultAttribute + '_1'
+      resultAttribute = resultAttribute + '_' + bebVariant
     }
   }
 

@@ -2,14 +2,14 @@ import { alleIndicatoren } from "$lib/stores"
 export function setupIndicators(data, eff, geb, kwe) {
 
 
-  const metadata = (data.lang === 'en')
-    ? data.metadata_english
-    : data.metadata
+  const indicatorsConfig = (data.lang === 'en')
+    ? data.indicatorsConfig_english
+    : data.indicatorsConfig
 
   let indicatorsList = [];
   [eff, geb, kwe].forEach(category => {
-    if (metadata.filter(d => d.Categorie === category).length > 0) {
-      indicatorsList = addIndicatorCategory(indicatorsList, metadata.filter(d => d.Categorie === category))
+    if (indicatorsConfig.filter(d => d.Categorie === category).length > 0) {
+      indicatorsList = addIndicatorCategory(indicatorsList, indicatorsConfig.filter(d => d.Categorie === category))
     }
   });
 

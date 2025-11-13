@@ -186,7 +186,7 @@ See [.claude/project.md](.claude/project.md) for complete details.
 ## Architecture
 
 **Data Flow:**
-1. Server loads lightweight data (metadata + CSV)
+1. Server loads lightweight data (indicators config + CSV)
 2. Client renders UI immediately with loading states
 3. Client fetches GeoJSON in background
 4. Progressive enhancement as data arrives
@@ -226,7 +226,7 @@ Progressive loading should make this rare. If it occurs:
 - Ensure map container has dimensions
 
 ### Data Not Showing
-- Check CSV column names match metadata `attribute` field
+- Check CSV column names match indicators config `attribute` field
 - Verify semicolon-separated format with Dutch decimal comma
 - Check browser console for parsing errors
 

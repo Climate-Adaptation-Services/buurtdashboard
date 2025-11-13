@@ -3,7 +3,7 @@
  * Pre-calculation script for Nederland (Netherlands) aggregate values
  *
  * This script:
- * 1. Fetches all necessary data (metadata, CSV, GeoJSON)
+ * 1. Fetches all necessary data (indicators config, CSV, GeoJSON)
  * 2. Processes indicators
  * 3. Calculates Nederland aggregate values (median or weighted average)
  * 4. Saves results to static/nederland-aggregates.json
@@ -21,7 +21,7 @@ import { feature } from 'topojson-client';
 import {
   DATASET_VERSION,
   BUURT_GEOJSON_URL,
-  DEFAULT_METADATA_URL,
+  DEFAULT_INDICATORS_CONFIG_URL,
   DEFAULT_CSV_DATA_URL
 } from '../src/lib/datasets.js';
 
@@ -92,10 +92,10 @@ function calcWeightedAverage(features, valueExtractor, surfaceAreaColumn) {
 }
 
 // Setup indicators (simplified from setupIndicators.js)
-function setupIndicators(metadata) {
+function setupIndicators(indicatorsConfig) {
   const indicatorsList = [];
 
-  metadata.forEach(indicator => {
+  indicatorsConfig.forEach(indicator => {
     if (indicator.Titel === '') return;
 
     const classes = {};
@@ -181,7 +181,7 @@ function prepareJSONData(geoJson, csvData) {
 }
 
 // Helper function to build attribute name with proper suffixes
-function buildAttributeName(baseAttribute, { year, bebOption, ahnVersion }) {
+function buildAttributeName(baseAttribute, { year, bebOption, ahnVersion, bebVariant }) {
   let attributeName = baseAttribute;
 
   // Add year suffix (with underscore)
@@ -194,9 +194,9 @@ function buildAttributeName(baseAttribute, { year, bebOption, ahnVersion }) {
     attributeName = `${attributeName}${ahnVersion}`;
   }
 
-  // Add BEB suffix (with underscore)
-  if (bebOption === 'bebouwde_kom') {
-    attributeName = `${attributeName}_1`;
+  // Add BEB suffix (with underscore, read from config not hardcoded)
+  if (bebOption === 'bebouwde_kom' && bebVariant) {
+    attributeName = `${attributeName}_${bebVariant}`;
   }
 
   return attributeName;
@@ -209,11 +209,16 @@ function calculateNederlandAggregate(indicator, jsonData, year = null, bebOption
   // Use passed ahnVersion, or fallback to first version in indicator's ahnVersions array
   const effectiveAhnVersion = ahnVersion || (indicator.ahnVersions && indicator.ahnVersions.length > 0 ? indicator.ahnVersions[0] : null);
 
+  // Get the BEB variant from the variants column (not hardcoded)
+  const variants = indicator.variants ? indicator.variants.split(',').map(v => v.trim()) : []
+  const bebVariant = variants.find(v => v !== 'M2' && v !== '') // Find the BEB variant (not M2)
+
   // Determine the attribute name with all applicable suffixes
   const attributeName = buildAttributeName(indicator.attribute, {
     year,
     bebOption,
-    ahnVersion: effectiveAhnVersion
+    ahnVersion: effectiveAhnVersion,
+    bebVariant
   });
 
   if (indicator.numerical) {
@@ -227,9 +232,9 @@ function calculateNederlandAggregate(indicator, jsonData, year = null, bebOption
       // Use weighted average
       let surfaceAreaColumn = indicator.surfaceArea;
 
-      // Handle BEB variants for surface area column
-      if (bebOption === 'bebouwde_kom') {
-        surfaceAreaColumn = `${surfaceAreaColumn}_1`;
+      // Handle BEB variants for surface area column (read from config, not hardcoded)
+      if (bebOption === 'bebouwde_kom' && bebVariant) {
+        surfaceAreaColumn = `${surfaceAreaColumn}_${bebVariant}`;
       }
 
       return calcWeightedAverage(features, valueExtractor, surfaceAreaColumn);
@@ -247,7 +252,8 @@ function calculateNederlandAggregate(indicator, jsonData, year = null, bebOption
       const classAttribute = buildAttributeName(indicator.classes[className], {
         year,
         bebOption,
-        ahnVersion: effectiveAhnVersion
+        ahnVersion: effectiveAhnVersion,
+        bebVariant
       });
 
       const valueExtractor = (feature) => {
@@ -257,8 +263,8 @@ function calculateNederlandAggregate(indicator, jsonData, year = null, bebOption
 
       if (indicator.surfaceArea) {
         let surfaceAreaColumn = indicator.surfaceArea;
-        if (bebOption === 'bebouwde_kom') {
-          surfaceAreaColumn = `${surfaceAreaColumn}_1`;
+        if (bebOption === 'bebouwde_kom' && bebVariant) {
+          surfaceAreaColumn = `${surfaceAreaColumn}_${bebVariant}`;
         }
         result[className] = calcWeightedAverage(features, valueExtractor, surfaceAreaColumn);
       } else {
@@ -294,16 +300,16 @@ async function main() {
   try {
     // 1. Fetch all data
     console.log('\n📥 Fetching data...');
-    const [metadataResponse, geoJsonResponse, csvResponse] = await Promise.all([
-      fetch(DEFAULT_METADATA_URL),
+    const [indicatorsConfigResponse, geoJsonResponse, csvResponse] = await Promise.all([
+      fetch(DEFAULT_INDICATORS_CONFIG_URL),
       fetch(BUURT_GEOJSON_URL),
       fetch(DEFAULT_CSV_DATA_URL)
     ]);
 
-    // 2. Process metadata
-    console.log('📊 Processing metadata...');
-    const metadataText = await metadataResponse.text();
-    const metadata = dsvFormat(';').parse(metadataText);
+    // 2. Process indicators config
+    console.log('📊 Processing indicators config...');
+    const indicatorsConfigText = await indicatorsConfigResponse.text();
+    const indicatorsConfig = dsvFormat(';').parse(indicatorsConfigText);
 
     // 3. Process CSV
     console.log('📄 Processing CSV data...');
@@ -338,7 +344,7 @@ async function main() {
 
     // 5. Setup indicators
     console.log('🔧 Setting up indicators...');
-    const indicators = setupIndicators(metadata);
+    const indicators = setupIndicators(indicatorsConfig);
     console.log(`   Found ${indicators.length} indicators`);
 
     // 6. Calculate Nederland aggregates
@@ -346,8 +352,10 @@ async function main() {
     const nederlandAggregates = {};
 
     for (const indicator of indicators) {
-      // Check if indicator has BEB variants
-      const hasBEBVariant = indicator.variants && indicator.variants.split(',').map(v => v.trim()).includes('1');
+      // Get the BEB variant from the variants column (not hardcoded)
+      const variants = indicator.variants ? indicator.variants.split(',').map(v => v.trim()) : []
+      const bebVariant = variants.find(v => v !== 'M2' && v !== '') // Find the BEB variant (not M2)
+      const hasBEBVariant = !!bebVariant;
 
       // Get available years for this indicator
       const years = getAvailableYears(csvData, indicator.attribute);

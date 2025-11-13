@@ -85,7 +85,7 @@ export function getIndicatorSelection(indicatorTitle) {
 
 // Initialize indicator stores from the old AHNSelecties data
 export function initializeIndicatorStores(data) {
-  data.metadata.forEach(indicator => {
+  data.indicatorsConfig.forEach(indicator => {
     const baseYear = (indicator.AHNversie)
       ? indicator.AHNversie.split(',')[indicator.AHNversie.split(',').length - 1]
       : ''
