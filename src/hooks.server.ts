@@ -1,13 +1,13 @@
 // src/hooks.server.ts
 import type { Handle } from '@sveltejs/kit';
-import { 
+import {
   BUURT_GEOJSON_URL,
   MUNICIPALITY_JSON_URL,
-  DEFAULT_METADATA_URL, 
-  DEFAULT_METADATA_ENGLISH_URL,
+  DEFAULT_INDICATORS_CONFIG_URL,
+  DEFAULT_INDICATORS_CONFIG_ENGLISH_URL,
   DEFAULT_CSV_DATA_URL,
-  DORDRECHT_METADATA_URL,
-  DORDRECHT_METADATA_ENGLISH_URL,
+  DORDRECHT_INDICATORS_CONFIG_URL,
+  DORDRECHT_INDICATORS_CONFIG_ENGLISH_URL,
   DORDRECHT_CSV_DATA_URL
 } from '$lib/datasets';
 
@@ -39,24 +39,24 @@ export const handle: Handle = async ({ event, resolve }) => {
         'crossorigin; fetchpriority=high'
     );
     
-    // Add preload for metadata and CSV data based on config
+    // Add preload for indicators config and CSV data based on config
     if (configParam === 'dordrecht') {
-      // Preload Dordrecht metadata
+      // Preload Dordrecht indicators config
       response.headers.append(
         'Link',
-        `<${DORDRECHT_METADATA_URL}>; ` +
+        `<${DORDRECHT_INDICATORS_CONFIG_URL}>; ` +
           'rel=preload; as=fetch; type="text/csv"; ' +
           'crossorigin; fetchpriority=high'
       );
-      
-      // Preload Dordrecht English metadata
+
+      // Preload Dordrecht English indicators config
       response.headers.append(
         'Link',
-        `<${DORDRECHT_METADATA_ENGLISH_URL}>; ` +
+        `<${DORDRECHT_INDICATORS_CONFIG_ENGLISH_URL}>; ` +
           'rel=preload; as=fetch; type="text/csv"; ' +
           'crossorigin; fetchpriority=high'
       );
-      
+
       // Preload Dordrecht CSV data
       response.headers.append(
         'Link',
@@ -65,22 +65,22 @@ export const handle: Handle = async ({ event, resolve }) => {
           'crossorigin; fetchpriority=high'
       );
     } else {
-      // Preload default metadata
+      // Preload default indicators config
       response.headers.append(
         'Link',
-        `<${DEFAULT_METADATA_URL}>; ` +
+        `<${DEFAULT_INDICATORS_CONFIG_URL}>; ` +
           'rel=preload; as=fetch; type="text/csv"; ' +
           'crossorigin; fetchpriority=high'
       );
-      
-      // Preload default English metadata
+
+      // Preload default English indicators config
       response.headers.append(
         'Link',
-        `<${DEFAULT_METADATA_ENGLISH_URL}>; ` +
+        `<${DEFAULT_INDICATORS_CONFIG_ENGLISH_URL}>; ` +
           'rel=preload; as=fetch; type="text/csv"; ' +
           'crossorigin; fetchpriority=high'
       );
-      
+
       // Preload default CSV data
       response.headers.append(
         'Link',
