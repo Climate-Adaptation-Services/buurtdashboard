@@ -160,6 +160,9 @@
   $: yScale = scaleBand()
     .domain(regios)
     .range([0, (indicatorHeight - margin.top - margin.bottom) * (barPlotData.length / 2)])
+
+  // Safe bandwidth calculation - provides fallback for NaN cases
+  $: safeBandwidth = yScale && regios.length > 0 ? (yScale.bandwidth() || 0) : 0
 </script>
 
 <svg class={"barplot_" + indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', '')} style="height:74%">
@@ -197,8 +200,8 @@
     {/each}
     {#each regios as regio, i}
       {#if regio !== "Nederland" || !($configStore && $configStore.dashboardTitle === "Buurtdashboard Dordrecht")}
-        {#if graphWidth > 0 && !isNaN(yScale.bandwidth())}
-          <text style="fill:#645F5E" x={graphWidth / 2} text-anchor="middle" font-size="15px" y={i * yScale.bandwidth() - 5}
+        {#if graphWidth > 0 && safeBandwidth > 0}
+          <text style="fill:#645F5E" x={graphWidth / 2} text-anchor="middle" font-size="15px" y={i * safeBandwidth - 5}
             >{getRegionName(regio)}</text
           >
         {/if}
