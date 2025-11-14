@@ -55,16 +55,18 @@
   // Set indicatorAttribute for positioning and use value retrieval for colors
   $: {
     const ahnSelection = $indicatorStore || {}
-    
+
     // Create base attribute considering BEB selection
     let baseAttribute = indicator.attribute
-    if (indicator.variants && indicator.variants.split(',').map(v => v.trim()).includes('1')) {
+    const variants = indicator.variants ? indicator.variants.split(',').map(v => v.trim()) : []
+    const bebVariant = variants.find(v => v !== 'M2' && v !== '') // Find the BEB variant (not M2)
+    if (bebVariant) {
       const bebSelection = ahnSelection.beb || 'hele_buurt'
       if (bebSelection === 'bebouwde_kom') {
-        baseAttribute = baseAttribute + '_1'
+        baseAttribute = baseAttribute + '_' + bebVariant
       }
     }
-    
+
     // For positioning: use reactive attribute (may include _BEB and year suffixes)
     indicatorAttribute = getIndicatorAttribute(indicator, baseAttribute)
     
