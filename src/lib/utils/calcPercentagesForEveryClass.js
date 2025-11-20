@@ -10,7 +10,7 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
     return null
   }
 
-  let totalSurfaceArea = 0
+  let totalCount = 0
   let totalSumPerClass = []
 
   // object om totale som van elke klasse in op te tellen
@@ -21,62 +21,12 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
     })
   }
 
-  // Get the surface area column name from the indicator's surfaceArea field
-  // Special case: "Totale buurt" means use the standard surface area column
-  let surfaceAreaColumn = indicator.surfaceArea
-  if (surfaceAreaColumn === 'Totale buurt') {
-    surfaceAreaColumn = 'Oppervlakte_Land_m2' // Standard surface area column
-
-    // Check if this column exists in the data, if not, try alternatives
-    // Find first non-null feature for checking column names
-    const firstValidFeature = data.features.find(f => f?.properties)
-    if (firstValidFeature && !firstValidFeature.properties[surfaceAreaColumn]) {
-      // Try common alternatives
-      const alternatives = ['Oppervlakte_m2', 'oppervlakte', 'area', 'surface_area']
-      for (const alt of alternatives) {
-        if (firstValidFeature.properties[alt]) {
-          surfaceAreaColumn = alt
-          break
-        }
-      }
-    }
-  }
-
-  // Check if we need to apply BEB suffix to surface area column
-  const variants = surfaceAreaColumn && indicator.variants ? indicator.variants.split(',').map(v => v.trim()) : []
-  const bebVariant = variants.find(v => v !== 'M2' && v !== '') // Find the BEB variant (not M2)
-
-  if (bebVariant) {
-    const indicatorStore = getIndicatorStore(indicator.title)
-    let ahnSelection
-
-    const unsubscribe = indicatorStore.subscribe(value => {
-      ahnSelection = value
-    })
-    unsubscribe()
-
-    const bebSelection = ahnSelection?.beb || 'hele_buurt'
-    if (bebSelection === 'bebouwde_kom') {
-      surfaceAreaColumn = surfaceAreaColumn + '_' + bebVariant
-    }
-  }
-
   // voor elke neighbourhood gaan we de waardes van elke klasse bij de som van die klasse toevoegen
   data.features.forEach(neighbourhood => {
     // Skip null/invalid features
     if (!neighbourhood?.properties) return
 
-    // Get surface area for this neighborhood from the specified column
-    let neighbourhoodShapeArea = 1 // Default to 1 (equal weight for all neighbourhoods)
-
-    if (surfaceAreaColumn && neighbourhood.properties[surfaceAreaColumn]) {
-      const areaValue = +neighbourhood.properties[surfaceAreaColumn]
-      if (!isNaN(areaValue) && areaValue > 0) {
-        neighbourhoodShapeArea = areaValue
-      }
-    }
-
-    totalSurfaceArea += neighbourhoodShapeArea
+    totalCount += 1
 
     // voor deze neighbourhood tel de waardes van elke klasse bij de totale som op
     let noData = true
@@ -98,25 +48,23 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
         noData = false
         // pak de klasse erbij in totalSumPerClass
         const tempKlasse = totalSumPerClass.filter(kl2 => kl2.className === kl)[0]
-        // Weight by surface area
         let value = +propertyValue
 
-        // Use raw percentage values directly - no conversion needed
-        // The weighted average formula naturally accounts for surface area differences
-        tempKlasse.som += value * neighbourhoodShapeArea
+        // Simple sum - no surface area weighting
+        tempKlasse.som += value
       }
     });
     if (noData) {
       if (indicator.title !== t('Gevoelstemperatuur') && indicator.title !== 'Maximale overstromingsdiepte') {
-        // Weight "No data" by surface area as well
-        totalSumPerClass.filter(kl => kl.className === 'No data')[0].som += 100 * neighbourhoodShapeArea
+        // Add 100% to "No data" class for neighborhoods without data
+        totalSumPerClass.filter(kl => kl.className === 'No data')[0].som += 100
       }
     }
   });
 
-  // Divide by total surface area instead of number of features
+  // Divide by total number of neighborhoods to get average
   totalSumPerClass.forEach(kl => {
-    kl.som = totalSurfaceArea > 0 ? (kl.som / totalSurfaceArea) : 0
+    kl.som = totalCount > 0 ? (kl.som / totalCount) : 0
     if (indicator.title === t('Gevoelstemperatuur') || indicator.title === 'Gevoelstemperatuur') {
       kl.som *= 100
     }

@@ -60,35 +60,21 @@ function calcMedian(array) {
   }
 }
 
-function calcWeightedAverage(features, valueExtractor, surfaceAreaColumn) {
-  if (!features || features.length === 0 || !surfaceAreaColumn) {
+function calcAverage(array) {
+  if (!array || array.length === 0) {
     return null;
   }
 
-  let totalWeightedSum = 0;
-  let totalSurfaceArea = 0;
-  let validCount = 0;
+  const OnlyNumbers = array
+    .filter(d => d !== null && d !== undefined && !isNaN(+d) && isFinite(+d))
+    .map(d => +d);
 
-  features.forEach(feature => {
-    const value = valueExtractor(feature);
-    const surfaceArea = feature.properties?.[surfaceAreaColumn];
-
-    if (value !== null && value !== undefined && !isNaN(+value) &&
-        surfaceArea !== null && surfaceArea !== undefined && !isNaN(+surfaceArea)) {
-      const numValue = +value;
-      const numSurfaceArea = +surfaceArea;
-
-      totalWeightedSum += numValue * numSurfaceArea;
-      totalSurfaceArea += numSurfaceArea;
-      validCount++;
-    }
-  });
-
-  if (totalSurfaceArea === 0) {
+  if (OnlyNumbers.length === 0) {
     return null;
   }
 
-  return totalWeightedSum / totalSurfaceArea;
+  const sum = OnlyNumbers.reduce((acc, val) => acc + val, 0);
+  return sum / OnlyNumbers.length;
 }
 
 // Setup indicators (simplified from setupIndicators.js)
@@ -222,31 +208,16 @@ function calculateNederlandAggregate(indicator, jsonData, year = null, bebOption
   });
 
   if (indicator.numerical) {
-    // For numerical indicators
-    const valueExtractor = (feature) => {
-      const value = feature.properties[attributeName];
-      return (value !== null && value !== undefined && value !== '' && !isNaN(value)) ? +value : null;
-    };
-
-    if (indicator.surfaceArea) {
-      // Use weighted average
-      let surfaceAreaColumn = indicator.surfaceArea;
-
-      // Handle BEB variants for surface area column (read from config, not hardcoded)
-      if (bebOption === 'bebouwde_kom' && bebVariant) {
-        surfaceAreaColumn = `${surfaceAreaColumn}_${bebVariant}`;
-      }
-
-      return calcWeightedAverage(features, valueExtractor, surfaceAreaColumn);
-    } else {
-      // Use median
-      const values = features
-        .map(valueExtractor)
-        .filter(v => v !== null);
-      return calcMedian(values);
-    }
+    // For numerical indicators - use median
+    const values = features
+      .map(feature => {
+        const value = feature.properties[attributeName];
+        return (value !== null && value !== undefined && value !== '' && !isNaN(value)) ? +value : null;
+      })
+      .filter(v => v !== null);
+    return calcMedian(values);
   } else if (indicator.aggregatedIndicator) {
-    // For aggregated indicators, calculate for each class
+    // For aggregated indicators, calculate average for each class
     const result = {};
     Object.keys(indicator.classes).forEach(className => {
       const classAttribute = buildAttributeName(indicator.classes[className], {
@@ -256,21 +227,14 @@ function calculateNederlandAggregate(indicator, jsonData, year = null, bebOption
         bebVariant
       });
 
-      const valueExtractor = (feature) => {
-        const value = feature.properties[classAttribute];
-        return (value !== null && value !== undefined && value !== '' && !isNaN(value)) ? +value : null;
-      };
+      const values = features
+        .map(feature => {
+          const value = feature.properties[classAttribute];
+          return (value !== null && value !== undefined && value !== '' && !isNaN(value)) ? +value : null;
+        })
+        .filter(v => v !== null);
 
-      if (indicator.surfaceArea) {
-        let surfaceAreaColumn = indicator.surfaceArea;
-        if (bebOption === 'bebouwde_kom' && bebVariant) {
-          surfaceAreaColumn = `${surfaceAreaColumn}_${bebVariant}`;
-        }
-        result[className] = calcWeightedAverage(features, valueExtractor, surfaceAreaColumn);
-      } else {
-        const values = features.map(valueExtractor).filter(v => v !== null);
-        result[className] = calcMedian(values);
-      }
+      result[className] = calcAverage(values);
     });
 
     // Special handling for indicators stored as decimals - multiply by 100

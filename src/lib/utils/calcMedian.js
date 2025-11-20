@@ -28,6 +28,32 @@ export const calcMedian = (array) => {
 }
 
 /**
+ * Calculate average (mean) of an array of values
+ * @param {Array} array - Array of values
+ * @returns {number|string} Average or "Geen data" if no valid data
+ */
+export const calcAverage = (array) => {
+  // Handle empty array
+  if (!array || array.length === 0) {
+    return "Geen data"
+  }
+
+  // Filter for valid numbers and convert to numbers
+  const OnlyNumbers = array
+    .filter(d => d !== null && d !== undefined && !isNaN(+d) && isFinite(+d))
+    .map(d => +d)
+
+  // Handle case where no valid numbers remain after filtering
+  if (OnlyNumbers.length === 0) {
+    return "Geen data"
+  }
+
+  // Calculate average
+  const sum = OnlyNumbers.reduce((acc, val) => acc + val, 0)
+  return sum / OnlyNumbers.length
+}
+
+/**
  * Calculate weighted average based on surface area
  * @param {Array} features - Array of GeoJSON features
  * @param {Function} valueExtractor - Function to extract value from feature

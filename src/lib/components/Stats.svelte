@@ -14,7 +14,7 @@
   } from "$lib/stores"
   import Stat from "./Stat.svelte"
   import { scaleLinear, min, max } from "d3"
-  import { calcMedian, calcWeightedAverage } from "$lib/utils/calcMedian"
+  import { calcMedian, calcAverage } from "$lib/utils/calcMedian"
   // MIGRATED: Import centralized value retrieval functions
   import { getNumericalValue, getDifferenceValue, getIndicatorAttribute, toNumber, isValidValue, getRawValue } from "$lib/utils/valueRetrieval.js"
 
@@ -78,13 +78,12 @@
             .filter((value) => value !== null)
         )
       } else {
-        // Use weighted average if surface area is specified, otherwise use median
-        if (indicator.surfaceArea) {
-          nederlandMedian = calcWeightedAverage(
-            $allNeighbourhoodsJSONData.features,
-            (neighbourhood) => getNumericalValue(neighbourhood, indicator),
-            indicator.surfaceArea,
-            indicator
+        // Use median for numerical indicators, average for aggregated indicators
+        if (indicator.aggregatedIndicator) {
+          nederlandMedian = calcAverage(
+            $allNeighbourhoodsJSONData.features
+              .map((neighbourhood) => getNumericalValue(neighbourhood, indicator))
+              .filter((value) => value !== null)
           )
         } else {
           nederlandMedian = calcMedian(
@@ -96,7 +95,7 @@
       }
     }
 
-    // Municipality calculation - DISPLAY VALUES (weighted average when surface area specified)
+    // Municipality calculation - DISPLAY VALUES
     const gemeenteMedian = ($municipalitySelection !== null && $allNeighbourhoodsJSONData && $allNeighbourhoodsJSONData.features && currentAHNSelection) ? (() => {
       const municipalityFilter = $allNeighbourhoodsJSONData.features.filter(
         (neighbourhood) => neighbourhood?.properties && neighbourhood.properties[$municipalityCodeAbbreviation] === $municipalitySelection
@@ -108,13 +107,12 @@
               .filter((value) => value !== null)
           )
         : (() => {
-            // Use weighted average if surface area is specified, otherwise use median
-            if (indicator.surfaceArea) {
-              return calcWeightedAverage(
-                municipalityFilter,
-                (neighbourhood) => getNumericalValue(neighbourhood, indicator),
-                indicator.surfaceArea,
-                indicator
+            // Use median for numerical indicators, average for aggregated indicators
+            if (indicator.aggregatedIndicator) {
+              return calcAverage(
+                municipalityFilter
+                  .map((neighbourhood) => getNumericalValue(neighbourhood, indicator))
+                  .filter((value) => value !== null)
               )
             } else {
               return calcMedian(
@@ -215,12 +213,12 @@
             .filter((value) => value !== null)
         )
       } else {
-        if (indicator.surfaceArea) {
-          nederlandScale = calcWeightedAverage(
-            $allNeighbourhoodsJSONData.features,
-            (neighbourhood) => getNumericalValue(neighbourhood, indicator),
-            indicator.surfaceArea,
-            indicator
+        // Use median for numerical indicators, average for aggregated indicators
+        if (indicator.aggregatedIndicator) {
+          nederlandScale = calcAverage(
+            $allNeighbourhoodsJSONData.features
+              .map((neighbourhood) => getNumericalValue(neighbourhood, indicator))
+              .filter((value) => value !== null)
           )
         } else {
           nederlandScale = calcMedian(
@@ -232,7 +230,7 @@
       }
     }
 
-    // Municipality scale calculation - ORIGINAL VALUES (weighted average when surface area specified)
+    // Municipality scale calculation - ORIGINAL VALUES
     const gemeenteScale = ($municipalitySelection !== null && $allNeighbourhoodsJSONData && $allNeighbourhoodsJSONData.features && currentAHNSelection) ? (() => {
       const municipalityFilter = $allNeighbourhoodsJSONData.features.filter(
         (neighbourhood) => neighbourhood?.properties && neighbourhood.properties[$municipalityCodeAbbreviation] === $municipalitySelection
@@ -244,13 +242,12 @@
               .filter((value) => value !== null)
           )
         : (() => {
-            // Use weighted average if surface area is specified, otherwise use median
-            if (indicator.surfaceArea) {
-              return calcWeightedAverage(
-                municipalityFilter,
-                (neighbourhood) => getNumericalValue(neighbourhood, indicator),
-                indicator.surfaceArea,
-                indicator
+            // Use median for numerical indicators, average for aggregated indicators
+            if (indicator.aggregatedIndicator) {
+              return calcAverage(
+                municipalityFilter
+                  .map((neighbourhood) => getNumericalValue(neighbourhood, indicator))
+                  .filter((value) => value !== null)
               )
             } else {
               return calcMedian(
