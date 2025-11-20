@@ -138,12 +138,14 @@
 
   // Debounce timer for simulation restarts
   let simulationDebounceTimer = null
+  let previousBEB = null
 
   // FIXED: Let Svelte handle reactivity naturally - run simulation when AHN selection changes
   $: {
     // This reactive block will trigger whenever this indicator's store changes OR indicatorAttribute changes
     const currentSelection = $indicatorStore
     const currentIndicatorAttribute = indicatorAttribute
+    const currentBEB = currentSelection?.beb || 'hele_buurt'
 
     // Only restart simulation if we have a valid indicator attribute
     if (currentIndicatorAttribute) {
@@ -152,10 +154,21 @@
         clearTimeout(simulationDebounceTimer)
       }
 
+      // Detect BEB change - if BEB changed, clear previous positions
+      // This allows nodes to reposition from their new data values
+      const bebChanged = previousBEB !== null && previousBEB !== currentBEB
+      if (bebChanged) {
+        previousNodePositions = {}  // Clear positions so nodes use new starting positions
+      }
+      previousBEB = currentBEB
+
+      // Minimal debounce to prevent rapid-fire updates
+      const debounceDelay = 50
+
       simulationDebounceTimer = setTimeout(() => {
         runSimulation()
         simulationDebounceTimer = null
-      }, 100) // Increased delay to debounce rapid changes
+      }, debounceDelay)
     }
   }
 
@@ -204,14 +217,14 @@
     })
 
     // Adjust parameters for large datasets to improve performance
-    // Very large (>100): Moderate energy with very fast decay and hard stop at 3 ticks
+    // Very large (>100): Higher energy for better spreading, fast decay, hard stop at 5 ticks
     // Large (70-100): Quick freeze to prevent jiggling
     // Medium (40-70): Moderate optimization - balance speed and smoothness
     const xStrength = isVeryLargeDataset ? 1.0 : isLargeDataset ? 0.9 : isMediumDataset ? 0.7 : 0.5
-    const yStrength = isVeryLargeDataset ? 0.02 : isLargeDataset ? 0.02 : 0.05  // Weak Y force for large datasets
-    const alphaValue = isVeryLargeDataset ? 0.2 : isLargeDataset ? 0.15 : isMediumDataset ? 0.3 : 0.4
-    const alphaDecayRate = isVeryLargeDataset ? 0.95 : isLargeDataset ? 0.3 : isMediumDataset ? 0.03 : 0.015
-    const maxTicks = isVeryLargeDataset ? 3 : isLargeDataset ? 5 : isMediumDataset ? 10 : 15
+    const yStrength = isVeryLargeDataset ? 0.08 : isLargeDataset ? 0.02 : 0.05  // Increased Y force for better vertical spreading
+    const alphaValue = isVeryLargeDataset ? 0.4 : isLargeDataset ? 0.15 : isMediumDataset ? 0.3 : 0.4
+    const alphaDecayRate = isVeryLargeDataset ? 0.7 : isLargeDataset ? 0.3 : isMediumDataset ? 0.03 : 0.015
+    const maxTicks = isVeryLargeDataset ? 5 : isLargeDataset ? 5 : isMediumDataset ? 10 : 15
 
     // Create a new simulation with the nodes
     // For very large datasets, use higher collision strength for quick separation
