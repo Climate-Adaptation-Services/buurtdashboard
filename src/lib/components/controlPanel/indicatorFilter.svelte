@@ -138,7 +138,7 @@
   .input-container {
     background: #36575a;
     border: 2px solid white;
-    border-radius: 4px;
+    border-radius: 8px;
     padding: 4px;
     display: flex;
     flex-wrap: wrap;
