@@ -13,7 +13,7 @@
 
 <div class="indicator-title" style="height: {titleHeight}px">
   <!-- <h4 class="category">{t("Categorie")}: {indicator.category}</h4> -->
-  <h2 class="title" style="background-color:{$configStore.mainColor}">
+  <h2 class="title" class:long-title={indicator.title.length > 25} style="background-color:{$configStore.mainColor}">
     {indicator.title}
   </h2>
   <h4 class="subtitle">
@@ -49,6 +49,10 @@
     border-radius: 15px;
     color: white;
     text-align: center;
+  }
+
+  .title.long-title {
+    font-size: 1.2rem;
   }
 
   .subtitle {

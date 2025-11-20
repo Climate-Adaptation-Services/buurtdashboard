@@ -130,18 +130,33 @@ async function testWeightedVsMedian() {
       },
       {
         name: 'Boomkroonoppervlakte (hele buurt)',
-        attribute: 'BKB',
+        attribute: 'BKBgraad_PercLand',
         surfaceArea: 'Oppervlakte_Land_VSK_m2'
       },
       {
         name: 'Boomkroonoppervlakte openbaar (hele buurt)',
-        attribute: 'BKB_Openbaar_PercOpenbaar',
+        attribute: 'BKBgraad_Openbaar_PercOpenbaar',
         surfaceArea: 'Oppervlakte_Openbaar_m2'
+      },
+      {
+        name: 'Boomkroonoppervlakte niet-openbaar (hele buurt)',
+        attribute: 'BKBgraad_NietOpenbaar_PercNO',
+        surfaceArea: 'Oppervlakte_NietOpenbaar_m2'
       },
       {
         name: 'Verharding (hele buurt)',
         attribute: 'Verharding_PercLand',
         surfaceArea: 'Oppervlakte_Land_VSK_m2'
+      },
+      {
+        name: 'Verharding openbaar (hele buurt)',
+        attribute: 'Verharding_Openbaar_PercOpenbaar',
+        surfaceArea: 'Oppervlakte_Openbaar_m2'
+      },
+      {
+        name: 'Verharding niet-openbaar (hele buurt)',
+        attribute: 'Verharding_NietOpenbaar_PercNO',
+        surfaceArea: 'Oppervlakte_NietOpenbaar_m2'
       }
     ];
 
