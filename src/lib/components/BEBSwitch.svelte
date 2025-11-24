@@ -15,7 +15,6 @@
 </script>
 
 <div class="beb-switch">
-  <span class="beb-label">Gebied:</span>
   <div class="dropdown-wrapper">
     <select class="beb-dropdown" value={$indicatorStore.beb || "hele_buurt"} on:change={handleChange} style="border-color: {$configStore.mainColor};">
       <option value="hele_buurt">Hele buurt</option>

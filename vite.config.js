@@ -3,7 +3,18 @@ import { defineConfig } from 'vite';
 import { isoImport } from 'vite-plugin-iso-import';
 
 export default defineConfig({
-	plugins: [sveltekit(), isoImport()],
+	plugins: [
+		sveltekit({
+			onwarn: (warning, handler) => {
+				// Suppress warnings about svelte-carousel missing exports condition
+				if (warning.code === 'missing-exports-condition' && warning.message.includes('svelte-carousel')) {
+					return;
+				}
+				handler(warning);
+			}
+		}),
+		isoImport()
+	],
 	optimizeDeps: {
 		include: [
 			'lodash.get', 

@@ -9,9 +9,12 @@
 
   // Check if indicator has BEB variant (any variant that's not M2 or empty)
   $: hasBEBVariant = indicator.variants && indicator.variants.split(",").map(v => v.trim()).some(v => v !== 'M2' && v !== '')
+
+  // Check if both switches are present
+  $: hasBothSwitches = hasBEBVariant && indicator.AHNversie
 </script>
 
-<div class="indicator-title" style="height: {titleHeight}px">
+<div class="indicator-title" class:both-switches={hasBothSwitches} style="height: {titleHeight}px">
   <!-- <h4 class="category">{t("Categorie")}: {indicator.category}</h4> -->
   <h2 class="title" class:long-title={indicator.title.length > 25} style="background-color:{$configStore.mainColor}">
     {indicator.title}
@@ -36,6 +39,10 @@
     justify-content: flex-start;
     border-radius: 10px;
     padding-top: 25px;
+  }
+
+  .indicator-title.both-switches {
+    padding-top: 5px;
   }
 
   .category {

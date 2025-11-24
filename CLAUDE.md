@@ -33,6 +33,31 @@ npx playwright test --debug   # Debug mode
 
 ## Recent Improvements
 
+### Custom Indicator Filter Dropdown (2025-11-20)
+
+**Replaced third-party MultiSelect component with custom-built dropdown** for better control and styling consistency:
+
+- ✅ **Custom multi-select dropdown** - Built from scratch with full control over behavior and styling
+- ✅ **Category headers** - Indicators grouped by category (Effecten, Gebiedskenmerken, Kwetsbaarheid) with steelblue/gray styling
+- ✅ **Search filtering** - Type to filter indicators while keeping category headers visible
+- ✅ **Tag-based selection** - Selected indicators appear as tags in input area, disappear from dropdown
+- ✅ **Green theme integration** - Matches app's green color scheme (#36575a) with white borders
+- ✅ **Remove all functionality** - White × button in top-right corner to clear all selections
+- ✅ **Reactive filtering** - Selected items automatically excluded from dropdown list
+
+**Features:**
+- Tags show selected indicators with individual × to remove
+- Click any indicator to select it - appears as tag and disappears from list
+- Search box filters indicators while maintaining category structure
+- Clear all button always visible in top-right when items are selected
+- Proper click-outside-to-close behavior
+
+**Technical implementation:**
+- `src/lib/components/controlPanel/indicatorFilter.svelte` - Complete custom dropdown implementation
+- Direct manipulation of `indicatorsSelection` store for immediate reactivity
+- Category headers conditionally rendered (not just hidden) for clean filtering
+- Green background (#36575a), white borders, white text, rounded corners (8px)
+
 ### Iframe Embedding & Null Safety Fixes (2025-11-06)
 
 **Fixed iframe embedding issues** and **production crash bugs**:
