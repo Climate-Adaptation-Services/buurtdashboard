@@ -33,6 +33,30 @@ npx playwright test --debug   # Debug mode
 
 ## Recent Improvements
 
+### UI Refinements (2025-11-24)
+
+**Enhanced visual spacing and layout** for better usability:
+
+- ✅ **Dordrecht background image positioning** - Background image now aligns flush with sidebar top, compensating for control panel margin
+  - Changed `.dord-icon` CSS `top: -20px` to offset the control panel's `margin-top: 20px`
+  - Ensures no gap appears between sidebar top and background image
+- ✅ **BEB Switch label removed** - Removed "Gebied:" label from bebouwde kom switch for cleaner appearance
+  - Only dropdown selector remains visible
+  - Reduces visual clutter in indicator titles
+- ✅ **Dynamic indicator title spacing** - Reduced top padding when both switches present
+  - Normal: `padding-top: 25px`
+  - Both BEB + Year switches: `padding-top: 5px`
+  - Provides more room for switches without title overlap
+- ✅ **Dependency cleanup** - Removed unused `svelte-fuzzy` package
+  - Configured Vite to suppress harmless `svelte-carousel` export warnings
+
+**Technical implementation:**
+- `src/lib/components/controlPanel/ControlPanel.svelte` - Background image positioning fix
+- `src/lib/components/BEBSwitch.svelte` - Removed label span
+- `src/lib/components/IndicatorTitle.svelte` - Conditional padding based on switch presence
+- `vite.config.js` - Warning suppression for older Svelte packages
+- `package.json` - Removed unused dependency
+
 ### Custom Indicator Filter Dropdown (2025-11-20)
 
 **Replaced third-party MultiSelect component with custom-built dropdown** for better control and styling consistency:
