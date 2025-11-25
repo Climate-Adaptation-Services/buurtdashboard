@@ -10,8 +10,18 @@ import { getClassByIndicatorValue } from './getClassByIndicatorValue.js'
 
 // Utilities
 export function isValidValue(value) {
-  return value !== null && value !== undefined &&
-    value !== '' && value !== 'null' && !isNaN(value)
+  if (value === null || value === undefined || value === '' || value === 'null') {
+    return false
+  }
+  if (isNaN(value)) {
+    return false
+  }
+  // Treat -9999 as missing/invalid data (common convention)
+  const numValue = typeof value === 'number' ? value : parseFloat(value)
+  if (numValue === -9999) {
+    return false
+  }
+  return true
 }
 
 export function toNumber(value, defaultValue = null) {

@@ -3,17 +3,33 @@ import { tooltipValues, tooltipRegion, municipalitySelection } from "$lib/stores
 import { select } from "d3";
 import { get } from "svelte/store";
 
+// Helper function to sanitize class names for use in CSS selectors
+function sanitizeClassName(str) {
+  return str
+    .replaceAll(' ', '')
+    .replaceAll(',', '_')
+    .replaceAll('/', '_')
+    .replaceAll('(', '')
+    .replaceAll(')', '')
+    .replaceAll(':', '')  // Remove colons
+    .replaceAll('>', '')
+}
+
 export function barPlotMouseOver(indicator, indicatorValueColorscale, st, stacked) {
   const percentageValue = st[1] - st[0]
   const displayValue = Math.round(percentageValue * 100) / 100
-  
+
   tooltipValues.set({
     indicator: stacked.key,
     value: displayValue + '%',
     color: indicatorValueColorscale(stacked.key)
   })
 
-  let elem = document.getElementsByClassName('barplot_rect' + indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', '') + stacked.key.replaceAll(' ', '').replaceAll('>', '') + st.data.group)[0]
+  const className = 'barplot_rect' + sanitizeClassName(indicator.title) + sanitizeClassName(stacked.key) + st.data.group
+  let elem = document.getElementsByClassName(className)[0]
+
+  if (!elem) return // Guard against missing element
+
   let rectmap = elem.getBoundingClientRect();
   let tooltipCenter = [rectmap.left, rectmap.top]
 
@@ -25,7 +41,9 @@ export function barPlotMouseOver(indicator, indicatorValueColorscale, st, stacke
 }
 
 export function barPlotMouseOut(indicator, st, stacked) {
-  select('.' + 'barplot_rect' + indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', '') + stacked.key.replaceAll(' ', '').replaceAll('>', '') + st.data.group)
+  const className = 'barplot_rect' + sanitizeClassName(indicator.title) + sanitizeClassName(stacked.key) + st.data.group
+
+  select('.' + className)
     .attr('stroke', 'none')
 
   tooltipValues.set(null)

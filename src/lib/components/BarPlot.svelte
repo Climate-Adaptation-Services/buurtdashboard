@@ -31,6 +31,18 @@
 
   const margin = { bottom: 100, top: 30, left: 30, right: 30 }
 
+  // Helper function to sanitize class names (must match barPlotMouseEvents.js)
+  function sanitizeClassName(str) {
+    return str
+      .replaceAll(' ', '')
+      .replaceAll(',', '_')
+      .replaceAll('/', '_')
+      .replaceAll('(', '')
+      .replaceAll(')', '')
+      .replaceAll(':', '')  // Remove colons
+      .replaceAll('>', '')
+  }
+
   const calcPercentagesForEveryClass = aggregated ? calcPercentagesForEveryClassMultiIndicator : calcPercentagesForEveryClassSingleIndicator
 
   // Get the indicator-specific store for reactivity
@@ -165,7 +177,7 @@
   $: safeBandwidth = yScale && regios.length > 0 ? (yScale.bandwidth() || 0) : 0
 </script>
 
-<svg class={"barplot_" + indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', '')} style="height:74%">
+<svg class={"barplot_" + sanitizeClassName(indicator.title)} style="height:74%">
   <g class="inner-chart-bar" transform="translate(0, {margin.top})">
     {#each stackedData as stacked, i}
       <g class="stack" fill={indicatorValueColorscale(stacked.key)}>
@@ -173,7 +185,7 @@
           <rect
             on:mouseover={() => barPlotMouseOver(indicator, indicatorValueColorscale, st, stacked)}
             on:mouseout={barPlotMouseOut(indicator, st, stacked)}
-            class={"barplot_rect" + indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', '') + stacked.key.replaceAll(" ", "").replaceAll(">", "") + st.data.group}
+            class={"barplot_rect" + sanitizeClassName(indicator.title) + sanitizeClassName(stacked.key) + st.data.group}
             x={xScale(st[0])}
             y={yScale(st.data.group)}
             width={xScale(st[1]) - xScale(st[0])}
