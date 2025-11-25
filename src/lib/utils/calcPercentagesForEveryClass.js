@@ -71,6 +71,18 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
     }
   })
 
+  // Special handling for "10% en 30% regel" indicator
+  // Buildings meeting 30% also meet 10%, so subtract 30% from 10% to avoid double-counting
+  if (indicator.title === '10% en 30% regel') {
+    const class10 = totalSumPerClass.find(kl => kl.className === 'voldoet aan 10%')
+    const class30 = totalSumPerClass.find(kl => kl.className === 'voldoet aan30%')
+
+    if (class10 && class30) {
+      // Subtract 30% values from 10% values to show only buildings meeting 10% but not 30%
+      class10.som = Math.max(0, class10.som - class30.som)
+    }
+  }
+
   // we stoppen het resultaat per klasse in een dictionary
   let result = { 'group': regio }
   Object.keys(indicator.classes).forEach(indicatorClass => {
