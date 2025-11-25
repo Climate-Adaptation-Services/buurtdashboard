@@ -30,8 +30,8 @@
       // MIGRATED: Filter using centralized value retrieval system
       baseFilteredData = neighbourhoodsInMunicipalityFeaturesClone.filter((d) => {
         const rawValue = getRawValue(d, indicator)
-        // For beeswarm plots, we need values that exist and are not null/empty
-        return rawValue !== null && rawValue !== ""
+        // For beeswarm plots, we need valid values (filters out null, empty, -9999, etc.)
+        return isValidValue(rawValue)
       })
 
       // Special case for "Groen per inwoner" - filter out zero and negative values

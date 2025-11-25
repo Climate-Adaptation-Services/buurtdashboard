@@ -5,7 +5,7 @@
   import IndicatorTitle from "./IndicatorTitle.svelte"
   import IndicatorBody from "./IndicatorBody.svelte"
   import { getIndicatorAttribute } from "$lib/utils/getIndicatorAttribute"
-  import { getRawValue } from "$lib/utils/valueRetrieval"
+  import { getRawValue, isValidValue } from "$lib/utils/valueRetrieval"
 
   export let indicatorHeight
   export let indicator
@@ -67,15 +67,20 @@
 
 
         if (indicator.numerical) {
-          // Always use base attribute (% values) for consistent color scale
-          const indicatorAttribute = getIndicatorAttribute(indicator, indicator.attribute)
-
           let rangeExtent = [0, 1] // default value [0,1]
 
           // Only calculate extent if we have data, otherwise use config defaults
-          // Use getRawValue to handle Dordrecht's AHN underscore naming
+          // Use getRawValue to handle Dordrecht's AHN underscore naming and BEB variants
+          // Filter out invalid values like -9999 before calculating extent
           if (relevantData?.features) {
-            rangeExtent = extent(relevantData.features, (d) => +getRawValue(d, indicator))
+            const validValues = relevantData.features
+              .map((d) => getRawValue(d, indicator))
+              .filter((v) => isValidValue(v))
+              .map((v) => +v)
+
+            if (validValues.length > 0) {
+              rangeExtent = extent(validValues)
+            }
           }
 
           // this can deal with any amount of colors in the scale

@@ -1,7 +1,7 @@
 import { getClassByIndicatorValue } from "./getClassByIndicatorValue.js";
 import { t } from "$lib/i18n/translate.js"
 import { getIndicatorAttribute } from "./getIndicatorAttribute.js";
-import { getNumericalValue, getRawValue } from "./valueRetrieval.js";
+import { getNumericalValue, getRawValue, isValidValue } from "./valueRetrieval.js";
 import { getIndicatorStore } from "$lib/stores";
 
 export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regio) {
@@ -44,7 +44,8 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
         }
       }
 
-      if (propertyValue !== undefined && propertyValue !== null && propertyValue !== '' && !isNaN(parseFloat(propertyValue))) {
+      // Use isValidValue to filter out -9999 and other invalid values
+      if (isValidValue(propertyValue)) {
         noData = false
         // pak de klasse erbij in totalSumPerClass
         const tempKlasse = totalSumPerClass.filter(kl2 => kl2.className === kl)[0]
@@ -91,8 +92,13 @@ export function calcPercentagesForEveryClassSingleIndicator(indicator, data, reg
     if (!neighbourhoodOrMunicipality?.properties) return
 
     // Use getRawValue to handle Dordrecht's AHN underscore naming (e.g., "BKB_AHN3" vs "BKBAHN3")
-    classesTotal.filter(kl => kl.className === getClassByIndicatorValue(indicator, getRawValue(neighbourhoodOrMunicipality, indicator)))[0].waarde += 1
-    totalAmount += 1
+    const rawValue = getRawValue(neighbourhoodOrMunicipality, indicator)
+
+    // Skip invalid values like -9999
+    if (isValidValue(rawValue)) {
+      classesTotal.filter(kl => kl.className === getClassByIndicatorValue(indicator, rawValue))[0].waarde += 1
+      totalAmount += 1
+    }
   });
 
   classesTotal.forEach(kl => {
