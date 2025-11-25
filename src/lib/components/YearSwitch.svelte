@@ -369,6 +369,7 @@
     position: relative;
     display: inline-block;
     width: 150px;
+    z-index: 10; /* Ensure dropdown appears above indicator body */
   }
   .dropdown-wrapper:last-child .year-dropdown {
     padding-right: 12px;
@@ -409,6 +410,8 @@
     gap: 20px;
     margin-top: 12px;
     align-items: center;
+    position: relative;
+    z-index: 10; /* Ensure dropdown container appears above indicator body */
   }
   .year-switch-dropdowns.less-gap {
     gap: 8px;

@@ -29,30 +29,32 @@ function addIndicatorCategory(indicatorsList, indicators) {
     if (!indicator.Titel || indicator.Titel === '') return;
 
     let classes = { 'No data': '-10' }
-    // add no data class
-    const indicatorDomein = ['No data', ...(indicator.Domein ? indicator.Domein.split(',') : [])]
+    // add no data class - trim whitespace from domain names and colors
+    const indicatorDomein = ['No data', ...(indicator.Domein ? indicator.Domein.split(',').map(d => d.trim()) : [])]
     const noDataColor = '#333333'
     const indicatorColors = (indicator['kwantitatief / categoraal / aggregated'] !== 'kwantitatief')
-      ? [noDataColor, ...(indicator.Kleur ? indicator.Kleur.split(',') : [])]
-      : (indicator.Kleur ? indicator.Kleur.split(',') : [])
+      ? [noDataColor, ...(indicator.Kleur ? indicator.Kleur.split(',').map(c => c.trim()) : [])]
+      : (indicator.Kleur ? indicator.Kleur.split(',').map(c => c.trim()) : [])
 
     if (indicator['kwantitatief / categoraal / aggregated'] !== 'categoraal') {
       indicatorDomein.slice(1).forEach((d, i) => {
         if (indicator.Indicatornaamtabel) {
-          classes[d] = indicator.Indicatornaamtabel.split(',')[i]
+          // Trim whitespace from column names to handle inconsistent spacing in CSV
+          classes[d] = indicator.Indicatornaamtabel.split(',')[i].trim()
         }
       });
     } else {
       indicatorDomein.slice(1).forEach((d, i) => {
         if (indicator.klassenthresholds) {
-          classes[d] = indicator.klassenthresholds.split(',')[i]
+          // Trim whitespace from thresholds
+          classes[d] = indicator.klassenthresholds.split(',')[i].trim()
         }
       });
     }
 
     indicatorsList.push({
       title: indicator.Titel,
-      attribute: indicator.Indicatornaamtabel ? indicator.Indicatornaamtabel.split(',')[0] : '',
+      attribute: indicator.Indicatornaamtabel ? indicator.Indicatornaamtabel.split(',')[0].trim() : '',
       subtitle: indicator.Subtitel,
       plottitle: indicator['Plottitel (enkel bij kwantitatief)'],
       category: indicator.Categorie,
