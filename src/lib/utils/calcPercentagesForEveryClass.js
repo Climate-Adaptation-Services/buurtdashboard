@@ -35,12 +35,21 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
       const attributeName = getIndicatorAttribute(indicator, indicator.classes[kl])
       let propertyValue = neighbourhood.properties?.[attributeName]
 
-      // FALLBACK: Handle Dordrecht's AHN underscore naming (e.g., "BKB_AHN3" vs "BKBAHN3")
+      // FALLBACK 1: Handle Dordrecht's AHN underscore naming (e.g., "BKB_AHN3" vs "BKBAHN3")
       if ((propertyValue === null || propertyValue === undefined || propertyValue === '') && attributeName && typeof attributeName === 'string' && attributeName.includes('AHN')) {
         const ahnPattern = /(AHN\d+)$/
         const fallbackAttribute = attributeName.replace(ahnPattern, '_$1')
         if (fallbackAttribute !== attributeName && neighbourhood.properties) {
           propertyValue = neighbourhood.properties[fallbackAttribute]
+        }
+      }
+
+      // FALLBACK 2: Handle Gevoelstemperatuur columns without underscore (e.g., "PET29tm34pAHN4" vs "PET29tm34p_AHN4")
+      if ((propertyValue === null || propertyValue === undefined || propertyValue === '') && attributeName && typeof attributeName === 'string' && attributeName.includes('_AHN')) {
+        // Try removing the underscore before AHN
+        const fallbackWithoutUnderscore = attributeName.replace('_AHN', 'AHN')
+        if (neighbourhood.properties) {
+          propertyValue = neighbourhood.properties[fallbackWithoutUnderscore]
         }
       }
 

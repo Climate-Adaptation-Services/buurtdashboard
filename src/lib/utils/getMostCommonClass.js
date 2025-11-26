@@ -11,12 +11,20 @@ export function getMostCommonClass(indicator, feature) {
     const attribute = getIndicatorAttribute(indicator, indicator.classes[key])
     let value = feature.properties?.[attribute]
 
-    // FALLBACK: Handle Dordrecht's AHN underscore naming (e.g., "BKB_AHN3" vs "BKBAHN3")
+    // FALLBACK 1: Handle Dordrecht's AHN underscore naming (e.g., "BKB_AHN3" vs "BKBAHN3")
     if ((value === null || value === undefined || value === '') && attribute && typeof attribute === 'string' && attribute.includes('AHN')) {
       const ahnPattern = /(AHN\d+)$/
       const fallbackAttribute = attribute.replace(ahnPattern, '_$1')
       if (fallbackAttribute !== attribute && feature.properties) {
         value = feature.properties[fallbackAttribute]
+      }
+    }
+
+    // FALLBACK 2: Handle Gevoelstemperatuur columns without underscore (e.g., "PET29tm34pAHN4" vs "PET29tm34p_AHN4")
+    if ((value === null || value === undefined || value === '') && attribute && typeof attribute === 'string' && attribute.includes('_AHN')) {
+      const fallbackWithoutUnderscore = attribute.replace('_AHN', 'AHN')
+      if (feature.properties) {
+        value = feature.properties[fallbackWithoutUnderscore]
       }
     }
 

@@ -60,53 +60,21 @@ function formatM2Value(value) {
 // Property access
 function getRawValue(feature, indicator, { year, attributeOverride, forceM2 = false, forceBEB = null } = {}) {
   let baseAttribute = indicator.attribute
-  let hasBEBSuffix = false
-
-  // Handle BEB variants using indicator store (read variant from config, not hardcoded)
-  const variants = !attributeOverride && indicator.variants ? indicator.variants.split(',').map(v => v.trim()) : []
-  const bebVariant = variants.find(v => v !== 'M2' && v !== '') // Find the BEB variant (not M2)
-
-  if (bebVariant) {
-    const indicatorStore = getIndicatorStore(indicator.title)
-    let ahnSelection
-
-    // Get the current value from the store
-    const unsubscribe = indicatorStore.subscribe(value => {
-      ahnSelection = value
-    })
-    unsubscribe() // Immediately unsubscribe to avoid memory leaks
-
-    // Use forceBEB if provided, otherwise use store value
-    const bebSelection = forceBEB || (ahnSelection?.beb) || 'hele_buurt'
-
-    // Append BEB variant suffix for bebouwde kom variant
-    if (bebSelection === 'bebouwde_kom') {
-      baseAttribute = baseAttribute + '_' + bebVariant
-      hasBEBSuffix = true
-    }
-  }
 
   // Only handle M2 variants for popups when explicitly requested (handle spaces)
   if (!attributeOverride && forceM2 && indicator.variants && indicator.variants.split(',').map(v => v.trim()).includes('M2')) {
     baseAttribute = baseAttribute + '_M2'
   }
 
+  // Let getIndicatorAttribute handle BEB suffixes - it will check the indicator store
+  // and apply the correct order: attribute_AHN3_BK
   const attribute = attributeOverride ||
     (year ? getIndicatorAttribute(indicator, baseAttribute, year) :
       getIndicatorAttribute(indicator, baseAttribute))
 
   let value = feature.properties?.[attribute]
 
-  // FALLBACK: If BEB variant was requested but value is null/undefined, try base attribute
-  if (hasBEBSuffix && !isValidValue(value)) {
-    const baseAttributeWithoutSuffix = indicator.attribute
-    const fallbackAttribute = year
-      ? getIndicatorAttribute(indicator, baseAttributeWithoutSuffix, year)
-      : getIndicatorAttribute(indicator, baseAttributeWithoutSuffix)
-    value = feature.properties?.[fallbackAttribute]
-  }
-
-  // FALLBACK: If AHN version attribute doesn't exist, try with underscore before AHN
+  // FALLBACK 1: If AHN version attribute doesn't exist, try with underscore before AHN
   // NOTE: This is a workaround for Dordrecht data which uses "BKB_AHN3" instead of "BKBAHN3"
   // TODO: Standardize Dordrecht CSV column naming to match default dataset (remove underscores before AHN)
   if (!isValidValue(value) && attribute && typeof attribute === 'string' && attribute.includes('AHN')) {
@@ -116,6 +84,13 @@ function getRawValue(feature, indicator, { year, attributeOverride, forceM2 = fa
     if (fallbackAttribute !== attribute) {
       value = feature.properties?.[fallbackAttribute]
     }
+  }
+
+  // FALLBACK 2: Handle Gevoelstemperatuur columns without underscore (e.g., "PET29tm34pAHN4" vs "PET29tm34p_AHN4")
+  if (!isValidValue(value) && attribute && typeof attribute === 'string' && attribute.includes('_AHN')) {
+    // Try removing the underscore before AHN
+    const fallbackWithoutUnderscore = attribute.replace('_AHN', 'AHN')
+    value = feature.properties?.[fallbackWithoutUnderscore]
   }
 
   return value
