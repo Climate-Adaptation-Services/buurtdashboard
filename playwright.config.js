@@ -37,7 +37,7 @@ export default defineConfig({
 		/* Maximum time each action such as `click()` can take. Defaults to 0 (no limit). */
 		actionTimeout: 0,
 		/* Base URL to use in actions like `await page.goto('/')`. */
-		baseURL: process.env.BASE_URL || 'http://localhost:5175',
+		baseURL: process.env.BASE_URL || 'http://localhost:5173',
 
 		/* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
 		trace: 'on-first-retry',
@@ -84,7 +84,7 @@ export default defineConfig({
 	...(process.env.CI ? {} : {
 		webServer: {
 			command: 'npm run dev',
-			port: 5175,
+			port: 5173,
 			reuseExistingServer: true,
 			timeout: 120 * 1000,
 		}
