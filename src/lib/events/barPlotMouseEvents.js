@@ -13,6 +13,7 @@ function sanitizeClassName(str) {
     .replaceAll(')', '')
     .replaceAll(':', '')  // Remove colons
     .replaceAll('>', '')
+    .replaceAll('%', '')  // Remove percent signs
 }
 
 export function barPlotMouseOver(indicator, indicatorValueColorscale, st, stacked) {

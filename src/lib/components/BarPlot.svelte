@@ -41,6 +41,7 @@
       .replaceAll(')', '')
       .replaceAll(':', '')  // Remove colons
       .replaceAll('>', '')
+      .replaceAll('%', '')  // Remove percent signs
   }
 
   const calcPercentagesForEveryClass = aggregated ? calcPercentagesForEveryClassMultiIndicator : calcPercentagesForEveryClassSingleIndicator

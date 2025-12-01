@@ -55,10 +55,29 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
 
       // Use isValidValue to filter out -9999 and other invalid values
       if (isValidValue(propertyValue)) {
+        let value = +propertyValue
+
+        // Sanity check: For percentage data, values should be 0-100
+        // Values > 100 are likely data errors (e.g., 10099 instead of 100)
+        if (value > 100 && value < 10000) {
+          // Common error pattern: extra digit(s) added (10099 -> 100, 999 -> 99)
+          // Try to fix by removing extra leading digit
+          const strValue = value.toString()
+          if (strValue.startsWith('100') && strValue.length > 3) {
+            value = 100 // 10099 -> 100
+          } else if (strValue.length === 3 && value > 100) {
+            value = parseFloat(strValue.substring(1)) // 999 -> 99
+          }
+        }
+
+        // Skip values that are still out of range after correction
+        if (value < 0 || value > 100) {
+          return // Skip this invalid value
+        }
+
         noData = false
         // pak de klasse erbij in totalSumPerClass
         const tempKlasse = totalSumPerClass.filter(kl2 => kl2.className === kl)[0]
-        let value = +propertyValue
 
         // Simple sum - no surface area weighting
         tempKlasse.som += value
@@ -79,18 +98,6 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
       kl.som *= 100
     }
   })
-
-  // Special handling for "10% en 30% regel" indicator
-  // Buildings meeting 30% also meet 10%, so subtract 30% from 10% to avoid double-counting
-  if (indicator.title === '10% en 30% regel') {
-    const class10 = totalSumPerClass.find(kl => kl.className === 'voldoet aan 10%')
-    const class30 = totalSumPerClass.find(kl => kl.className === 'voldoet aan30%')
-
-    if (class10 && class30) {
-      // Subtract 30% values from 10% values to show only buildings meeting 10% but not 30%
-      class10.som = Math.max(0, class10.som - class30.som)
-    }
-  }
 
   // we stoppen het resultaat per klasse in een dictionary
   let result = { 'group': regio }
