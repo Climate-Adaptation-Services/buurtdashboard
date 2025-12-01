@@ -25,13 +25,13 @@ export const DEFAULT_DATA_DOWNLOAD_URL =
 
 // Dordrecht indicators config URLs
 export const DORDRECHT_INDICATORS_CONFIG_URL =
-  "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/dordrecht-rmk/metadata/config_251125.csv";
+  "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/dordrecht-rmk/metadata/config-011225.csv";
 
 export const DORDRECHT_INDICATORS_CONFIG_ENGLISH_URL =
   "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/dordrecht-rmk/metadata/metadata_030625_2023_2.csv";
 
 export const DORDRECHT_CSV_DATA_URL =
-  "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/dordrecht-rmk/csvdata/Dordrecht_RMK_241125(main.csv.zip";
+  "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/dordrecht-rmk/csvdata/Dordrecht_RMK_011225(b11buurt).csv.gz";
 
 export const DORDRECHT_DATA_DOWNLOAD_URL =
   "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/data-download/Downloadbuurtdashboard_nov25.xlsx";
