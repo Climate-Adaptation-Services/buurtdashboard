@@ -70,17 +70,16 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
           }
         }
 
-        // Skip values that are still out of range after correction
-        if (value < 0 || value > 100) {
-          return // Skip this invalid value
+        // Only use valid percentage values (0-100)
+        if (value >= 0 && value <= 100) {
+          noData = false
+          // pak de klasse erbij in totalSumPerClass
+          const tempKlasse = totalSumPerClass.filter(kl2 => kl2.className === kl)[0]
+
+          // Simple sum - no surface area weighting
+          tempKlasse.som += value
         }
-
-        noData = false
-        // pak de klasse erbij in totalSumPerClass
-        const tempKlasse = totalSumPerClass.filter(kl2 => kl2.className === kl)[0]
-
-        // Simple sum - no surface area weighting
-        tempKlasse.som += value
+        // If value is still out of range, simply skip it (don't add to sum)
       }
     });
     if (noData) {
