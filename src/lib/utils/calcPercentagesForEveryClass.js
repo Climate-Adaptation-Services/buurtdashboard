@@ -31,6 +31,11 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
     // voor deze neighbourhood tel de waardes van elke klasse bij de totale som op
     let noData = true
     Object.keys(indicator.classes).forEach(kl => {
+      // Skip the dummy "No data" class for aggregated indicators (it has attribute "-10")
+      if (kl === 'No data' && indicator.classes[kl] === '-10') {
+        return // Skip this class
+      }
+
       // getIndicatorAttribute will automatically apply BEB suffix if needed
       const attributeName = getIndicatorAttribute(indicator, indicator.classes[kl])
       let propertyValue = neighbourhood.properties?.[attributeName]
@@ -56,6 +61,7 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
       // Use isValidValue to filter out -9999 and other invalid values
       if (isValidValue(propertyValue)) {
         let value = +propertyValue
+        const originalValue = value
 
         // Sanity check: For percentage data, values should be 0-100
         // Values > 100 are likely data errors (e.g., 10099 instead of 100)
@@ -84,8 +90,11 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
     });
     if (noData) {
       if (indicator.title !== t('Gevoelstemperatuur') && indicator.title !== 'Maximale overstromingsdiepte') {
-        // Add 100% to "No data" class for neighborhoods without data
-        totalSumPerClass.filter(kl => kl.className === 'No data')[0].som += 100
+        // Add 100% to "No data" class for neighborhoods without data (only if that class exists)
+        const noDataClass = totalSumPerClass.find(kl => kl.className === 'No data')
+        if (noDataClass) {
+          noDataClass.som += 100
+        }
       }
     }
   });
@@ -98,10 +107,26 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
     }
   })
 
+  // Debug: Check if totals add up to 100% for Gemeente
+  if (indicator.title === '10% en 30% regel' && regio === 'Gemeente' && import.meta.env.DEV) {
+    const total = totalSumPerClass.reduce((sum, kl) => sum + kl.som, 0)
+    console.log(`[Gemeente Debug] Total: ${total}, Count: ${totalCount}`)
+    totalSumPerClass.forEach(kl => {
+      if (kl.className !== 'No data') {
+        console.log(`  ${kl.className}: ${kl.som}`)
+      }
+    })
+  }
+
   // we stoppen het resultaat per klasse in een dictionary
   let result = { 'group': regio }
   Object.keys(indicator.classes).forEach(indicatorClass => {
-    result[indicatorClass] = totalSumPerClass.filter(kl => kl.className === indicatorClass)[0].som
+    // Skip the dummy "No data" class for aggregated indicators in the output
+    if (indicatorClass === 'No data' && indicator.classes[indicatorClass] === '-10') {
+      result[indicatorClass] = 0 // Set to 0 instead of trying to calculate
+    } else {
+      result[indicatorClass] = totalSumPerClass.filter(kl => kl.className === indicatorClass)[0].som
+    }
   });
 
   return result

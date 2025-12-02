@@ -67,7 +67,10 @@
 
 <style>
   .question-mark {
+    position: absolute;
     right: 5px;
+    top: 5px;
+    z-index: 10;
   }
 
   .category {
@@ -77,6 +80,8 @@
     position: absolute;
     border-radius: 50px;
     top: 5px;
+    left: 5px;
+    z-index: 10;
   }
 
   h3 {
