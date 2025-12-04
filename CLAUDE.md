@@ -33,6 +33,43 @@ npx playwright test --debug   # Debug mode
 
 ## Recent Improvements
 
+### Dordrecht Data Update & Bug Fixes (2025-12-02)
+
+**Updated Dordrecht dataset and fixed critical calculation bugs:**
+
+- ✅ **Dordrecht data updated** - New dataset version (011225) with updated indicators
+  - Updated CSV: `config-011225.csv`
+  - Updated GeoJSON: `Dordrecht_RMK_011225.csv.gz`
+  - Using default styling (green theme) for consistency
+  - Original Dordrecht styling preserved as comments in config
+- ✅ **CSS selector validation** - Fixed invalid selectors with percent signs
+  - Added `.replaceAll('%', '')` to sanitizeClassName functions
+  - Fixes error: `'.barplot_rect10%en30%regelvoldoetaan10%Buurt' is not a valid selector`
+  - Applied in both [BarPlot.svelte](src/lib/components/BarPlot.svelte) and [barPlotMouseEvents.js](src/lib/events/barPlotMouseEvents.js)
+- ✅ **Data validation & correction** - Automatic fixing of data errors
+  - Corrects values like 10099 → 100 (common data entry errors)
+  - Validates percentage values are within 0-100 range
+  - Skips invalid values instead of causing corruption
+- ✅ **Aggregated indicator calculation fix** - Fixed "No data" class handling
+  - Dummy "No data" class (attribute "-10") now properly skipped during calculation
+  - Prevents invalid attribute names like "-10_AHN5_BK"
+  - Fixes empty/zero data bug in neighborhoods like Merwelanden
+- ✅ **Icon visibility restored** - Fixed missing question mark and category icons
+  - Added `position: absolute` and `z-index: 10` to both icons
+  - Proper positioning with `top: 5px`, `left: 5px` (category), `right: 5px` (question mark)
+
+**Technical implementation:**
+- [config.js](src/lib/config.js) - Updated Dordrecht config with new data URLs, default styling
+- [calcPercentagesForEveryClass.js](src/lib/utils/calcPercentagesForEveryClass.js:34-36,61-84,108-113) - Skip dummy "No data" class, validate percentage ranges
+- [BarPlot.svelte](src/lib/components/BarPlot.svelte:44) - Added `%` to sanitizeClassName
+- [barPlotMouseEvents.js](src/lib/events/barPlotMouseEvents.js:16) - Added `%` to sanitizeClassName
+- [IndicatorInfo.svelte](src/lib/components/IndicatorInfo.svelte:69-85) - Fixed icon positioning and z-index
+
+**Data quality improvements:**
+- Automatic correction for common data entry errors (10099, 999, etc.)
+- Invalid values filtered out instead of corrupting aggregates
+- Percentage totals now correctly sum to 100% for valid data
+
 ### Dependency Cleanup & Code Quality (2025-11-26)
 
 **Major cleanup of unused dependencies and production console logs:**

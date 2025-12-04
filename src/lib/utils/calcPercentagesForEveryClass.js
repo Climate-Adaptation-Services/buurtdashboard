@@ -107,17 +107,6 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
     }
   })
 
-  // Debug: Check if totals add up to 100% for Gemeente
-  if (indicator.title === '10% en 30% regel' && regio === 'Gemeente' && import.meta.env.DEV) {
-    const total = totalSumPerClass.reduce((sum, kl) => sum + kl.som, 0)
-    console.log(`[Gemeente Debug] Total: ${total}, Count: ${totalCount}`)
-    totalSumPerClass.forEach(kl => {
-      if (kl.className !== 'No data') {
-        console.log(`  ${kl.className}: ${kl.som}`)
-      }
-    })
-  }
-
   // we stoppen het resultaat per klasse in een dictionary
   let result = { 'group': regio }
   Object.keys(indicator.classes).forEach(indicatorClass => {
