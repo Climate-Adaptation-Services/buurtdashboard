@@ -65,7 +65,7 @@ function addIndicatorCategory(indicatorsList, indicators) {
       classes: classes,
       numerical: (indicator['kwantitatief / categoraal / aggregated'] === 'kwantitatief') ? true : false,
       link: indicator['Link kaartverhaal'],
-      aggregatedIndicator: (indicator['kwantitatief / categoraal / aggregated'] === 'aggregated') ? true : false,
+      aggregatedIndicator: (indicator['kwantitatief / categoraal / aggregated'] === 'geaggregeerd') ? true : false,
       source: indicator.Bron,
       description: indicator['Tekst vraagteken'],
       AHNversie: indicator['AHNversie'],

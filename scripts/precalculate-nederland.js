@@ -107,7 +107,7 @@ function setupIndicators(indicatorsConfig) {
       title: indicator.Titel,
       attribute: indicator.Indicatornaamtabel.split(',')[0],
       numerical: (indicator['kwantitatief / categoraal / aggregated'] === 'kwantitatief') ? true : false,
-      aggregatedIndicator: (indicator['kwantitatief / categoraal / aggregated'] === 'aggregated') ? true : false,
+      aggregatedIndicator: (indicator['kwantitatief / categoraal / aggregated'] === 'geaggregeerd') ? true : false,
       surfaceArea: indicator['Oppervlakte'],
       variants: indicator.Varianten,
       classes: classes,
