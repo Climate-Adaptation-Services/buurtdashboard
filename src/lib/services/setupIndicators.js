@@ -32,24 +32,30 @@ function addIndicatorCategory(indicatorsList, indicators) {
     // add no data class - trim whitespace from domain names and colors
     const indicatorDomein = ['No data', ...(indicator.Domein ? indicator.Domein.split(',').map(d => d.trim()) : [])]
     const noDataColor = '#333333'
-    const indicatorColors = (indicator['kwantitatief / categoraal / aggregated'] !== 'kwantitatief')
+    const indicatorColors = (indicator['kwantitatief / categoraal / geaggregeerd'] !== 'kwantitatief')
       ? [noDataColor, ...(indicator.Kleur ? indicator.Kleur.split(',').map(c => c.trim()) : [])]
       : (indicator.Kleur ? indicator.Kleur.split(',').map(c => c.trim()) : [])
 
-    if (indicator['kwantitatief / categoraal / aggregated'] !== 'categoraal') {
-      indicatorDomein.slice(1).forEach((d, i) => {
-        if (indicator.Indicatornaamtabel) {
-          // Trim whitespace from column names to handle inconsistent spacing in CSV
-          classes[d] = indicator.Indicatornaamtabel.split(',')[i].trim()
-        }
-      });
+    if (indicator['kwantitatief / categoraal / geaggregeerd'] !== 'categoraal') {
+      if (indicator.Indicatornaamtabel) {
+        const tabelItems = indicator.Indicatornaamtabel.split(',').map(item => item.trim())
+        indicatorDomein.slice(1).forEach((d, i) => {
+          // Only add class if the index exists in the tabel items
+          if (tabelItems[i]) {
+            classes[d] = tabelItems[i]
+          }
+        });
+      }
     } else {
-      indicatorDomein.slice(1).forEach((d, i) => {
-        if (indicator.klassenthresholds) {
-          // Trim whitespace from thresholds
-          classes[d] = indicator.klassenthresholds.split(',')[i].trim()
-        }
-      });
+      if (indicator.klassenthresholds) {
+        const thresholds = indicator.klassenthresholds.split(',').map(item => item.trim())
+        indicatorDomein.slice(1).forEach((d, i) => {
+          // Only add class if the index exists in the thresholds
+          if (thresholds[i]) {
+            classes[d] = thresholds[i]
+          }
+        });
+      }
     }
 
     indicatorsList.push({
@@ -63,9 +69,9 @@ function addIndicatorCategory(indicatorsList, indicators) {
         range: indicatorColors
       },
       classes: classes,
-      numerical: (indicator['kwantitatief / categoraal / aggregated'] === 'kwantitatief') ? true : false,
+      numerical: (indicator['kwantitatief / categoraal / geaggregeerd'] === 'kwantitatief') ? true : false,
       link: indicator['Link kaartverhaal'],
-      aggregatedIndicator: (indicator['kwantitatief / categoraal / aggregated'] === 'geaggregeerd') ? true : false,
+      aggregatedIndicator: (indicator['kwantitatief / categoraal / geaggregeerd'] === 'geaggregeerd') ? true : false,
       source: indicator.Bron,
       description: indicator['Tekst vraagteken'],
       AHNversie: indicator['AHNversie'],

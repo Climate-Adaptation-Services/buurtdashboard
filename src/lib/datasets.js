@@ -10,7 +10,7 @@ export const DATASET_VERSION = '20251105';
 // Set via environment variable PUBLIC_CONFIG_MODE
 const CONFIG_MODE = env.PUBLIC_CONFIG_MODE || 'published';
 
-// Config Portal base URL
+// Config Portal base URL (always uses Vercel production)
 const CONFIG_PORTAL_URL = "https://buurtdashboard-config-portal.vercel.app";
 
 // Helper to build config portal CSV URL

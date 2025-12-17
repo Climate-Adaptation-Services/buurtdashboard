@@ -23,9 +23,11 @@ export function getIndicatorAttribute(indicator, attribute, specificYear) {
   if (yearToUse && yearToUse !== '') {
     // Check if this is an AHN version (starts with "AHN") or a regular year (numeric)
     if (yearToUse.startsWith('AHN')) {
-      resultAttribute = resultAttribute + '_' + yearToUse; // Underscore for AHN versions
+      // For AHN versions: no underscore (e.g., PET29tm34pAHN4)
+      resultAttribute = resultAttribute + yearToUse;
     } else {
-      resultAttribute = resultAttribute + '_' + yearToUse; // Underscore for regular years
+      // For regular years: use underscore (e.g., attribute_2020)
+      resultAttribute = resultAttribute + '_' + yearToUse;
     }
   }
 

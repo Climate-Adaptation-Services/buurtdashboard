@@ -137,18 +137,23 @@ export function calcPercentagesForEveryClassSingleIndicator(indicator, data, reg
 
     // Skip invalid values like -9999
     if (isValidValue(rawValue)) {
-      classesTotal.filter(kl => kl.className === getClassByIndicatorValue(indicator, rawValue))[0].waarde += 1
-      totalAmount += 1
+      const className = getClassByIndicatorValue(indicator, rawValue)
+      const classEntry = classesTotal.find(kl => kl.className === className)
+      if (classEntry) {
+        classEntry.waarde += 1
+        totalAmount += 1
+      }
     }
   });
 
   classesTotal.forEach(kl => {
-    kl.waarde = (kl.waarde / totalAmount) * 100
+    kl.waarde = totalAmount > 0 ? (kl.waarde / totalAmount) * 100 : 0
   })
 
   let result = { 'group': regio }
   Object.keys(indicator.classes).forEach(klasse => {
-    result[klasse] = classesTotal.filter(kl => kl.className === klasse)[0].waarde
+    const classEntry = classesTotal.find(kl => kl.className === klasse)
+    result[klasse] = classEntry ? classEntry.waarde : 0
   });
 
   return result
