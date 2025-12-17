@@ -1,8 +1,27 @@
 // src/lib/datasets.ts
 // Centralized location for all dataset URLs and versions
 
+// Config mode: 'dev' or 'published' (default)
+// Set via environment variable PUBLIC_CONFIG_MODE
+// Use dynamic import with fallback for environments where the var isn't set
+let CONFIG_MODE = 'published';
+try {
+  const env = await import('$env/static/public');
+  CONFIG_MODE = env.PUBLIC_CONFIG_MODE || 'published';
+} catch {
+  // Fallback to 'published' if env var not available
+  CONFIG_MODE = 'published';
+}
+
 // Current dataset version
 export const DATASET_VERSION = '20251105';
+
+// Config Portal base URL
+const CONFIG_PORTAL_URL = "https://buurtdashboard-config-portal.vercel.app";
+
+// Helper to build config portal CSV URL
+const buildConfigUrl = (slug) =>
+  `${CONFIG_PORTAL_URL}/api/config/${slug}/csv?mode=${CONFIG_MODE}`;
 
 // URLs for different datasets
 export const BUURT_GEOJSON_URL = "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/geojsondata/buurt24IdentificationOnly.json";
@@ -10,10 +29,10 @@ export const BUURT_GEOJSON_URL = "https://buurtdashboard-data.s3.eu-north-1.amaz
 // Municipality data URL
 export const MUNICIPALITY_JSON_URL = "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/geojsondata/gemeentes.json";
 
-// Default indicators config URLs
-export const DEFAULT_INDICATORS_CONFIG_URL =
-  "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/metadata/buurtdashboard-config-131125-02.csv";
+// Default indicators config URLs - now from config portal
+export const DEFAULT_INDICATORS_CONFIG_URL = buildConfigUrl('default-nl');
 
+// English config - fallback to S3 for now (TODO: add English support to config portal)
 export const DEFAULT_INDICATORS_CONFIG_ENGLISH_URL =
   "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/metadata/EN-buurtdashboard-metadata-050825-01.csv";
 
@@ -23,10 +42,10 @@ export const DEFAULT_CSV_DATA_URL =
 export const DEFAULT_DATA_DOWNLOAD_URL =
   "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/data-download/Downloadbuurtdashboard_nov25.xlsx";
 
-// Dordrecht indicators config URLs
-export const DORDRECHT_INDICATORS_CONFIG_URL =
-  "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/dordrecht-rmk/metadata/config-011225.csv";
+// Dordrecht indicators config URLs - now from config portal
+export const DORDRECHT_INDICATORS_CONFIG_URL = buildConfigUrl('dordrecht');
 
+// English config - fallback to S3 for now
 export const DORDRECHT_INDICATORS_CONFIG_ENGLISH_URL =
   "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/dordrecht-rmk/metadata/metadata_030625_2023_2.csv";
 
