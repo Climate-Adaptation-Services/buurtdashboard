@@ -1,23 +1,23 @@
 # sveltekitapp - Project Context
 
-## Project Overview
+## Project Overzicht
 
 Het Buurtdashboard is een interactieve kaartvisualisatie-applicatie voor het tonen van klimaatadaptatie-indicatoren per buurt/wijk in Nederland. Gebruikers kunnen gemeentes selecteren en verschillende indicatoren bekijken via thematische kaarten en grafieken.
 
-**Purpose**: Inzicht geven in klimaatadaptatie-data per buurt voor beleidsmakers, gemeenten en burgers.
+**Doel**: Inzicht geven in klimaatadaptatie-data per buurt voor beleidsmakers, gemeenten en burgers.
 
-**Related Project**: `../buurtdashboard-config-portal` - Config portal voor beheer van indicator configuraties
+**Gerelateerd Project**: `../buurtdashboard-config-portal` - Config portal voor beheer van indicator configuraties
 
 ## Tech Stack
 
 - **Framework**: SvelteKit 2.x met Svelte 5
 - **Runtime**: Node.js / Browser
 - **Package Manager**: npm
-- **Maps**: Mapbox GL JS
-- **Charts**: D3.js
+- **Kaarten**: Mapbox GL JS
+- **Grafieken**: D3.js
 - **Deployment**: Vercel
 
-## Architecture
+## Architectuur
 
 ### Data Flow
 
@@ -64,11 +64,15 @@ De database en CSV gebruiken beide de Nederlandse termen.
   - `calcPercentagesForEveryClassSingleIndicator()` - Voor categorale indicatoren
 - `src/lib/utils/getClassByIndicatorValue.js` - Bepaalt klasse op basis van waarde
 - `src/lib/utils/getIndicatorAttribute.js` - Bouwt kolomnaam met AHN/jaar suffix
+- `src/lib/utils/valueRetrieval.js` - Hulpfuncties voor waarde ophalen en validatie
 
-#### Components
-- `src/lib/components/IndicatorCategorical.svelte` - Container voor bar charts
-- `src/lib/components/BarPlot.svelte` - Bar chart visualisatie
-- `src/lib/components/IndicatorNumerical.svelte` - Beeswarm plot
+#### Visualisatie Components
+- `src/lib/components/IndicatorCategorical.svelte` - Container voor bar charts (categoraal + geaggregeerd)
+- `src/lib/components/BarPlot.svelte` - Bar chart visualisatie met D3.js
+- `src/lib/components/BarPlotLegend.svelte` - Legenda voor bar charts
+- `src/lib/components/IndicatorNumerical.svelte` - Beeswarm plot voor kwantitatieve data
+- `src/lib/components/Map.svelte` - Mapbox GL kaart component
+- `src/lib/components/Sidebar.svelte` - Zijbalk met indicator selectie en grafieken
 
 ### AHN Versie Naamgeving
 
@@ -80,7 +84,7 @@ Kolom namen in de CSV data volgen dit patroon:
 | Met jaar | `{base}_{jaar}` | `indicator_2020` |
 | Met BEB variant | `{base}{AHNx}_{variant}` | `BKBAHN3_BK` |
 
-**Let op**: Sommige gemeentes (bijv. Dordrecht) gebruiken underscore voor AHN (`BKB_AHN3`), de code heeft fallbacks hiervoor.
+**Let op**: Sommige gemeentes (bijv. Dordrecht) gebruiken underscore voor AHN (`BKB_AHN3`), de code heeft fallbacks hiervoor in `calcPercentagesForEveryClass.js` en `getIndicatorAttribute.js`.
 
 ## Development
 
@@ -91,19 +95,19 @@ npm install
 
 ### Environment Variables
 
-Create `.env` file:
+Maak `.env` bestand:
 ```
 PUBLIC_CONFIG_MODE=dev
 ```
 
-### Running
+### Starten
 ```bash
 npm run dev        # Start development server
-npm run build      # Build for production
-npm run preview    # Preview production build
+npm run build      # Build voor productie
+npm run preview    # Preview productie build
 ```
 
-## Important Patterns
+## Belangrijke Patronen
 
 ### Indicator Object Structuur
 
@@ -128,7 +132,22 @@ Na parsing door `setupIndicators.js`:
 Voor indicatoren zoals "Gevoelstemperatuur" met meerdere temperatuurbanden:
 - Elke klasse heeft een eigen kolom in de CSV data
 - `classes` object mapt klassenaam → kolomnaam
-- Percentage per klasse wordt berekend en gestapeld in bar chart
+- `calcPercentagesForEveryClassMultiIndicator()` berekent percentages per klasse
+- Percentage per klasse wordt gestapeld in bar chart
+
+### Categorale Indicatoren
+
+Voor indicatoren met een enkele waarde per buurt:
+- Enkele kolom met categorie code (bijv. 1, 2, 3)
+- `getClassByIndicatorValue()` bepaalt de klasse op basis van thresholds
+- `calcPercentagesForEveryClassSingleIndicator()` telt buurten per klasse
+
+### Waarde Validatie
+
+Ongeldige waarden worden gefilterd:
+- `-9999` wordt als "geen data" behandeld
+- `isValidValue()` in `valueRetrieval.js` checkt op geldige waarden
+- "No data" klasse wordt automatisch toegevoegd aan elke indicator
 
 ## Known Issues
 
@@ -136,7 +155,7 @@ Voor indicatoren zoals "Gevoelstemperatuur" met meerdere temperatuurbanden:
 - Vercel API cache kan even duren na config wijzigingen (~1 min)
 - Invalid values (-9999) worden gefilterd maar kunnen bij oude data voorkomen
 
-## Configuration
+## Configuratie
 
 ### Data URLs
 
@@ -145,3 +164,14 @@ Geconfigureerd in `src/lib/datasets.js`:
 - Gemeente grenzen: AWS S3
 - CSV indicator data: AWS S3 (gzip)
 - Indicator config: Config Portal API
+
+### Dashboard Varianten
+
+De applicatie ondersteunt meerdere dashboard configuraties:
+- `default-nl` - Standaard KEA buurtdashboard
+- `dordrecht` - Dordrecht RMK specifieke configuratie
+
+Elke variant heeft eigen:
+- Indicator configuratie (via config portal slug)
+- CSV data URL
+- GeoJSON data (optioneel)
