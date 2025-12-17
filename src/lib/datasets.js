@@ -1,20 +1,14 @@
 // src/lib/datasets.ts
 // Centralized location for all dataset URLs and versions
 
-// Config mode: 'dev' or 'published' (default)
-// Set via environment variable PUBLIC_CONFIG_MODE
-// Use dynamic import with fallback for environments where the var isn't set
-let CONFIG_MODE = 'published';
-try {
-  const env = await import('$env/static/public');
-  CONFIG_MODE = env.PUBLIC_CONFIG_MODE || 'published';
-} catch {
-  // Fallback to 'published' if env var not available
-  CONFIG_MODE = 'published';
-}
+import { env } from '$env/dynamic/public';
 
 // Current dataset version
 export const DATASET_VERSION = '20251105';
+
+// Config mode: 'dev' or 'published' (default)
+// Set via environment variable PUBLIC_CONFIG_MODE
+const CONFIG_MODE = env.PUBLIC_CONFIG_MODE || 'published';
 
 // Config Portal base URL
 const CONFIG_PORTAL_URL = "https://buurtdashboard-config-portal.vercel.app";
