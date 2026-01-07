@@ -19,7 +19,8 @@
   export let neighbourhoodsInMunicipalityFeaturesClone
 
   // Get the dedicated store for this specific indicator - naturally isolated!
-  const indicatorStore = getIndicatorStore(indicator.title)
+  // Use dutchTitle for store key to ensure consistency across languages
+  const indicatorStore = getIndicatorStore(indicator.dutchTitle || indicator.title)
 
   // Declare filtered data to be populated reactively
   let baseFilteredData = []
@@ -30,8 +31,8 @@
       // MIGRATED: Filter using centralized value retrieval system
       baseFilteredData = neighbourhoodsInMunicipalityFeaturesClone.filter((d) => {
         const rawValue = getRawValue(d, indicator)
-        // For beeswarm plots, we need values that exist and are not null/empty
-        return rawValue !== null && rawValue !== ""
+        // For beeswarm plots, we need valid values (filters out null, empty, -9999, etc.)
+        return isValidValue(rawValue)
       })
 
       // Special case for "Groen per inwoner" - filter out zero and negative values

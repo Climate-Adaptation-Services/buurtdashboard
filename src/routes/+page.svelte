@@ -108,7 +108,7 @@
   // Check if we're in an iframe
   const isIframe = browser && window.parent !== window
 
-  // Version marker for debugging
+  // Version marker for debugging (dev mode only)
   if (browser && import.meta.env.DEV) {
     console.log('%c🔧 Buurtdashboard Version Check', 'background: #222; color: #bada55; font-size: 14px; padding: 4px;');
     console.log('Mode:', isIframe ? '🖼️ IFRAME' : '🌐 STANDALONE');

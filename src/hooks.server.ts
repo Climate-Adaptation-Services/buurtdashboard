@@ -4,10 +4,8 @@ import {
   BUURT_GEOJSON_URL,
   MUNICIPALITY_JSON_URL,
   DEFAULT_INDICATORS_CONFIG_URL,
-  DEFAULT_INDICATORS_CONFIG_ENGLISH_URL,
   DEFAULT_CSV_DATA_URL,
   DORDRECHT_INDICATORS_CONFIG_URL,
-  DORDRECHT_INDICATORS_CONFIG_ENGLISH_URL,
   DORDRECHT_CSV_DATA_URL
 } from '$lib/datasets';
 
@@ -49,14 +47,6 @@ export const handle: Handle = async ({ event, resolve }) => {
           'crossorigin; fetchpriority=high'
       );
 
-      // Preload Dordrecht English indicators config
-      response.headers.append(
-        'Link',
-        `<${DORDRECHT_INDICATORS_CONFIG_ENGLISH_URL}>; ` +
-          'rel=preload; as=fetch; type="text/csv"; ' +
-          'crossorigin; fetchpriority=high'
-      );
-
       // Preload Dordrecht CSV data
       response.headers.append(
         'Link',
@@ -65,18 +55,10 @@ export const handle: Handle = async ({ event, resolve }) => {
           'crossorigin; fetchpriority=high'
       );
     } else {
-      // Preload default indicators config
+      // Preload default indicators config (English translations applied client-side)
       response.headers.append(
         'Link',
         `<${DEFAULT_INDICATORS_CONFIG_URL}>; ` +
-          'rel=preload; as=fetch; type="text/csv"; ' +
-          'crossorigin; fetchpriority=high'
-      );
-
-      // Preload default English indicators config
-      response.headers.append(
-        'Link',
-        `<${DEFAULT_INDICATORS_CONFIG_ENGLISH_URL}>; ` +
           'rel=preload; as=fetch; type="text/csv"; ' +
           'crossorigin; fetchpriority=high'
       );

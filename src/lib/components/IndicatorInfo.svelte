@@ -52,7 +52,7 @@
 <!-- <h3 class="category" style="background-color:{$configStore.mainColor}">C</h3> -->
 <img
   class="category"
-  src="{indicator.category + $configStore.categoryPath}.png"
+  src="{(indicator.dutchCategory || indicator.category) + $configStore.categoryPath}.png"
   alt={indicator.category}
   on:mouseover={handleCategoryMouseOver}
   on:mouseout={handleCategoryMouseOut}
@@ -67,7 +67,10 @@
 
 <style>
   .question-mark {
+    position: absolute;
     right: 5px;
+    top: 5px;
+    z-index: 10;
   }
 
   .category {
@@ -77,6 +80,8 @@
     position: absolute;
     border-radius: 50px;
     top: 5px;
+    left: 5px;
+    z-index: 10;
   }
 
   h3 {

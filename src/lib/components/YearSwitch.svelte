@@ -4,7 +4,8 @@
   export let indicator
 
   // Get the dedicated store for this specific indicator
-  const indicatorStore = getIndicatorStore(indicator.title)
+  // Use dutchTitle for store key to ensure consistency across languages
+  const indicatorStore = getIndicatorStore(indicator.dutchTitle || indicator.title)
 
   let options = []
   let selectedAHN = ''
@@ -26,6 +27,14 @@
 
   // Parse AHN versions from the indicator
   const ahnVersions = indicator.AHNversie.split(",")
+
+  // Hardcoded year mappings for AHN versions (when Jaar columns are missing)
+  const ahnYearMapping = {
+    'AHN2': '2009',
+    'AHN3': '2019',
+    'AHN4': '2022',
+    'AHN5': '2025'
+  }
 
   // Format years consistently - sort and use ranges for consecutive years
   function formatYears(yearsString) {
@@ -80,10 +89,13 @@
   $: {
     if ($selectedNeighbourhoodJSONData) {
       // For a selected neighborhood, get years and format them consistently
-      options = ahnVersions.map((ahn) => ({
-        AHN: ahn,
-        Jaar: formatYears($selectedNeighbourhoodJSONData.properties["Jaar" + ahn]),
-      }))
+      options = ahnVersions.map((ahn) => {
+        const jaarData = $selectedNeighbourhoodJSONData.properties["Jaar" + ahn];
+        return {
+          AHN: ahn,
+          Jaar: jaarData ? formatYears(jaarData) : (ahnYearMapping[ahn] || ahn) // Use hardcoded year or AHN version
+        };
+      })
     } else if ($neighbourhoodsInMunicipalityJSONData) {
       findAHNyearsWithoutDuplicatesAndSort()
     } else if ($allNeighbourhoodsJSONData) {
@@ -106,12 +118,15 @@
     options = ahnVersions.map((ahn) => ({ AHN: ahn, Jaar: [] }))
 
     if (!$neighbourhoodsInMunicipalityJSONData?.features) return
+
+    let hasJaarColumns = false
     $neighbourhoodsInMunicipalityJSONData.features.forEach((nh) => {
       if (!nh?.properties) return // Skip null/invalid features
       ahnVersions.forEach((ahn) => {
         // Use the same splitting logic as in formatYears
         const yearData = nh.properties["Jaar" + ahn]
         if (yearData) {
+          hasJaarColumns = true
           const ahnYear = yearData.split(/[.,]\s*/)
           ahnYear
             .filter((y) => y.trim())
@@ -124,10 +139,15 @@
       })
     })
 
-    // Sort years and format as ranges
+    // Sort years and format as ranges, or fallback to hardcoded year or AHN version
     options.forEach((option) => {
-      const sortedYears = option.Jaar.map(y => parseInt(y)).sort((a, b) => a - b)
-      option.Jaar = formatYearRanges(sortedYears)
+      if (option.Jaar.length > 0) {
+        const sortedYears = option.Jaar.map(y => parseInt(y)).sort((a, b) => a - b)
+        option.Jaar = formatYearRanges(sortedYears)
+      } else {
+        // No Jaar data found, use hardcoded year mapping or AHN version
+        option.Jaar = ahnYearMapping[option.AHN] || option.AHN
+      }
     })
   }
 
@@ -136,12 +156,15 @@
     options = ahnVersions.map((ahn) => ({ AHN: ahn, Jaar: [] }))
 
     if (!$allNeighbourhoodsJSONData?.features) return
+
+    let hasJaarColumns = false
     $allNeighbourhoodsJSONData.features.forEach((nh) => {
       if (!nh?.properties) return // Skip null/invalid features
       ahnVersions.forEach((ahn) => {
         // Use the same splitting logic as in formatYears
         const yearData = nh.properties["Jaar" + ahn]
         if (yearData) {
+          hasJaarColumns = true
           const ahnYear = yearData.split(/[.,]\s*/)
           ahnYear
             .filter((y) => y.trim())
@@ -154,10 +177,15 @@
       })
     })
 
-    // Sort years and format as ranges
+    // Sort years and format as ranges, or fallback to hardcoded year or AHN version
     options.forEach((option) => {
-      const sortedYears = option.Jaar.map(y => parseInt(y)).sort((a, b) => a - b)
-      option.Jaar = formatYearRanges(sortedYears)
+      if (option.Jaar.length > 0) {
+        const sortedYears = option.Jaar.map(y => parseInt(y)).sort((a, b) => a - b)
+        option.Jaar = formatYearRanges(sortedYears)
+      } else {
+        // No Jaar data found, use hardcoded year mapping or AHN version
+        option.Jaar = ahnYearMapping[option.AHN] || option.AHN
+      }
     })
   }
 
@@ -342,6 +370,7 @@
     position: relative;
     display: inline-block;
     width: 150px;
+    z-index: 10; /* Ensure dropdown appears above indicator body */
   }
   .dropdown-wrapper:last-child .year-dropdown {
     padding-right: 12px;
@@ -382,6 +411,8 @@
     gap: 20px;
     margin-top: 12px;
     align-items: center;
+    position: relative;
+    z-index: 10; /* Ensure dropdown container appears above indicator body */
   }
   .year-switch-dropdowns.less-gap {
     gap: 8px;

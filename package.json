@@ -13,7 +13,8 @@
     "test:integration": "playwright test integration.spec.js",
     "test:ui": "playwright test --ui",
     "test:debug": "playwright test --debug",
-    "precalculate-nederland": "node scripts/precalculate-nederland.js"
+    "precalculate-nederland": "node scripts/precalculate-nederland.js",
+    "generate-translations": "node scripts/generate-translations.js"
   },
   "engines": {
     "node": "22.x"
@@ -39,22 +40,12 @@
   "type": "module",
   "dependencies": {
     "@turf/center": "^6.5.0",
-    "@turf/centroid": "^6.5.0",
-    "@turf/flip": "^6.5.0",
-    "all": "^0.0.0",
     "d3": "^7.8.5",
     "fflate": "^0.8.2",
-    "flatgeobuf": "^4.0.1",
     "lodash": "^4.17.21",
-    "openai": "^4.32.0",
-    "svelte-i18n": "^4.0.0",
-    "svelte-multiselect": "^10.2.0",
-    "svelte-search": "^2.0.1",
     "svelte-select": "^5.7.0",
     "svelte-simple-modal": "^1.6.2",
-    "tnl-midjourney-api": "^1.0.3",
     "topojson-client": "^3.1.0",
-    "topojson-simplify": "^3.0.3",
-    "vite-plugin-iso-import": "^1.0.0"
+    "topojson-simplify": "^3.0.3"
   }
 }

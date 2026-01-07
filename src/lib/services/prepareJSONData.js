@@ -146,11 +146,24 @@ export async function prepareJSONData(JSONdata, CSVdata, options = {}) {
     // Detect which buurtcode column the CSV actually has
     let csvCodeColumn = preferredColumn;
     if (CSVdata[0] && !CSVdata[0][preferredColumn]) {
-      // Try alternative column names
-      if (CSVdata[0]['buurtcode']) {
+      // Try alternative column names (case-insensitive)
+      const firstRow = CSVdata[0];
+      const columnNames = Object.keys(firstRow);
+
+      // Check for exact matches first
+      if (firstRow['buurtcode']) {
         csvCodeColumn = 'buurtcode';
-      } else if (CSVdata[0]['buurtcode2024']) {
+      } else if (firstRow['buurtcode2024']) {
         csvCodeColumn = 'buurtcode2024';
+      } else {
+        // Check for case-insensitive matches
+        const match = columnNames.find(col =>
+          col.toLowerCase() === 'buurtcode' ||
+          col.toLowerCase() === 'buurtcode2024'
+        );
+        if (match) {
+          csvCodeColumn = match;
+        }
       }
     }
 
@@ -159,6 +172,7 @@ export async function prepareJSONData(JSONdata, CSVdata, options = {}) {
         lookup[item[csvCodeColumn]] = item;
       }
     });
+
     return lookup;
   });
 
@@ -186,7 +200,9 @@ export async function prepareJSONData(JSONdata, CSVdata, options = {}) {
         // Preserve the buurtcode2024 from GeoJSON and merge with CSV data
         neighbourhood.properties = {
           ...neighbourhood.properties,
-          ...matchingCSVData
+          ...matchingCSVData,
+          // Ensure buurtcode2024 is set for compatibility
+          buurtcode2024: neighborhoodCode || matchingCSVData.Buurtcode || matchingCSVData.buurtcode
         };
       }
 

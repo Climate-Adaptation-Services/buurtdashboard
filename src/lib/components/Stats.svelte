@@ -25,7 +25,8 @@
   let statsWidth
 
   // MIGRATED: Use centralized AHN selection handling with reactive store dependency
-  const indicatorStore = getIndicatorStore(indicator.title)
+  // Use dutchTitle for store key to ensure consistency across languages
+  const indicatorStore = getIndicatorStore(indicator.dutchTitle || indicator.title)
 
   // Keep these at top level for template access
   $: currentAHNSelection = $indicatorStore

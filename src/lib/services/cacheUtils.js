@@ -129,7 +129,9 @@ export async function saveToCache(url, data) {
     await cache.put(cacheKey, dataResponse);
     await cache.put(`${cacheKey}-metadata`, metadataResponse);
 
-    console.log(`Cached data for ${url}`);
+    if (import.meta.env.DEV) {
+      console.log(`Cached data for ${url}`);
+    }
     return true;
   } catch (error) {
     console.error('Error saving to cache:', error);
@@ -148,7 +150,9 @@ export async function clearCache() {
     }
 
     await caches.delete(CACHE_NAME);
-    console.log('Cache cleared');
+    if (import.meta.env.DEV) {
+      console.log('Cache cleared');
+    }
     return true;
   } catch (error) {
     console.error('Error clearing cache:', error);

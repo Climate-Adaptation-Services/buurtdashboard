@@ -39,6 +39,8 @@
     justify-content: flex-start;
     border-radius: 10px;
     padding-top: 25px;
+    position: relative;
+    z-index: 2; /* Ensure title and dropdowns appear above indicator body */
   }
 
   .indicator-title.both-switches {

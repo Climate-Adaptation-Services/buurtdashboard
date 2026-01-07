@@ -8,7 +8,7 @@
  * 3. Calculates Nederland aggregate values (median or weighted average)
  * 4. Saves results to static/nederland-aggregates.json
  *
- * Run this script whenever dataset updates occur in datasets.ts
+ * Run this script whenever dataset updates occur in data-urls.js
  * Usage: npm run precalculate-nederland
  */
 
@@ -18,11 +18,13 @@ import { fileURLToPath } from 'url';
 import { dsvFormat } from 'd3-dsv';
 import { gunzipSync, unzipSync, strFromU8 } from 'fflate';
 import { feature } from 'topojson-client';
+
+// Import from datasets.js (single source of truth)
 import {
   DATASET_VERSION,
   BUURT_GEOJSON_URL,
-  DEFAULT_INDICATORS_CONFIG_URL,
-  DEFAULT_CSV_DATA_URL
+  DEFAULT_CSV_DATA_URL,
+  DEFAULT_INDICATORS_CONFIG_URL
 } from '../src/lib/datasets.js';
 
 // Get __dirname equivalent in ES modules
@@ -87,7 +89,7 @@ function setupIndicators(indicatorsConfig) {
     const classes = {};
     const indicatorDomein = ['No data', ...indicator.Domein.split(',')];
 
-    if (indicator['kwantitatief / categoraal / aggregated'] !== 'categoraal') {
+    if (indicator['kwantitatief / categoraal / geaggregeerd'] !== 'categoraal') {
       indicatorDomein.slice(1).forEach((d, i) => {
         classes[d] = indicator.Indicatornaamtabel.split(',')[i];
       });
@@ -106,8 +108,8 @@ function setupIndicators(indicatorsConfig) {
     indicatorsList.push({
       title: indicator.Titel,
       attribute: indicator.Indicatornaamtabel.split(',')[0],
-      numerical: (indicator['kwantitatief / categoraal / aggregated'] === 'kwantitatief') ? true : false,
-      aggregatedIndicator: (indicator['kwantitatief / categoraal / aggregated'] === 'aggregated') ? true : false,
+      numerical: (indicator['kwantitatief / categoraal / geaggregeerd'] === 'kwantitatief') ? true : false,
+      aggregatedIndicator: (indicator['kwantitatief / categoraal / geaggregeerd'] === 'geaggregeerd') ? true : false,
       surfaceArea: indicator['Oppervlakte'],
       variants: indicator.Varianten,
       classes: classes,

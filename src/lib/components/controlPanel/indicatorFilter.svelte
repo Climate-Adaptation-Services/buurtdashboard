@@ -1,7 +1,6 @@
 <script>
   import { indicatorsSelection, URLParams } from "$lib/stores"
   import { addURLParameter, removeURLParameter } from "$lib/services/urlManager"
-  import { browser } from "$app/environment"
   import { t } from "$lib/i18n/translate.js"
 
   export let allIndicators
@@ -82,49 +81,49 @@
 
 <svelte:window on:click={handleClickOutside} />
 
-{#if browser}
-  <div class="custom-multiselect" bind:this={dropdownRef}>
-    <p style="margin-bottom:5px">{`Filter ${t("indicatoren")}:`}</p>
+{#if allIndicators && allIndicators.length > 0}
+<div class="custom-multiselect" bind:this={dropdownRef}>
+  <p style="margin-bottom:5px">{`Filter ${t("indicatoren")}:`}</p>
 
-    <!-- Input area with selected tags -->
-    <div class="input-container" on:click={() => isOpen = true}>
-      {#each $indicatorsSelection as selected}
-        <span class="tag">
-          {selected}
-          <button on:click|stopPropagation={() => removeIndicator(selected)}>×</button>
-        </span>
-      {/each}
-      <input
-        type="text"
-        placeholder={$indicatorsSelection.length === 0 ? "Zoek indicatoren..." : ""}
-        bind:value={searchText}
-        on:focus={() => isOpen = true}
-        on:click|stopPropagation
-      />
-      {#if $indicatorsSelection.length > 0}
-        <button class="clear-all-btn" on:click|stopPropagation={clearAll}>×</button>
-      {/if}
-    </div>
-
-    <!-- Dropdown menu -->
-    {#if isOpen}
-      <div class="dropdown-menu">
-        {#each filteredCategories as { category, indicators }}
-          {#if showCategoryHeaders}
-            <div class="category-header">{category}</div>
-          {/if}
-          {#each indicators as indicator}
-            <div class="indicator-item" on:click={() => selectIndicator(indicator.title)}>
-              {indicator.title}
-            </div>
-          {/each}
-        {/each}
-        {#if filteredCategories.length === 0}
-          <div class="no-results">No indicators found</div>
-        {/if}
-      </div>
+  <!-- Input area with selected tags -->
+  <div class="input-container" on:click={() => isOpen = true}>
+    {#each $indicatorsSelection as selected}
+      <span class="tag">
+        {selected}
+        <button on:click|stopPropagation={() => removeIndicator(selected)}>×</button>
+      </span>
+    {/each}
+    <input
+      type="text"
+      placeholder={$indicatorsSelection.length === 0 ? "Zoek indicatoren..." : ""}
+      bind:value={searchText}
+      on:focus={() => isOpen = true}
+      on:click|stopPropagation
+    />
+    {#if $indicatorsSelection.length > 0}
+      <button class="clear-all-btn" on:click|stopPropagation={clearAll}>×</button>
     {/if}
   </div>
+
+  <!-- Dropdown menu -->
+  {#if isOpen}
+    <div class="dropdown-menu">
+      {#each filteredCategories as { category, indicators }}
+        {#if showCategoryHeaders}
+          <div class="category-header">{category}</div>
+        {/if}
+        {#each indicators as indicator}
+          <div class="indicator-item" on:click={() => selectIndicator(indicator.title)}>
+            {indicator.title}
+          </div>
+        {/each}
+      {/each}
+      {#if filteredCategories.length === 0}
+        <div class="no-results">No indicators found</div>
+      {/if}
+    </div>
+  {/if}
+</div>
 {/if}
 
 <style>
