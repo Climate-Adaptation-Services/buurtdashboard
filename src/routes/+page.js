@@ -17,29 +17,26 @@ export async function load({ url }) {
 
   // Start lightweight fetches (indicators config, CSV, and Nederland aggregates)
   // GeoJSON will be loaded client-side for progressive rendering
-  const [indicatorsConfigPromise, indicatorsConfigEnglishPromise, csvPromise, nederlandAggregatesPromise] = [
+  // Note: English translations are now applied client-side from indicator-translations.json
+  const [indicatorsConfigPromise, csvPromise, nederlandAggregatesPromise] = [
     fetch(configObj.indicatorsConfigLocation),
-    fetch(configObj.indicatorsConfigLocationEnglish),
     fetch(configObj.neighbourhoodCSVdataLocation),
     fetch('/nederland-aggregates.json').catch(() => null) // Don't fail if file doesn't exist
   ];
 
   // Wait for lightweight data only
-  const [indicatorsConfigResponse, indicatorsConfigEnglishResponse, csvResponse, nederlandAggregatesResponse] = await Promise.all([
+  const [indicatorsConfigResponse, csvResponse, nederlandAggregatesResponse] = await Promise.all([
     indicatorsConfigPromise,
-    indicatorsConfigEnglishPromise,
     csvPromise,
     nederlandAggregatesPromise
   ]);
 
   // Process the responses
   const indicatorsConfigText = await indicatorsConfigResponse.text();
-  const indicatorsConfigEnglishText = await indicatorsConfigEnglishResponse.text();
   const zipBuffer = await csvResponse.arrayBuffer();
 
   // Parse indicators config
   const indicatorsConfig = dsvFormat(';').parse(indicatorsConfigText);
-  const indicatorsConfig_english = dsvFormat(';').parse(indicatorsConfigEnglishText);
 
   // Handle both zip and gzip formats
   let csvText;
@@ -76,7 +73,6 @@ export async function load({ url }) {
   return {
     lang,
     indicatorsConfig,
-    indicatorsConfig_english,
     buurtCSVdata,
     nederlandAggregates,
     neighbourhoodGeoJson: null,

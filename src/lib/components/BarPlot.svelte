@@ -47,7 +47,8 @@
   const calcPercentagesForEveryClass = aggregated ? calcPercentagesForEveryClassMultiIndicator : calcPercentagesForEveryClassSingleIndicator
 
   // Get the indicator-specific store for reactivity
-  const indicatorStore = getIndicatorStore(indicator.title)
+  // Use dutchTitle for store key to ensure consistency across languages
+  const indicatorStore = getIndicatorStore(indicator.dutchTitle || indicator.title)
 
   // Simplified function - always show percentages in bar plot
   function getDisplayValue(percentageValue) {

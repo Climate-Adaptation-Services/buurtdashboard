@@ -52,7 +52,7 @@
 <!-- <h3 class="category" style="background-color:{$configStore.mainColor}">C</h3> -->
 <img
   class="category"
-  src="{indicator.category + $configStore.categoryPath}.png"
+  src="{(indicator.dutchCategory || indicator.category) + $configStore.categoryPath}.png"
   alt={indicator.category}
   on:mouseover={handleCategoryMouseOver}
   on:mouseout={handleCategoryMouseOut}

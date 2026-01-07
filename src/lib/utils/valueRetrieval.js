@@ -118,7 +118,8 @@ function getCategoryValue(feature, indicator, { defaultValue = 'No data', ...opt
 // AHN selection helper
 export function getAHNSelection(indicator) {
   // Use indicator-specific store for proper reactivity
-  const indicatorStore = getIndicatorStore(indicator.title)
+  // Use dutchTitle for store key to ensure consistency across languages
+  const indicatorStore = getIndicatorStore(indicator.dutchTitle || indicator.title)
   let selection = null;
   
   // Get the current value from the store
@@ -221,7 +222,8 @@ function getSurfaceAreaM2(feature, indicator) {
   const surfaceBebVariant = surfaceVariants.find(v => v !== 'M2' && v !== '') // Find the BEB variant (not M2)
 
   if (surfaceBebVariant) {
-    const indicatorStore = getIndicatorStore(indicator.title)
+    // Use dutchTitle for store key to ensure consistency across languages
+    const indicatorStore = getIndicatorStore(indicator.dutchTitle || indicator.title)
     let ahnSelection
 
     const unsubscribe = indicatorStore.subscribe(value => {

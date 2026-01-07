@@ -22,12 +22,10 @@ export const BUURT_GEOJSON_URL = "https://buurtdashboard-data.s3.eu-north-1.amaz
 // Municipality data URL
 export const MUNICIPALITY_JSON_URL = "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/geojsondata/gemeentes.json";
 
-// Default indicators config URLs - now from config portal
+// Default indicators config URL - from config portal
+// English translations are applied client-side from src/lib/i18n/indicator-translations.json
+// Run `npm run generate-translations` to update translations when config changes
 export const DEFAULT_INDICATORS_CONFIG_URL = buildConfigUrl('default-nl');
-
-// English config - fallback to S3 for now (TODO: add English support to config portal)
-export const DEFAULT_INDICATORS_CONFIG_ENGLISH_URL =
-  "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/metadata/EN-buurtdashboard-metadata-050825-01.csv";
 
 export const DEFAULT_CSV_DATA_URL =
   "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/csvdata/Buurt2024BuurtdashboardDataset20251113.csv.gz";
@@ -35,12 +33,8 @@ export const DEFAULT_CSV_DATA_URL =
 export const DEFAULT_DATA_DOWNLOAD_URL =
   "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/data-download/Downloadbuurtdashboard_nov25.xlsx";
 
-// Dordrecht indicators config URLs - now from config portal
+// Dordrecht indicators config URL - from config portal
 export const DORDRECHT_INDICATORS_CONFIG_URL = buildConfigUrl('dordrecht');
-
-// English config - fallback to S3 for now
-export const DORDRECHT_INDICATORS_CONFIG_ENGLISH_URL =
-  "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/dordrecht-rmk/metadata/metadata_030625_2023_2.csv";
 
 export const DORDRECHT_CSV_DATA_URL =
   "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/dordrecht-rmk/csvdata/Dordrecht_RMK_011225(b11buurt).csv.gz";

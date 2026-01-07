@@ -1,22 +1,20 @@
 // in this file all specifications for the dashboard are stored
 import {
   DEFAULT_INDICATORS_CONFIG_URL,
-  DEFAULT_INDICATORS_CONFIG_ENGLISH_URL,
   DEFAULT_CSV_DATA_URL,
   DEFAULT_DATA_DOWNLOAD_URL,
   DORDRECHT_INDICATORS_CONFIG_URL,
-  DORDRECHT_INDICATORS_CONFIG_ENGLISH_URL,
   DORDRECHT_CSV_DATA_URL,
   DORDRECHT_DATA_DOWNLOAD_URL
 } from './datasets';
 
 // Default configuration for the general dashboard
+// Note: English translations are applied client-side from src/lib/i18n/indicator-translations.json
 export const defaultConfig = {
   dashboardTitle: "Buurtdashboard NL",
   mainColor: "#36575B",
   backgroundColor: "#36575B",
   indicatorsConfigLocation: DEFAULT_INDICATORS_CONFIG_URL,
-  indicatorsConfigLocationEnglish: DEFAULT_INDICATORS_CONFIG_ENGLISH_URL,
   neighbourhoodCSVdataLocation: DEFAULT_CSV_DATA_URL,
   dataDownloadLocation: DEFAULT_DATA_DOWNLOAD_URL,
   defaultMunicipality: null,
@@ -31,7 +29,6 @@ export const dordrechtConfig = {
   mainColor: "#36575B",           // Original: "#0064af"
   backgroundColor: "#36575B",     // Original: "#C4C4C4"
   indicatorsConfigLocation: DORDRECHT_INDICATORS_CONFIG_URL,
-  indicatorsConfigLocationEnglish: DORDRECHT_INDICATORS_CONFIG_ENGLISH_URL,
   neighbourhoodCSVdataLocation: DORDRECHT_CSV_DATA_URL,
   dataDownloadLocation: DORDRECHT_DATA_DOWNLOAD_URL,
   defaultMunicipality: "GM0505",

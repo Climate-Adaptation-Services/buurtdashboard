@@ -97,7 +97,8 @@
   }
 
   // Use dedicated indicator store for difference mode detection (naturally isolated)
-  $: indicatorStore = indicator ? getIndicatorStore(indicator.title) : null
+  // Use dutchTitle for store key to ensure consistency across languages
+  $: indicatorStore = indicator ? getIndicatorStore(indicator.dutchTitle || indicator.title) : null
   $: isDifferenceMode = $indicatorStore && typeof $indicatorStore === "object" && $indicatorStore.isDifference
 
   // Pre-calculate difference values for map features to match BeeswarmPlot approach

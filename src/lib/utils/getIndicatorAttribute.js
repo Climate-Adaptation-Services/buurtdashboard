@@ -14,7 +14,8 @@ export function getIndicatorAttribute(indicator, attribute, specificYear) {
   // Determine the year to use first
   let yearToUse = specificYear;
   if (!yearToUse) {
-    const indicatorStore = getIndicatorStore(indicator.title);
+    // Use dutchTitle for store key to ensure consistency across languages
+    const indicatorStore = getIndicatorStore(indicator.dutchTitle || indicator.title);
     const ahnSelection = get(indicatorStore);
     yearToUse = ahnSelection?.baseYear;
   }
@@ -37,7 +38,8 @@ export function getIndicatorAttribute(indicator, attribute, specificYear) {
   const bebVariant = variants.find(v => v !== 'M2' && v !== '') // Find the BEB variant (not M2)
 
   if (bebVariant) {
-    const indicatorStore = getIndicatorStore(indicator.title);
+    // Use dutchTitle for store key to ensure consistency across languages
+    const indicatorStore = getIndicatorStore(indicator.dutchTitle || indicator.title);
     const ahnSelection = get(indicatorStore);
     const bebSelection = ahnSelection?.beb || 'hele_buurt'
 

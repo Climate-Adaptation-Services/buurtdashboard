@@ -1,0 +1,244 @@
+{
+  "generatedAt": "2026-01-07T09:35:00.000Z",
+  "note": "Manually maintained. Add translations here when new indicators are added to the Dutch config.",
+  "translations": {
+    "Gevoelstemperatuur": {
+      "title": "Perceived temperature",
+      "subtitle": "Perceived temperature (°C) on a hot summer day",
+      "description": "These percentages show how high the perceived temperature in outdoor spaces becomes on a hot, almost windless summer day. Neighborhoods with little shade and lots of pavement heat up strongly. The length of the bars is determined by the share of outdoor space: water and buildings are not filled. Want to know what these percentages are based on? Go to the map story.",
+      "plottitle": null,
+      "domain": "31 - 34°C,35 - 40°C,41 - 45°C,46 - 50°C,51°C"
+    },
+    "Waterdiepte bij hevige bui": {
+      "title": "Water depth during heavy rain",
+      "subtitle": "Water depth during heavy rain of 70 mm / 2 hours",
+      "description": "These statistics show the water depth that occurs during a heavy summer shower. The graphs show the percentage of an area per water depth class. Buildings, surface water and areas with less than 5 cm are not shown with colored bars. Want to know more about the background of these statistics? Go to the map story.",
+      "plottitle": null,
+      "domain": "5 - 10cm,10 - 15cm,15 - 20cm,20 - 30cm,>30cm"
+    },
+    "Lage grondwaterstand": {
+      "title": "Low groundwater level",
+      "subtitle": "Average lowest groundwater level (meters below ground level)",
+      "description": "These statistics show the Average Lowest Groundwater Level (GLG) for the current climate. The figures show the average number of meters below ground level per neighborhood. The GLG is modeled with the National Water Model. The maps provide a rough picture and are therefore only intended as an indication. Want more information about these statistics? Go to the map story.",
+      "plottitle": "Meters below ground level",
+      "domain": null
+    },
+    "Lage grondwaterstand | 2050 hoog": {
+      "title": "Low groundwater level | 2050 high",
+      "subtitle": "Difference GLG now - 2050 High (meters)",
+      "description": "These statistics show how the Average Lowest Groundwater Level (GLG) changes between now and 2050 under severe climate change. The GLG is modeled with the National Water Model. The maps provide a rough picture and are therefore only intended as an indication. Want more information about these statistics? Go to the map story.",
+      "plottitle": "Difference in meters",
+      "domain": null
+    },
+    "Extreem lage grondwaterstand ": {
+      "title": "Extremely low groundwater level",
+      "subtitle": "Groundwater level extremely dry year (meters below ground level)",
+      "description": "These statistics show the lowest groundwater level (LG3) for the current climate based on the extremely dry year 1976. The figures show the average number of meters below ground level per neighborhood. The LG3 is modeled with the National Water Model. The maps provide a rough picture and are therefore only intended as an indication. Want more information about these statistics? Go to the map story.",
+      "plottitle": "Meters below ground level",
+      "domain": null
+    },
+    "Hoge grondwaterstand ": {
+      "title": "High groundwater level",
+      "subtitle": "Average highest groundwater level (meters below ground level)",
+      "description": "These statistics show the Average Highest Groundwater Level (GHG) for the current climate. This is the benchmark for a wet situation. The figures show the average number of meters below ground level per neighborhood. The GHG is modeled with the National Water Model. The maps provide a rough picture and are therefore only intended as an indication. Want more information about these statistics? Go to the map story.",
+      "plottitle": "Meters below ground level",
+      "domain": null
+    },
+    "Extreem hoge grondwaterstand ": {
+      "title": "Extremely high groundwater level",
+      "subtitle": "Groundwater level extremely wet year (meters below ground level)",
+      "description": "These statistics show the maximum groundwater level (so-called HG3) in the current climate. This is the maximum groundwater level modeled over a period of 100 years (1911-2011). This is the benchmark groundwater level. The figures show the number of meters below ground level. The GHG is modeled with the National Water Model. The maps provide a rough picture and are therefore only intended as an indication. Want more information about these statistics? Go to the map story.",
+      "plottitle": "Meters below ground level",
+      "domain": null
+    },
+    "Risico Paalrot huidig": {
+      "title": "Risk of pile rot current",
+      "subtitle": "Risk of pile rot in current climate",
+      "description": "These statistics show the risks of pile rot in the current climate. The risk is calculated by combining the percentage of buildings with wooden piles at a location with that location's susceptibility to pile rot. Want to know more about the background of these statistics? Go to the map story.",
+      "plottitle": null,
+      "domain": "Very low,Low,Medium,High,Very high"
+    },
+    "Risico Paalrot 2050 hoog": {
+      "title": "Risk of pile rot 2050 high",
+      "subtitle": "Risk of pile rot in 2050 (high scenario)",
+      "description": "These statistics show the risks of pile rot in 2050 if the climate changes significantly. Changes in groundwater levels can change the risk of pile rot. The risk is calculated by combining the percentage of buildings with wooden piles at a location with that location's susceptibility to pile rot. Want to know more about the background of these statistics? Go to the map story.",
+      "plottitle": null,
+      "domain": "Very low,Low,Medium,High,Very high"
+    },
+    "Risico Verschilzetting 2050H": {
+      "title": "Risk of differential settlement 2050H",
+      "subtitle": "Risk of differential settlement in 2050 (high scenario)",
+      "description": "These statistics show the risks of differential settlement in 2050 under severe climate change. The risk is calculated by combining the percentage of buildings on shallow foundations at a location with that location's susceptibility to settlement. Want to know more about the background of these statistics? Go to the map story.",
+      "plottitle": null,
+      "domain": "Very low,Low,Medium,High,Very high"
+    },
+    "Schaduw wandel- en fietspaden": {
+      "title": "Shade on walking and cycling paths",
+      "subtitle": "Percentage of shade on walking and cycling paths",
+      "description": "These statistics show the percentage of shade on walking and cycling paths. The shade map is based on the shade on June 21 at 3:30 p.m., because this is the longest day of the year with the shortest shadows. In the 'Maatlat groene klimaatadaptieve gebouwde omgeving' a target value of 30% at neighborhood level is mentioned. The bicycle and walking paths come from the Basic Large-Scale Topography Map. Want more information about these statistics? Go to the map story.",
+      "plottitle": "% shade",
+      "domain": null
+    },
+    "Maximale overstromingsdiepte": {
+      "title": "Maximum flood depth",
+      "subtitle": "Maximum flood depth (m)",
+      "description": "These statistics show what water depths can occur during a flood with an extremely small chance (1:100,000 years). The consequences vary per depth class. The possible measures for consequence limitation also differ per depth class. Want more information about these statistics? Go to the map story.",
+      "plottitle": null,
+      "domain": "up to 20cm,20-50cm,50-200cm,>200cm"
+    },
+    "Droge verdiepingen": {
+      "title": "Dry floors",
+      "subtitle": "% of buildings with dry floors during flooding",
+      "description": "These statistics show the percentage of buildings in the neighborhood that have a dry floor during a flood with an extremely small chance (1:100,000 years). This information can be useful when exploring measures for a deep flood. Want more information about these statistics? Go to the map story.",
+      "plottitle": "% buildings with dry floors",
+      "domain": null
+    },
+    "Boomkroonoppervlakte": {
+      "title": "Tree canopy coverage",
+      "subtitle": "Total tree canopy area",
+      "description": "These statistics show the percentage of the neighborhood covered by tree canopy. Tree canopy provides shade, cooling, and improves air quality. A higher percentage indicates more mature trees in the area.",
+      "plottitle": "% tree canopy",
+      "domain": null
+    },
+    "Boomkroonoppervlakte openbaar": {
+      "title": "Tree canopy coverage public",
+      "subtitle": "Tree canopy area in public spaces",
+      "description": "These statistics show the percentage of public areas covered by tree canopy. Public spaces include streets, parks, and other publicly accessible areas. Tree canopy in public spaces benefits all residents.",
+      "plottitle": "% tree canopy",
+      "domain": null
+    },
+    "Boomkroonoppervlakte niet-openbaar ": {
+      "title": "Tree canopy coverage private",
+      "subtitle": "Tree canopy area in private spaces",
+      "description": "These statistics show the percentage of private areas covered by tree canopy. Private spaces include gardens, private parking lots, and other non-public areas.",
+      "plottitle": "% tree canopy",
+      "domain": null
+    },
+    "Groen": {
+      "title": "Green space",
+      "subtitle": "Trees, shrubs and grass",
+      "description": "These statistics show the percentage of green space (trees, shrubs, and grass) in the neighborhood. Green space helps reduce heat stress, absorb rainwater, and improve biodiversity.",
+      "plottitle": "% green space",
+      "domain": null
+    },
+    "Groen openbaar": {
+      "title": "Green space public",
+      "subtitle": "Trees, shrubs and grass in public areas",
+      "description": "These statistics show the percentage of green space in public areas. Public green spaces are accessible to all residents and contribute to neighborhood livability.",
+      "plottitle": "% green space",
+      "domain": null
+    },
+    "Groen niet-openbaar": {
+      "title": "Green space private",
+      "subtitle": "Trees, shrubs and grass in private areas",
+      "description": "These statistics show the percentage of green space in private areas such as gardens and private grounds.",
+      "plottitle": "% green space",
+      "domain": null
+    },
+    "Verharding ": {
+      "title": "Paved surface",
+      "subtitle": "Paved surface area",
+      "description": "These statistics show the percentage of paved surface in the neighborhood. High amounts of paving contribute to heat stress and reduce rainwater infiltration.",
+      "plottitle": "% paved",
+      "domain": null
+    },
+    "Verharding openbaar": {
+      "title": "Paved surface public",
+      "subtitle": "Paved surface in public areas",
+      "description": "These statistics show the percentage of paved surface in public areas such as streets, squares, and parking lots.",
+      "plottitle": "% paved",
+      "domain": null
+    },
+    "Verharding niet-openbaar": {
+      "title": "Paved surface private",
+      "subtitle": "Paved surface in private areas",
+      "description": "These statistics show the percentage of paved surface in private areas such as driveways and private parking areas.",
+      "plottitle": "% paved",
+      "domain": null
+    },
+    "Water": {
+      "title": "Water surface",
+      "subtitle": "Water surface area",
+      "description": "These statistics show the percentage of water surface in the neighborhood. Water helps with cooling and water storage during heavy rainfall.",
+      "plottitle": "% water",
+      "domain": null
+    },
+    "Landbedekking ": {
+      "title": "Land cover",
+      "subtitle": "Land cover distribution",
+      "description": "These statistics show the distribution of different land cover types in the neighborhood, including buildings, vegetation, pavement, and water.",
+      "plottitle": null,
+      "domain": null
+    },
+    "Openbaar en niet-openbaar": {
+      "title": "Public and private areas",
+      "subtitle": "Distribution of public and private land",
+      "description": "These statistics show the distribution of land between public and private ownership. Public areas are managed by the municipality while private areas are owned by residents or businesses.",
+      "plottitle": null,
+      "domain": null
+    },
+    "Groen per inwoner": {
+      "title": "Green space per inhabitant",
+      "subtitle": "Green space area per inhabitant",
+      "description": "These statistics show the amount of green space available per inhabitant in the neighborhood. More green space per person indicates better access to nature and outdoor recreation.",
+      "plottitle": "m² per inhabitant",
+      "domain": null
+    },
+    "Bevolkingsdichtheid": {
+      "title": "Population density",
+      "subtitle": "Number of inhabitants per km²",
+      "description": "These statistics show the number of inhabitants per km² based on the CBS District and Neighborhood Map 2022. In neighborhoods with high population density, many people are exposed to climate effects. At the same time, the pressure on outdoor space is often high, leaving less room for adaptation measures.",
+      "plottitle": "Number of inhabitants per km²",
+      "domain": null
+    },
+    "Gemiddelde WOZ-waarde": {
+      "title": "Average property value (WOZ)",
+      "subtitle": "Average property value (WOZ) (in euros)",
+      "description": "These statistics show the average property value (WOZ) per neighborhood based on the CBS District and Neighborhood Map 2022. The WOZ value gives an indication of the socio-economic status of a neighborhood. In neighborhoods with a high WOZ value, residents can usually implement adaptation measures more easily themselves.",
+      "plottitle": "Property value in €",
+      "domain": null
+    },
+    "Sociaal minimum huishoudens": {
+      "title": "Households at social minimum",
+      "subtitle": "Percentage of households at or around social minimum, vulnerable to heat",
+      "description": "These statistics show the percentage of households living around or below the social minimum. This group is extra vulnerable to heat. Want to know more about the relationship between social vulnerability and heat? Go to the map story.",
+      "plottitle": "% households",
+      "domain": null
+    },
+    "Hitte en broze 65-plussers": {
+      "title": "Heat and vulnerable 65+ population",
+      "subtitle": "Percentage of fragile 65+ population",
+      "description": "These statistics show the percentage of people aged 65 and over with a fragile health. This group is extra vulnerable to heat. The concept of fragility includes physical health, mental health and social health. Want to know more about the relationship between people aged 65 and over with fragile health and heat? Go to the map story.",
+      "plottitle": "% fragile 65+ population",
+      "domain": null
+    },
+    "Ernstige eenzaamheid": {
+      "title": "Severe loneliness",
+      "subtitle": "Percentage of inhabitants who are severely lonely",
+      "description": "These statistics show the percentage of severely lonely people over 18 years old. These people are extra vulnerable to heat because they have few social contacts. This increases the risk of dehydration and overheating during a heat wave. For more information about these statistics, go to the Neighborhood Atlas of the RIVM.",
+      "plottitle": "% severely lonely",
+      "domain": null
+    },
+    "Moeite met rondkomen": {
+      "title": "Difficulty making ends meet",
+      "subtitle": "Percentage of inhabitants who have difficulty making ends meet",
+      "description": "These statistics show the percentage of people over 18 years old who had difficulty making ends meet in 2020. This group has less financial capacity to take measures against heat. For more information about these statistics, go to the Neighborhood Atlas of the RIVM.",
+      "plottitle": "% difficulty making ends meet",
+      "domain": null
+    },
+    "Ernstig overgewicht": {
+      "title": "Severe overweight",
+      "subtitle": "Percentage of inhabitants with severe overweight",
+      "description": "These statistics show the percentage of people with severe overweight (obesity). People with obesity are more vulnerable to heat stress. For more information about these statistics, go to the Neighborhood Atlas of the RIVM.",
+      "plottitle": "% severe overweight",
+      "domain": null
+    },
+    "Percentage huurwoningen": {
+      "title": "Percentage rental housing",
+      "subtitle": "Percentage of rental housing",
+      "description": "These statistics show what percentage of houses are rental properties. For tenants, it is more difficult to make major adjustments to their homes. For example, they cannot easily install sunshades. The statistics come from the CBS District and Neighborhood Map 2022.",
+      "plottitle": "% rental housing",
+      "domain": null
+    }
+  }
+}

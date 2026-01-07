@@ -13,7 +13,8 @@
     "test:integration": "playwright test integration.spec.js",
     "test:ui": "playwright test --ui",
     "test:debug": "playwright test --debug",
-    "precalculate-nederland": "node scripts/precalculate-nederland.js"
+    "precalculate-nederland": "node scripts/precalculate-nederland.js",
+    "generate-translations": "node scripts/generate-translations.js"
   },
   "engines": {
     "node": "22.x"

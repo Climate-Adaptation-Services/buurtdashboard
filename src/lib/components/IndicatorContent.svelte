@@ -12,7 +12,8 @@
   export let isLoading = false
 
   // Get the dedicated store for this specific indicator - naturally isolated!
-  const indicatorStore = getIndicatorStore(indicator.title)
+  // Use dutchTitle for store key to ensure consistency across languages
+  const indicatorStore = getIndicatorStore(indicator.dutchTitle || indicator.title)
 
 
 
