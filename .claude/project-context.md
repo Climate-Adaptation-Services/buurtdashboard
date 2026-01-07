@@ -13,7 +13,7 @@ Het Buurtdashboard is een interactieve kaartvisualisatie-applicatie voor het ton
 - **Framework**: SvelteKit 2.x met Svelte 5
 - **Runtime**: Node.js / Browser
 - **Package Manager**: npm
-- **Kaarten**: Mapbox GL JS
+- **Kaarten**: Leaflet.js
 - **Grafieken**: D3.js
 - **Deployment**: Vercel
 
@@ -71,7 +71,7 @@ De database en CSV gebruiken beide de Nederlandse termen.
 - `src/lib/components/BarPlot.svelte` - Bar chart visualisatie met D3.js
 - `src/lib/components/BarPlotLegend.svelte` - Legenda voor bar charts
 - `src/lib/components/IndicatorNumerical.svelte` - Beeswarm plot voor kwantitatieve data
-- `src/lib/components/Map.svelte` - Mapbox GL kaart component
+- `src/lib/components/Map.svelte` - Leaflet kaart component
 - `src/lib/components/Sidebar.svelte` - Zijbalk met indicator selectie en grafieken
 
 ### AHN Versie Naamgeving
