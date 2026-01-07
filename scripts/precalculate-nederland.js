@@ -18,12 +18,20 @@ import { fileURLToPath } from 'url';
 import { dsvFormat } from 'd3-dsv';
 import { gunzipSync, unzipSync, strFromU8 } from 'fflate';
 import { feature } from 'topojson-client';
-import {
-  DATASET_VERSION,
-  BUURT_GEOJSON_URL,
-  DEFAULT_INDICATORS_CONFIG_URL,
-  DEFAULT_CSV_DATA_URL
-} from '../src/lib/datasets.js';
+
+// Note: We can't import from datasets.js because it uses import.meta.env (Vite-only)
+// Instead, we define the URLs directly here - keep these in sync with src/lib/datasets.js
+
+// Current dataset version - update this when data changes
+const DATASET_VERSION = '20260107';
+
+// Config Portal base URL (always uses Vercel production)
+const CONFIG_PORTAL_URL = "https://buurtdashboard-config-portal.vercel.app";
+const CONFIG_MODE = process.env.PUBLIC_CONFIG_MODE || 'published';
+
+const BUURT_GEOJSON_URL = "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/geojsondata/buurt24IdentificationOnly.json";
+const DEFAULT_INDICATORS_CONFIG_URL = `${CONFIG_PORTAL_URL}/api/config/default-nl/csv?mode=${CONFIG_MODE}`;
+const DEFAULT_CSV_DATA_URL = "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/csvdata/jan26Buurtdashboarddata.csv.gz";
 
 // Get __dirname equivalent in ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -87,7 +95,7 @@ function setupIndicators(indicatorsConfig) {
     const classes = {};
     const indicatorDomein = ['No data', ...indicator.Domein.split(',')];
 
-    if (indicator['kwantitatief / categoraal / aggregated'] !== 'categoraal') {
+    if (indicator['kwantitatief / categoraal / geaggregeerd'] !== 'categoraal') {
       indicatorDomein.slice(1).forEach((d, i) => {
         classes[d] = indicator.Indicatornaamtabel.split(',')[i];
       });
@@ -106,8 +114,8 @@ function setupIndicators(indicatorsConfig) {
     indicatorsList.push({
       title: indicator.Titel,
       attribute: indicator.Indicatornaamtabel.split(',')[0],
-      numerical: (indicator['kwantitatief / categoraal / aggregated'] === 'kwantitatief') ? true : false,
-      aggregatedIndicator: (indicator['kwantitatief / categoraal / aggregated'] === 'geaggregeerd') ? true : false,
+      numerical: (indicator['kwantitatief / categoraal / geaggregeerd'] === 'kwantitatief') ? true : false,
+      aggregatedIndicator: (indicator['kwantitatief / categoraal / geaggregeerd'] === 'geaggregeerd') ? true : false,
       surfaceArea: indicator['Oppervlakte'],
       variants: indicator.Varianten,
       classes: classes,
