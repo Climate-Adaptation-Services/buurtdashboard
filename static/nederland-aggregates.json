@@ -1,6 +1,6 @@
 {
   "version": "20260107",
-  "generatedAt": "2026-01-07T09:07:26.555Z",
+  "generatedAt": "2026-01-07T09:26:38.627Z",
   "aggregates": {
     "Gevoelstemperatuur": {
       "AHN2": {
@@ -19,11 +19,11 @@
       }
     },
     "Waterdiepte bij hevige bui": {
-      "5 - 10cm": null,
-      "10 - 15cm": null,
-      "15 - 20cm": null,
-      "20 - 30cm": null,
-      ">30cm": null
+      "5 - 10cm": 7.8490293624262355,
+      "10 - 15cm": 4.460297987943613,
+      "15 - 20cm": 2.3932343869617054,
+      "20 - 30cm": 1.7597871884602663,
+      ">30cm": 0.9355107195030854
     },
     "Lage grondwaterstand": 1.744941962,
     "Lage grondwaterstand | 2050 hoog": -0.035739432,

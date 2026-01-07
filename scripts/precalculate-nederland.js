@@ -8,7 +8,7 @@
  * 3. Calculates Nederland aggregate values (median or weighted average)
  * 4. Saves results to static/nederland-aggregates.json
  *
- * Run this script whenever dataset updates occur in datasets.ts
+ * Run this script whenever dataset updates occur in data-urls.js
  * Usage: npm run precalculate-nederland
  */
 
@@ -19,19 +19,13 @@ import { dsvFormat } from 'd3-dsv';
 import { gunzipSync, unzipSync, strFromU8 } from 'fflate';
 import { feature } from 'topojson-client';
 
-// Note: We can't import from datasets.js because it uses import.meta.env (Vite-only)
-// Instead, we define the URLs directly here - keep these in sync with src/lib/datasets.js
-
-// Current dataset version - update this when data changes
-const DATASET_VERSION = '20260107';
-
-// Config Portal base URL (always uses Vercel production)
-const CONFIG_PORTAL_URL = "https://buurtdashboard-config-portal.vercel.app";
-const CONFIG_MODE = process.env.PUBLIC_CONFIG_MODE || 'published';
-
-const BUURT_GEOJSON_URL = "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/geojsondata/buurt24IdentificationOnly.json";
-const DEFAULT_INDICATORS_CONFIG_URL = `${CONFIG_PORTAL_URL}/api/config/default-nl/csv?mode=${CONFIG_MODE}`;
-const DEFAULT_CSV_DATA_URL = "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/csvdata/jan26Buurtdashboarddata.csv.gz";
+// Import from datasets.js (single source of truth)
+import {
+  DATASET_VERSION,
+  BUURT_GEOJSON_URL,
+  DEFAULT_CSV_DATA_URL,
+  DEFAULT_INDICATORS_CONFIG_URL
+} from '../src/lib/datasets.js';
 
 // Get __dirname equivalent in ES modules
 const __filename = fileURLToPath(import.meta.url);
