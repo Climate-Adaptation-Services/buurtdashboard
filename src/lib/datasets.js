@@ -28,14 +28,10 @@ export const DEFAULT_DATA_DOWNLOAD_URL = `${S3_BASE_URL}/buurtdashboard-KEA/data
 export const DORDRECHT_DATA_DOWNLOAD_URL = `${S3_BASE_URL}/buurtdashboard-KEA/data-download/Downloadbuurtdashboard_jan26.xlsx`;
 
 // Config mode: 'dev' or 'published' (default)
-// Uses import.meta.env for Vite, falls back to process.env for Node.js scripts
-const getConfigMode = () => {
-  if (typeof import.meta !== 'undefined' && import.meta.env) {
-    return import.meta.env.PUBLIC_CONFIG_MODE || 'published';
-  }
-  return process.env.PUBLIC_CONFIG_MODE || 'published';
-};
+// VITE_ prefix ensures the variable is available at build time
+// This value is baked into the bundle during build
+export const CONFIG_MODE = import.meta.env.VITE_CONFIG_MODE || 'published';
 
 // Indicators config URLs (built with config mode)
-export const DEFAULT_INDICATORS_CONFIG_URL = buildConfigUrl('default-nl', getConfigMode());
-export const DORDRECHT_INDICATORS_CONFIG_URL = buildConfigUrl('dordrecht', getConfigMode());
+export const DEFAULT_INDICATORS_CONFIG_URL = buildConfigUrl('default-nl', CONFIG_MODE);
+export const DORDRECHT_INDICATORS_CONFIG_URL = buildConfigUrl('dordrecht', CONFIG_MODE);
