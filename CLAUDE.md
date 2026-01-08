@@ -33,12 +33,19 @@ Tests located in `/tests/`
 ### Current Dataset
 - **Version**: `20260107` (January 2026)
 - **CSV**: `jan26-Buurtdashboarddata.csv.gz`
-- **Config**: `src/lib/datasets.js` (single source of truth)
+- **Config Portal**: Single source of truth for data URLs
 
 ### Updating Data
-1. Update URLs and `DATASET_VERSION` in `src/lib/datasets.js`
-2. Run `npm run precalculate-nederland`
-3. Commit and deploy
+1. Upload new data files to S3
+2. Update URLs in **Config Portal** (https://buurtdashboard-config-portal.vercel.app)
+   - CSV Data URL
+   - Data Download URL
+3. Publish to production in Config Portal
+4. Update `DATASET_VERSION` in `src/lib/datasets.js`
+5. Run `npm run precalculate-nederland`
+6. Commit and deploy
+
+Note: The app fetches data URLs from the Config Portal JSON API. Fallback URLs in `datasets.js` are only used if the portal is unavailable.
 
 ### Internationalization
 - Dutch config is single source of truth
