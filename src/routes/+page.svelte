@@ -43,6 +43,11 @@
     nederlandAggregates.set(data.nederlandAggregates)
   }
 
+  // Set dashboard config with portal URLs (single source of truth)
+  if (data.dashboardConfig) {
+    configStore.set(data.dashboardConfig)
+  }
+
   let displayedIndicators = []
   let allIndicators = []
   let isInitialized = false

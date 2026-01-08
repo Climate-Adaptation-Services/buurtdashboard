@@ -1,7 +1,7 @@
 import { dsvFormat } from 'd3-dsv'
 import { defaultConfig, dordrechtConfig } from '$lib/config'
 import { unzipSync, gunzipSync, strFromU8 } from 'fflate'
-import { BUURT_GEOJSON_URL, MUNICIPALITY_JSON_URL, DATASET_VERSION } from '$lib/datasets'
+import { BUURT_GEOJSON_URL, MUNICIPALITY_JSON_URL, DATASET_VERSION, fetchDashboardConfig } from '$lib/datasets'
 import { prepareJSONData } from '$lib/services/prepareJSONData'
 
 export async function load({ url }) {
@@ -12,8 +12,25 @@ export async function load({ url }) {
   const lang = searchParams.get('lang');
   const configParam = searchParams.get('config') || 'default';
 
-  // Select the appropriate config object based on URL parameter
-  const configObj = configParam === 'dordrecht' ? dordrechtConfig : defaultConfig;
+  // Select the appropriate local config object (for fallback values)
+  const localConfig = configParam === 'dordrecht' ? dordrechtConfig : defaultConfig;
+
+  // Fetch dashboard config from config portal (single source of truth for URLs)
+  let portalConfig;
+  try {
+    portalConfig = await fetchDashboardConfig(configParam);
+  } catch (err) {
+    console.warn('Failed to fetch config from portal, using fallback:', err.message);
+    portalConfig = null;
+  }
+
+  // Merge portal config with local config (portal takes precedence for URLs)
+  const configObj = {
+    ...localConfig,
+    // Use portal URLs if available, otherwise fall back to local config
+    neighbourhoodCSVdataLocation: portalConfig?.csv_data_url || localConfig.neighbourhoodCSVdataLocation,
+    dataDownloadLocation: portalConfig?.data_download_url || localConfig.dataDownloadLocation
+  };
 
   // Start lightweight fetches (indicators config, CSV, and Nederland aggregates)
   // GeoJSON will be loaded client-side for progressive rendering
@@ -76,6 +93,8 @@ export async function load({ url }) {
     buurtCSVdata,
     nederlandAggregates,
     neighbourhoodGeoJson: null,
-    municipalityGeoJson: null
+    municipalityGeoJson: null,
+    // Pass the merged config so client can update configStore with portal URLs
+    dashboardConfig: configObj
   };
 }

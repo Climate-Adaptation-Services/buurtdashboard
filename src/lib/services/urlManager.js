@@ -60,17 +60,24 @@ export function removeURLParameter() {
 /**
  * Process URL parameters and update stores
  * Note: Only call this after allNeighbourhoodsJSONData is loaded
+ * Note: configStore is now set by +page.svelte with portal URLs, we preserve those URLs
+ *       when switching between default and dordrecht configs
  */
 export function processURLParameters() {
   const configParam = get(URLParams).get("config") || "default";
 
-  // Set the config object in the configStore
+  // Update config while preserving portal URLs that were set by +page.svelte
   setTimeout(() => {
-    if (configParam === "dordrecht") {
-      configStore.set(dordrechtConfig);
-    } else {
-      configStore.set(defaultConfig);
-    }
+    const currentConfig = get(configStore);
+    const baseConfig = configParam === "dordrecht" ? dordrechtConfig : defaultConfig;
+
+    // Merge: use base config but preserve portal URLs if they were set
+    configStore.set({
+      ...baseConfig,
+      // Preserve portal URLs (they take precedence over local fallbacks)
+      neighbourhoodCSVdataLocation: currentConfig.neighbourhoodCSVdataLocation || baseConfig.neighbourhoodCSVdataLocation,
+      dataDownloadLocation: currentConfig.dataDownloadLocation || baseConfig.dataDownloadLocation
+    });
   }, 10);
 
   // Update other parameters - sequential to avoid race conditions
