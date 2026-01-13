@@ -177,9 +177,19 @@ function buildAttributeName(baseAttribute, { year, bebOption, ahnVersion, bebVar
     attributeName = `${attributeName}_${year}`;
   }
 
-  // Add AHN suffix (direct concatenation, no underscore)
+  // Add AHN suffix
+  // Two naming conventions in CSV:
+  // - Old-style (PET, etc): no underscore before AHN (e.g., PET29tm34pAHN4)
+  // - New-style (BKB, SHD, etc): underscore before AHN (e.g., BKBgraad_Tot_percLand_AHN3)
   if (ahnVersion && ahnVersion !== '') {
-    attributeName = `${attributeName}${ahnVersion}`;
+    const underscoreCount = (attributeName.match(/_/g) || []).length;
+    if (underscoreCount >= 1) {
+      // New-style: use underscore
+      attributeName = `${attributeName}_${ahnVersion}`;
+    } else {
+      // Old-style: no underscore
+      attributeName = `${attributeName}${ahnVersion}`;
+    }
   }
 
   // Add BEB suffix (with underscore, read from config not hardcoded)

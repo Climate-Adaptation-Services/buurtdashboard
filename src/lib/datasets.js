@@ -3,7 +3,7 @@
 // This file is imported by both the client app AND Node.js scripts (precalculate-nederland.js)
 
 // Current dataset version
-export const DATASET_VERSION = '20260107';
+export const DATASET_VERSION = '20260113';
 
 // Config Portal base URL (always uses Vercel production)
 export const CONFIG_PORTAL_URL = "https://buurtdashboard-config-portal.vercel.app";
@@ -14,7 +14,8 @@ export const S3_BASE_URL = "https://buurtdashboard-data.s3.eu-north-1.amazonaws.
 // Config mode: 'dev' or 'published' (default)
 // VITE_ prefix ensures the variable is available at build time
 // This value is baked into the bundle during build
-export const CONFIG_MODE = import.meta.env.VITE_CONFIG_MODE || 'published';
+// Uses optional chaining for Node.js compatibility (precalculate-nederland.js)
+export const CONFIG_MODE = (typeof import.meta.env !== 'undefined' && import.meta.env.VITE_CONFIG_MODE) || (typeof process !== 'undefined' && process.env?.VITE_CONFIG_MODE) || 'published';
 
 // Helper to build config portal URLs
 export const buildConfigCsvUrl = (slug, configMode) =>
@@ -52,7 +53,7 @@ export const DORDRECHT_INDICATORS_CONFIG_URL = buildConfigCsvUrl('dordrecht', CO
 
 // Legacy exports for backwards compatibility with precalculate-nederland.js script
 // These are fallback URLs - the app now fetches URLs from config portal
-export const DEFAULT_CSV_DATA_URL = `${S3_BASE_URL}/buurtdashboard-KEA/csvdata/jan26-Buurtdashboarddata.csv.gz`;
+export const DEFAULT_CSV_DATA_URL = `${S3_BASE_URL}/buurtdashboard-KEA/csvdata/Buurt2024BuurtdashboardDataset20260113RMK(c02Buurt2024BuurtdashboardDatas)2.csv.gz`;
 export const DORDRECHT_CSV_DATA_URL = `${S3_BASE_URL}/dordrecht-rmk/csvdata/Dordrecht_RMK_011225(b11buurt).csv.gz`;
 export const DEFAULT_DATA_DOWNLOAD_URL = `${S3_BASE_URL}/buurtdashboard-KEA/data-download/Downloadbuurtdashboard_jan26.xlsx`;
 export const DORDRECHT_DATA_DOWNLOAD_URL = `${S3_BASE_URL}/buurtdashboard-KEA/data-download/Downloadbuurtdashboard_jan26.xlsx`;

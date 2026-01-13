@@ -1,6 +1,6 @@
 {
-  "version": "20260107",
-  "generatedAt": "2026-01-07T09:26:38.627Z",
+  "version": "20260113",
+  "generatedAt": "2026-01-13T16:21:40.656Z",
   "aggregates": {
     "Gevoelstemperatuur": {
       "AHN2": {
@@ -39,16 +39,16 @@
     },
     "Droge verdiepingen": 94,
     "Boomkroonoppervlakte": {
-      "hele_buurt": 11.12972323,
-      "bebouwde_kom": 12.321464259999999
+      "hele_buurt": 10.100646130000001,
+      "bebouwde_kom": 10.890490345
     },
     "Boomkroonoppervlakte openbaar": {
-      "hele_buurt": 22.406581674999998,
-      "bebouwde_kom": 19.77986676
+      "hele_buurt": 19.935536115,
+      "bebouwde_kom": 17.057854965
     },
     "Boomkroonoppervlakte niet-openbaar ": {
-      "hele_buurt": 6.555428398,
-      "bebouwde_kom": 9.3245958025
+      "hele_buurt": 6.272154983,
+      "bebouwde_kom": 8.774644186
     },
     "Groen": {
       "hele_buurt": 22.43230312,
@@ -109,6 +109,42 @@
     "Ernstige eenzaamheid": 8.7,
     "Moeite met rondkomen": 9.7,
     "Ernstig overgewicht": 14.4,
-    "Percentage huurwoningen": 26
+    "Percentage huurwoningen": 26,
+    "Schaduw totaal": {
+      "hele_buurt": 29.47395992,
+      "bebouwde_kom": 32.461944564999996
+    },
+    "Schaduw groen en grijs": {
+      "hele_buurt": {
+        "Grijze schaduw": 9.137973109557143,
+        "Groene schaduw": 19.91566861340563
+      },
+      "bebouwde_kom": {
+        "Grijze schaduw": -533.3262953044,
+        "Groene schaduw": -522.8475317392584
+      }
+    },
+    "Schaduw openbaar gebied": {
+      "hele_buurt": 37.37243263,
+      "bebouwde_kom": 34.65770335
+    },
+    "Schaduw niet-openbaar gebied": {
+      "hele_buurt": 27.485196555,
+      "bebouwde_kom": 34.961613889999995
+    },
+    "10% en 30% regel": {
+      "hele_buurt": {
+        "Voldoet aan 10%": 10.93247863265965,
+        "Voldoet aan 30%": 47.05462763166893
+      },
+      "bebouwde_kom": {
+        "Voldoet aan 10%": -797.248732721762,
+        "Voldoet aan 30%": 45.5482123299982
+      }
+    },
+    "Percentage boomkroon per pand": {
+      "hele_buurt": 10.779146525,
+      "bebouwde_kom": 10.247070820000001
+    }
   }
 }

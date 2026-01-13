@@ -31,8 +31,8 @@ Tests located in `/tests/`
 ## Data Management
 
 ### Current Dataset
-- **Version**: `20260107` (January 2026)
-- **CSV**: `jan26-Buurtdashboarddata.csv.gz`
+- **Version**: `20260113` (January 2026)
+- **CSV**: `Buurt2024BuurtdashboardDataset20260113RMK(c02Buurt2024BuurtdashboardDatas)2.csv.gz`
 - **Config Portal**: Single source of truth for data URLs
   - **Live**: https://buurtdashboard-config-portal.vercel.app
   - **Source**: `../buurtdashboard-config-portal/` (sibling folder)
@@ -92,8 +92,10 @@ Configured for **Vercel** deployment with `@sveltejs/adapter-vercel`.
 
 ### Data Not Showing
 - Check CSV column names match config `attribute` field
-- Verify semicolon-separated format with Dutch decimal comma
+- Verify semicolon-separated format (decimal format can be dot or comma)
 - Check browser console for errors
+- AHN column naming: old-style uses no underscore (`PET29tm34pAHN4`), new-style uses underscore (`BKBgraad_Tot_percLand_AHN3`)
+- Percentage values: 0-1 decimals are auto-converted to 0-100 percentages
 
 ### Map Issues
 - Verify GeoJSON loaded in stores
