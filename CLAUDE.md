@@ -34,6 +34,8 @@ Tests located in `/tests/`
 - **Version**: `20260107` (January 2026)
 - **CSV**: `jan26-Buurtdashboarddata.csv.gz`
 - **Config Portal**: Single source of truth for data URLs
+  - **Live**: https://buurtdashboard-config-portal.vercel.app
+  - **Source**: `../buurtdashboard-config-portal/` (sibling folder)
 
 ### Updating Data
 1. Upload new data files to S3

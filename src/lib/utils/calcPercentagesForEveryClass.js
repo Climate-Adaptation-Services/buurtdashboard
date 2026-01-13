@@ -63,6 +63,12 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
         let value = +propertyValue
         const originalValue = value
 
+        // Handle 0-1 decimal format: convert to 0-100 percentage
+        // Most percentage columns are stored as decimals (e.g., 0.037 = 3.7%)
+        if (value >= 0 && value <= 1) {
+          value = value * 100
+        }
+
         // Sanity check: For percentage data, values should be 0-100
         // Values > 100 are likely data errors (e.g., 10099 instead of 100)
         if (value > 100 && value < 10000) {
@@ -102,9 +108,6 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
   // Divide by total number of neighborhoods to get average
   totalSumPerClass.forEach(kl => {
     kl.som = totalCount > 0 ? (kl.som / totalCount) : 0
-    if (indicator.title === t('Gevoelstemperatuur') || indicator.title === 'Gevoelstemperatuur') {
-      kl.som *= 100
-    }
   })
 
   // we stoppen het resultaat per klasse in een dictionary

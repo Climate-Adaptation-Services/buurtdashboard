@@ -24,8 +24,19 @@ export function getIndicatorAttribute(indicator, attribute, specificYear) {
   if (yearToUse && yearToUse !== '') {
     // Check if this is an AHN version (starts with "AHN") or a regular year (numeric)
     if (yearToUse.startsWith('AHN')) {
-      // For AHN versions: no underscore (e.g., PET29tm34pAHN4)
-      resultAttribute = resultAttribute + yearToUse;
+      // AHN versions have two naming conventions in the CSV data:
+      // - Old-style (PET, etc): no underscore before AHN (e.g., PET29tm34pAHN4)
+      // - New-style (BKB, SHD, etc): underscore before AHN (e.g., BKBgraad_Tot_percLand_AHN3)
+      // Detect by checking if attribute ends with underscore-separated component
+      // New style attributes typically have multiple underscore-separated parts
+      const underscoreCount = (resultAttribute.match(/_/g) || []).length
+      if (underscoreCount >= 1 && resultAttribute.includes('_')) {
+        // New-style: use underscore (e.g., BKBgraad_Tot_percLand_AHN3)
+        resultAttribute = resultAttribute + '_' + yearToUse;
+      } else {
+        // Old-style: no underscore (e.g., PET29tm34pAHN4)
+        resultAttribute = resultAttribute + yearToUse;
+      }
     } else {
       // For regular years: use underscore (e.g., attribute_2020)
       resultAttribute = resultAttribute + '_' + yearToUse;
