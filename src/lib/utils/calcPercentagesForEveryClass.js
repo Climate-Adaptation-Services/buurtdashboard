@@ -61,28 +61,9 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
       // Use isValidValue to filter out -9999 and other invalid values
       if (isValidValue(propertyValue)) {
         let value = +propertyValue
-        const originalValue = value
 
-        // Handle 0-1 decimal format: convert to 0-100 percentage
-        // Most percentage columns are stored as decimals (e.g., 0.037 = 3.7%)
-        if (value >= 0 && value <= 1) {
-          value = value * 100
-        }
-
-        // Sanity check: For percentage data, values should be 0-100
-        // Values > 100 are likely data errors (e.g., 10099 instead of 100)
-        if (value > 100 && value < 10000) {
-          // Common error pattern: extra digit(s) added (10099 -> 100, 999 -> 99)
-          // Try to fix by removing extra leading digit
-          const strValue = value.toString()
-          if (strValue.startsWith('100') && strValue.length > 3) {
-            value = 100 // 10099 -> 100
-          } else if (strValue.length === 3 && value > 100) {
-            value = parseFloat(strValue.substring(1)) // 999 -> 99
-          }
-        }
-
-        // Only use valid percentage values (0-100)
+        // Data is already in percentage format (0-100), no conversion needed
+        // Values should be between 0 and 100
         if (value >= 0 && value <= 100) {
           noData = false
           // pak de klasse erbij in totalSumPerClass
