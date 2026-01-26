@@ -196,7 +196,7 @@
     </div>
 
     <div class="indicators" style="margin-left:{screenWidth > 800 ? 400 : 0}px">
-      {#each displayedIndicators as indicator}
+      {#each displayedIndicators as indicator (indicator.title)}
         {#if getIndicatorAttribute(indicator, indicator.attribute)}
           <div class="indicator" style="height:{indicatorHeight}px">
             <Indicator {indicatorHeight} {indicator} isLoading={isLoadingGeoJSON} />
