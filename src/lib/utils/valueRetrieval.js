@@ -16,9 +16,9 @@ export function isValidValue(value) {
   if (isNaN(value)) {
     return false
   }
-  // Treat -9999 as missing/invalid data (common convention)
+  // Treat -9999, -9995, -9991 as missing/invalid data (common convention)
   const numValue = typeof value === 'number' ? value : parseFloat(value)
-  if (numValue === -9999) {
+  if (numValue === -9999 || numValue === -9995 || numValue === -9991) {
     return false
   }
   return true
