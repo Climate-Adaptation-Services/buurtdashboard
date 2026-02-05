@@ -1,7 +1,21 @@
 {
   "version": "20260113",
-  "generatedAt": "2026-01-13T16:21:40.656Z",
+  "generatedAt": "2026-02-05T10:05:59.401Z",
   "aggregates": {
+    "Schaduw fiets- en wandelpaden": {
+      "hele_buurt": 35.291052265000005,
+      "bebouwde_kom": 35.68065881
+    },
+    "Schaduw fiets- en wandelpaden: groen en grijs": {
+      "hele_buurt": {
+        "Grijze schaduw": -1222.2966750374515,
+        "Groene schaduw": -1204.3061638267284
+      },
+      "bebouwde_kom": {
+        "Grijze schaduw": -886.1854114250763,
+        "Groene schaduw": -870.4744817584365
+      }
+    },
     "Gevoelstemperatuur": {
       "AHN2": {
         "31 - 34°C": 7.079539850867753,
@@ -30,7 +44,6 @@
     "Extreem lage grondwaterstand ": 1.8777691275000001,
     "Hoge grondwaterstand ": 1.098987579,
     "Extreem hoge grondwaterstand ": 0.733189174,
-    "Schaduw wandel- en fietspaden": 40.833796245,
     "Maximale overstromingsdiepte": {
       "tot 20cm": 6.846912936532617,
       "20-50cm": 9.244197064290205,
@@ -135,11 +148,11 @@
     "10% en 30% regel": {
       "hele_buurt": {
         "Voldoet aan 10%": 10.93247863265965,
-        "Voldoet aan 30%": 47.05462763166893
+        "Voldoet aan 30%": -36.12214899899262
       },
       "bebouwde_kom": {
         "Voldoet aan 10%": -797.248732721762,
-        "Voldoet aan 30%": 45.5482123299982
+        "Voldoet aan 30%": -842.7969450517644
       }
     },
     "Percentage boomkroon per pand": {
