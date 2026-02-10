@@ -121,7 +121,12 @@
       on:click|stopPropagation
     />
     {#if $indicatorsSelection.length === 0}
-      <button class="year-filter-btn" on:click|stopPropagation={selectAllWithYears}>Monitoring over tijd</button>
+      <div class="year-filter-wrapper">
+        <button class="year-filter-btn" on:click|stopPropagation={selectAllWithYears}>Monitoring over tijd</button>
+        <div class="year-filter-tooltip">
+          Klik om alle indicatoren te selecteren waarvoor data beschikbaar is voor meerdere jaren, zodat je ontwikkelingen over tijd kunt analyseren.
+        </div>
+      </div>
     {:else}
       <button class="clear-all-btn" on:click|stopPropagation={clearAll}>×</button>
     {/if}
@@ -235,6 +240,13 @@
     opacity: 0.7;
   }
 
+  .year-filter-wrapper {
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
   .year-filter-btn {
     background: white;
     color: #36575a;
@@ -243,16 +255,36 @@
     cursor: pointer;
     font-size: 11px;
     padding: 4px 8px;
-    position: absolute;
-    right: 4px;
-    top: 50%;
-    transform: translateY(-50%);
     font-weight: 500;
     white-space: nowrap;
   }
 
   .year-filter-btn:hover {
     background: #e0e0e0;
+  }
+
+  .year-filter-tooltip {
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    width: 250px;
+    background-color: white;
+    color: #333;
+    padding: 10px 15px;
+    border-radius: 10px;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    font-size: 12px;
+    line-height: 1.4;
+    z-index: 1001;
+    top: 100%;
+    right: 0;
+    margin-top: 8px;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+  }
+
+  .year-filter-wrapper:hover .year-filter-tooltip {
+    visibility: visible;
+    opacity: 1;
   }
 
   .dropdown-menu {
