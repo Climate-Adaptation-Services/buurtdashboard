@@ -11,6 +11,9 @@
   let isOpen = false
   let dropdownRef
 
+  // Indicators with year/AHN variants
+  $: indicatorsWithYears = allIndicators.filter(ind => ind.AHNversie && ind.AHNversie.length > 0)
+
   // Group indicators by category
   const indicatorsByCategory = categories.map(category => ({
     category,
@@ -71,6 +74,23 @@
     removeURLParameter()
   }
 
+  function selectAllWithYears() {
+    // Get all indicator titles that have AHN/year variants
+    const titlesWithYears = indicatorsWithYears.map(ind => ind.title)
+
+    // Set indicatorsSelection store
+    $indicatorsSelection = titlesWithYears
+
+    // Update URL params
+    const newParams = new URLSearchParams($URLParams)
+    newParams.delete("indicator")
+    titlesWithYears.forEach(title => {
+      newParams.append("indicator", title)
+    })
+    $URLParams = newParams
+    addURLParameter()
+  }
+
   // Close dropdown when clicking outside
   function handleClickOutside(event) {
     if (dropdownRef && !dropdownRef.contains(event.target)) {
@@ -100,7 +120,9 @@
       on:focus={() => isOpen = true}
       on:click|stopPropagation
     />
-    {#if $indicatorsSelection.length > 0}
+    {#if $indicatorsSelection.length === 0}
+      <button class="year-filter-btn" on:click|stopPropagation={selectAllWithYears}>Monitoring over tijd</button>
+    {:else}
       <button class="clear-all-btn" on:click|stopPropagation={clearAll}>×</button>
     {/if}
   </div>
@@ -178,11 +200,12 @@
 
   .input-container input {
     flex: 1;
-    min-width: 100px;
+    min-width: 80px;
     border: none;
     outline: none;
     font-size: 12px;
     padding: 4px;
+    padding-right: 70px;
     color: white;
     background: transparent;
   }
@@ -210,6 +233,26 @@
 
   .clear-all-btn:hover {
     opacity: 0.7;
+  }
+
+  .year-filter-btn {
+    background: white;
+    color: #36575a;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 11px;
+    padding: 4px 8px;
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .year-filter-btn:hover {
+    background: #e0e0e0;
   }
 
   .dropdown-menu {

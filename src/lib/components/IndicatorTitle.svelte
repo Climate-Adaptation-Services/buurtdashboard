@@ -16,7 +16,7 @@
 
 <div class="indicator-title" class:both-switches={hasBothSwitches} style="height: {titleHeight}px">
   <!-- <h4 class="category">{t("Categorie")}: {indicator.category}</h4> -->
-  <h2 class="title" class:long-title={indicator.title.length > 25} style="background-color:{$configStore.mainColor}">
+  <h2 class="title" class:long-title={indicator.title.length > 25} class:extra-long-title={indicator.title.length > 40} style="background-color:{$configStore.mainColor}">
     {indicator.title}
   </h2>
   <h4 class="subtitle">
@@ -62,6 +62,10 @@
 
   .title.long-title {
     font-size: 1.2rem;
+  }
+
+  .title.extra-long-title {
+    font-size: 0.9rem;
   }
 
   .subtitle {
