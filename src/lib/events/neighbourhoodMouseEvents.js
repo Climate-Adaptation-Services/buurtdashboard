@@ -19,7 +19,9 @@ import {
   getAHNSelection,
   isValidValue,
   getPopupValue,
-  formatM2Value
+  formatM2Value,
+  isSpecificNoDataReason,
+  isAnyNoData
 } from '../utils/valueRetrieval.js';
 
 export function mouseOver(e, feature, indicator, mapType, indicatorValueColorscale, projection, beeswarmMargin) {
@@ -149,18 +151,24 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
       } else {
         // MIGRATED: Use centralized categorical value retrieval
         tooltipValue = getCategoricalValue(feature, indicator)
-        
+
         // Handle special case for flood depth indicator
         if (indicator.title === 'Maximale overstromingsdiepte' && tooltipValue === 'No data') {
           tooltipValue = 'Geen'
         }
-        
+
+        // Translate specific no-data reasons using centralized check
+        if (isSpecificNoDataReason(tooltipValue)) {
+          tooltipValue = t(tooltipValue)
+        }
+
         // Get color for categorical value (use getRawValue for Dordrecht AHN underscore naming)
         const categoricalValue = indicator.aggregatedIndicator
           ? getMostCommonClass(indicator, feature)
           : getClassByIndicatorValue(indicator, getRawValue(feature, indicator))
-        
-        tooltipValueColor = indicatorValueColorscale(categoricalValue)
+
+        // Use gray color for no-data values (using centralized check)
+        tooltipValueColor = isAnyNoData(categoricalValue) ? '#cccccc' : indicatorValueColorscale(categoricalValue)
         tooltipIndicator = indicator.title
       }
 

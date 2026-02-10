@@ -1,12 +1,13 @@
 import { getIndicatorAttribute } from "./getIndicatorAttribute";
+import { getNoDataReason, isValidValue } from "./valueRetrieval.js";
 
 // Function to determine the color of a neighbourhood in aggregated indicator maps
 export function getMostCommonClass(indicator, feature) {
 
-
-
   let mostCommon = ''
   let highestValue = 0
+  let firstNoDataReason = null
+
   Object.keys(indicator.classes).forEach(key => {
     const attribute = getIndicatorAttribute(indicator, indicator.classes[key])
     let value = feature.properties?.[attribute]
@@ -28,7 +29,16 @@ export function getMostCommonClass(indicator, feature) {
       }
     }
 
-    if (+value > highestValue) {
+    // Check for specific no-data codes before processing
+    if (!firstNoDataReason && value !== null && value !== undefined && value !== '') {
+      const reason = getNoDataReason(value)
+      if (reason && reason !== 'no_data' && reason !== null) {
+        firstNoDataReason = reason
+      }
+    }
+
+    // Only count valid values (skip no-data codes)
+    if (isValidValue(value) && +value > highestValue) {
       highestValue = +value
       mostCommon = key
     }
@@ -36,7 +46,8 @@ export function getMostCommonClass(indicator, feature) {
 
 
   if (mostCommon === '') {
-    return 'No data'
+    // Return specific no-data reason if found, otherwise generic 'No data'
+    return firstNoDataReason || 'No data'
   }
 
 

@@ -8,6 +8,41 @@ import { getIndicatorAttribute } from './getIndicatorAttribute.js'
 import { getMostCommonClass } from './getMostCommonClass.js'
 import { getClassByIndicatorValue } from './getClassByIndicatorValue.js'
 
+// No-data code meanings - single source of truth
+// -9991: No slow traffic route in this neighbourhood
+// -9995: No AHN5 data available
+// -9999: No built-up area (bebouwde kom) in this neighbourhood
+export const NO_DATA_CODES = {
+  '-9991': 'no_slow_traffic_route',
+  '-9995': 'no_ahn5_data',
+  '-9999': 'no_bebouwde_kom'
+}
+
+// List of all specific no-data reason keys (for checking if a value is a no-data reason)
+export const NO_DATA_REASON_KEYS = Object.values(NO_DATA_CODES)
+
+// Get the specific reason for no-data based on the code
+export function getNoDataReason(value) {
+  if (value === null || value === undefined || value === '' || value === 'null') {
+    return 'no_data'
+  }
+  const numValue = typeof value === 'number' ? value : parseFloat(value)
+  if (isNaN(numValue)) return 'no_data'
+
+  const reason = NO_DATA_CODES[String(Math.round(numValue))]
+  return reason || null // Return reason if found, null if value is valid
+}
+
+// Check if a value is a specific no-data reason (not generic 'no_data' or 'No data')
+export function isSpecificNoDataReason(value) {
+  return NO_DATA_REASON_KEYS.includes(value)
+}
+
+// Check if a value is any kind of no-data (specific reason, generic, or 'No data')
+export function isAnyNoData(value) {
+  return value === 'No data' || value === 'no_data' || NO_DATA_REASON_KEYS.includes(value)
+}
+
 // Utilities
 export function isValidValue(value) {
   if (value === null || value === undefined || value === '' || value === 'null') {
@@ -16,12 +51,9 @@ export function isValidValue(value) {
   if (isNaN(value)) {
     return false
   }
-  // Treat -9999, -9995, -9991 as missing/invalid data (common convention)
+  // Check if value is a no-data code using centralized lookup
   const numValue = typeof value === 'number' ? value : parseFloat(value)
-  if (numValue === -9999 || numValue === -9995 || numValue === -9991) {
-    return false
-  }
-  return true
+  return !NO_DATA_CODES[String(Math.round(numValue))]
 }
 
 export function toNumber(value, defaultValue = null) {

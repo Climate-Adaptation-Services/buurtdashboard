@@ -3,6 +3,8 @@
   import { neighbourhoodSelection, municipalitySelection, allNeighbourhoodsJSONData, getIndicatorStore } from "$lib/stores"
   import { onMount } from 'svelte'
   import { getRegionName } from "$lib/utils/getRegionName"
+  import { getNoDataReason, isSpecificNoDataReason } from "$lib/utils/valueRetrieval.js"
+  import { t } from "$lib/i18n/translate.js"
 
   export let graphWidth
   export let indicatorHeight
@@ -13,6 +15,7 @@
   export let xScaleStats
   export let medianValue // Display value (unit-converted)
   export let scaleValue = medianValue // Scale value (original %) for positioning - defaults to medianValue for backward compatibility
+  export let rawValue = null // Raw value for determining specific no-data reason
   export let indicatorValueColorscale
 
   // Determine if we're in difference mode
@@ -20,8 +23,15 @@
   $: indicatorStore = getIndicatorStore(indicator.dutchTitle || indicator.title)
   $: currentAHNSelection = $indicatorStore
   $: isDifferenceMode = currentAHNSelection && currentAHNSelection.isDifference
-  
-  $: displayValue = medianValue !== "Geen data" ? Math.round(medianValue * 100) / 100 : "Geen data"
+
+  // Get the specific no-data reason text
+  $: noDataText = (() => {
+    if (medianValue !== "Geen data") return null
+    const reason = getNoDataReason(rawValue)
+    return isSpecificNoDataReason(reason) ? t(reason) : "Geen data"
+  })()
+
+  $: displayValue = medianValue !== "Geen data" ? Math.round(medianValue * 100) / 100 : noDataText
   
 
 
@@ -184,7 +194,7 @@
         text-anchor={textAnchor}
         fill={isDifferenceMode ? (medianValue > 0 ? "#4682b4" : medianValue < 0 ? "#E1575A" : "#666666") : "#645f5e"}
       >
-        {displayValue !== "Geen data" ? textPlus + displayValue : "Geen data"}
+        {typeof displayValue === 'number' ? textPlus + displayValue : displayValue}
       </text>
     {/if}
   </g>

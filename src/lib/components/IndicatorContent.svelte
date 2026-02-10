@@ -101,7 +101,8 @@
             indicatorValueColorscale = scaleLinear().domain(domain).range(indicator.color.range)
           }
         } else {
-          indicatorValueColorscale = scaleOrdinal().domain(indicator.color.domain).range(indicator.color.range)
+          // Use .unknown() to set gray color for no-data values (no_slow_traffic_route, no_ahn5_data, no_bebouwde_kom, No data)
+          indicatorValueColorscale = scaleOrdinal().domain(indicator.color.domain).range(indicator.color.range).unknown('#cccccc')
         }
       } // Close memoization key check
     } // Close main if block

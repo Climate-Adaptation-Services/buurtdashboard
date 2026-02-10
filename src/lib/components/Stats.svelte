@@ -16,7 +16,7 @@
   import { scaleLinear, min, max } from "d3"
   import { calcMedian, calcAverage } from "$lib/utils/calcMedian"
   // MIGRATED: Import centralized value retrieval functions
-  import { getNumericalValue, getDifferenceValue, getIndicatorAttribute, toNumber, isValidValue, getRawValue } from "$lib/utils/valueRetrieval.js"
+  import { getNumericalValue, getDifferenceValue, getIndicatorAttribute, toNumber, isValidValue, getRawValue, getNoDataReason } from "$lib/utils/valueRetrieval.js"
 
   export let bodyHeight
   export let indicator
@@ -127,17 +127,18 @@
     
     // Neighborhood and district type calculations - DISPLAY VALUES (unit-converted)
     let buurtValue = 0
+    let buurtRawValueForNoData = null // Store raw value to determine no-data reason
     let wijktypeMedian = 0
 
     if ($neighbourhoodSelection !== null && $allNeighbourhoodsJSONData && $allNeighbourhoodsJSONData.features && currentAHNSelection) {
       const neighbourhoodFilter = $allNeighbourhoodsJSONData.features.filter(
         (neighbourhood) => neighbourhood?.properties && neighbourhood.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection
       )
-      
+
       if (isDifferenceMode) {
         const diffValue = getDifferenceValue(neighbourhoodFilter[0], indicator)
         buurtValue = diffValue !== null ? Math.round(diffValue * 100) / 100 : "Geen data"
-        
+
         wijktypeMedian = calcMedian(
           $districtTypeJSONData.features
             .map((neighbourhood) => getDifferenceValue(neighbourhood, indicator))
@@ -145,10 +146,12 @@
         )
       } else {
         const feature = neighbourhoodFilter[0]
-        let buurtRawValue = getNumericalValue(feature, indicator)
+        // Get raw value first to check no-data reason
+        buurtRawValueForNoData = getRawValue(feature, indicator)
+        let buurtNumericalValue = getNumericalValue(feature, indicator)
 
-        buurtValue = buurtRawValue !== null
-          ? Math.round(buurtRawValue * 100) / 100
+        buurtValue = buurtNumericalValue !== null
+          ? Math.round(buurtNumericalValue * 100) / 100
           : "Geen data"
 
         wijktypeMedian = calcMedian(
@@ -158,12 +161,13 @@
         )
       }
     }
-    
+
     const result = {
       medianValueNederland: nederlandMedian,
       medianValueGemeente: gemeenteMedian,
       medianValueBuurt: buurtValue,
       medianValueWijktype: wijktypeMedian,
+      rawValueBuurt: buurtRawValueForNoData, // Pass raw value for no-data reason detection
     }
     return result
   })()
@@ -413,6 +417,7 @@
       regio="Buurt"
       medianValue={medianValuesDict["medianValueBuurt"]}
       scaleValue={scaleValuesDict["medianValueBuurt"]}
+      rawValue={medianValuesDict["rawValueBuurt"]}
       {xScaleStats}
     />
   </div>

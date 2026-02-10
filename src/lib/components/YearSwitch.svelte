@@ -1,5 +1,7 @@
 <script>
   import { getIndicatorStore, selectedNeighbourhoodJSONData, neighbourhoodsInMunicipalityJSONData, configStore, municipalitySelection, allNeighbourhoodsJSONData } from "$lib/stores"
+  import { isValidValue } from "$lib/utils/valueRetrieval.js"
+  import { getIndicatorAttribute } from "$lib/utils/getIndicatorAttribute.js"
 
   export let indicator
 
@@ -85,17 +87,31 @@
     return ranges.join(", ")
   }
 
+  // Helper function to check if a neighbourhood has valid data for a specific AHN version
+  function hasValidDataForAHN(neighbourhoodData, ahn) {
+    if (!neighbourhoodData?.properties) return false
+
+    // Build the attribute name for this AHN version
+    const attribute = getIndicatorAttribute(indicator, indicator.attribute, ahn)
+    const value = neighbourhoodData.properties[attribute]
+
+    // Check if the value is valid (not -9991, -9995, -9999, null, etc.)
+    return isValidValue(value)
+  }
+
   // Update options when data changes, initialize store if needed
   $: {
     if ($selectedNeighbourhoodJSONData) {
-      // For a selected neighborhood, get years and format them consistently
-      options = ahnVersions.map((ahn) => {
-        const jaarData = $selectedNeighbourhoodJSONData.properties["Jaar" + ahn];
-        return {
-          AHN: ahn,
-          Jaar: jaarData ? formatYears(jaarData) : (ahnYearMapping[ahn] || ahn) // Use hardcoded year or AHN version
-        };
-      })
+      // For a selected neighborhood, only show AHN versions for which the buurt has valid data
+      options = ahnVersions
+        .filter((ahn) => hasValidDataForAHN($selectedNeighbourhoodJSONData, ahn))
+        .map((ahn) => {
+          const jaarData = $selectedNeighbourhoodJSONData.properties["Jaar" + ahn];
+          return {
+            AHN: ahn,
+            Jaar: jaarData ? formatYears(jaarData) : (ahnYearMapping[ahn] || ahn) // Use hardcoded year or AHN version
+          };
+        })
     } else if ($neighbourhoodsInMunicipalityJSONData) {
       findAHNyearsWithoutDuplicatesAndSort()
     } else if ($allNeighbourhoodsJSONData) {
@@ -103,13 +119,32 @@
     }
 
     // Initialize store with latest available year if no selection exists
-    if (options.length > 0 && !currentSelection.baseYear) {
-      indicatorStore.set({
-        baseYear: options[options.length - 1].AHN,
-        compareYear: null,
-        isDifference: false,
-        beb: 'hele_buurt'
-      })
+    // OR update selection if current selection is no longer available in options
+    if (options.length > 0) {
+      const currentBaseYearAvailable = options.some(opt => opt.AHN === currentSelection.baseYear)
+      const currentCompareYearAvailable = currentSelection.compareYear ? options.some(opt => opt.AHN === currentSelection.compareYear) : true
+
+      if (!currentSelection.baseYear || !currentBaseYearAvailable) {
+        // Select latest available year
+        const latestOption = options[options.length - 1]
+        indicatorStore.set({
+          baseYear: latestOption.AHN,
+          compareYear: null,
+          isDifference: false,
+          beb: currentSelection.beb || 'hele_buurt'
+        })
+        selectedAHN = latestOption.AHN
+        selectedDifference = "Difference"
+      } else if (currentSelection.isDifference && !currentCompareYearAvailable) {
+        // Compare year no longer available, disable difference mode
+        indicatorStore.set({
+          baseYear: currentSelection.baseYear,
+          compareYear: null,
+          isDifference: false,
+          beb: currentSelection.beb
+        })
+        selectedDifference = "Difference"
+      }
     }
   }
 
