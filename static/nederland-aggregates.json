@@ -1,7 +1,17 @@
 {
-  "version": "20260204",
-  "generatedAt": "2026-02-05T13:27:44.312Z",
+  "version": "20260210",
+  "generatedAt": "2026-02-10T16:04:52.077Z",
   "aggregates": {
+    "Schaduw fiets- en wandelpaden: groen en grijs": {
+      "hele_buurt": {
+        "Grijze schaduw": -1218.4014161038233,
+        "Groene schaduw": -1202.585602295532
+      },
+      "bebouwde_kom": {
+        "Grijze schaduw": -886.4872047383109,
+        "Groene schaduw": -872.2951276018108
+      }
+    },
     "Gevoelstemperatuur": {
       "AHN2": {
         "31 - 34°C": 7.079539850867753,
@@ -19,18 +29,8 @@
       }
     },
     "Schaduw fiets- en wandelpaden": {
-      "hele_buurt": 32.991261769999994,
+      "hele_buurt": 32.99496488,
       "bebouwde_kom": 33.60260617
-    },
-    "Schaduw fiets- en wandelpaden: groen en grijs": {
-      "hele_buurt": {
-        "Grijze schaduw": -1221.8264845678552,
-        "Groene schaduw": -1206.0299526106965
-      },
-      "bebouwde_kom": {
-        "Grijze schaduw": -887.8593743554372,
-        "Groene schaduw": -873.6672972189372
-      }
     },
     "Waterdiepte bij hevige bui": {
       "5 - 10cm": 7.8490293624262355,
@@ -56,58 +56,27 @@
       "bebouwde_kom": 10.890490345
     },
     "Boomkroonoppervlakte openbaar": {
-      "hele_buurt": 19.935536115,
+      "hele_buurt": 19.93800308,
       "bebouwde_kom": 17.057854965
     },
     "Boomkroonoppervlakte niet-openbaar ": {
-      "hele_buurt": 6.272154983,
+      "hele_buurt": 6.271943993500001,
       "bebouwde_kom": 8.774644186
     },
-    "Groen": {
-      "hele_buurt": 22.43230312,
-      "bebouwde_kom": {}
-    },
-    "Groen openbaar": {
-      "hele_buurt": 51.44659106,
-      "bebouwde_kom": {}
-    },
-    "Groen niet-openbaar": {
-      "hele_buurt": 13.26696927,
-      "bebouwde_kom": {}
-    },
-    "Verharding ": {
-      "hele_buurt": 31.37530482,
-      "bebouwde_kom": {}
-    },
-    "Verharding openbaar": {
-      "hele_buurt": 40.519949315,
-      "bebouwde_kom": {}
-    },
-    "Verharding niet-openbaar": {
-      "hele_buurt": 34.76862001,
-      "bebouwde_kom": {}
-    },
-    "Water": {
-      "hele_buurt": 3.7402805795000003,
-      "bebouwde_kom": {}
-    },
+    "Groen": 22.43230312,
+    "Groen openbaar": 51.44659106,
+    "Groen niet-openbaar": 13.26696927,
+    "Verharding ": 31.37530482,
+    "Verharding openbaar": 40.519949315,
+    "Verharding niet-openbaar": 34.76862001,
+    "Water": 3.7402805795000003,
     "Landbedekking ": {
-      "hele_buurt": {
-        "Gebouwen": 13.943662170889672,
-        "Verhard": 27.97771498465827,
-        "Halfverhard": 0.7887654330560419,
-        "Onverhard": 44.69243354048655,
-        "Gras": 9.36568814594543,
-        "Struiken": 3.231735724572109
-      },
-      "bebouwde_kom": {
-        "Gebouwen": null,
-        "Verhard": null,
-        "Halfverhard": null,
-        "Onverhard": null,
-        "Gras": null,
-        "Struiken": null
-      }
+      "Gebouwen": 13.943662170889672,
+      "Verhard": 27.97771498465827,
+      "Halfverhard": 0.7887654330560419,
+      "Onverhard": 44.69243354048655,
+      "Gras": 9.36568814594543,
+      "Struiken": 3.231735724572109
     },
     "Openbaar en niet-openbaar": {
       "Gebouwen": 13.88668405919523,
@@ -119,18 +88,17 @@
     "Gemiddelde WOZ-waarde": 337,
     "Sociaal minimum huishoudens": 4,
     "Hitte en broze 65-plussers": 24.3,
-    "Ernstige eenzaamheid": 8.7,
     "Moeite met rondkomen": 9.7,
     "Ernstig overgewicht": 14.4,
     "Percentage huurwoningen": 26,
     "Schaduw totaal": {
-      "hele_buurt": 29.47395992,
+      "hele_buurt": 29.472744165,
       "bebouwde_kom": 32.461944564999996
     },
     "Schaduw groen en grijs": {
       "hele_buurt": {
-        "Grijze schaduw": 9.137973109557143,
-        "Groene schaduw": 19.91566861340563
+        "Grijze schaduw": 9.136572638908522,
+        "Groene schaduw": 19.914964950314985
       },
       "bebouwde_kom": {
         "Grijze schaduw": -520.9767687502629,
@@ -138,7 +106,7 @@
       }
     },
     "Schaduw openbaar gebied": {
-      "hele_buurt": 37.37243263,
+      "hele_buurt": 37.375338035,
       "bebouwde_kom": 34.65770335
     },
     "Schaduw niet-openbaar gebied": {
@@ -147,8 +115,8 @@
     },
     "10% en 30% regel": {
       "hele_buurt": {
-        "Voldoet aan 10%": 47.05462763166893,
-        "Voldoet aan 30%": 5.7290243233622835
+        "Voldoet aan 10%": 47.047991792470846,
+        "Voldoet aan 30%": 5.729709374647517
       },
       "bebouwde_kom": {
         "Voldoet aan 10%": 45.5482123299982,
@@ -156,7 +124,7 @@
       }
     },
     "Percentage boomkroon per pand": {
-      "hele_buurt": 10.779146525,
+      "hele_buurt": 10.775756625,
       "bebouwde_kom": 10.247070820000001
     }
   }

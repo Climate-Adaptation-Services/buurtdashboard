@@ -91,7 +91,16 @@
   function hasValidDataForAHN(neighbourhoodData, ahn) {
     if (!neighbourhoodData?.properties) return false
 
-    // Build the attribute name for this AHN version
+    // For aggregated indicators, check if AT LEAST ONE class column has valid data
+    if (indicator.aggregatedIndicator && indicator.classes) {
+      return Object.values(indicator.classes).some(classAttr => {
+        const attribute = getIndicatorAttribute(indicator, classAttr, ahn)
+        const value = neighbourhoodData.properties[attribute]
+        return isValidValue(value)
+      })
+    }
+
+    // For regular indicators, check the main attribute
     const attribute = getIndicatorAttribute(indicator, indicator.attribute, ahn)
     const value = neighbourhoodData.properties[attribute]
 
@@ -150,7 +159,8 @@
 
   function findAHNyearsWithoutDuplicatesAndSort() {
     // For municipality view, collect all unique years
-    options = ahnVersions.map((ahn) => ({ AHN: ahn, Jaar: [] }))
+    // But only for AHN versions that have at least one neighbourhood with valid data
+    options = ahnVersions.map((ahn) => ({ AHN: ahn, Jaar: [], hasValidData: false }))
 
     if (!$neighbourhoodsInMunicipalityJSONData?.features) return
 
@@ -158,6 +168,13 @@
     $neighbourhoodsInMunicipalityJSONData.features.forEach((nh) => {
       if (!nh?.properties) return // Skip null/invalid features
       ahnVersions.forEach((ahn) => {
+        const option = options.find((j) => j.AHN === ahn)
+
+        // Check if this neighbourhood has valid data for this AHN version
+        if (!option.hasValidData && hasValidDataForAHN(nh, ahn)) {
+          option.hasValidData = true
+        }
+
         // Use the same splitting logic as in formatYears
         const yearData = nh.properties["Jaar" + ahn]
         if (yearData) {
@@ -166,8 +183,8 @@
           ahnYear
             .filter((y) => y.trim())
             .forEach((year) => {
-              if (!options.find((j) => j.AHN === ahn).Jaar.includes(year)) {
-                options.find((j) => j.AHN === ahn).Jaar.push(year)
+              if (!option.Jaar.includes(year)) {
+                option.Jaar.push(year)
               }
             })
         }
@@ -184,11 +201,15 @@
         option.Jaar = ahnYearMapping[option.AHN] || option.AHN
       }
     })
+
+    // Filter out AHN versions that have no valid data for this indicator
+    options = options.filter(opt => opt.hasValidData)
   }
 
   function findAHNyearsForAllNetherlands() {
     // For Nederland level, collect all unique years from all neighbourhoods
-    options = ahnVersions.map((ahn) => ({ AHN: ahn, Jaar: [] }))
+    // But only for AHN versions that have at least one neighbourhood with valid data
+    options = ahnVersions.map((ahn) => ({ AHN: ahn, Jaar: [], hasValidData: false }))
 
     if (!$allNeighbourhoodsJSONData?.features) return
 
@@ -196,6 +217,13 @@
     $allNeighbourhoodsJSONData.features.forEach((nh) => {
       if (!nh?.properties) return // Skip null/invalid features
       ahnVersions.forEach((ahn) => {
+        const option = options.find((j) => j.AHN === ahn)
+
+        // Check if this neighbourhood has valid data for this AHN version
+        if (!option.hasValidData && hasValidDataForAHN(nh, ahn)) {
+          option.hasValidData = true
+        }
+
         // Use the same splitting logic as in formatYears
         const yearData = nh.properties["Jaar" + ahn]
         if (yearData) {
@@ -204,8 +232,8 @@
           ahnYear
             .filter((y) => y.trim())
             .forEach((year) => {
-              if (!options.find((j) => j.AHN === ahn).Jaar.includes(year)) {
-                options.find((j) => j.AHN === ahn).Jaar.push(year)
+              if (!option.Jaar.includes(year)) {
+                option.Jaar.push(year)
               }
             })
         }
@@ -222,6 +250,9 @@
         option.Jaar = ahnYearMapping[option.AHN] || option.AHN
       }
     })
+
+    // Filter out AHN versions that have no valid data for this indicator
+    options = options.filter(opt => opt.hasValidData)
   }
 
 
