@@ -64,12 +64,13 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
 
         // Handle 0-1 decimal format: convert to 0-100 percentage
         // Some columns are stored as decimals (0-1 range), others as percentages (0-100 range):
-        // - 0-1 format: PET (Gevoelstemperatuur), perc* (Waterdiepte) - max values ~0.5
-        // - 0-100 format: SHD (Schaduw), P_* (Overstroming), *PercLand (Landbedekking) - max values >1
-        // Detect by column name pattern: PET* and perc* columns use 0-1 format
+        // - 0-1 format: PET (Gevoelstemperatuur), perc5_10cm etc (Waterdiepte) - max values ~0.5
+        // - 0-100 format: SHD (Schaduw), P_* (Overstroming), *PercLand (Landbedekking), percPanden* - already 0-100
+        // Detect by column name pattern: PET* and perc[0-9]* columns use 0-1 format
+        // Note: percPanden* columns are already in 0-100 format (max=100), so exclude them
         const isDecimalFormat = attributeName && (
           attributeName.startsWith('PET') ||
-          attributeName.startsWith('perc')
+          (attributeName.startsWith('perc') && !attributeName.startsWith('percPanden'))
         )
 
         if (isDecimalFormat && value >= 0 && value <= 1) {
