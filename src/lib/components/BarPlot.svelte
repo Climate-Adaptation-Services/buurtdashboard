@@ -51,7 +51,8 @@
   const indicatorStore = getIndicatorStore(indicator.dutchTitle || indicator.title)
 
   // Check if AHN5 is selected - Nederland statistics not available for AHN5
-  $: isAHN5Selected = $indicatorStore && $indicatorStore.baseYear === 'AHN5' && indicator.AHNversie
+  // Check for AHNversie being a non-empty string (indicator has AHN versions configured)
+  $: isAHN5Selected = $indicatorStore && $indicatorStore.baseYear === 'AHN5' && indicator.AHNversie && indicator.AHNversie.length > 0
 
   // Simplified function - always show percentages in bar plot
   function getDisplayValue(percentageValue) {
@@ -126,9 +127,16 @@
     }
 
     // Add Nederland if available (not available for municipality-specific dashboards like Dordrecht)
+    // Check if AHN5 is selected - we'll still add "Nederland" to regions for the notice, but without data
+    const currentIsAHN5 = $indicatorStore && $indicatorStore.baseYear === 'AHN5' && indicator.AHNversie && indicator.AHNversie.length > 0
     if (nederlandValues) {
-      data.push(nederlandValues)
-      regions.push("Nederland")
+      if (!currentIsAHN5) {
+        // Normal case: add Nederland with data
+        data.push(nederlandValues)
+        regions.push("Nederland")
+      }
+      // Note: For AHN5, we don't add Nederland to data or regions here
+      // The notice is shown in the template when isAHN5Selected is true
     }
 
     // Add municipality level if selected
@@ -184,51 +192,50 @@
 
 <svg class={"barplot_" + sanitizeClassName(indicator.title)} style="height:74%">
   <g class="inner-chart-bar" transform="translate(0, {margin.top})">
+    <!-- Show AHN5 notice for Nederland when AHN5 is selected (before other bars) -->
+    {#if isAHN5Selected && graphWidth > 0}
+      <text style="fill:#645F5E" x={graphWidth / 2} text-anchor="middle" font-size="15px" y={-5}
+        >Nederland</text
+      >
+      <text style="fill:#888; font-style:italic" x={graphWidth / 2} text-anchor="middle" font-size="11px" y={12}
+        >Niet voor heel Nederland beschikbaar</text
+      >
+    {/if}
     {#each stackedData as stacked, i}
       <g class="stack" fill={indicatorValueColorscale(stacked.key)}>
         {#each stacked as st}
-          <!-- Hide Nederland bars when AHN5 is selected or for Dordrecht dashboard -->
-          {#if !(st.data.group === "Nederland" && (isAHN5Selected || ($configStore && $configStore.dashboardTitle === "Buurtdashboard Dordrecht")))}
-            <rect
-              on:mouseover={() => barPlotMouseOver(indicator, indicatorValueColorscale, st, stacked)}
-              on:mouseout={barPlotMouseOut(indicator, st, stacked)}
-              class={"barplot_rect" + sanitizeClassName(indicator.title) + sanitizeClassName(stacked.key) + st.data.group}
-              x={xScale(st[0])}
-              y={yScale(st.data.group)}
-              width={xScale(st[1]) - xScale(st[0])}
-              height={yScale.bandwidth() / 2.0}
-              stroke-width="4"
+          <rect
+            on:mouseover={() => barPlotMouseOver(indicator, indicatorValueColorscale, st, stacked)}
+            on:mouseout={barPlotMouseOut(indicator, st, stacked)}
+            class={"barplot_rect" + sanitizeClassName(indicator.title) + sanitizeClassName(stacked.key) + st.data.group}
+            x={xScale(st[0])}
+            y={yScale(st.data.group) + (isAHN5Selected ? 30 : 0)}
+            width={xScale(st[1]) - xScale(st[0])}
+            height={yScale.bandwidth() / 2.0}
+            stroke-width="4"
+            style={st.data.group === "Nederland" && $configStore && $configStore.dashboardTitle === "Buurtdashboard Dordrecht"
+              ? "visibility: hidden;"
+              : ""}
+          >
+          </rect>
+          {#if xScale(st[1]) - xScale(st[0]) > 40}
+            <text
+              text-anchor="middle"
+              x={xScale(st[0]) + (xScale(st[1]) - xScale(st[0])) / 2}
+              y={yScale(st.data.group) + 1.5 + (isAHN5Selected ? 30 : 0)}
+              fill={checkContrast(indicatorValueColorscale(stacked.key)) ? "white" : "black"}
+              dy="1.1em"
+              font-size="14px"
+              pointer-events="none">{getDisplayValue(st.data[stacked.key])}%</text
             >
-            </rect>
-            {#if xScale(st[1]) - xScale(st[0]) > 40}
-              <text
-                text-anchor="middle"
-                x={xScale(st[0]) + (xScale(st[1]) - xScale(st[0])) / 2}
-                y={yScale(st.data.group) + 1.5}
-                fill={checkContrast(indicatorValueColorscale(stacked.key)) ? "white" : "black"}
-                dy="1.1em"
-                font-size="14px"
-                pointer-events="none">{getDisplayValue(st.data[stacked.key])}%</text
-              >
-            {/if}
           {/if}
         {/each}
       </g>
     {/each}
     {#each regios as regio, i}
-      {#if regio === "Nederland" && isAHN5Selected}
-        <!-- Show AHN5 notice for Nederland -->
+      {#if regio !== "Nederland" || !($configStore && $configStore.dashboardTitle === "Buurtdashboard Dordrecht")}
         {#if graphWidth > 0 && safeBandwidth > 0}
-          <text style="fill:#645F5E" x={graphWidth / 2} text-anchor="middle" font-size="15px" y={i * safeBandwidth - 5}
-            >{getRegionName(regio)}</text
-          >
-          <text style="fill:#888; font-style:italic" x={graphWidth / 2} text-anchor="middle" font-size="11px" y={i * safeBandwidth + 12}
-            >Niet voor heel Nederland beschikbaar</text
-          >
-        {/if}
-      {:else if regio !== "Nederland" || !($configStore && $configStore.dashboardTitle === "Buurtdashboard Dordrecht")}
-        {#if graphWidth > 0 && safeBandwidth > 0}
-          <text style="fill:#645F5E" x={graphWidth / 2} text-anchor="middle" font-size="15px" y={i * safeBandwidth - 5}
+          <text style="fill:#645F5E" x={graphWidth / 2} text-anchor="middle" font-size="15px" y={i * safeBandwidth - 5 + (isAHN5Selected ? 30 : 0)}
             >{getRegionName(regio)}</text
           >
         {/if}
