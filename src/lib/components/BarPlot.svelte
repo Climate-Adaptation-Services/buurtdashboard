@@ -50,6 +50,9 @@
   // Use dutchTitle for store key to ensure consistency across languages
   const indicatorStore = getIndicatorStore(indicator.dutchTitle || indicator.title)
 
+  // Check if AHN5 is selected - Nederland statistics not available for AHN5
+  $: isAHN5Selected = $indicatorStore && $indicatorStore.baseYear === 'AHN5' && indicator.AHNversie
+
   // Simplified function - always show percentages in bar plot
   function getDisplayValue(percentageValue) {
     return Math.round(percentageValue * 10) / 10
@@ -184,36 +187,46 @@
     {#each stackedData as stacked, i}
       <g class="stack" fill={indicatorValueColorscale(stacked.key)}>
         {#each stacked as st}
-          <rect
-            on:mouseover={() => barPlotMouseOver(indicator, indicatorValueColorscale, st, stacked)}
-            on:mouseout={barPlotMouseOut(indicator, st, stacked)}
-            class={"barplot_rect" + sanitizeClassName(indicator.title) + sanitizeClassName(stacked.key) + st.data.group}
-            x={xScale(st[0])}
-            y={yScale(st.data.group)}
-            width={xScale(st[1]) - xScale(st[0])}
-            height={yScale.bandwidth() / 2.0}
-            stroke-width="4"
-            style={st.data.group === "Nederland" && $configStore && $configStore.dashboardTitle === "Buurtdashboard Dordrecht"
-              ? "visibility: hidden;"
-              : ""}
-          >
-          </rect>
-          {#if xScale(st[1]) - xScale(st[0]) > 40}
-            <text
-              text-anchor="middle"
-              x={xScale(st[0]) + (xScale(st[1]) - xScale(st[0])) / 2}
-              y={yScale(st.data.group) + 1.5}
-              fill={checkContrast(indicatorValueColorscale(stacked.key)) ? "white" : "black"}
-              dy="1.1em"
-              font-size="14px"
-              pointer-events="none">{getDisplayValue(st.data[stacked.key])}%</text
+          <!-- Hide Nederland bars when AHN5 is selected or for Dordrecht dashboard -->
+          {#if !(st.data.group === "Nederland" && (isAHN5Selected || ($configStore && $configStore.dashboardTitle === "Buurtdashboard Dordrecht")))}
+            <rect
+              on:mouseover={() => barPlotMouseOver(indicator, indicatorValueColorscale, st, stacked)}
+              on:mouseout={barPlotMouseOut(indicator, st, stacked)}
+              class={"barplot_rect" + sanitizeClassName(indicator.title) + sanitizeClassName(stacked.key) + st.data.group}
+              x={xScale(st[0])}
+              y={yScale(st.data.group)}
+              width={xScale(st[1]) - xScale(st[0])}
+              height={yScale.bandwidth() / 2.0}
+              stroke-width="4"
             >
+            </rect>
+            {#if xScale(st[1]) - xScale(st[0]) > 40}
+              <text
+                text-anchor="middle"
+                x={xScale(st[0]) + (xScale(st[1]) - xScale(st[0])) / 2}
+                y={yScale(st.data.group) + 1.5}
+                fill={checkContrast(indicatorValueColorscale(stacked.key)) ? "white" : "black"}
+                dy="1.1em"
+                font-size="14px"
+                pointer-events="none">{getDisplayValue(st.data[stacked.key])}%</text
+              >
+            {/if}
           {/if}
         {/each}
       </g>
     {/each}
     {#each regios as regio, i}
-      {#if regio !== "Nederland" || !($configStore && $configStore.dashboardTitle === "Buurtdashboard Dordrecht")}
+      {#if regio === "Nederland" && isAHN5Selected}
+        <!-- Show AHN5 notice for Nederland -->
+        {#if graphWidth > 0 && safeBandwidth > 0}
+          <text style="fill:#645F5E" x={graphWidth / 2} text-anchor="middle" font-size="15px" y={i * safeBandwidth - 5}
+            >{getRegionName(regio)}</text
+          >
+          <text style="fill:#888; font-style:italic" x={graphWidth / 2} text-anchor="middle" font-size="11px" y={i * safeBandwidth + 12}
+            >Niet voor heel Nederland beschikbaar</text
+          >
+        {/if}
+      {:else if regio !== "Nederland" || !($configStore && $configStore.dashboardTitle === "Buurtdashboard Dordrecht")}
         {#if graphWidth > 0 && safeBandwidth > 0}
           <text style="fill:#645F5E" x={graphWidth / 2} text-anchor="middle" font-size="15px" y={i * safeBandwidth - 5}
             >{getRegionName(regio)}</text

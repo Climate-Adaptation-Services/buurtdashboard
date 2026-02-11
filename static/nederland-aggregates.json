@@ -1,15 +1,35 @@
 {
   "version": "20260210",
-  "generatedAt": "2026-02-10T16:04:52.077Z",
+  "generatedAt": "2026-02-11T10:22:30.183Z",
   "aggregates": {
     "Schaduw fiets- en wandelpaden: groen en grijs": {
       "hele_buurt": {
-        "Grijze schaduw": -1218.4014161038233,
-        "Groene schaduw": -1202.585602295532
+        "AHN3": {
+          "Grijze schaduw": -1218.4014161038233,
+          "Groene schaduw": -1202.585602295532
+        },
+        "AHN4": {
+          "Grijze schaduw": -1218.0002497288676,
+          "Groene schaduw": -1202.3014781811928
+        },
+        "AHN5": {
+          "Grijze schaduw": -3384.642648919174,
+          "Groene schaduw": -3374.4643573417425
+        }
       },
       "bebouwde_kom": {
-        "Grijze schaduw": -886.4872047383109,
-        "Groene schaduw": -872.2951276018108
+        "AHN3": {
+          "Grijze schaduw": -886.4872047383109,
+          "Groene schaduw": -872.2951276018108
+        },
+        "AHN4": {
+          "Grijze schaduw": -886.0017006493293,
+          "Groene schaduw": -871.8732499869687
+        },
+        "AHN5": {
+          "Grijze schaduw": -3036.3311835246436,
+          "Groene schaduw": -3026.8837358117444
+        }
       }
     },
     "Gevoelstemperatuur": {
@@ -29,8 +49,22 @@
       }
     },
     "Schaduw fiets- en wandelpaden": {
-      "hele_buurt": 32.99496488,
-      "bebouwde_kom": 33.60260617
+      "hele_buurt": {
+        "AHN3": 32.99496488,
+        "AHN4": 33.949804725,
+        "AHN5": 25.635366265000002,
+        "diff_AHN3_AHN4": 0.5939751039999988,
+        "diff_AHN3_AHN5": 0,
+        "diff_AHN4_AHN5": -0.21710968499999694
+      },
+      "bebouwde_kom": {
+        "AHN3": 33.60260617,
+        "AHN4": 34.51703297,
+        "AHN5": 28.05416519,
+        "diff_AHN3_AHN4": 0.7758898649999999,
+        "diff_AHN3_AHN5": 0,
+        "diff_AHN4_AHN5": -0.10918221499999703
+      }
     },
     "Waterdiepte bij hevige bui": {
       "5 - 10cm": 7.8490293624262355,
@@ -52,16 +86,58 @@
     },
     "Droge verdiepingen": 94,
     "Boomkroonoppervlakte": {
-      "hele_buurt": 10.100646130000001,
-      "bebouwde_kom": 10.890490345
+      "hele_buurt": {
+        "AHN3": 10.100646130000001,
+        "AHN4": 10.696119015,
+        "AHN5": 7.847450240500001,
+        "diff_AHN3_AHN4": 0.5520336330000002,
+        "diff_AHN3_AHN5": 0.30988957000000106,
+        "diff_AHN4_AHN5": 0.0010687744999998694
+      },
+      "bebouwde_kom": {
+        "AHN3": 10.890490345,
+        "AHN4": 11.497770495000001,
+        "AHN5": 8.742952748499999,
+        "diff_AHN3_AHN4": 0.5522229034999999,
+        "diff_AHN3_AHN5": 0.2540006515000002,
+        "diff_AHN4_AHN5": 0
+      }
     },
     "Boomkroonoppervlakte openbaar": {
-      "hele_buurt": 19.93800308,
-      "bebouwde_kom": 17.057854965
+      "hele_buurt": {
+        "AHN3": 19.93800308,
+        "AHN4": 21.352272255000003,
+        "AHN5": 15.60015052,
+        "diff_AHN3_AHN4": 1.4120211000000014,
+        "diff_AHN3_AHN5": 1.2098980800000003,
+        "diff_AHN4_AHN5": 0.31448055599999947
+      },
+      "bebouwde_kom": {
+        "AHN3": 17.057854965,
+        "AHN4": 18.341028010000002,
+        "AHN5": 13.74173617,
+        "diff_AHN3_AHN4": 1.0759027624999997,
+        "diff_AHN3_AHN5": 0.8312016050000004,
+        "diff_AHN4_AHN5": 0.16983099499999987
+      }
     },
     "Boomkroonoppervlakte niet-openbaar ": {
-      "hele_buurt": 6.271943993500001,
-      "bebouwde_kom": 8.774644186
+      "hele_buurt": {
+        "AHN3": 6.271943993500001,
+        "AHN4": 6.5202728914999994,
+        "AHN5": 4.338274467,
+        "diff_AHN3_AHN4": 0.2152619819999999,
+        "diff_AHN3_AHN5": -0.052407959999999976,
+        "diff_AHN4_AHN5": -0.23454347099999984
+      },
+      "bebouwde_kom": {
+        "AHN3": 8.774644186,
+        "AHN4": 9.018255204999999,
+        "AHN5": 6.1141568455,
+        "diff_AHN3_AHN4": 0.23190970700000105,
+        "diff_AHN3_AHN5": -0.030241860499999884,
+        "diff_AHN4_AHN5": -0.25913961649999995
+      }
     },
     "Groen": 22.43230312,
     "Groen openbaar": 51.44659106,
@@ -92,40 +168,127 @@
     "Ernstig overgewicht": 14.4,
     "Percentage huurwoningen": 26,
     "Schaduw totaal": {
-      "hele_buurt": 29.472744165,
-      "bebouwde_kom": 32.461944564999996
+      "hele_buurt": {
+        "AHN3": 29.472744165,
+        "AHN4": 29.94947993,
+        "AHN5": 23.668596870000002,
+        "diff_AHN3_AHN4": 0.29943222450000184,
+        "diff_AHN3_AHN5": -0.5355499649999995,
+        "diff_AHN4_AHN5": -0.5063694500000011
+      },
+      "bebouwde_kom": {
+        "AHN3": 32.461944564999996,
+        "AHN4": 32.732325335,
+        "AHN5": 27.93442651,
+        "diff_AHN3_AHN4": 0.3529072599999985,
+        "diff_AHN3_AHN5": -0.41457848499999805,
+        "diff_AHN4_AHN5": -0.4853144250000021
+      }
     },
     "Schaduw groen en grijs": {
       "hele_buurt": {
-        "Grijze schaduw": 9.136572638908522,
-        "Groene schaduw": 19.914964950314985
+        "AHN3": {
+          "Grijze schaduw": 9.136572638908522,
+          "Groene schaduw": 19.914964950314985
+        },
+        "AHN4": {
+          "Grijze schaduw": 9.208772231047949,
+          "Groene schaduw": 20.11396701199951
+        },
+        "AHN5": {
+          "Grijze schaduw": -2489.6539782531263,
+          "Groene schaduw": -2482.2384767070257
+        }
       },
       "bebouwde_kom": {
-        "Grijze schaduw": -520.9767687502629,
-        "Groene schaduw": -510.4980051851207
+        "AHN3": {
+          "Grijze schaduw": -520.9767687502629,
+          "Groene schaduw": -510.4980051851207
+        },
+        "AHN4": {
+          "Grijze schaduw": -520.909761621383,
+          "Groene schaduw": -510.2253670432846
+        },
+        "AHN5": {
+          "Grijze schaduw": -2786.3378377699723,
+          "Groene schaduw": -2779.1907170927752
+        }
       }
     },
     "Schaduw openbaar gebied": {
-      "hele_buurt": 37.375338035,
-      "bebouwde_kom": 34.65770335
+      "hele_buurt": {
+        "AHN3": 37.375338035,
+        "AHN4": 38.418427449999996,
+        "AHN5": 30.04663813,
+        "diff_AHN3_AHN4": 0.901842000000002,
+        "diff_AHN3_AHN5": -0.46297025000000147,
+        "diff_AHN4_AHN5": -0.6213074400000025
+      },
+      "bebouwde_kom": {
+        "AHN3": 34.65770335,
+        "AHN4": 35.661141955,
+        "AHN5": 28.59251926,
+        "diff_AHN3_AHN4": 0.9830787499999971,
+        "diff_AHN3_AHN5": 0,
+        "diff_AHN4_AHN5": -0.22316563000000222
+      }
     },
     "Schaduw niet-openbaar gebied": {
-      "hele_buurt": 27.485196555,
-      "bebouwde_kom": 34.961613889999995
+      "hele_buurt": {
+        "AHN3": 27.485196555,
+        "AHN5": 19.51946848,
+        "diff_AHN3_AHN5": -0.6398337459999996
+      },
+      "bebouwde_kom": {
+        "AHN3": 34.961613889999995,
+        "AHN4": 35.253215845,
+        "AHN5": 29.874517009999998,
+        "diff_AHN3_AHN4": 0.37510350999999886,
+        "diff_AHN3_AHN5": -0.8162554949999983,
+        "diff_AHN4_AHN5": -0.9926917089999998
+      }
     },
     "10% en 30% regel": {
       "hele_buurt": {
-        "Voldoet aan 10%": 47.047991792470846,
-        "Voldoet aan 30%": 5.729709374647517
+        "AHN3": {
+          "Voldoet aan 10%": 47.047991792470846,
+          "Voldoet aan 30%": 5.729709374647517
+        },
+        "AHN4": {
+          "Voldoet aan 10%": 50.10612202339065,
+          "Voldoet aan 30%": 6.291080411355157
+        },
+        "AHN5": {
+          "Voldoet aan 10%": 39.11462966911867,
+          "Voldoet aan 30%": -2492.466012384789
+        }
       },
       "bebouwde_kom": {
-        "Voldoet aan 10%": 45.5482123299982,
-        "Voldoet aan 30%": -527.1979331126946
+        "AHN3": {
+          "Voldoet aan 10%": 45.5482123299982,
+          "Voldoet aan 30%": -527.1979331126946
+        },
+        "AHN4": {
+          "Voldoet aan 10%": 48.57809420423556,
+          "Voldoet aan 30%": -526.7365445555694
+        },
+        "AHN5": {
+          "Voldoet aan 10%": 38.26506652575826,
+          "Voldoet aan 30%": -2791.1217479691522
+        }
       }
     },
     "Percentage boomkroon per pand": {
-      "hele_buurt": 10.775756625,
-      "bebouwde_kom": 10.247070820000001
+      "hele_buurt": {
+        "AHN3": 10.775756625,
+        "AHN5": 8.97060234,
+        "diff_AHN3_AHN5": 0.3900182815000002
+      },
+      "bebouwde_kom": {
+        "AHN3": 10.247070820000001,
+        "AHN5": 8.454536646,
+        "diff_AHN3_AHN5": 0.2580499200000004
+      }
     }
   }
 }

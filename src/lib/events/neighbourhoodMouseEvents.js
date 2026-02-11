@@ -35,16 +35,24 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
   // Reset any lingering hover states from other elements before applying new hover
   // This prevents multiple elements staying highlighted when mouse moves quickly
   if (mapType !== 'main map') {
+    const indicatorClassName = indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', '').replaceAll('|', '_').replaceAll(':', '_')
+
     // Reset all paths in this indicator's map/beeswarm
-    selectAll('path[class*="path_' + indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', '').replaceAll('|', '_').replaceAll(':', '_') + '"]')
+    selectAll('path[class*="path_' + indicatorClassName + '"]')
       .attr('stroke-width', 0.5)
       .style('filter', 'none')
     // Reset all circles in this indicator's beeswarm
     if (indicator.numerical) {
-      selectAll('circle[class*="node_' + indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', '').replaceAll('|', '_').replaceAll(':', '_') + '"]')
+      selectAll('circle[class*="node_' + indicatorClassName + '"]')
         .attr('stroke', 'none')
         .attr('r', get(circleRadius))
         .style('filter', 'none')
+    }
+
+    // Re-raise the selected neighbourhood elements so they stay on top with their red stroke
+    const currentSelection = get(neighbourhoodSelection)
+    if (currentSelection) {
+      selectAll('.svgelements_' + currentSelection).raise()
     }
   }
 

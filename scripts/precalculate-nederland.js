@@ -341,8 +341,87 @@ async function main() {
 
       console.log(`   Processing: ${indicator.title} (${years.length > 0 ? years.join(', ') : 'single value'}${hasBEBVariant ? ', BEB' : ''}${hasAHNVersions ? `, AHN: ${indicator.ahnVersions.join(', ')}` : ''})`);
 
-      if (hasBEBVariant) {
-        // BEB variant indicator - calculate for both hele_buurt and bebouwde_kom
+      if (hasBEBVariant && hasAHNVersions) {
+        // BEB variant indicator WITH AHN versions - calculate for both hele_buurt and bebouwde_kom, per AHN version
+        nederlandAggregates[indicator.title] = {
+          hele_buurt: {},
+          bebouwde_kom: {}
+        };
+
+        const bebOptions = ['hele_buurt', 'bebouwde_kom'];
+
+        for (const bebOption of bebOptions) {
+          nederlandAggregates[indicator.title][bebOption] = {};
+
+          // Calculate values for each AHN version
+          for (const ahnVersion of indicator.ahnVersions) {
+            const indicatorWithAHN = { ...indicator, ahnVersions: [ahnVersion] };
+            const value = calculateNederlandAggregate(indicatorWithAHN, jsonData, null, bebOption, ahnVersion);
+            if (value !== null) {
+              nederlandAggregates[indicator.title][bebOption][ahnVersion] = value;
+            }
+          }
+
+          // Calculate differences between AHN versions for this BEB option
+          const ahnVersionsWithData = indicator.ahnVersions.filter(v =>
+            nederlandAggregates[indicator.title][bebOption][v] !== undefined
+          );
+
+          if (ahnVersionsWithData.length >= 2 && indicator.numerical) {
+            for (let i = 0; i < ahnVersionsWithData.length; i++) {
+              for (let j = i + 1; j < ahnVersionsWithData.length; j++) {
+                const baseAHN = ahnVersionsWithData[i];
+                const compareAHN = ahnVersionsWithData[j];
+                const diffKey = `diff_${baseAHN}_${compareAHN}`;
+
+                // Calculate difference for each neighbourhood, then take median
+                const differences = jsonData.features
+                  .map(feature => {
+                    const baseAttr = buildAttributeName(indicator.attribute, {
+                      ahnVersion: baseAHN,
+                      bebOption,
+                      bebVariant
+                    });
+                    const compareAttr = buildAttributeName(indicator.attribute, {
+                      ahnVersion: compareAHN,
+                      bebOption,
+                      bebVariant
+                    });
+                    const baseValue = feature.properties[baseAttr];
+                    const compareValue = feature.properties[compareAttr];
+
+                    if (baseValue !== null && baseValue !== undefined && baseValue !== '' && !isNaN(baseValue) &&
+                        compareValue !== null && compareValue !== undefined && compareValue !== '' && !isNaN(compareValue)) {
+                      return +compareValue - +baseValue;
+                    }
+                    return null;
+                  })
+                  .filter(v => v !== null);
+
+                const diffMedian = calcMedian(differences);
+                if (diffMedian !== null) {
+                  nederlandAggregates[indicator.title][bebOption][diffKey] = diffMedian;
+                }
+              }
+            }
+          }
+        }
+
+        // Clean up completely empty entries
+        const helebuurtEmpty =
+          (nederlandAggregates[indicator.title].hele_buurt === undefined) ||
+          (typeof nederlandAggregates[indicator.title].hele_buurt === 'object' &&
+           Object.keys(nederlandAggregates[indicator.title].hele_buurt).length === 0);
+        const bebouwdekomEmpty =
+          (nederlandAggregates[indicator.title].bebouwde_kom === undefined) ||
+          (typeof nederlandAggregates[indicator.title].bebouwde_kom === 'object' &&
+           Object.keys(nederlandAggregates[indicator.title].bebouwde_kom).length === 0);
+
+        if (helebuurtEmpty && bebouwdekomEmpty) {
+          delete nederlandAggregates[indicator.title];
+        }
+      } else if (hasBEBVariant) {
+        // BEB variant indicator WITHOUT AHN versions - calculate for both hele_buurt and bebouwde_kom
         nederlandAggregates[indicator.title] = {
           hele_buurt: {},
           bebouwde_kom: {}
@@ -394,6 +473,41 @@ async function main() {
             nederlandAggregates[indicator.title][ahnVersion] = value;
           }
         }
+
+        // Calculate differences between AHN versions
+        const ahnVersionsWithData = indicator.ahnVersions.filter(v => nederlandAggregates[indicator.title][v] !== undefined);
+        if (ahnVersionsWithData.length >= 2 && indicator.numerical) {
+          // For numerical indicators, calculate median of differences
+          for (let i = 0; i < ahnVersionsWithData.length; i++) {
+            for (let j = i + 1; j < ahnVersionsWithData.length; j++) {
+              const baseAHN = ahnVersionsWithData[i];
+              const compareAHN = ahnVersionsWithData[j];
+              const diffKey = `diff_${baseAHN}_${compareAHN}`;
+
+              // Calculate difference for each neighbourhood, then take median
+              const differences = jsonData.features
+                .map(feature => {
+                  const baseAttr = buildAttributeName(indicator.attribute, { ahnVersion: baseAHN });
+                  const compareAttr = buildAttributeName(indicator.attribute, { ahnVersion: compareAHN });
+                  const baseValue = feature.properties[baseAttr];
+                  const compareValue = feature.properties[compareAttr];
+
+                  if (baseValue !== null && baseValue !== undefined && baseValue !== '' && !isNaN(baseValue) &&
+                      compareValue !== null && compareValue !== undefined && compareValue !== '' && !isNaN(compareValue)) {
+                    return +compareValue - +baseValue;
+                  }
+                  return null;
+                })
+                .filter(v => v !== null);
+
+              const diffMedian = calcMedian(differences);
+              if (diffMedian !== null) {
+                nederlandAggregates[indicator.title][diffKey] = diffMedian;
+              }
+            }
+          }
+        }
+
         // Only add to aggregates if we got at least one version's data
         if (Object.keys(nederlandAggregates[indicator.title]).length === 0) {
           delete nederlandAggregates[indicator.title];
