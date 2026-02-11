@@ -32,6 +32,22 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
   let attributeWithoutYear = ''
   let indicatorAttribute = ''
 
+  // Reset any lingering hover states from other elements before applying new hover
+  // This prevents multiple elements staying highlighted when mouse moves quickly
+  if (mapType !== 'main map') {
+    // Reset all paths in this indicator's map/beeswarm
+    selectAll('path[class*="path_' + indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', '').replaceAll('|', '_').replaceAll(':', '_') + '"]')
+      .attr('stroke-width', 0.5)
+      .style('filter', 'none')
+    // Reset all circles in this indicator's beeswarm
+    if (indicator.numerical) {
+      selectAll('circle[class*="node_' + indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', '').replaceAll('|', '_').replaceAll(':', '_') + '"]')
+        .attr('stroke', 'none')
+        .attr('r', get(circleRadius))
+        .style('filter', 'none')
+    }
+  }
+
   if (mapType === 'main map') {
     if (feature.properties[get(currentCodeAbbreviation)] !== get(neighbourhoodSelection)) {
       select('.' + shapeClassName).attr('fill', '#36575A')

@@ -124,7 +124,7 @@
       <div class="year-filter-wrapper">
         <button class="year-filter-btn" on:click|stopPropagation={selectAllWithYears}>Monitoring over tijd</button>
         <div class="year-filter-tooltip">
-          Klik om alle indicatoren te selecteren waarvoor data beschikbaar is voor meerdere jaren, zodat je ontwikkelingen over tijd kunt analyseren.
+          Klik om alle indicatoren te selecteren waarvoor data beschikbaar is voor meerdere jaren, zodat je ontwikkelingen over tijd kunt analyseren. Deze indicatoren sluiten aan op de Regionale Monitor Klimaatadaptatie.
         </div>
       </div>
     {:else}
