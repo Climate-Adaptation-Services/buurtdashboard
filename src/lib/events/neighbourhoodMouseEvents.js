@@ -1,4 +1,5 @@
 import { getClassName } from '$lib/utils/getClassName';
+import { sanitizeClassName } from '$lib/utils/sanitizeClassName.js';
 import { currentCodeAbbreviation, neighbourhoodSelection, mousePosition, circleRadius, municipalitySelection, currentNameAbbreviation, URLParams, currentOverviewLevel, neighbourhoodCodeAbbreviation, tooltipValues, tooltipRegion, AHNSelecties } from '$lib/stores';
 import { addURLParameter } from '$lib/services/urlManager.js';
 import { get } from 'svelte/store';
@@ -35,28 +36,30 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
   // Reset any lingering hover states from other elements before applying new hover
   // This prevents multiple elements staying highlighted when mouse moves quickly
   if (mapType !== 'main map') {
-    const indicatorClassName = indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', '').replaceAll('|', '_').replaceAll(':', '_')
+    const indicatorClassName = sanitizeClassName(indicator.title)
     const currentSelection = get(neighbourhoodSelection)
+    const selectedClass = currentSelection ? 'svgelements_' + currentSelection : null
 
-    // Reset all paths in this indicator's map/beeswarm
+    // Reset all paths in this indicator's map/beeswarm (exclude selected neighbourhood)
     selectAll('path[class*="path_' + indicatorClassName + '"]')
+      .filter(function() {
+        // Keep the selected neighbourhood's styling intact
+        const el = /** @type {Element} */ (this)
+        return !selectedClass || !el.classList?.contains(selectedClass)
+      })
       .attr('stroke-width', 0.5)
       .style('filter', 'none')
 
-    // Reset all circles in this indicator's beeswarm
+    // Reset all circles in this indicator's beeswarm (exclude selected neighbourhood)
     if (indicator.numerical) {
       selectAll('circle[class*="node_' + indicatorClassName + '"]')
+        .filter(function() {
+          const el = /** @type {Element} */ (this)
+          return !selectedClass || !el.classList?.contains(selectedClass)
+        })
         .attr('stroke', 'none')
         .attr('r', get(circleRadius))
         .style('filter', 'none')
-    }
-
-    // Re-apply the selected neighbourhood styling (red stroke, raised)
-    if (currentSelection) {
-      selectAll('.svgelements_' + currentSelection)
-        .attr('stroke', 'red')
-        .attr('stroke-width', 3)
-        .raise()
     }
   }
 
@@ -207,7 +210,7 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
         color: tooltipValueColor
       })
 
-      const mapElement = document.getElementsByClassName("indicator-map-" + indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', ''))[0]
+      const mapElement = document.getElementsByClassName("indicator-map-" + sanitizeClassName(indicator.title))[0]
       const rectmap = mapElement.getBoundingClientRect();
       const featureCenter = projection(center(feature).geometry.coordinates)
       tooltipCenter = [featureCenter[0] + rectmap.left, featureCenter[1] + rectmap.top]
@@ -273,7 +276,7 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
         })
       }
 
-      let elem = document.getElementsByClassName('beeswarm_' + indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', ''))[0]
+      let elem = document.getElementsByClassName('beeswarm_' + sanitizeClassName(indicator.title))[0]
       let rectmap = elem.getBoundingClientRect();
       tooltipCenter = [feature.x + rectmap.left + beeswarmMargin.left, rectmap.top + beeswarmMargin.top + feature.y + 10]
     }
@@ -320,7 +323,7 @@ export function click(feature, indicator, mapType) {
   selectAll('.svgelements_' + feature.properties[get(neighbourhoodCodeAbbreviation)])
     .raise()
 
-  const newSelection = feature.properties[get(currentCodeAbbreviation)].replaceAll(' ', '').replaceAll('(', '').replaceAll(')', '')
+  const newSelection = sanitizeClassName(feature.properties[get(currentCodeAbbreviation)])
   if (get(currentOverviewLevel) === 'Nederland') {
     get(URLParams).set('gemeente', newSelection);
     addURLParameter();

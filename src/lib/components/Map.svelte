@@ -13,6 +13,7 @@
   import MapPath from "./MapPath.svelte"
   import { onMount, tick } from "svelte"
   import { LeafletMapManager } from "$lib/map/LeafletMapManager.js"
+  import { sanitizeClassName } from "$lib/utils/sanitizeClassName.js"
 
   // Leaflet map manager
   let mapManager = new LeafletMapManager()
@@ -87,12 +88,12 @@
   }
 
   function aggregatedMapInfo() {
-    const className = ".tooltip-multi" + indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', '').replaceAll('|', '_').replaceAll(':', '_')
+    const className = ".tooltip-multi" + sanitizeClassName(indicator.title)
     select(className).style("visibility", "visible")
   }
 
   function aggregatedMapInfoOut() {
-    const className = ".tooltip-multi" + indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', '').replaceAll('|', '_').replaceAll(':', '_')
+    const className = ".tooltip-multi" + sanitizeClassName(indicator.title)
     select(className).style("visibility", "hidden")
   }
 
@@ -231,7 +232,7 @@
     {/if}
   </div>
 {:else}
-  <svg class={"indicator-map-" + indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', '')} style="filter:drop-shadow(0 0 15px rgb(160, 160, 160))">
+  <svg class={"indicator-map-" + sanitizeClassName(indicator.title)} style="filter:drop-shadow(0 0 15px rgb(160, 160, 160))">
     <!-- svelte-ignore a11y-mouse-events-have-key-events -->
     <!-- svelte-ignore a11y-no-static-element-interactions -->
     {#if $currentJSONData.features && path && projection}
@@ -266,7 +267,7 @@
 {/if}
 
 {#if indicator && indicator.aggregatedIndicator === true}
-  <div class={"tooltip-multi tooltip-multi" + indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', '').replaceAll('|', '_').replaceAll(':', '_')}>
+  <div class={"tooltip-multi tooltip-multi" + sanitizeClassName(indicator.title)}>
     <p>{t("multi-indicator-map-explanation")}</p>
   </div>
 {/if}

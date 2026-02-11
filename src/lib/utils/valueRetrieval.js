@@ -7,6 +7,7 @@ import { AHNSelecties, getIndicatorStore } from '$lib/stores'
 import { getIndicatorAttribute } from './getIndicatorAttribute.js'
 import { getMostCommonClass } from './getMostCommonClass.js'
 import { getClassByIndicatorValue } from './getClassByIndicatorValue.js'
+import { getPropertyWithAHNFallback } from './resolveAHNColumnName.js'
 
 // No-data code meanings - single source of truth
 // -9991: No slow traffic route in this neighbourhood
@@ -104,28 +105,8 @@ function getRawValue(feature, indicator, { year, attributeOverride, forceM2 = fa
     (year ? getIndicatorAttribute(indicator, baseAttribute, year) :
       getIndicatorAttribute(indicator, baseAttribute))
 
-  let value = feature.properties?.[attribute]
-
-  // FALLBACK 1: If AHN version attribute doesn't exist, try with underscore before AHN
-  // NOTE: This is a workaround for Dordrecht data which uses "BKB_AHN3" instead of "BKBAHN3"
-  // TODO: Standardize Dordrecht CSV column naming to match default dataset (remove underscores before AHN)
-  if (!isValidValue(value) && attribute && typeof attribute === 'string' && attribute.includes('AHN')) {
-    // Try adding underscore before AHN (e.g., "PET29tm34pAHN4" -> "PET29tm34p_AHN4")
-    const ahnPattern = /(AHN\d+)$/
-    const fallbackAttribute = attribute.replace(ahnPattern, '_$1')
-    if (fallbackAttribute !== attribute) {
-      value = feature.properties?.[fallbackAttribute]
-    }
-  }
-
-  // FALLBACK 2: Handle Gevoelstemperatuur columns without underscore (e.g., "PET29tm34pAHN4" vs "PET29tm34p_AHN4")
-  if (!isValidValue(value) && attribute && typeof attribute === 'string' && attribute.includes('_AHN')) {
-    // Try removing the underscore before AHN
-    const fallbackWithoutUnderscore = attribute.replace('_AHN', 'AHN')
-    value = feature.properties?.[fallbackWithoutUnderscore]
-  }
-
-  return value
+  // Use centralized AHN column name resolution (handles Dordrecht naming differences)
+  return getPropertyWithAHNFallback(attribute, feature.properties)
 }
 
 function getNumberValue(feature, indicator, options = {}) {
@@ -152,14 +133,8 @@ export function getAHNSelection(indicator) {
   // Use indicator-specific store for proper reactivity
   // Use dutchTitle for store key to ensure consistency across languages
   const indicatorStore = getIndicatorStore(indicator.dutchTitle || indicator.title)
-  let selection = null;
-  
-  // Get the current value from the store
-  const unsubscribe = indicatorStore.subscribe(value => {
-    selection = value
-  })
-  unsubscribe() // Immediately unsubscribe to avoid memory leaks
-  
+  const selection = get(indicatorStore)
+
   if (!selection) return { baseYear: '', compareYear: null, isDifference: false, beb: 'hele_buurt' }
   if (typeof selection === 'object') {
     return { 
@@ -256,12 +231,7 @@ function getSurfaceAreaM2(feature, indicator) {
   if (surfaceBebVariant) {
     // Use dutchTitle for store key to ensure consistency across languages
     const indicatorStore = getIndicatorStore(indicator.dutchTitle || indicator.title)
-    let ahnSelection
-
-    const unsubscribe = indicatorStore.subscribe(value => {
-      ahnSelection = value
-    })
-    unsubscribe()
+    const ahnSelection = get(indicatorStore)
 
     const bebSelection = ahnSelection?.beb || 'hele_buurt'
     if (bebSelection === 'bebouwde_kom') {

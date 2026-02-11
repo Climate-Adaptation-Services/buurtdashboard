@@ -1,3 +1,4 @@
+import { get } from 'svelte/store'
 import { getIndicatorStore } from '$lib/stores'
 
 export const calcMedian = (array) => {
@@ -81,12 +82,7 @@ export const calcWeightedAverage = (features, valueExtractor, surfaceAreaColumn,
   if (bebVariant) {
     // Use dutchTitle for store key to ensure consistency across languages
     const indicatorStore = getIndicatorStore(indicator.dutchTitle || indicator.title)
-    let ahnSelection
-
-    const unsubscribe = indicatorStore.subscribe(value => {
-      ahnSelection = value
-    })
-    unsubscribe()
+    const ahnSelection = get(indicatorStore)
 
     const bebSelection = ahnSelection?.beb || 'hele_buurt'
     if (bebSelection === 'bebouwde_kom') {

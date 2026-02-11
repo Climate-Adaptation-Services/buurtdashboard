@@ -2,11 +2,14 @@
   import BeeswarmPlot from "./BeeswarmPlot.svelte"
   import Stats from "./Stats.svelte"
   import { neighbourhoodsInMunicipalityJSONData, AHNSelecties, municipalitySelection } from "$lib/stores"
-  
+  import { t } from "$lib/i18n/translate.js"
+  import { getIndicatorAttribute } from "$lib/utils/getIndicatorAttribute"
+  import { sanitizeClassName } from "$lib/utils/sanitizeClassName.js"
+
   // Memoize cloned data to prevent unnecessary BeeswarmPlot re-renders
   let memoizedClonedFeatures = []
   let lastDataReference = null
-  
+
   $: {
     // Only clone when the actual data reference changes, not on every render
     const currentData = $neighbourhoodsInMunicipalityJSONData?.features
@@ -15,8 +18,6 @@
       lastDataReference = currentData
     }
   }
-  import { t } from "$lib/i18n/translate.js"
-  import { getIndicatorAttribute } from "$lib/utils/getIndicatorAttribute"
 
   export let indicator
   export let bodyHeight
@@ -34,7 +35,7 @@
 </div>
 <div class="indicator-graph" style="height:{graphHeight}px" bind:clientWidth={graphWidth}>
   {#if $municipalitySelection !== null}
-    <svg class={"beeswarm_" + indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', '')}>
+    <svg class={"beeswarm_" + sanitizeClassName(indicator.title)}>
       <BeeswarmPlot
         {graphWidth}
         indicatorHeight={graphHeight}

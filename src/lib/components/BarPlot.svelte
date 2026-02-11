@@ -21,6 +21,7 @@
     calcPercentagesForEveryClassSingleIndicator,
   } from "$lib/utils/calcPercentagesForEveryClass"
   import { getNumericalValue } from "$lib/utils/valueRetrieval.js"
+  import { sanitizeClassName } from "$lib/utils/sanitizeClassName.js"
 
   export let graphWidth
   export let indicatorHeight
@@ -30,19 +31,6 @@
   export let aggregated
 
   const margin = { bottom: 100, top: 30, left: 30, right: 30 }
-
-  // Helper function to sanitize class names (must match barPlotMouseEvents.js)
-  function sanitizeClassName(str) {
-    return str
-      .replaceAll(' ', '')
-      .replaceAll(',', '_')
-      .replaceAll('/', '_')
-      .replaceAll('(', '')
-      .replaceAll(')', '')
-      .replaceAll(':', '')  // Remove colons
-      .replaceAll('>', '')
-      .replaceAll('%', '')  // Remove percent signs
-  }
 
   const calcPercentagesForEveryClass = aggregated ? calcPercentagesForEveryClassMultiIndicator : calcPercentagesForEveryClassSingleIndicator
 

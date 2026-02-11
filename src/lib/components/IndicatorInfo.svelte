@@ -3,6 +3,7 @@
   import { afterUpdate } from "svelte"
   import { getIndicatorAttribute } from "$lib/utils/getIndicatorAttribute"
   import { t } from "$lib/i18n/translate.js"
+  import { sanitizeClassName } from "$lib/utils/sanitizeClassName.js"
 
   export let indicator
   export let graphWidth
@@ -11,7 +12,7 @@
   let isRightmost = false
 
   afterUpdate(() => {
-    const className = "indicator-info-" + indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', '').replaceAll('|', '_')
+    const className = "indicator-info-" + sanitizeClassName(indicator.title)
     const infoElement = document.getElementsByClassName(className)[0]
     if (!infoElement) return
 
@@ -57,7 +58,7 @@
   on:mouseover={handleCategoryMouseOver}
   on:mouseout={handleCategoryMouseOut}
 />
-<div class={"indicator-info indicator-info-" + indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', '').replaceAll('|', '_')} style="left:{indicatorInfoPosition}px">
+<div class={"indicator-info indicator-info-" + sanitizeClassName(indicator.title)} style="left:{indicatorInfoPosition}px">
   <p class="title" style="background-color:{$configStore.mainColor}">
     <strong>{indicator.title}</strong>
   </p>

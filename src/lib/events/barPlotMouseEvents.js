@@ -1,20 +1,8 @@
 import { getRegionName } from "../utils/getRegionName.js";
+import { sanitizeClassName } from "../utils/sanitizeClassName.js";
 import { tooltipValues, tooltipRegion, municipalitySelection } from "$lib/stores";
 import { select } from "d3";
 import { get } from "svelte/store";
-
-// Helper function to sanitize class names for use in CSS selectors
-function sanitizeClassName(str) {
-  return str
-    .replaceAll(' ', '')
-    .replaceAll(',', '_')
-    .replaceAll('/', '_')
-    .replaceAll('(', '')
-    .replaceAll(')', '')
-    .replaceAll(':', '')  // Remove colons
-    .replaceAll('>', '')
-    .replaceAll('%', '')  // Remove percent signs
-}
 
 export function barPlotMouseOver(indicator, indicatorValueColorscale, st, stacked) {
   const percentageValue = st[1] - st[0]

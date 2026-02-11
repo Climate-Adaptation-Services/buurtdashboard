@@ -1,4 +1,4 @@
-import { writable, derived, readable } from 'svelte/store';
+import { writable, derived, readable, get } from 'svelte/store';
 import { defaultConfig, setupThemeSubscription } from './config';
 
 export const municipalitySelection = writable(null);
@@ -30,10 +30,8 @@ const indicatorStores = new Map()
 
 export function getIndicatorStore(indicatorTitle) {
   if (!indicatorStores.has(indicatorTitle)) {
-    // Get current AHNSelecties value without subscribing
-    let currentAHNSelecties
-    const unsubscribe = AHNSelecties.subscribe(v => currentAHNSelecties = v)
-    unsubscribe() // Immediately unsubscribe to avoid loops
+    // Get current AHNSelecties value synchronously
+    const currentAHNSelecties = get(AHNSelecties)
 
     // Initialize from existing data if available
     const existing = currentAHNSelecties[indicatorTitle]
