@@ -326,6 +326,7 @@
     color: white;
     font-size: 12px;
     position: relative;
+    margin-top: 16px;
   }
 
   .input-container {
