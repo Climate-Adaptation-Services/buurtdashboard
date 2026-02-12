@@ -30,14 +30,6 @@
   // Parse AHN versions from the indicator
   const ahnVersions = indicator.AHNversie.split(",")
 
-  // Hardcoded year mappings for AHN versions (when Jaar columns are missing)
-  const ahnYearMapping = {
-    'AHN2': '2009',
-    'AHN3': '2019',
-    'AHN4': '2022',
-    'AHN5': '2025'
-  }
-
   // Format years consistently - sort and use ranges for consecutive years
   function formatYears(yearsString) {
     if (!yearsString) return ""
@@ -111,14 +103,20 @@
   // Update options when data changes, initialize store if needed
   $: {
     if ($selectedNeighbourhoodJSONData) {
-      // For a selected neighborhood, only show AHN versions for which the buurt has valid data
+      // For a selected neighborhood, only show AHN versions for which the buurt has valid data AND year data
       options = ahnVersions
-        .filter((ahn) => hasValidDataForAHN($selectedNeighbourhoodJSONData, ahn))
+        .filter((ahn) => {
+          // Must have valid indicator data
+          if (!hasValidDataForAHN($selectedNeighbourhoodJSONData, ahn)) return false
+          // Must have valid year data (JaarAHN column must not be empty)
+          const jaarData = $selectedNeighbourhoodJSONData.properties["Jaar" + ahn]
+          return jaarData && jaarData.toString().trim() !== ''
+        })
         .map((ahn) => {
           const jaarData = $selectedNeighbourhoodJSONData.properties["Jaar" + ahn];
           return {
             AHN: ahn,
-            Jaar: jaarData ? formatYears(jaarData) : (ahnYearMapping[ahn] || ahn) // Use hardcoded year or AHN version
+            Jaar: formatYears(jaarData) // Year data is guaranteed to exist due to filter above
           };
         })
     } else if ($neighbourhoodsInMunicipalityJSONData) {
@@ -159,12 +157,11 @@
 
   function findAHNyearsWithoutDuplicatesAndSort() {
     // For municipality view, collect all unique years
-    // But only for AHN versions that have at least one neighbourhood with valid data
-    options = ahnVersions.map((ahn) => ({ AHN: ahn, Jaar: [], hasValidData: false }))
+    // But only for AHN versions that have at least one neighbourhood with valid data AND year data
+    options = ahnVersions.map((ahn) => ({ AHN: ahn, Jaar: [], hasValidData: false, hasYearData: false }))
 
     if (!$neighbourhoodsInMunicipalityJSONData?.features) return
 
-    let hasJaarColumns = false
     $neighbourhoodsInMunicipalityJSONData.features.forEach((nh) => {
       if (!nh?.properties) return // Skip null/invalid features
       ahnVersions.forEach((ahn) => {
@@ -177,8 +174,8 @@
 
         // Use the same splitting logic as in formatYears
         const yearData = nh.properties["Jaar" + ahn]
-        if (yearData) {
-          hasJaarColumns = true
+        if (yearData && yearData.toString().trim() !== '') {
+          option.hasYearData = true
           const ahnYear = yearData.split(/[.,]\s*/)
           ahnYear
             .filter((y) => y.trim())
@@ -191,29 +188,25 @@
       })
     })
 
-    // Sort years and format as ranges, or fallback to hardcoded year or AHN version
+    // Sort years and format as ranges
     options.forEach((option) => {
       if (option.Jaar.length > 0) {
         const sortedYears = option.Jaar.map(y => parseInt(y)).sort((a, b) => a - b)
         option.Jaar = formatYearRanges(sortedYears)
-      } else {
-        // No Jaar data found, use hardcoded year mapping or AHN version
-        option.Jaar = ahnYearMapping[option.AHN] || option.AHN
       }
     })
 
-    // Filter out AHN versions that have no valid data for this indicator
-    options = options.filter(opt => opt.hasValidData)
+    // Filter out AHN versions that have no valid data OR no year data
+    options = options.filter(opt => opt.hasValidData && opt.hasYearData)
   }
 
   function findAHNyearsForAllNetherlands() {
     // For Nederland level, collect all unique years from all neighbourhoods
-    // But only for AHN versions that have at least one neighbourhood with valid data
-    options = ahnVersions.map((ahn) => ({ AHN: ahn, Jaar: [], hasValidData: false }))
+    // But only for AHN versions that have at least one neighbourhood with valid data AND year data
+    options = ahnVersions.map((ahn) => ({ AHN: ahn, Jaar: [], hasValidData: false, hasYearData: false }))
 
     if (!$allNeighbourhoodsJSONData?.features) return
 
-    let hasJaarColumns = false
     $allNeighbourhoodsJSONData.features.forEach((nh) => {
       if (!nh?.properties) return // Skip null/invalid features
       ahnVersions.forEach((ahn) => {
@@ -226,8 +219,8 @@
 
         // Use the same splitting logic as in formatYears
         const yearData = nh.properties["Jaar" + ahn]
-        if (yearData) {
-          hasJaarColumns = true
+        if (yearData && yearData.toString().trim() !== '') {
+          option.hasYearData = true
           const ahnYear = yearData.split(/[.,]\s*/)
           ahnYear
             .filter((y) => y.trim())
@@ -240,19 +233,16 @@
       })
     })
 
-    // Sort years and format as ranges, or fallback to hardcoded year or AHN version
+    // Sort years and format as ranges
     options.forEach((option) => {
       if (option.Jaar.length > 0) {
         const sortedYears = option.Jaar.map(y => parseInt(y)).sort((a, b) => a - b)
         option.Jaar = formatYearRanges(sortedYears)
-      } else {
-        // No Jaar data found, use hardcoded year mapping or AHN version
-        option.Jaar = ahnYearMapping[option.AHN] || option.AHN
       }
     })
 
-    // Filter out AHN versions that have no valid data for this indicator
-    options = options.filter(opt => opt.hasValidData)
+    // Filter out AHN versions that have no valid data OR no year data
+    options = options.filter(opt => opt.hasValidData && opt.hasYearData)
   }
 
 
