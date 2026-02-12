@@ -4,7 +4,8 @@ import { nederlands } from './nl';
 import { english } from './en';
 
 export function t(text){
-  return (get(lang) === 'en')
-    ? english[text]
-    : nederlands[text]
+  if (get(lang) === 'en') {
+    return english[text] || text
+  }
+  return nederlands[text] || text
 }

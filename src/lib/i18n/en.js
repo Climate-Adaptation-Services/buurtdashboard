@@ -31,5 +31,9 @@ export const english = {
   "Jaar": "Year",
   "Vergelijk": "Compare",
   "Hele buurt": "Entire area",
-  "Bebouwde kom": "Built-up area"
+  "Bebouwde kom": "Built-up area",
+  "Toon alleen data binnen de bebouwde kom van de buurt": "Show only data within the built-up area of the neighborhood",
+  "Selecteer indicatoren met meerdere jaren om veranderingen over tijd te monitoren": "Select indicators with multiple years to monitor changes over time",
+  "tooltip_bebouwde_kom": "Click to select all indicators for which data is available for the built-up area, and show only data within the built-up area of the neighborhood.",
+  "tooltip_monitoring": "Click to select all indicators for which data is available for multiple years, so you can analyze developments over time. These indicators are aligned with the Regional Climate Adaptation Monitor."
 }

@@ -11,6 +11,37 @@
   let isOpen = false
   let dropdownRef
 
+  // Tooltip state
+  let hoveredTooltip = null
+  let tooltipPosition = { x: 0, y: 0 }
+
+  function showTooltip(event, tooltipId) {
+    hoveredTooltip = tooltipId
+    const rect = event.target.getBoundingClientRect()
+
+    // For bebouwde_kom, center horizontally above the sidepanel (use parent container width)
+    if (tooltipId === 'bebouwde_kom') {
+      const sidepanel = event.target.closest('.custom-multiselect')
+      if (sidepanel) {
+        const sidepanelRect = sidepanel.getBoundingClientRect()
+        tooltipPosition = {
+          x: sidepanelRect.left + sidepanelRect.width / 2,
+          y: rect.top - 10
+        }
+        return
+      }
+    }
+
+    tooltipPosition = {
+      x: rect.left + rect.width / 2,
+      y: rect.top - 10
+    }
+  }
+
+  function hideTooltip() {
+    hoveredTooltip = null
+  }
+
   // Indicators with year/AHN variants
   $: indicatorsWithYears = allIndicators.filter(ind => ind.AHNversie && ind.AHNversie.length > 0)
 
@@ -209,7 +240,8 @@
     <label
       class="beb-toggle"
       class:active={$globalBEBSelection === 'bebouwde_kom'}
-      title={t("Toon alleen data binnen de bebouwde kom van de buurt")}
+      on:mouseenter={(e) => showTooltip(e, 'bebouwde_kom')}
+      on:mouseleave={hideTooltip}
     >
       <input type="radio" bind:group={$globalBEBSelection} value="bebouwde_kom" />
       {t("Bebouwde kom")}
@@ -224,11 +256,23 @@
       class="filter-toggle"
       class:active={$monitoringOverTijdActive}
       on:click={() => $monitoringOverTijdActive = !$monitoringOverTijdActive}
-      title={t("Selecteer indicatoren met meerdere jaren om veranderingen over tijd te monitoren")}
+      on:mouseenter={(e) => showTooltip(e, 'monitoring')}
+      on:mouseleave={hideTooltip}
     >
       {t("Monitoring over tijd")}
     </button>
   </div>
+
+  <!-- Custom tooltips - rendered at document level for proper z-index -->
+  {#if hoveredTooltip}
+    <div class="custom-tooltip" style="left: {tooltipPosition.x}px; top: {tooltipPosition.y}px;">
+      {#if hoveredTooltip === 'bebouwde_kom'}
+        {t("tooltip_bebouwde_kom")}
+      {:else if hoveredTooltip === 'monitoring'}
+        {t("tooltip_monitoring")}
+      {/if}
+    </div>
+  {/if}
 
   <!-- Divider between filters and indicator selection -->
   {#if $monitoringOverTijdActive}
@@ -486,4 +530,23 @@
     background: rgba(255, 255, 255, 0.3);
     margin: 12px 0;
   }
+
+  .custom-tooltip {
+    position: fixed;
+    background-color: white;
+    color: #333;
+    padding: 15px 20px;
+    border-radius: 10px;
+    font-size: 12px;
+    line-height: 1.5;
+    max-width: 300px;
+    text-align: left;
+    transform: translate(-50%, -100%);
+    z-index: 99999;
+    pointer-events: none;
+    box-shadow:
+      rgba(0, 0, 0, 0.3) 0px 19px 38px,
+      rgba(0, 0, 0, 0.22) 0px 15px 12px;
+  }
+
 </style>
