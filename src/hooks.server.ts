@@ -21,11 +21,11 @@ export const handle: Handle = async ({ event, resolve }) => {
     // Check if we're in a prerendering environment
     const configParam = import.meta.env.SSR && !import.meta.env.DEV ? 'default' : event.url.searchParams.get('config') || 'default';
     
-    // Add preload for GeoJSON data
+    // Add preload for GeoJSON data (gzipped)
     response.headers.append(
       'Link',
       `<${BUURT_GEOJSON_URL}>; ` +
-        'rel=preload; as=fetch; type="application/json"; ' +
+        'rel=preload; as=fetch; type="application/gzip"; ' +
         'crossorigin; fetchpriority=high'
     );
     

@@ -25,7 +25,7 @@ export const buildConfigJsonUrl = (slug, configMode) =>
   `${CONFIG_PORTAL_URL}/api/config/${slug}/json?mode=${configMode}`;
 
 // GeoJSON URLs (fallback, can be overridden by config portal)
-export const BUURT_GEOJSON_URL = `${S3_BASE_URL}/buurtdashboard-KEA/geojsondata/buurt24IdentificationOnly.json`;
+export const BUURT_GEOJSON_URL = `${S3_BASE_URL}/buurtdashboard-KEA/geojsondata/Buurt2024_simplified.json.gz`;
 export const MUNICIPALITY_JSON_URL = `${S3_BASE_URL}/buurtdashboard-KEA/geojsondata/gemeentes.json`;
 
 // Dashboard config slugs

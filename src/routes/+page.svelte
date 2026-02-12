@@ -28,6 +28,7 @@
   import { onMount, tick } from "svelte"
   import { BUURT_GEOJSON_URL, MUNICIPALITY_JSON_URL } from "$lib/datasets"
   import { prepareJSONData } from "$lib/services/prepareJSONData"
+  import { gunzipSync, strFromU8 } from "fflate"
 
   export let data
 
@@ -91,7 +92,12 @@
       ])
 
       municipalityGeoJson = await municipalityResponse.json()
-      neighbourhoodGeoJson = await neighbourhoodResponse.json()
+
+      // Decompress gzipped buurt TopoJSON
+      const neighbourhoodBuffer = await neighbourhoodResponse.arrayBuffer()
+      const decompressed = gunzipSync(new Uint8Array(neighbourhoodBuffer))
+      neighbourhoodGeoJson = JSON.parse(strFromU8(decompressed))
+
       geoJSONData = [municipalityGeoJson, neighbourhoodGeoJson]
 
       // Process and cache the GeoJSON data

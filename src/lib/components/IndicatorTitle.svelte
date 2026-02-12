@@ -25,9 +25,8 @@
     flex-direction: column;
     background-color: whitesmoke;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center;
     border-radius: 10px;
-    padding-top: 12px;
     position: relative;
     z-index: 2;
   }
@@ -43,6 +42,7 @@
     border-radius: 15px;
     color: white;
     text-align: center;
+    font-size: 1.3rem;
   }
 
   .title.long-title {
@@ -50,6 +50,6 @@
   }
 
   .year-switch-container {
-    margin-top: 4px;
+    margin-top: 0px;
   }
 </style>

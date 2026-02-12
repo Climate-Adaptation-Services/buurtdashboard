@@ -122,14 +122,15 @@
     padding: 3px 10px;
     border-radius: 50px;
     color: white;
-    float: left;
+    display: inline-block;
     margin: 0;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
   }
 
   hr {
     width: 100%;
-    margin: 1rem 0;
+    margin: 0.5rem 0;
+    clear: both;
   }
 
   .subtitle {
@@ -137,6 +138,8 @@
     font-size: 0.9em;
     color: #666;
     font-style: italic;
+    clear: both;
+    display: block;
   }
 
   .description {

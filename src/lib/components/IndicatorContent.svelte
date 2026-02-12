@@ -18,8 +18,8 @@
 
 
   let graphWidth
-  const titleHeight = indicatorHeight * 0.23
-  const bodyHeight = indicatorHeight * 0.77
+  const titleHeight = 135
+  const bodyHeight = indicatorHeight - titleHeight
 
   // Initialize with a default color scale to prevent null errors
   let indicatorValueColorscale = (value) => "#cccccc"
