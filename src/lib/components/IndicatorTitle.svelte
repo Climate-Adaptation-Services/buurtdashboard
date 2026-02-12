@@ -14,12 +14,12 @@
   $: hasBothSwitches = hasBEBVariant && indicator.AHNversie
 </script>
 
-<div class="indicator-title" class:both-switches={hasBothSwitches} style="height: {titleHeight}px">
+<div class="indicator-title" class:both-switches={hasBothSwitches} class:has-two-line-title={indicator.title.length > 33} style="height: {titleHeight}px">
   <!-- <h4 class="category">{t("Categorie")}: {indicator.category}</h4> -->
-  <h2 class="title" class:long-title={indicator.title.length > 25} class:extra-long-title={indicator.title.length > 40} style="background-color:{$configStore.mainColor}">
+  <h2 class="title" class:long-title={indicator.title.length > 25} class:extra-long-title={indicator.title.length > 28} style="background-color:{$configStore.mainColor}">
     {indicator.title}
   </h2>
-  <h4 class="subtitle">
+  <h4 class="subtitle" class:compact={indicator.title.length > 28}>
     {indicator.subtitle}
     {#if hasBEBVariant}
       <BEBSwitch {indicator} />
@@ -78,5 +78,18 @@
     align-items: center;
     justify-content: center;
     gap: 5px;
+  }
+
+  .subtitle.compact {
+    font-size: 0.85rem;
+    margin: 0;
+  }
+
+  .has-two-line-title .title {
+    margin-bottom: 3px;
+  }
+
+  .has-two-line-title :global(.year-switch-dropdowns) {
+    margin-top: 0;
   }
 </style>

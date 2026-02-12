@@ -72,27 +72,35 @@
     right: 5px;
     top: 5px;
     z-index: 10;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    font-size: 14px;
   }
 
   .category {
-    width: 29px;
-    padding: 0px 6px;
+    width: 28px;
+    height: 28px;
+    padding: 0;
     margin: 0;
     position: absolute;
-    border-radius: 50px;
+    border-radius: 50%;
     top: 5px;
     left: 5px;
     z-index: 10;
+    object-fit: contain;
   }
 
   h3 {
-    padding: 3px 11px;
     margin: 0;
     position: absolute;
-    border-radius: 50px;
-    top: 5px;
+    border-radius: 50%;
     color: white;
     cursor: default;
+    box-sizing: border-box;
   }
 
   .indicator-info {

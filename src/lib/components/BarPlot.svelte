@@ -23,12 +23,16 @@
   import { getNumericalValue } from "$lib/utils/valueRetrieval.js"
   import { sanitizeClassName } from "$lib/utils/sanitizeClassName.js"
 
+  import { createEventDispatcher } from "svelte"
+
   export let graphWidth
   export let indicatorHeight
   export let indicator
   export let indicatorValueColorscale
   export let getClassByIndicatorValue
   export let aggregated
+
+  const dispatch = createEventDispatcher()
 
   const margin = { bottom: 100, top: 30, left: 30, right: 30 }
 
@@ -144,6 +148,8 @@
 
     barPlotData = data
     regios = regions
+    // Dispatch data to parent for legend
+    dispatch('dataUpdate', { barPlotData: data })
   }
   // Create stacked data for D3 visualization
   $: stackedData = (() => {
