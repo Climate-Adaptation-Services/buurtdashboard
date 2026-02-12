@@ -128,7 +128,7 @@ function getCategoryValue(feature, indicator, { defaultValue = 'No data', ...opt
   }
 }
 
-// AHN selection helper
+// AHN selection helper - uses per-indicator store
 export function getAHNSelection(indicator) {
   // Use indicator-specific store for proper reactivity
   // Use dutchTitle for store key to ensure consistency across languages
@@ -137,9 +137,9 @@ export function getAHNSelection(indicator) {
 
   if (!selection) return { baseYear: '', compareYear: null, isDifference: false, beb: 'hele_buurt' }
   if (typeof selection === 'object') {
-    return { 
-      baseYear: selection.baseYear || '', 
-      compareYear: selection.compareYear || null, 
+    return {
+      baseYear: selection.baseYear || '',
+      compareYear: selection.compareYear || null,
       isDifference: selection.isDifference || false,
       beb: selection.beb || 'hele_buurt'
     }

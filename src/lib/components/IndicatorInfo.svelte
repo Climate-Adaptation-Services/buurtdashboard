@@ -62,6 +62,9 @@
   <p class="title" style="background-color:{$configStore.mainColor}">
     <strong>{indicator.title}</strong>
   </p>
+  {#if indicator.subtitle}
+    <p class="subtitle">{indicator.subtitle}</p>
+  {/if}
   <hr />
   <p class="description">{indicator.description}</p>
 </div>
@@ -127,6 +130,13 @@
   hr {
     width: 100%;
     margin: 1rem 0;
+  }
+
+  .subtitle {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.9em;
+    color: #666;
+    font-style: italic;
   }
 
   .description {

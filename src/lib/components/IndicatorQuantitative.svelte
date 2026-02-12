@@ -75,4 +75,5 @@
     position: absolute;
     left: 29.4%;
   }
+
 </style>

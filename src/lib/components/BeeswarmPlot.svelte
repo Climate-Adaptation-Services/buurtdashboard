@@ -1,5 +1,5 @@
 <script>
-  import { neighbourhoodSelection, neighbourhoodCodeAbbreviation, circleRadius, selectedNeighbourhoodJSONData, getIndicatorStore } from "$lib/stores"
+  import { neighbourhoodSelection, neighbourhoodCodeAbbreviation, circleRadius, selectedNeighbourhoodJSONData, getIndicatorStore, globalBEBSelection } from "$lib/stores"
   import { extent, scaleLinear, scaleLog, select } from "d3"
   import XAxis from "$lib/components/XAxis.svelte"
   import { forceSimulation, forceY, forceX, forceCollide, forceManyBody } from "d3-force"
@@ -26,8 +26,9 @@
   let baseFilteredData = []
 
   // Reactive data filtering using value retrieval system
+  // Include globalBEBSelection for reactivity when BEB changes
   $: {
-    if ($indicatorStore) {
+    if ($indicatorStore || $globalBEBSelection) {
       // MIGRATED: Filter using centralized value retrieval system
       baseFilteredData = neighbourhoodsInMunicipalityFeaturesClone.filter((d) => {
         const rawValue = getRawValue(d, indicator)
@@ -76,7 +77,7 @@
     originalAttribute = indicatorAttribute // Keep this for backward compatibility but use getRawValue for colors
   }
 
-  // Use dedicated indicator store for difference mode detection (naturally isolated)
+  // Use indicator store for difference mode detection
   $: isDifferenceMode = $indicatorStore && typeof $indicatorStore === "object" && $indicatorStore.isDifference
 
   // Calculate difference values reactive only to this indicator's selection
@@ -143,7 +144,7 @@
 
   // FIXED: Let Svelte handle reactivity naturally - run simulation when AHN selection changes
   $: {
-    // This reactive block will trigger whenever this indicator's store changes OR indicatorAttribute changes
+    // This reactive block will trigger whenever this indicator's store selection changes OR indicatorAttribute changes
     const currentSelection = $indicatorStore
     const currentIndicatorAttribute = indicatorAttribute
     const currentBEB = currentSelection?.beb || 'hele_buurt'

@@ -8,6 +8,7 @@
     municipalitySelection,
     isUpdatingIndicators,
   } from "$lib/stores"
+  // Note: Using per-indicator year selection via indicatorStore (not global)
   import { geoMercator, geoPath, select, selectAll } from "d3"
   import { t } from "$lib/i18n/translate.js"
   import MapPath from "./MapPath.svelte"
@@ -100,10 +101,11 @@
   // Use dedicated indicator store for difference mode detection (naturally isolated)
   // Use dutchTitle for store key to ensure consistency across languages
   $: indicatorStore = indicator ? getIndicatorStore(indicator.dutchTitle || indicator.title) : null
+
+  // Use per-indicator year selection
   $: isDifferenceMode = $indicatorStore && typeof $indicatorStore === "object" && $indicatorStore.isDifference
 
   // Pre-calculate difference values for map features to match BeeswarmPlot approach
-  // Watch for changes to indicatorStore to recalculate when BEB selection changes
   $: differenceValues = calculateDifferenceValues(
     $currentJSONData,
     indicator,

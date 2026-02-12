@@ -26,5 +26,10 @@ export const english = {
   "Indicator 2": "Indicator type 2: Categorical indicator",
   "Carousel1-path":"carousel-2-en.png",
   "Carousel2-path":"carousel-1-en.png",
-
+  "Monitoring over tijd": "Monitoring over time",
+  "Gebiedsselectie": "Area selection",
+  "Jaar": "Year",
+  "Vergelijk": "Compare",
+  "Hele buurt": "Entire area",
+  "Bebouwde kom": "Built-up area"
 }

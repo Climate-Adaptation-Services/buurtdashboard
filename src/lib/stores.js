@@ -26,12 +26,26 @@ export const alleIndicatoren = writable([])
 export const AHNSelecties = writable({})
 export const isUpdatingIndicators = writable(false) // Flag to prevent zoom during indicator updates
 
+// Global filter toggles for indicator filtering
+export const monitoringOverTijdActive = writable(false) // Filter for indicators with year variants
+export const gebiedsselectieActive = writable(false) // Filter for indicators with BEB variants
+
+// Global selections (apply to all relevant indicators)
+export const globalYearSelection = writable({
+  baseYear: '',
+  compareYear: null,
+  isDifference: false
+})
+export const globalBEBSelection = writable('hele_buurt') // 'hele_buurt' or 'bebouwde_kom'
+
 const indicatorStores = new Map()
 
 export function getIndicatorStore(indicatorTitle) {
   if (!indicatorStores.has(indicatorTitle)) {
     // Get current AHNSelecties value synchronously
     const currentAHNSelecties = get(AHNSelecties)
+    // Get current global BEB selection
+    const currentGlobalBEB = get(globalBEBSelection)
 
     // Initialize from existing data if available
     const existing = currentAHNSelecties[indicatorTitle]
@@ -43,7 +57,7 @@ export function getIndicatorStore(indicatorTitle) {
           baseYear: existing.baseYear || '',
           compareYear: existing.compareYear || null,
           isDifference: existing.isDifference || false,
-          beb: existing.beb || 'hele_buurt'
+          beb: currentGlobalBEB // Use global BEB selection
         }
       } else {
         // Legacy string format
@@ -51,7 +65,7 @@ export function getIndicatorStore(indicatorTitle) {
           baseYear: existing,
           compareYear: null,
           isDifference: false,
-          beb: 'hele_buurt'
+          beb: currentGlobalBEB // Use global BEB selection
         }
       }
     } else {
@@ -60,7 +74,7 @@ export function getIndicatorStore(indicatorTitle) {
         baseYear: '',
         compareYear: null,
         isDifference: false,
-        beb: 'hele_buurt'
+        beb: currentGlobalBEB // Use global BEB selection
       }
     }
 
@@ -78,11 +92,30 @@ export function getIndicatorSelection(indicatorTitle) {
   return value
 }
 
-// Note: No automatic sync to prevent loops. 
+// Note: No automatic sync to prevent loops.
 // Components should use the new indicator stores directly.
+
+// Sync global BEB selection to all indicator stores
+export function syncGlobalBEBToIndicators(bebValue) {
+  indicatorStores.forEach((store, indicatorTitle) => {
+    store.update(current => ({
+      ...current,
+      beb: bebValue
+    }))
+  })
+}
+
+// Subscribe to globalBEBSelection changes and sync to all indicator stores
+if (typeof window !== 'undefined') {
+  globalBEBSelection.subscribe(bebValue => {
+    syncGlobalBEBToIndicators(bebValue)
+  })
+}
 
 // Initialize indicator stores from the old AHNSelecties data
 export function initializeIndicatorStores(data) {
+  const currentGlobalBEB = get(globalBEBSelection)
+
   data.indicatorsConfig.forEach(indicator => {
     const baseYear = (indicator.AHNversie)
       ? indicator.AHNversie.split(',')[indicator.AHNversie.split(',').length - 1]
@@ -93,7 +126,7 @@ export function initializeIndicatorStores(data) {
       baseYear: baseYear,
       compareYear: null,
       isDifference: false,
-      beb: 'hele_buurt'
+      beb: currentGlobalBEB
     })
   })
 }

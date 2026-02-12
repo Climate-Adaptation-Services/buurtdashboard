@@ -25,5 +25,11 @@ export const nederlands = {
   "Indicator 1": "Indicator type 1: Kwantitatieve indicator",
   "Indicator 2": "Indicator type 2: Categorische indicator",
   "Carousel1-path": "carousel-2-300625.png",
-  "Carousel2-path": "carousel-1-300625.png"
+  "Carousel2-path": "carousel-1-300625.png",
+  "Monitoring over tijd": "Monitoring over tijd",
+  "Gebiedsselectie": "Gebiedsselectie",
+  "Jaar": "Jaar",
+  "Vergelijk": "Vergelijk",
+  "Hele buurt": "Hele buurt",
+  "Bebouwde kom": "Bebouwde kom"
 }

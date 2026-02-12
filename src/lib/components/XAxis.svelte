@@ -1,6 +1,6 @@
 <script>
   import { axisBottom, select, selectAll, format } from "d3"
-  import { AHNSelecties } from "$lib/stores"
+  import { AHNSelecties, getIndicatorStore } from "$lib/stores"
 
   export let xScale
   export let height
@@ -8,11 +8,14 @@
   export let indicator = null
 
   let pinXAxis // declare pins
-  
+
+  // Get the indicator-specific store
+  $: indicatorStore = indicator ? getIndicatorStore(indicator.dutchTitle || indicator.title) : null
+
   // Determine if we're showing a difference plot
-  $: isDifferencePlot = indicator && $AHNSelecties[indicator.title] && 
-      typeof $AHNSelecties[indicator.title] === 'object' && 
-      $AHNSelecties[indicator.title].isDifference
+  $: isDifferencePlot = $indicatorStore &&
+      typeof $indicatorStore === 'object' &&
+      $indicatorStore.isDifference
   
   // Get domain to check if it spans positive and negative values
   $: domain = xScale.domain()

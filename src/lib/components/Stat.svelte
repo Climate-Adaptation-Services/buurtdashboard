@@ -21,6 +21,7 @@
   // Determine if we're in difference mode
   // Use dutchTitle for store key to ensure consistency across languages
   $: indicatorStore = getIndicatorStore(indicator.dutchTitle || indicator.title)
+
   $: currentAHNSelection = $indicatorStore
   $: isDifferenceMode = currentAHNSelection && currentAHNSelection.isDifference
 

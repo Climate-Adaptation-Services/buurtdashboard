@@ -1,5 +1,5 @@
 <script>
-  import { indicatorsSelection, URLParams } from "$lib/stores"
+  import { indicatorsSelection, URLParams, monitoringOverTijdActive, gebiedsselectieActive, globalBEBSelection } from "$lib/stores"
   import { addURLParameter, removeURLParameter } from "$lib/services/urlManager"
   import { t } from "$lib/i18n/translate.js"
 
@@ -14,10 +14,84 @@
   // Indicators with year/AHN variants
   $: indicatorsWithYears = allIndicators.filter(ind => ind.AHNversie && ind.AHNversie.length > 0)
 
-  // Group indicators by category
-  const indicatorsByCategory = categories.map(category => ({
+  // Indicators with BEB variants (any variant that's not M2 or empty)
+  $: indicatorsWithBEB = allIndicators.filter(ind =>
+    ind.variants && ind.variants.split(",").map(v => v.trim()).some(v => v !== 'M2' && v !== '')
+  )
+
+  // Filter indicators based on active global filters
+  $: filteredByGlobalFilters = allIndicators.filter(ind => {
+    // If no filters active, show all
+    if (!$monitoringOverTijdActive && !$gebiedsselectieActive) return true
+
+    let passesFilter = true
+
+    // If monitoring filter active, indicator must have year variants
+    if ($monitoringOverTijdActive) {
+      passesFilter = passesFilter && ind.AHNversie && ind.AHNversie.length > 0
+    }
+
+    // If gebiedsselectie filter active, indicator must have BEB variants
+    if ($gebiedsselectieActive) {
+      const hasBEB = ind.variants && ind.variants.split(",").map(v => v.trim()).some(v => v !== 'M2' && v !== '')
+      passesFilter = passesFilter && hasBEB
+    }
+
+    return passesFilter
+  })
+
+  // Track previous filter states to detect changes
+  let prevMonitoringActive = false
+  let prevGebiedsselectieActive = false
+  let prevBEBSelection = 'hele_buurt'
+
+  // Auto-select filtered indicators when a filter is activated or BEB changes
+  $: {
+    const monitoringJustActivated = $monitoringOverTijdActive && !prevMonitoringActive
+    const gebiedsselectieJustActivated = $gebiedsselectieActive && !prevGebiedsselectieActive
+    const monitoringJustDeactivated = !$monitoringOverTijdActive && prevMonitoringActive
+    const gebiedsselectieJustDeactivated = !$gebiedsselectieActive && prevGebiedsselectieActive
+    const bebJustChangedToBebouwdeKom = $globalBEBSelection === 'bebouwde_kom' && prevBEBSelection === 'hele_buurt'
+
+    // When a filter is activated OR BEB is set to bebouwde_kom, select all matching indicators
+    if (monitoringJustActivated || gebiedsselectieJustActivated || bebJustChangedToBebouwdeKom) {
+      // When BEB changes to bebouwde_kom, filter to only indicators with BEB variants
+      let titlesToSelect
+      if (bebJustChangedToBebouwdeKom) {
+        titlesToSelect = indicatorsWithBEB.map(ind => ind.title)
+      } else {
+        titlesToSelect = filteredByGlobalFilters.map(ind => ind.title)
+      }
+      $indicatorsSelection = titlesToSelect
+
+      // Update URL params
+      const newParams = new URLSearchParams($URLParams)
+      newParams.delete("indicator")
+      titlesToSelect.forEach(title => newParams.append("indicator", title))
+      $URLParams = newParams
+      addURLParameter()
+    }
+
+    // When both filters are deactivated, clear selection (but NOT when BEB changes to hele_buurt)
+    if ((monitoringJustDeactivated || gebiedsselectieJustDeactivated) &&
+        !$monitoringOverTijdActive && !$gebiedsselectieActive) {
+      $indicatorsSelection = []
+      const newParams = new URLSearchParams($URLParams)
+      newParams.delete("indicator")
+      $URLParams = newParams
+      removeURLParameter()
+    }
+
+    // Update previous states
+    prevMonitoringActive = $monitoringOverTijdActive
+    prevGebiedsselectieActive = $gebiedsselectieActive
+    prevBEBSelection = $globalBEBSelection
+  }
+
+  // Group filtered indicators by category
+  $: indicatorsByCategory = categories.map(category => ({
     category,
-    indicators: allIndicators.filter(ind => ind.category === category)
+    indicators: filteredByGlobalFilters.filter(ind => ind.category === category)
   }))
 
   // Filter indicators based on search and exclude already selected ones
@@ -33,6 +107,36 @@
   $: showCategoryHeaders = true
 
   function selectIndicator(title) {
+    // Find the indicator object
+    const indicator = allIndicators.find(ind => ind.title === title)
+
+    // Check if indicator fits the active filters, if not - deactivate the filters
+    if (indicator) {
+      // Check monitoring filter
+      if ($monitoringOverTijdActive) {
+        const hasYears = indicator.AHNversie && indicator.AHNversie.length > 0
+        if (!hasYears) {
+          $monitoringOverTijdActive = false
+        }
+      }
+
+      // Check gebiedsselectie filter
+      if ($gebiedsselectieActive) {
+        const hasBEB = indicator.variants && indicator.variants.split(",").map(v => v.trim()).some(v => v !== 'M2' && v !== '')
+        if (!hasBEB) {
+          $gebiedsselectieActive = false
+        }
+      }
+
+      // Check BEB selection - if indicator doesn't have BEB variant and bebouwde_kom is selected, switch to hele_buurt
+      if ($globalBEBSelection === 'bebouwde_kom') {
+        const hasBEB = indicator.variants && indicator.variants.split(",").map(v => v.trim()).some(v => v !== 'M2' && v !== '')
+        if (!hasBEB) {
+          $globalBEBSelection = 'hele_buurt'
+        }
+      }
+    }
+
     // Add to indicatorsSelection store
     $indicatorsSelection = [...$indicatorsSelection, title]
 
@@ -67,28 +171,18 @@
     // Clear indicatorsSelection store
     $indicatorsSelection = []
 
+    // Deactivate filter toggles
+    $monitoringOverTijdActive = false
+    $gebiedsselectieActive = false
+
+    // Reset BEB selection to hele_buurt
+    $globalBEBSelection = 'hele_buurt'
+
     // Update URL params
     const newParams = new URLSearchParams($URLParams)
     newParams.delete("indicator")
     $URLParams = newParams
     removeURLParameter()
-  }
-
-  function selectAllWithYears() {
-    // Get all indicator titles that have AHN/year variants
-    const titlesWithYears = indicatorsWithYears.map(ind => ind.title)
-
-    // Set indicatorsSelection store
-    $indicatorsSelection = titlesWithYears
-
-    // Update URL params
-    const newParams = new URLSearchParams($URLParams)
-    newParams.delete("indicator")
-    titlesWithYears.forEach(title => {
-      newParams.append("indicator", title)
-    })
-    $URLParams = newParams
-    addURLParameter()
   }
 
   // Close dropdown when clicking outside
@@ -103,7 +197,43 @@
 
 {#if allIndicators && allIndicators.length > 0}
 <div class="custom-multiselect" bind:this={dropdownRef}>
+  <!-- BEB selection - always visible above filter section -->
+  <div class="beb-selection">
+    <label
+      class="beb-toggle"
+      class:active={$globalBEBSelection === 'hele_buurt'}
+    >
+      <input type="radio" bind:group={$globalBEBSelection} value="hele_buurt" />
+      {t("Hele buurt")}
+    </label>
+    <label
+      class="beb-toggle"
+      class:active={$globalBEBSelection === 'bebouwde_kom'}
+      title={t("Toon alleen data binnen de bebouwde kom van de buurt")}
+    >
+      <input type="radio" bind:group={$globalBEBSelection} value="bebouwde_kom" />
+      {t("Bebouwde kom")}
+    </label>
+  </div>
+
   <p style="margin-bottom:5px">{`Filter ${t("indicatoren")}:`}</p>
+
+  <!-- Global filter toggles -->
+  <div class="global-filters">
+    <button
+      class="filter-toggle"
+      class:active={$monitoringOverTijdActive}
+      on:click={() => $monitoringOverTijdActive = !$monitoringOverTijdActive}
+      title={t("Selecteer indicatoren met meerdere jaren om veranderingen over tijd te monitoren")}
+    >
+      {t("Monitoring over tijd")}
+    </button>
+  </div>
+
+  <!-- Divider between filters and indicator selection -->
+  {#if $monitoringOverTijdActive}
+    <div class="divider"></div>
+  {/if}
 
   <!-- Input area with selected tags -->
   <div class="input-container" on:click={() => isOpen = true}>
@@ -120,14 +250,7 @@
       on:focus={() => isOpen = true}
       on:click|stopPropagation
     />
-    {#if $indicatorsSelection.length === 0}
-      <div class="year-filter-wrapper">
-        <button class="year-filter-btn" on:click|stopPropagation={selectAllWithYears}>Monitoring over tijd</button>
-        <div class="year-filter-tooltip">
-          Klik om alle indicatoren te selecteren waarvoor data beschikbaar is voor meerdere jaren, zodat je ontwikkelingen over tijd kunt analyseren. Deze indicatoren sluiten aan op de Regionale Monitor Klimaatadaptatie.
-        </div>
-      </div>
-    {:else}
+    {#if $indicatorsSelection.length > 0}
       <button class="clear-all-btn" on:click|stopPropagation={clearAll}>×</button>
     {/if}
   </div>
@@ -240,53 +363,6 @@
     opacity: 0.7;
   }
 
-  .year-filter-wrapper {
-    position: absolute;
-    right: 4px;
-    top: 50%;
-    transform: translateY(-50%);
-  }
-
-  .year-filter-btn {
-    background: white;
-    color: #36575a;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 11px;
-    padding: 4px 8px;
-    font-weight: 500;
-    white-space: nowrap;
-  }
-
-  .year-filter-btn:hover {
-    background: #e0e0e0;
-  }
-
-  .year-filter-tooltip {
-    visibility: hidden;
-    opacity: 0;
-    position: absolute;
-    width: 250px;
-    background-color: white;
-    color: #333;
-    padding: 10px 15px;
-    border-radius: 10px;
-    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
-    font-size: 12px;
-    line-height: 1.4;
-    z-index: 1001;
-    top: 100%;
-    right: 0;
-    margin-top: 8px;
-    transition: opacity 0.2s ease, visibility 0.2s ease;
-  }
-
-  .year-filter-wrapper:hover .year-filter-tooltip {
-    visibility: visible;
-    opacity: 1;
-  }
-
   .dropdown-menu {
     position: absolute;
     top: 100%;
@@ -326,5 +402,88 @@
     padding: 12px;
     text-align: center;
     color: #999;
+  }
+
+  .global-filters {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .filter-toggle {
+    flex: 1;
+    background: transparent;
+    color: white;
+    border: 1px solid white;
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .filter-toggle:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .filter-toggle.active {
+    background: white;
+    color: #36575a;
+    font-weight: 500;
+  }
+
+  .beb-selection {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .beb-toggle {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    color: white;
+    border: 1px solid white;
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .beb-toggle input[type="radio"] {
+    display: none;
+  }
+
+  .beb-toggle:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .beb-toggle.active {
+    background: white;
+    color: #36575a;
+    font-weight: 500;
+  }
+
+  .global-selection select {
+    background: white;
+    color: #36575a;
+    border: none;
+    border-radius: 3px;
+    padding: 3px 6px;
+    font-size: 11px;
+  }
+
+  .global-selection input[type="checkbox"],
+  .global-selection input[type="radio"] {
+    margin: 0;
+  }
+
+  .divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.3);
+    margin: 12px 0;
   }
 </style>

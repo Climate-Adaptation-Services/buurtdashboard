@@ -28,13 +28,11 @@
 
 {#if $tooltipRegion !== null}
   <div class="tooltip" style="left:{getTooltipLeft()}px;top:{getTooltipTop()}px">
-    {#if $tooltipValues === null}
-      <div class="tooltip-title">
-        {$tooltipRegion.region}
-      </div>
-    {/if}
-    <div class="tooltip-description">
+    <div class="tooltip-title">
       <strong>{$tooltipRegion.name}</strong>
+    </div>
+    <div class="tooltip-description">
+      {$tooltipRegion.region}
     </div>
     {#if $tooltipValues !== null}
       <div class="tooltip-value">
@@ -69,6 +67,23 @@
     padding-right: 30px;
     padding-top: 15px;
     padding-bottom: 15px;
+  }
+
+  .tooltip-title {
+    width: 100%;
+    text-align: center;
+  }
+
+  .tooltip-description {
+    width: 100%;
+    text-align: center;
+    font-size: 0.9em;
+    color: #666;
+  }
+
+  .tooltip-value {
+    width: 100%;
+    text-align: center;
   }
 
   p {

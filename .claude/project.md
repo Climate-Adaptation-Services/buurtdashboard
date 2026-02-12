@@ -108,6 +108,53 @@ A SvelteKit-based neighborhood dashboard application for visualizing Dutch neigh
 4. Projection created (only after step 3)
 5. Paths rendered
 
+## Recent Improvements (2026-02-12)
+
+### Per-Indicator Year Selection & Global BEB Selection
+
+**Problem**: The previous implementation used global year selection when "Monitoring over tijd" filter was active, which caused confusion and "no data" errors. Additionally, the BEB (Bebouwde kom) selection needed to be more intuitive.
+
+**Solution**: Reverted to per-indicator year selection while implementing global BEB selection:
+
+1. **Per-Indicator Year Selection** (`YearSwitch.svelte` in `IndicatorTitle.svelte`):
+   - Each indicator has its own year dropdown
+   - Appears below the indicator title for indicators with AHN versions
+   - Uses `getIndicatorStore(indicator.dutchTitle)` for isolated state
+   - No global year override - each indicator maintains its own selection
+
+2. **Global BEB Selection** (`indicatorFilter.svelte`):
+   - Radio buttons styled like filter toggle buttons
+   - "Hele buurt" (default) shows full neighborhood data
+   - "Bebouwde kom" filters to built-up area data only
+   - Selecting "Bebouwde kom" auto-selects all indicators with BEB variants
+   - Adding an indicator without BEB variant switches back to "Hele buurt"
+   - Clear All resets BEB to "Hele buurt"
+
+3. **Simplified Filter Logic** (`getIndicatorAttribute.js`):
+   - Removed `globalYearSelection` dependency
+   - Always uses per-indicator store for year selection
+   - Always uses `globalBEBSelection` for BEB variant selection
+   - Cleaner code with fewer conditional branches
+
+4. **Component Updates for BEB Reactivity**:
+   - `IndicatorContent.svelte` - Uses `$globalBEBSelection` directly
+   - `BeeswarmPlot.svelte` - Added `globalBEBSelection` import
+   - `Stats.svelte` - Uses `$globalBEBSelection` for cached values
+   - `BarPlot.svelte` - Uses `$globalBEBSelection` for Nederland values
+
+5. **Tooltips Added**:
+   - "Monitoring over tijd": Explains filtering for multi-year indicators
+   - "Bebouwde kom": Explains built-up area data filtering
+
+**Files Modified**:
+- `src/lib/components/IndicatorTitle.svelte` - YearSwitch placement
+- `src/lib/components/controlPanel/indicatorFilter.svelte` - BEB radio buttons, tooltips
+- `src/lib/utils/getIndicatorAttribute.js` - Simplified logic
+- `src/lib/components/IndicatorContent.svelte` - BEB reactivity
+- `src/lib/components/BeeswarmPlot.svelte` - BEB reactivity
+- `src/lib/components/Stats.svelte` - BEB reactivity
+- `src/lib/components/BarPlot.svelte` - BEB reactivity
+
 ## Recent Improvements (2025-11-04)
 
 ### Dataset Version Management & Nederland Aggregates Precalculation

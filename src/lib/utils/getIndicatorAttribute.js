@@ -1,4 +1,4 @@
-import { getIndicatorStore } from "$lib/stores"
+import { getIndicatorStore, globalBEBSelection } from "$lib/stores"
 import { get } from "svelte/store"
 
 /**
@@ -11,9 +11,10 @@ import { get } from "svelte/store"
 export function getIndicatorAttribute(indicator, attribute, specificYear) {
   let resultAttribute = attribute
 
-  // Determine the year to use first
+  // Determine the year to use first - always use per-indicator store
   let yearToUse = specificYear;
   if (!yearToUse) {
+    // Use per-indicator store for year selection
     // Use dutchTitle for store key to ensure consistency across languages
     const indicatorStore = getIndicatorStore(indicator.dutchTitle || indicator.title);
     const ahnSelection = get(indicatorStore);
@@ -49,10 +50,8 @@ export function getIndicatorAttribute(indicator, attribute, specificYear) {
   const bebVariant = variants.find(v => v !== 'M2' && v !== '') // Find the BEB variant (not M2)
 
   if (bebVariant) {
-    // Use dutchTitle for store key to ensure consistency across languages
-    const indicatorStore = getIndicatorStore(indicator.dutchTitle || indicator.title);
-    const ahnSelection = get(indicatorStore);
-    const bebSelection = ahnSelection?.beb || 'hele_buurt'
+    // Always use global BEB selection - the BEB buttons are always visible
+    const bebSelection = get(globalBEBSelection)
 
     if (bebSelection === 'bebouwde_kom') {
       resultAttribute = resultAttribute + '_' + bebVariant

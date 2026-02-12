@@ -11,6 +11,7 @@
     configStore,
     getIndicatorStore,
     nederlandAggregates,
+    globalBEBSelection,
   } from "$lib/stores"
   import { scaleLinear, scaleBand, stack } from "d3"
   import { checkContrast } from "$lib/utils/checkContrast"
@@ -42,9 +43,15 @@
   // Use dutchTitle for store key to ensure consistency across languages
   const indicatorStore = getIndicatorStore(indicator.dutchTitle || indicator.title)
 
+  // Always use per-indicator store for year selection
+  $: effectiveYearSelection = $indicatorStore
+
+  // Always use global BEB selection (BEB buttons are always visible)
+  $: effectiveBEBSelection = $globalBEBSelection
+
   // Check if AHN5 is selected - Nederland statistics not available for AHN5
   // Check for AHNversie being a non-empty string (indicator has AHN versions configured)
-  $: isAHN5Selected = $indicatorStore && $indicatorStore.baseYear === 'AHN5' && indicator.AHNversie && indicator.AHNversie.length > 0
+  $: isAHN5Selected = effectiveYearSelection && effectiveYearSelection.baseYear === 'AHN5' && indicator.AHNversie && indicator.AHNversie.length > 0
 
   // Simplified function - always show percentages in bar plot
   function getDisplayValue(percentageValue) {
@@ -53,8 +60,9 @@
 
   let nederlandValues = null
   $: {
-    // Force reactivity by reading the indicator store
-    const ahnSelection = $indicatorStore;
+    // Force reactivity by reading the effective selections
+    const yearSelection = effectiveYearSelection;
+    const bebSelection = effectiveBEBSelection;
 
     // Try cached values first, fall back to client-side calculation if needed
     nederlandValues = null // Reset first
@@ -66,13 +74,12 @@
         // Check for BEB variants first
         if (cached && cached.hele_buurt !== undefined && cached.bebouwde_kom !== undefined) {
           // BEB indicator - get the correct variant
-          const bebSelection = ahnSelection?.beb || 'hele_buurt';
           cached = cached[bebSelection];
         }
 
         if (cached && typeof cached === 'object' && !Array.isArray(cached)) {
           // Check if this is a year-based value, AHN-based value, or class-based aggregated value
-          const selectedYear = ahnSelection?.baseYear;
+          const selectedYear = yearSelection?.baseYear;
 
           // If selectedYear is specified and exists in cache, use it (handles both years like "2020" and AHN versions like "AHN2")
           if (selectedYear && cached[selectedYear] !== undefined) {
@@ -87,7 +94,7 @@
 
     // FALLBACK: If no cached value and we have all neighborhoods data, calculate client-side
     // This handles AHN version switches and other cases where cache doesn't have the exact variant
-    if (!nederlandValues && $allNeighbourhoodsJSONData && $indicatorStore) {
+    if (!nederlandValues && $allNeighbourhoodsJSONData && yearSelection) {
       const calculated = calcPercentagesForEveryClass(indicator, $allNeighbourhoodsJSONData, "Nederland");
       if (calculated && typeof calculated === 'object' && Object.keys(calculated).length > 1) {
         nederlandValues = calculated;
@@ -120,7 +127,7 @@
 
     // Add Nederland if available (not available for municipality-specific dashboards like Dordrecht)
     // Check if AHN5 is selected - we'll still add "Nederland" to regions for the notice, but without data
-    const currentIsAHN5 = $indicatorStore && $indicatorStore.baseYear === 'AHN5' && indicator.AHNversie && indicator.AHNversie.length > 0
+    const currentIsAHN5 = effectiveYearSelection && effectiveYearSelection.baseYear === 'AHN5' && indicator.AHNversie && indicator.AHNversie.length > 0
     if (nederlandValues) {
       if (!currentIsAHN5) {
         // Normal case: add Nederland with data
@@ -132,12 +139,12 @@
     }
 
     // Add municipality level if selected
-    if ($municipalitySelection !== null && $indicatorStore && $allNeighbourhoodsJSONData) {
+    if ($municipalitySelection !== null && effectiveYearSelection && $allNeighbourhoodsJSONData) {
       addLevel("Gemeente", $neighbourhoodsInMunicipalityJSONData)
     }
 
     // Add neighbourhood level if selected
-    if ($neighbourhoodSelection !== null && $indicatorStore && $allNeighbourhoodsJSONData && $selectedNeighbourhoodJSONData) {
+    if ($neighbourhoodSelection !== null && effectiveYearSelection && $allNeighbourhoodsJSONData && $selectedNeighbourhoodJSONData) {
       addLevel("Buurt", { type: "FeatureCollection", features: [$selectedNeighbourhoodJSONData] })
 
       // Add district type if available

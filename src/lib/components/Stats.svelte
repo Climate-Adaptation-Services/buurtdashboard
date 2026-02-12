@@ -11,6 +11,7 @@
     getIndicatorStore,
     nederlandAggregates,
     configStore,
+    globalBEBSelection,
   } from "$lib/stores"
   import Stat from "./Stat.svelte"
   import { scaleLinear, min, max } from "d3"
@@ -37,12 +38,13 @@
   $: isAHN5Selected = currentAHNSelection && currentAHNSelection.baseYear === 'AHN5'
 
   // MIGRATED: Calculate display values (unit-converted) and scale values (original %) separately
-  // Force reactivity by reading $indicatorStore directly at the start
+  // Force reactivity by reading $indicatorStore and $globalBEBSelection directly at the start
   $: medianValuesDict = (() => {
-    // Read the store directly to ensure Svelte tracks this dependency
-    // Use this value throughout instead of currentAHNSelection to avoid timing issues
+    // Read the indicator store to ensure Svelte tracks this dependency
     const storeValue = $indicatorStore
     const localIsDifferenceMode = storeValue && storeValue.isDifference
+    // Read global BEB selection for reactivity
+    const bebSelection = $globalBEBSelection
 
     // Nederland calculation - DISPLAY VALUES (weighted average when surface area specified)
     // Try cached values first, fall back to client-side calculation if needed
@@ -54,8 +56,7 @@
       if (cached !== undefined) {
         // Check for BEB variants first
         if (cached && cached.hele_buurt !== undefined && cached.bebouwde_kom !== undefined) {
-          // BEB indicator - get the correct variant
-          const bebSelection = storeValue?.beb || 'hele_buurt';
+          // BEB indicator - get the correct variant using global BEB selection
           cached = cached[bebSelection];
         }
 
@@ -186,8 +187,7 @@
   
   // SCALE VALUES: Calculate using original percentage values for consistent positioning/colors
   $: scaleValuesDict = (() => {
-    // Read the store directly to ensure Svelte tracks this dependency
-    // Use this value throughout instead of currentAHNSelection to avoid timing issues
+    // Read the indicator store to ensure Svelte tracks this dependency
     const storeValue = $indicatorStore
     const localIsDifferenceMode = storeValue && storeValue.isDifference
 
