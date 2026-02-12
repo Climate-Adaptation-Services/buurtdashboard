@@ -18,7 +18,7 @@
 
 
   let graphWidth
-  const titleHeight = 135
+  const titleHeight = 150
   const bodyHeight = indicatorHeight - titleHeight
 
   // Initialize with a default color scale to prevent null errors

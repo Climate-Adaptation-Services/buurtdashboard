@@ -62,9 +62,6 @@
   <p class="title" style="background-color:{$configStore.mainColor}">
     <strong>{indicator.title}</strong>
   </p>
-  {#if indicator.subtitle}
-    <p class="subtitle">{indicator.subtitle}</p>
-  {/if}
   <hr />
   <p class="description">{indicator.description}</p>
 </div>
@@ -131,15 +128,6 @@
     width: 100%;
     margin: 0.5rem 0;
     clear: both;
-  }
-
-  .subtitle {
-    margin: 0 0 0.5rem 0;
-    font-size: 0.9em;
-    color: #666;
-    font-style: italic;
-    clear: both;
-    display: block;
   }
 
   .description {

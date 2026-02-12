@@ -12,6 +12,9 @@
   <h2 class="title" class:long-title={indicator.title.length > 35} style="background-color:{$configStore.mainColor}">
     {indicator.title}
   </h2>
+  {#if indicator.subtitle}
+    <p class="subtitle">{indicator.subtitle}</p>
+  {/if}
   {#if indicator.AHNversie && indicator.AHNversie.length > 0}
     <div class="year-switch-container">
       <YearSwitch {indicator} />
@@ -47,6 +50,13 @@
 
   .title.long-title {
     font-size: 1.0rem;
+  }
+
+  .subtitle {
+    margin: 8px 0 -4px 0;
+    font-size: 0.85rem;
+    color: #666;
+    text-align: center;
   }
 
   .year-switch-container {

@@ -33,6 +33,28 @@
   })()
 
   $: displayValue = medianValue !== "Geen data" ? Math.round(medianValue * 100) / 100 : noDataText
+
+  // Determine the unit suffix for the indicator value
+  $: unitSuffix = (() => {
+    const plottitle = indicator.plottitle || ''
+
+    // Check for percentage indicators
+    if (indicator.category?.includes('%') ||
+        plottitle.includes('%') ||
+        plottitle.toLowerCase().includes('percentage') ||
+        indicator.attribute?.toLowerCase().startsWith('perc')) {
+      return ' %'
+    }
+
+    // Check for specific unit patterns in plottitle
+    if (plottitle.toLowerCase().includes('meter onder maaiveld')) return ' m'
+    if (plottitle.toLowerCase().includes('verschil in m')) return ' m'
+    if (plottitle === 'm2' || plottitle === 'm2 ') return ' m²'
+    if (plottitle.includes('€')) return ' €'
+    if (plottitle.toLowerCase().includes('inwoners per km2')) return ' inw/km²'
+
+    return ''
+  })()
   
 
 
@@ -195,7 +217,7 @@
         text-anchor={textAnchor}
         fill={isDifferenceMode ? (medianValue > 0 ? "#4682b4" : medianValue < 0 ? "#E1575A" : "#666666") : "#645f5e"}
       >
-        {typeof displayValue === 'number' ? textPlus + displayValue : displayValue}
+        {typeof displayValue === 'number' ? textPlus + displayValue + unitSuffix : displayValue}
       </text>
     {/if}
   </g>
