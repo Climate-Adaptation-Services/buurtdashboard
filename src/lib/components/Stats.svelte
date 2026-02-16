@@ -419,8 +419,8 @@
     />
   {/if}
 </div>
-{#if $municipalitySelection !== null}
-  <div class="indicator-stats" style="height: {bodyHeight * 0.2 * 0.25}px">
+<div class="indicator-stats" style="height: {bodyHeight * 0.2 * 0.25}px">
+  {#if $municipalitySelection !== null}
     <Stat
       {indicatorValueColorscale}
       {indicator}
@@ -432,10 +432,10 @@
       scaleValue={scaleValuesDict["medianValueGemeente"]}
       {xScaleStats}
     />
-  </div>
-{/if}
-{#if $neighbourhoodSelection !== null}
-  <div class="indicator-stats" style="height: {bodyHeight * 0.2 * 0.25}px">
+  {/if}
+</div>
+<div class="indicator-stats" style="height: {bodyHeight * 0.2 * 0.25}px">
+  {#if $neighbourhoodSelection !== null}
     <Stat
       {indicatorValueColorscale}
       {indicator}
@@ -448,23 +448,23 @@
       rawValue={medianValuesDict["rawValueBuurt"]}
       {xScaleStats}
     />
-  </div>
-  {#if $selectedNeighbourhoodJSONData && $selectedNeighbourhoodJSONData.properties[$districtTypeAbbreviation]}
-    <div class="indicator-stats" style="height: {bodyHeight * 0.2 * 0.25}px">
-      <Stat
-        {indicatorValueColorscale}
-        {indicator}
-        medianValueOtherYear={medianValuesDictOtherYear["medianValueWijktype"]}
-        graphWidth={statsWidth}
-        indicatorHeight={bodyHeight * 0.2 * 0.25}
-        regio="Wijktype"
-        medianValue={medianValuesDict["medianValueWijktype"]}
-        scaleValue={scaleValuesDict["medianValueWijktype"]}
-        {xScaleStats}
-      />
-    </div>
   {/if}
-{/if}
+</div>
+<div class="indicator-stats" style="height: {bodyHeight * 0.2 * 0.25}px">
+  {#if $neighbourhoodSelection !== null && $selectedNeighbourhoodJSONData && $selectedNeighbourhoodJSONData.properties[$districtTypeAbbreviation]}
+    <Stat
+      {indicatorValueColorscale}
+      {indicator}
+      medianValueOtherYear={medianValuesDictOtherYear["medianValueWijktype"]}
+      graphWidth={statsWidth}
+      indicatorHeight={bodyHeight * 0.2 * 0.25}
+      regio="Wijktype"
+      medianValue={medianValuesDict["medianValueWijktype"]}
+      scaleValue={scaleValuesDict["medianValueWijktype"]}
+      {xScaleStats}
+    />
+  {/if}
+</div>
 
 <style>
   .ahn5-notice {

@@ -109,47 +109,36 @@
     const data = []
     const regions = []
 
-    // Helper to add a level if data exists
-    const addLevel = (regio, jsonData) => {
-      if (!jsonData) {
-        console.warn(`BarPlot: No jsonData for ${regio}`)
-        return
-      }
-
-      const calculated = calcPercentagesForEveryClass(indicator, jsonData, regio)
-      if (calculated && typeof calculated === 'object' && Object.keys(calculated).length > 1) {
-        data.push(calculated)
-        regions.push(regio)
-      } else {
-        console.warn(`BarPlot: Failed to calculate data for ${indicator.title} at ${regio} level`, calculated)
-      }
+    // 1. Nederland (skip if AHN5 selected - no Nederland data for AHN5)
+    if (nederlandValues && !isAHN5Selected) {
+      data.push(nederlandValues)
+      regions.push("Nederland")
     }
 
-    // Add Nederland if available (not available for municipality-specific dashboards like Dordrecht)
-    // Check if AHN5 is selected - we'll still add "Nederland" to regions for the notice, but without data
-    const currentIsAHN5 = effectiveYearSelection && effectiveYearSelection.baseYear === 'AHN5' && indicator.AHNversie && indicator.AHNversie.length > 0
-    if (nederlandValues) {
-      if (!currentIsAHN5) {
-        // Normal case: add Nederland with data
-        data.push(nederlandValues)
-        regions.push("Nederland")
-      }
-      // Note: For AHN5, we don't add Nederland to data or regions here
-      // The notice is shown in the template when isAHN5Selected is true
-    }
-
-    // Add municipality level if selected
+    // 2. Gemeente
     if ($municipalitySelection !== null && effectiveYearSelection && $allNeighbourhoodsJSONData) {
-      addLevel("Gemeente", $neighbourhoodsInMunicipalityJSONData)
+      const gemeenteData = calcPercentagesForEveryClass(indicator, $neighbourhoodsInMunicipalityJSONData, "Gemeente")
+      if (gemeenteData && typeof gemeenteData === 'object' && Object.keys(gemeenteData).length > 1) {
+        data.push(gemeenteData)
+        regions.push("Gemeente")
+      }
     }
 
-    // Add neighbourhood level if selected
+    // 3. Buurt
     if ($neighbourhoodSelection !== null && effectiveYearSelection && $allNeighbourhoodsJSONData && $selectedNeighbourhoodJSONData) {
-      addLevel("Buurt", { type: "FeatureCollection", features: [$selectedNeighbourhoodJSONData] })
+      const buurtData = calcPercentagesForEveryClass(indicator, { type: "FeatureCollection", features: [$selectedNeighbourhoodJSONData] }, "Buurt")
+      if (buurtData && typeof buurtData === 'object' && Object.keys(buurtData).length > 1) {
+        data.push(buurtData)
+        regions.push("Buurt")
+      }
 
-      // Add district type if available
+      // 4. Wijktype
       if ($selectedNeighbourhoodJSONData.properties[$districtTypeAbbreviation]) {
-        addLevel("Wijktype", $districtTypeJSONData)
+        const wijktypeData = calcPercentagesForEveryClass(indicator, $districtTypeJSONData, "Wijktype")
+        if (wijktypeData && typeof wijktypeData === 'object' && Object.keys(wijktypeData).length > 1) {
+          data.push(wijktypeData)
+          regions.push("Wijktype")
+        }
       }
     }
 
