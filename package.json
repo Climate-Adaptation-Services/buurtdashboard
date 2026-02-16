@@ -14,7 +14,11 @@
     "test:ui": "playwright test --ui",
     "test:debug": "playwright test --debug",
     "precalculate-nederland": "node scripts/precalculate-nederland.js",
-    "generate-translations": "node scripts/generate-translations.js"
+    "generate-translations": "node scripts/generate-translations.js",
+    "build:ios": "BUILD_TARGET=ios vite build",
+    "ios:sync": "npm run build:ios && npx cap sync ios",
+    "ios:open": "npx cap open ios",
+    "ios:run": "npm run ios:sync && npx cap run ios"
   },
   "engines": {
     "node": "22.x"
@@ -39,6 +43,9 @@
   },
   "type": "module",
   "dependencies": {
+    "@capacitor/cli": "^8.1.0",
+    "@capacitor/core": "^8.1.0",
+    "@capacitor/ios": "^8.1.0",
     "@turf/center": "^6.5.0",
     "d3": "^7.8.5",
     "fflate": "^0.8.2",
