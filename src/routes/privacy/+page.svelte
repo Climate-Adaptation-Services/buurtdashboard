@@ -61,6 +61,10 @@
 </div>
 
 <style>
+  :global(body) {
+    background-color: white !important;
+  }
+
   .privacy-policy {
     max-width: 800px;
     margin: 0 auto;
@@ -68,6 +72,8 @@
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     line-height: 1.6;
     color: #333;
+    background-color: white;
+    min-height: 100vh;
   }
 
   h1 {
