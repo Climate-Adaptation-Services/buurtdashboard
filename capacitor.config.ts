@@ -5,8 +5,9 @@ const config: CapacitorConfig = {
   appName: 'Buurtdashboard',
   webDir: 'build',
   server: {
-    // Allow loading external resources (maps, data)
-    androidScheme: 'https'
+    // Load live website instead of local build
+    url: 'https://buurtdashboard.vercel.app',
+    cleartext: false
   },
   ios: {
     // Allow loading external data sources
