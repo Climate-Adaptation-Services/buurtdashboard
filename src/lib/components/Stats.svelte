@@ -33,8 +33,8 @@
   $: isDifferenceMode = currentAHNSelection && currentAHNSelection.isDifference
   $: currentAttribute = getIndicatorAttribute(indicator, indicator.attribute)
 
-  // Check if AHN5 is selected - Nederland statistics not available for AHN5
-  $: isAHN5Selected = currentAHNSelection && currentAHNSelection.baseYear === 'AHN5'
+  // Check if AHN5 is selected (either as base year or compare year) - Nederland statistics not available for AHN5
+  $: isAHN5Selected = currentAHNSelection && (currentAHNSelection.baseYear === 'AHN5' || currentAHNSelection.compareYear === 'AHN5')
 
   // MIGRATED: Calculate display values (unit-converted) and scale values (original %) separately
   // Force reactivity by reading $indicatorStore directly at the start
@@ -49,7 +49,8 @@
     // Try cached values first, fall back to client-side calculation if needed
     let nederlandMedian = null;
 
-    if ($nederlandAggregates && $nederlandAggregates.aggregates) {
+    // In difference mode, always calculate client-side (cache doesn't store diff values for all combinations)
+    if (!localIsDifferenceMode && $nederlandAggregates && $nederlandAggregates.aggregates) {
       let cached = $nederlandAggregates.aggregates[indicator.title];
 
       if (cached !== undefined) {
@@ -197,7 +198,8 @@
     // Try cached values first, fall back to client-side calculation if needed
     let nederlandScale = null;
 
-    if ($nederlandAggregates && $nederlandAggregates.aggregates) {
+    // In difference mode, always calculate client-side (cache doesn't store diff values for all combinations)
+    if (!localIsDifferenceMode && $nederlandAggregates && $nederlandAggregates.aggregates) {
       let cached = $nederlandAggregates.aggregates[indicator.title];
 
       if (cached !== undefined) {
