@@ -1,5 +1,5 @@
 <script>
-  import { indicatorsSelection, URLParams, monitoringOverTijdActive, gebiedsselectieActive, globalBEBSelection } from "$lib/stores"
+  import { indicatorsSelection, URLParams, monitoringOverTijdActive, gebiedsselectieActive } from "$lib/stores"
   import { addURLParameter, removeURLParameter } from "$lib/services/urlManager"
   import { t } from "$lib/i18n/translate.js"
 
@@ -18,20 +18,6 @@
   function showTooltip(event, tooltipId) {
     hoveredTooltip = tooltipId
     const rect = event.target.getBoundingClientRect()
-
-    // For bebouwde_kom, center horizontally above the sidepanel (use parent container width)
-    if (tooltipId === 'bebouwde_kom') {
-      const sidepanel = event.target.closest('.custom-multiselect')
-      if (sidepanel) {
-        const sidepanelRect = sidepanel.getBoundingClientRect()
-        tooltipPosition = {
-          x: sidepanelRect.left + sidepanelRect.width / 2,
-          y: rect.top - 10
-        }
-        return
-      }
-    }
-
     tooltipPosition = {
       x: rect.left + rect.width / 2,
       y: rect.top - 10
@@ -44,11 +30,6 @@
 
   // Indicators with year/AHN variants
   $: indicatorsWithYears = allIndicators.filter(ind => ind.AHNversie && ind.AHNversie.length > 0)
-
-  // Indicators with BEB variants (any variant that's not M2 or empty)
-  $: indicatorsWithBEB = allIndicators.filter(ind =>
-    ind.variants && ind.variants.split(",").map(v => v.trim()).some(v => v !== 'M2' && v !== '')
-  )
 
   // Filter indicators based on active global filters
   $: filteredByGlobalFilters = allIndicators.filter(ind => {
@@ -74,25 +55,17 @@
   // Track previous filter states to detect changes
   let prevMonitoringActive = false
   let prevGebiedsselectieActive = false
-  let prevBEBSelection = 'hele_buurt'
 
-  // Auto-select filtered indicators when a filter is activated or BEB changes
+  // Auto-select filtered indicators when a filter is activated
   $: {
     const monitoringJustActivated = $monitoringOverTijdActive && !prevMonitoringActive
     const gebiedsselectieJustActivated = $gebiedsselectieActive && !prevGebiedsselectieActive
     const monitoringJustDeactivated = !$monitoringOverTijdActive && prevMonitoringActive
     const gebiedsselectieJustDeactivated = !$gebiedsselectieActive && prevGebiedsselectieActive
-    const bebJustChangedToBebouwdeKom = $globalBEBSelection === 'bebouwde_kom' && prevBEBSelection === 'hele_buurt'
 
-    // When a filter is activated OR BEB is set to bebouwde_kom, select all matching indicators
-    if (monitoringJustActivated || gebiedsselectieJustActivated || bebJustChangedToBebouwdeKom) {
-      // When BEB changes to bebouwde_kom, filter to only indicators with BEB variants
-      let titlesToSelect
-      if (bebJustChangedToBebouwdeKom) {
-        titlesToSelect = indicatorsWithBEB.map(ind => ind.title)
-      } else {
-        titlesToSelect = filteredByGlobalFilters.map(ind => ind.title)
-      }
+    // When a filter is activated, select all matching indicators
+    if (monitoringJustActivated || gebiedsselectieJustActivated) {
+      const titlesToSelect = filteredByGlobalFilters.map(ind => ind.title)
       $indicatorsSelection = titlesToSelect
 
       // Update URL params
@@ -103,7 +76,7 @@
       addURLParameter()
     }
 
-    // When both filters are deactivated, clear selection (but NOT when BEB changes to hele_buurt)
+    // When both filters are deactivated, clear selection
     if ((monitoringJustDeactivated || gebiedsselectieJustDeactivated) &&
         !$monitoringOverTijdActive && !$gebiedsselectieActive) {
       $indicatorsSelection = []
@@ -116,7 +89,6 @@
     // Update previous states
     prevMonitoringActive = $monitoringOverTijdActive
     prevGebiedsselectieActive = $gebiedsselectieActive
-    prevBEBSelection = $globalBEBSelection
   }
 
   // Group filtered indicators by category
@@ -159,13 +131,6 @@
         }
       }
 
-      // Check BEB selection - if indicator doesn't have BEB variant and bebouwde_kom is selected, switch to hele_buurt
-      if ($globalBEBSelection === 'bebouwde_kom') {
-        const hasBEB = indicator.variants && indicator.variants.split(",").map(v => v.trim()).some(v => v !== 'M2' && v !== '')
-        if (!hasBEB) {
-          $globalBEBSelection = 'hele_buurt'
-        }
-      }
     }
 
     // Add to indicatorsSelection store
@@ -206,9 +171,6 @@
     $monitoringOverTijdActive = false
     $gebiedsselectieActive = false
 
-    // Reset BEB selection to hele_buurt
-    $globalBEBSelection = 'hele_buurt'
-
     // Update URL params
     const newParams = new URLSearchParams($URLParams)
     newParams.delete("indicator")
@@ -228,26 +190,6 @@
 
 {#if allIndicators && allIndicators.length > 0}
 <div class="custom-multiselect" bind:this={dropdownRef}>
-  <!-- BEB selection - always visible above filter section -->
-  <div class="beb-selection">
-    <label
-      class="beb-toggle"
-      class:active={$globalBEBSelection === 'hele_buurt'}
-    >
-      <input type="radio" bind:group={$globalBEBSelection} value="hele_buurt" />
-      {t("Hele buurt")}
-    </label>
-    <label
-      class="beb-toggle"
-      class:active={$globalBEBSelection === 'bebouwde_kom'}
-      on:mouseenter={(e) => showTooltip(e, 'bebouwde_kom')}
-      on:mouseleave={hideTooltip}
-    >
-      <input type="radio" bind:group={$globalBEBSelection} value="bebouwde_kom" />
-      {t("Bebouwde kom")}
-    </label>
-  </div>
-
   <p style="margin-bottom:5px">{`Filter ${t("indicatoren")}:`}</p>
 
   <!-- Global filter toggles -->
@@ -266,9 +208,7 @@
   <!-- Custom tooltips - rendered at document level for proper z-index -->
   {#if hoveredTooltip}
     <div class="custom-tooltip" style="left: {tooltipPosition.x}px; top: {tooltipPosition.y}px;">
-      {#if hoveredTooltip === 'bebouwde_kom'}
-        {t("tooltip_bebouwde_kom")}
-      {:else if hoveredTooltip === 'monitoring'}
+      {#if hoveredTooltip === 'monitoring'}
         {t("tooltip_monitoring")}
       {/if}
     </div>
@@ -475,55 +415,6 @@
     background: white;
     color: #36575a;
     font-weight: 500;
-  }
-
-  .beb-selection {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 12px;
-  }
-
-  .beb-toggle {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: transparent;
-    color: white;
-    border: 1px solid white;
-    border-radius: 4px;
-    padding: 6px 10px;
-    font-size: 11px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .beb-toggle input[type="radio"] {
-    display: none;
-  }
-
-  .beb-toggle:hover {
-    background: rgba(255, 255, 255, 0.1);
-  }
-
-  .beb-toggle.active {
-    background: white;
-    color: #36575a;
-    font-weight: 500;
-  }
-
-  .global-selection select {
-    background: white;
-    color: #36575a;
-    border: none;
-    border-radius: 3px;
-    padding: 3px 6px;
-    font-size: 11px;
-  }
-
-  .global-selection input[type="checkbox"],
-  .global-selection input[type="radio"] {
-    margin: 0;
   }
 
   .divider {

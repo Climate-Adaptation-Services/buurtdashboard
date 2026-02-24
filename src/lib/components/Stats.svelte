@@ -11,7 +11,6 @@
     getIndicatorStore,
     nederlandAggregates,
     configStore,
-    globalBEBSelection,
   } from "$lib/stores"
   import Stat from "./Stat.svelte"
   import { scaleLinear, min, max } from "d3"
@@ -38,13 +37,13 @@
   $: isAHN5Selected = currentAHNSelection && currentAHNSelection.baseYear === 'AHN5'
 
   // MIGRATED: Calculate display values (unit-converted) and scale values (original %) separately
-  // Force reactivity by reading $indicatorStore and $globalBEBSelection directly at the start
+  // Force reactivity by reading $indicatorStore directly at the start
   $: medianValuesDict = (() => {
     // Read the indicator store to ensure Svelte tracks this dependency
     const storeValue = $indicatorStore
     const localIsDifferenceMode = storeValue && storeValue.isDifference
-    // Read global BEB selection for reactivity
-    const bebSelection = $globalBEBSelection
+    // Use per-indicator BEB selection from store
+    const bebSelection = storeValue?.beb || 'hele_buurt'
 
     // Nederland calculation - DISPLAY VALUES (weighted average when surface area specified)
     // Try cached values first, fall back to client-side calculation if needed

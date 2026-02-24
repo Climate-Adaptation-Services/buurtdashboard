@@ -402,7 +402,7 @@
         disabled={isDisabled}
       >
         {#if selectedDifference === "Difference"}
-          <option value="Difference">Vergelijk jaren</option>
+          <option value="Difference">Vergelijk</option>
         {:else}
           <option value="Difference">Stop vergelijken</option>
         {/if}
@@ -425,34 +425,34 @@
   .dropdown-wrapper {
     position: relative;
     display: inline-block;
-    width: 150px;
+    width: 105px;
     z-index: 10; /* Ensure dropdown appears above indicator body */
   }
   .dropdown-wrapper:last-child .year-dropdown {
-    padding-right: 12px;
+    padding-right: 8px;
   }
   .dropdown-wrapper:last-child .year-dropdown:not(.pseudo-disabled) {
-    padding-right: 32px;
+    padding-right: 24px;
   }
   .dropdown-arrow {
     pointer-events: none;
     position: absolute;
-    right: 16px;
+    right: 10px;
     top: 50%;
     transform: translateY(-50%);
-    font-size: 18px;
+    font-size: 15px;
     color: var(--background-color);
     z-index: 2;
   }
   .year-dropdown {
-    width: 150px;
-    height: 40px;
-    border-radius: 12px;
-    font-size: 18px;
-    padding: 6px 32px 6px 12px;
+    width: 105px;
+    height: 36px;
+    border-radius: 10px;
+    font-size: 16px;
+    padding: 5px 24px 5px 8px;
     color: #333;
     background: #fff;
-    box-shadow: 0 2px 8px rgba(54, 87, 91, 0.08);
+    box-shadow: 0 1px 4px rgba(54, 87, 91, 0.08);
     transition:
       border 0.3s,
       background 0.3s,
@@ -460,18 +460,18 @@
     appearance: none;
     cursor: pointer;
     outline: none;
-    border: 2px solid var(--background-color);
+    border: 1.5px solid var(--background-color);
   }
   .year-switch-dropdowns {
     display: flex;
-    gap: 20px;
-    margin-top: 12px;
+    gap: 10px;
+    margin-top: 8px;
     align-items: center;
     position: relative;
     z-index: 10; /* Ensure dropdown container appears above indicator body */
   }
   .year-switch-dropdowns.less-gap {
-    gap: 8px;
+    gap: 6px;
   }
   .year-dropdown option {
     color: #333;
@@ -482,6 +482,9 @@
     color: #8d8d8d !important;
     border-style: dashed !important;
     opacity: 0.8;
+    text-align: center;
+    padding-left: 8px;
+    padding-right: 8px;
   }
   .disabled {
     background: #f2f2f2 !important;
@@ -490,7 +493,7 @@
     opacity: 0.6 !important;
   }
   .arrow-between {
-    font-size: 28px;
+    font-size: 18px;
     color: var(--background-color);
     margin: 0;
     user-select: none;

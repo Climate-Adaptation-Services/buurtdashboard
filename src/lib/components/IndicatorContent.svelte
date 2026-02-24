@@ -1,5 +1,5 @@
 <script>
-  import { municipalitySelection, neighbourhoodsInMunicipalityJSONData, allNeighbourhoodsJSONData, getIndicatorStore, globalBEBSelection } from "$lib/stores"
+  import { municipalitySelection, neighbourhoodsInMunicipalityJSONData, allNeighbourhoodsJSONData, getIndicatorStore } from "$lib/stores"
   import { scaleLinear, extent, scaleOrdinal } from "d3"
   import IndicatorInfo from "./IndicatorInfo.svelte"
   import IndicatorTitle from "./IndicatorTitle.svelte"
@@ -36,8 +36,8 @@
       const ahnSelection = $indicatorStore || {}
       const isDifferenceMode = ahnSelection && typeof ahnSelection === "object" && ahnSelection.isDifference
 
-      // Use global BEB selection directly for reactivity
-      const bebSelection = $globalBEBSelection
+      // Use per-indicator BEB selection from indicator store
+      const bebSelection = ahnSelection.beb || 'hele_buurt'
 
       // Create base attribute considering BEB selection
       let baseAttribute = indicator.attribute

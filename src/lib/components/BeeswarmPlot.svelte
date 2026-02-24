@@ -1,5 +1,5 @@
 <script>
-  import { neighbourhoodSelection, neighbourhoodCodeAbbreviation, circleRadius, selectedNeighbourhoodJSONData, getIndicatorStore, globalBEBSelection } from "$lib/stores"
+  import { neighbourhoodSelection, neighbourhoodCodeAbbreviation, circleRadius, selectedNeighbourhoodJSONData, getIndicatorStore } from "$lib/stores"
   import { extent, scaleLinear, scaleLog, select } from "d3"
   import XAxis from "$lib/components/XAxis.svelte"
   import { forceSimulation, forceY, forceX, forceCollide, forceManyBody } from "d3-force"
@@ -26,9 +26,9 @@
   let baseFilteredData = []
 
   // Reactive data filtering using value retrieval system
-  // Include globalBEBSelection for reactivity when BEB changes
+  // Uses per-indicator BEB selection from indicatorStore
   $: {
-    if ($indicatorStore || $globalBEBSelection) {
+    if ($indicatorStore) {
       // MIGRATED: Filter using centralized value retrieval system
       baseFilteredData = neighbourhoodsInMunicipalityFeaturesClone.filter((d) => {
         const rawValue = getRawValue(d, indicator)

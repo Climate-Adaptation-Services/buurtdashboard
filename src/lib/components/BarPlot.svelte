@@ -11,7 +11,6 @@
     configStore,
     getIndicatorStore,
     nederlandAggregates,
-    globalBEBSelection,
   } from "$lib/stores"
   import { scaleLinear, scaleBand, stack } from "d3"
   import { checkContrast } from "$lib/utils/checkContrast"
@@ -46,8 +45,8 @@
   // Always use per-indicator store for year selection
   $: effectiveYearSelection = $indicatorStore
 
-  // Always use global BEB selection (BEB buttons are always visible)
-  $: effectiveBEBSelection = $globalBEBSelection
+  // Use per-indicator BEB selection from store
+  $: effectiveBEBSelection = $indicatorStore?.beb || 'hele_buurt'
 
   // Check if AHN5 is selected - Nederland statistics not available for AHN5
   // Check for AHNversie being a non-empty string (indicator has AHN versions configured)

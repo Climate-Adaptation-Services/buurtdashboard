@@ -35,5 +35,9 @@ export const english = {
   "Toon alleen data binnen de bebouwde kom van de buurt": "Show only data within the built-up area of the neighborhood",
   "Selecteer indicatoren met meerdere jaren om veranderingen over tijd te monitoren": "Select indicators with multiple years to monitor changes over time",
   "tooltip_bebouwde_kom": "Click to select all indicators for which data is available for the built-up area, and show only data within the built-up area of the neighborhood.",
-  "tooltip_monitoring": "Click to select all indicators for which data is available for multiple years, so you can analyze developments over time. These indicators are aligned with the Regional Climate Adaptation Monitor."
+  "tooltip_monitoring": "Click to select all indicators for which data is available for multiple years, so you can analyze developments over time. These indicators are aligned with the Regional Climate Adaptation Monitor.",
+  "Toon hele buurt": "Show entire area",
+  "Toon alleen bebouwde kom": "Show only built-up area",
+  "Toont alleen data binnen de bebouwde kom. Klik om hele buurt te tonen.": "Shows only data within the built-up area. Click to show the entire neighborhood.",
+  "Klik om alleen data binnen de bebouwde kom te tonen.": "Click to show only data within the built-up area."
 }
