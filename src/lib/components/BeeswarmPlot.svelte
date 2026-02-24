@@ -357,12 +357,13 @@
       class:selected-node={node.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection}
       cx={node.x}
       cy={node.y}
-      r={$circleRadius}
+      r={node.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection ? $circleRadius + 2 : $circleRadius}
       fill={differenceValues
         ? indicatorValueColorscale(node.diffValue)
         : indicatorValueColorscale(getRawValue(node, indicator))
       }
       stroke-width="3"
+      style={node.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection ? "filter: drop-shadow(0 0 5px #36575a);" : ""}
       on:mouseover={(e) => {
         // If we're showing a difference plot, add the diffValue to the node properties
         // so the mouseOver handler can access it
