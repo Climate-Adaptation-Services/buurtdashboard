@@ -303,7 +303,14 @@ async function main() {
 
     // 4. Process GeoJSON (convert from TopoJSON if needed)
     console.log('🗺️  Processing GeoJSON...');
-    const topoJson = await geoJsonResponse.json();
+    let topoJson;
+    if (BUURT_GEOJSON_URL.endsWith('.gz')) {
+      const geoBuffer = await geoJsonResponse.arrayBuffer();
+      const decompressed = gunzipSync(new Uint8Array(geoBuffer));
+      topoJson = JSON.parse(strFromU8(decompressed));
+    } else {
+      topoJson = await geoJsonResponse.json();
+    }
 
     // Convert TopoJSON to GeoJSON
     let geoJson;

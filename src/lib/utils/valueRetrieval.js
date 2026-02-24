@@ -235,12 +235,8 @@ function getSurfaceAreaM2(feature, indicator) {
 
     const bebSelection = ahnSelection?.beb || 'hele_buurt'
     if (bebSelection === 'bebouwde_kom') {
-      const bebColumn = surfaceAreaColumn + '_' + surfaceBebVariant
-      // Try BEB variant first, fall back to base column if not available
-      const bebValue = feature.properties[bebColumn]
-      if (bebValue !== null && bebValue !== undefined && !isNaN(bebValue)) {
-        surfaceAreaColumn = bebColumn
-      }
+      // Use BK surface area column - no fallback, return null if not available
+      surfaceAreaColumn = surfaceAreaColumn + '_' + surfaceBebVariant
     }
   }
 
