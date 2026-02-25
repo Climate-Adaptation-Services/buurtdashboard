@@ -361,6 +361,48 @@ For "Boomkroonoppervlakte openbaar" (tree crown in public areas):
 - `calcWeightedAverage` - Used for Nederland/Gemeente aggregates
 - `applySurfaceAreaConversion` - Available but not currently used (preserved for future use)
 
+### Available Surface Area Columns
+
+The following `Oppervlakte` columns are available in the CSV dataset, each with a `_BK` (bebouwde kom) variant:
+
+| Column | Description | BK Variant |
+|--------|-------------|------------|
+| `Oppervlakte_Land_ONO_m2` | Land (openbaar, niet-openbaar) | `Oppervlakte_Land_ONO_m2_BK` |
+| `Oppervlakte_Land_VSK_m2` | Land (verkeersruimte, spoorweg) | `Oppervlakte_Land_VSK_m2_BK` |
+| `Oppervlakte_NietOpenbaar_m2` | Niet-openbare ruimte | `Oppervlakte_NietOpenbaar_m2_BK` |
+| `Oppervlakte_Openbaar_m2` | Openbare ruimte | `Oppervlakte_Openbaar_m2_BK` |
+| `Oppervlakte_Totaal_m2` | Totale oppervlakte | `Oppervlakte_Totaal_m2_BK` |
+| `Oppervlakte_Water_ONO_m2` | Water (openbaar, niet-openbaar) | `Oppervlakte_Water_ONO_m2_BK` |
+| `Oppervlakte_Water_VSK_m2` | Water (verkeersruimte, spoorweg) | `Oppervlakte_Water_VSK_m2_BK` |
+
+Special value: `Totale buurt` is automatically mapped to `Oppervlakte_Totaal_m2`.
+
+### Surface Area Usage
+
+Surface area columns are used in two ways:
+
+1. **Popup Tooltips (m² calculation)**
+   - When `indicator.surfaceArea` is set, tooltips show both percentage AND m² values
+   - Formula: `percentage × oppervlakte = m²`
+   - Example: `35% (3.500 m²)`
+   - Configured in Config Portal via the `Oppervlakte` field
+
+2. **Weighted Averages (gemeente/Nederland aggregates)**
+   - Uses `calcWeightedAverage()` in `src/lib/utils/calcMedian.js`
+   - Larger neighborhoods weigh more heavily
+   - Only for aggregate statistics, not individual neighborhood values
+
+### BK (Bebouwde Kom) Variant Support
+
+When an indicator has a `BK` variant configured:
+- The BEBSwitch component appears, allowing users to toggle between "hele buurt" and "bebouwde kom"
+- Surface area columns automatically switch to `_BK` variant (e.g., `Oppervlakte_Openbaar_m2` → `Oppervlakte_Openbaar_m2_BK`)
+- **No fallback**: If BK data is missing, "Geen data" is shown (intentional for data quality visibility)
+
+**Files handling BK surface area:**
+- `src/lib/utils/valueRetrieval.js:getSurfaceAreaM2()` - Popup m² calculation
+- `src/lib/utils/calcMedian.js:calcWeightedAverage()` - Weighted averages
+
 ## Development Workflow
 
 ### Commands

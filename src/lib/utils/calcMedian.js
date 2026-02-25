@@ -69,12 +69,11 @@ export const calcWeightedAverage = (features, valueExtractor, surfaceAreaColumn,
 
   // Special handling for "Totale buurt" - map to standard column
   if (surfaceAreaColumn === 'Totale buurt') {
-    surfaceAreaColumn = 'Oppervlakte_Land_m2'
+    surfaceAreaColumn = 'Oppervlakte_Totaal_m2'
   }
 
   // Check if we need to apply BEB suffix to surface area column
   let actualSurfaceAreaColumn = surfaceAreaColumn
-  let shouldTryFallback = false
 
   const variants = indicator && indicator.variants ? indicator.variants.split(',').map(v => v.trim()) : []
   const bebVariant = variants.find(v => v !== 'M2' && v !== '') // Find the BEB variant (not M2)
@@ -86,8 +85,8 @@ export const calcWeightedAverage = (features, valueExtractor, surfaceAreaColumn,
 
     const bebSelection = ahnSelection?.beb || 'hele_buurt'
     if (bebSelection === 'bebouwde_kom') {
+      // Use BK surface area column - no fallback, return "Geen data" if not available
       actualSurfaceAreaColumn = surfaceAreaColumn + '_' + bebVariant
-      shouldTryFallback = true
     }
   }
 
@@ -98,11 +97,12 @@ export const calcWeightedAverage = (features, valueExtractor, surfaceAreaColumn,
 
   features.forEach(feature => {
     const value = valueExtractor(feature)
-    let surfaceArea = feature.properties?.[actualSurfaceAreaColumn]
+    const surfaceArea = feature.properties?.[actualSurfaceAreaColumn]
 
-    // If surface area column doesn't exist or is 0, default to 1 (equal weight)
+    // Skip features without valid surface area (no fallback - we want to know when data is missing)
     if (surfaceArea === null || surfaceArea === undefined || isNaN(+surfaceArea) || +surfaceArea === 0) {
-      surfaceArea = 1
+      invalidCount++
+      return
     }
 
     if (value !== null && value !== undefined && !isNaN(+value)) {
@@ -119,38 +119,7 @@ export const calcWeightedAverage = (features, valueExtractor, surfaceAreaColumn,
     }
   })
 
-  // If BEB variant was selected but no data found, fall back to base column
-  if (shouldTryFallback && validCount === 0 && totalSurfaceArea === 0) {
-    // Reset counters and try again with base column
-    totalWeightedSum = 0
-    totalSurfaceArea = 0
-    validCount = 0
-    invalidCount = 0
-
-    features.forEach(feature => {
-      const value = valueExtractor(feature)
-      let surfaceArea = feature.properties?.[surfaceAreaColumn]
-
-      // If surface area column doesn't exist or is 0, default to 1 (equal weight)
-      if (surfaceArea === null || surfaceArea === undefined || isNaN(+surfaceArea) || +surfaceArea === 0) {
-        surfaceArea = 1
-      }
-
-      if (value !== null && value !== undefined && !isNaN(+value)) {
-        const numValue = +value
-        const numSurfaceArea = +surfaceArea
-
-        // Use raw percentage values directly - no conversion needed
-        totalWeightedSum += numValue * numSurfaceArea
-        totalSurfaceArea += numSurfaceArea
-        validCount++
-      } else {
-        invalidCount++
-      }
-    })
-  }
-
-  // If still no valid data after all attempts, return "Geen data"
+  // No fallback: if BK surface area data is missing, return "Geen data"
   if (validCount === 0 || totalSurfaceArea === 0) {
     return "Geen data"
   }

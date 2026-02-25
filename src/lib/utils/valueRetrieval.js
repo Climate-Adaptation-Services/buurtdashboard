@@ -221,7 +221,7 @@ function getSurfaceAreaM2(feature, indicator) {
 
   // Special handling for "Totale buurt" - map to standard column
   if (surfaceAreaColumn === 'Totale buurt') {
-    surfaceAreaColumn = 'Oppervlakte_Land_m2'
+    surfaceAreaColumn = 'Oppervlakte_Totaal_m2'
   }
 
   // Check if we need to apply BEB suffix to surface area column
