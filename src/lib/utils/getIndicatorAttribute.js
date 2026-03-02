@@ -17,7 +17,14 @@ export function getIndicatorAttribute(indicator, attribute, specificYear) {
   const ahnSelection = get(indicatorStore);
 
   // Determine the year to use first - always use per-indicator store
+  // Fallback to the last AHN version from indicator config if store has no baseYear
   let yearToUse = specificYear || ahnSelection?.baseYear;
+
+  // If no year is selected but indicator has AHN versions, use the last one as default
+  if (!yearToUse && indicator.AHNversie) {
+    const versions = indicator.AHNversie.split(',').map(v => v.trim());
+    yearToUse = versions[versions.length - 1];
+  }
 
   // Add year/AHN suffix first (if it exists)
   if (yearToUse && yearToUse !== '') {

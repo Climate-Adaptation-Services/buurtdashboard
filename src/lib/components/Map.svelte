@@ -74,13 +74,18 @@
       }
     } else {
       // For indicator maps: use the original static projection
-      projection = geoMercator().fitExtent(
-        [
-          [10, topYPosition],
-          [mapWidth - 10, mapHeight - 45],
-        ],
-        $currentJSONData,
-      )
+      // Only create projection when we have valid dimensions and data
+      if (mapWidth > 0 && mapHeight > 0 && $currentJSONData?.features?.length > 0) {
+        projection = geoMercator().fitExtent(
+          [
+            [10, topYPosition],
+            [mapWidth - 10, mapHeight - 45],
+          ],
+          $currentJSONData,
+        )
+      } else {
+        projection = null
+      }
     }
   }
 

@@ -22,7 +22,8 @@ import {
   getPopupValue,
   formatM2Value,
   isSpecificNoDataReason,
-  isAnyNoData
+  isAnyNoData,
+  getNoDataReason
 } from '../utils/valueRetrieval.js';
 
 export function mouseOver(e, feature, indicator, mapType, indicatorValueColorscale, projection, beeswarmMargin) {
@@ -144,7 +145,14 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
               tooltipValue += ` (${m2Sign}${formattedM2} m²)`
             }
           } else {
-            tooltipValue = 'Geen data'
+            // Check for specific no-data reason from raw value
+            const rawValue = getRawValue(feature, indicator)
+            const noDataReason = getNoDataReason(rawValue)
+            if (noDataReason && noDataReason !== 'no_data') {
+              tooltipValue = t(noDataReason)
+            } else {
+              tooltipValue = 'Geen data'
+            }
           }
           
           tooltipValueColor = originalDiffValue !== null && !isNaN(originalDiffValue)
@@ -163,14 +171,21 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
           if (popupResult.value !== null && !isNaN(popupResult.value)) {
             const roundedValue = Math.round(popupResult.value * 100) / 100
             tooltipValue = `${roundedValue}${popupResult.unit}`
-            
+
             // Add M2 value if available with nice formatting
             if (popupResult.hasM2 && popupResult.m2Value !== null) {
               const formattedM2 = formatM2Value(popupResult.m2Value)
               tooltipValue += ` (${formattedM2} m²)`
             }
           } else {
-            tooltipValue = 'Geen data'
+            // Check for specific no-data reason from raw value
+            const rawValue = getRawValue(feature, indicator)
+            const noDataReason = getNoDataReason(rawValue)
+            if (noDataReason && noDataReason !== 'no_data') {
+              tooltipValue = t(noDataReason)
+            } else {
+              tooltipValue = 'Geen data'
+            }
           }
           
           // Use original value for consistent colors

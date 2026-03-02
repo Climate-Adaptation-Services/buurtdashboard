@@ -135,16 +135,25 @@ export function getAHNSelection(indicator) {
   const indicatorStore = getIndicatorStore(indicator.dutchTitle || indicator.title)
   const selection = get(indicatorStore)
 
-  if (!selection) return { baseYear: '', compareYear: null, isDifference: false, beb: 'hele_buurt' }
+  // Get default baseYear from indicator config if store has no baseYear
+  const getDefaultBaseYear = () => {
+    if (indicator.AHNversie) {
+      const versions = indicator.AHNversie.split(',').map(v => v.trim())
+      return versions[versions.length - 1]
+    }
+    return ''
+  }
+
+  if (!selection) return { baseYear: getDefaultBaseYear(), compareYear: null, isDifference: false, beb: 'hele_buurt' }
   if (typeof selection === 'object') {
     return {
-      baseYear: selection.baseYear || '',
+      baseYear: selection.baseYear || getDefaultBaseYear(),
       compareYear: selection.compareYear || null,
       isDifference: selection.isDifference || false,
       beb: selection.beb || 'hele_buurt'
     }
   }
-  return { baseYear: selection, compareYear: null, isDifference: false, beb: 'hele_buurt' }
+  return { baseYear: selection || getDefaultBaseYear(), compareYear: null, isDifference: false, beb: 'hele_buurt' }
 }
 
 // Difference calculation - now supports M2 variants

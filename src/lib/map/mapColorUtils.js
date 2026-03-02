@@ -9,6 +9,7 @@ import {
   getDifferenceValue,
   getAHNSelection,
   getRawValue,
+  isValidValue,
 } from "../utils/valueRetrieval.js"
 import { getIndicatorAttribute } from "../utils/getIndicatorAttribute.js"
 
@@ -81,13 +82,15 @@ export function getMapFillColor(feature, indicator, isDifferenceMode, difference
       const diffValue = diffRecord ? diffRecord.diffValue : null
 
       // Color based on difference value, matching BeeswarmPlot behavior
-      return diffValue !== null && diffValue !== "" && !isNaN(diffValue) ? indicatorValueColorscale(diffValue) : "#000000"
+      // Use isValidValue to properly check for no-data codes (-9999, -9995, -9991)
+      return isValidValue(diffValue) ? indicatorValueColorscale(diffValue) : "#000000"
     } else {
       // For non-difference mode, use the value retrieval system for BEB-aware coloring
       // This matches BeeswarmPlot which now uses: getRawValue(node, indicator)
       let value = getRawValue(feature, indicator)
 
-      return value !== null && value !== "" && !isNaN(value) ? indicatorValueColorscale(value) : "#000000"
+      // Use isValidValue to properly check for no-data codes (-9999, -9995, -9991)
+      return isValidValue(value) ? indicatorValueColorscale(value) : "#000000"
     }
   } else {
     // Use centralized categorical value retrieval
