@@ -13,6 +13,9 @@
   let selectedAHN = ''
   let selectedDifference = "Difference"
 
+  // Reactive: check if any data source is available
+  $: hasDataLoaded = !!($selectedNeighbourhoodJSONData || $neighbourhoodsInMunicipalityJSONData || $allNeighbourhoodsJSONData)
+
   // YearSwitch is never disabled - it works at Nederland, gemeente, and buurt levels
   $: isDisabled = false
 
@@ -28,7 +31,8 @@
   }
 
   // Parse AHN versions from the indicator
-  const ahnVersions = indicator.AHNversie.split(",")
+  // Handle missing/empty AHNversie gracefully
+  const ahnVersions = indicator.AHNversie ? indicator.AHNversie.split(",").map(v => v.trim()).filter(v => v) : []
 
   // Format years consistently - sort and use ranges for consecutive years
   function formatYears(yearsString) {
@@ -144,15 +148,21 @@
         })
         selectedAHN = latestOption.AHN
         selectedDifference = "Difference"
-      } else if (currentSelection.isDifference && !currentCompareYearAvailable) {
-        // Compare year no longer available, disable difference mode
-        indicatorStore.set({
-          baseYear: currentSelection.baseYear,
-          compareYear: null,
-          isDifference: false,
-          beb: currentSelection.beb
-        })
-        selectedDifference = "Difference"
+      } else {
+        // Sync selectedAHN with store if it doesn't match
+        if (selectedAHN !== currentSelection.baseYear) {
+          selectedAHN = currentSelection.baseYear
+        }
+        if (currentSelection.isDifference && !currentCompareYearAvailable) {
+          // Compare year no longer available, disable difference mode
+          indicatorStore.set({
+            baseYear: currentSelection.baseYear,
+            compareYear: null,
+            isDifference: false,
+            beb: currentSelection.beb
+          })
+          selectedDifference = "Difference"
+        }
       }
     } else {
       // No options available - reset selection to empty so "Geen data" option shows
@@ -385,14 +395,20 @@
 
 <!-- Replacing SVG year switch with two dropdowns -->
 <div class="year-switch-dropdowns {selectedDifference === 'Difference' ? 'less-gap' : ''}">
-  <div class="dropdown-wrapper {options.length === 0 ? 'wider' : ''}">
-    <select class="year-dropdown {isDisabled || options.length === 0 ? 'disabled' : ''}" bind:value={selectedAHN} on:change={yearClick} style="border: 2px solid {$configStore.mainColor};" disabled={isDisabled || options.length === 0}>
-      {#if options.length === 0}
-        <option value="" disabled selected>Geen data</option>
+  <div class="dropdown-wrapper {hasDataLoaded && options.length === 0 ? 'wider' : ''}">
+    <select class="year-dropdown {isDisabled || (hasDataLoaded && options.length === 0) ? 'disabled' : ''}" bind:value={selectedAHN} on:change={yearClick} style="border: 2px solid {$configStore.mainColor};" disabled={isDisabled || (hasDataLoaded && options.length === 0)}>
+      {#if !hasDataLoaded}
+        <option value="">Laden...</option>
+      {:else if options.length === 0}
+        <option value="">Geen data</option>
       {:else}
+        <!-- Always include an empty option to prevent browser showing blank when selectedAHN doesn't match -->
+        {#if !options.some(opt => opt.AHN === selectedAHN)}
+          <option value="" disabled></option>
+        {/if}
         {#each options as option, index}
           {#if shouldShowInMainDropdown(option.AHN, index)}
-            <option value={option.AHN} selected={option.AHN == selectedAHN}>{option.Jaar}</option>
+            <option value={option.AHN}>{option.Jaar}</option>
           {/if}
         {/each}
       {/if}
