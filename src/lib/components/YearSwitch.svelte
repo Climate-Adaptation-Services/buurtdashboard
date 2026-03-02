@@ -86,6 +86,8 @@
     // For aggregated indicators, check if AT LEAST ONE class column has valid data
     if (indicator.aggregatedIndicator && indicator.classes) {
       return Object.values(indicator.classes).some(classAttr => {
+        // Skip the remainder class marker - it's not a real CSV column
+        if (classAttr === '_REST_') return false
         const attribute = getIndicatorAttribute(indicator, classAttr, ahn)
         const value = neighbourhoodData.properties[attribute]
         return isValidValue(value)
@@ -152,6 +154,10 @@
         })
         selectedDifference = "Difference"
       }
+    } else {
+      // No options available - reset selection to empty so "Geen data" option shows
+      selectedAHN = ''
+      selectedDifference = "Difference"
     }
   }
 
@@ -379,20 +385,24 @@
 
 <!-- Replacing SVG year switch with two dropdowns -->
 <div class="year-switch-dropdowns {selectedDifference === 'Difference' ? 'less-gap' : ''}">
-  <div class="dropdown-wrapper">
-    <select class="year-dropdown {isDisabled ? 'disabled' : ''}" bind:value={selectedAHN} on:change={yearClick} style="border: 2px solid {$configStore.mainColor};" disabled={isDisabled}>
-      {#each options as option, index}
-        {#if shouldShowInMainDropdown(option.AHN, index)}
-          <option value={option.AHN} selected={option.AHN == selectedAHN}>{option.Jaar}</option>
-        {/if}
-      {/each}
+  <div class="dropdown-wrapper {options.length === 0 ? 'wider' : ''}">
+    <select class="year-dropdown {isDisabled || options.length === 0 ? 'disabled' : ''}" bind:value={selectedAHN} on:change={yearClick} style="border: 2px solid {$configStore.mainColor};" disabled={isDisabled || options.length === 0}>
+      {#if options.length === 0}
+        <option value="" disabled selected>Geen data</option>
+      {:else}
+        {#each options as option, index}
+          {#if shouldShowInMainDropdown(option.AHN, index)}
+            <option value={option.AHN} selected={option.AHN == selectedAHN}>{option.Jaar}</option>
+          {/if}
+        {/each}
+      {/if}
     </select>
     <span class="dropdown-arrow">&#9662;</span>
   </div>
-  {#if selectedDifference !== "Difference"}
+  {#if options.length > 0 && selectedDifference !== "Difference"}
     <span class="arrow-between">&#8594;</span>
   {/if}
-  {#if indicator.numerical}
+  {#if indicator.numerical && options.length > 0}
     <div class="dropdown-wrapper">
       <select
         class="year-dropdown {selectedDifference === 'Difference' ? 'pseudo-disabled' : ''} {isDisabled ? 'disabled' : ''}"
@@ -427,6 +437,12 @@
     display: inline-block;
     width: 105px;
     z-index: 10; /* Ensure dropdown appears above indicator body */
+  }
+  .dropdown-wrapper.wider {
+    width: 140px;
+  }
+  .dropdown-wrapper.wider .year-dropdown {
+    width: 140px;
   }
   .dropdown-wrapper:last-child .year-dropdown {
     padding-right: 8px;
