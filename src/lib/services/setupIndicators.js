@@ -45,64 +45,34 @@ function addIndicatorCategory(indicatorsList, indicators, isEnglish = false) {
     const domeinLabels = (isEnglish && englishDomein) ? englishDomein : dutchDomein
     const tabelItems = indicator.Indicatornaamtabel ? indicator.Indicatornaamtabel.split(',').map(item => item.trim()) : []
 
-    // Check if the first tabel item is '-10' (remainder class defined in config)
-    // If so, use the config's domain labels directly without adding hardcoded "No data"
-    const hasRemainderInConfig = tabelItems.length > 0 && tabelItems[0] === '-10'
+    // Check if any tabel item is '-10' (remainder class for filling to 100%)
+    // Only indicators with '-10' will have their remainder filled to 100%
+    const hasRemainderInConfig = tabelItems.includes('-10')
 
     let classes = {}
-    let indicatorDomein
-    let indicatorColors
-
-    if (hasRemainderInConfig) {
-      // Config defines the remainder class - use domain labels as-is
-      indicatorDomein = [...domeinLabels]
-      indicatorColors = (indicator['kwantitatief / categoraal / geaggregeerd'] !== 'kwantitatief')
-        ? (indicator.Kleur ? indicator.Kleur.split(',').map(c => c.trim()) : [])
-        : (indicator.Kleur ? indicator.Kleur.split(',').map(c => c.trim()) : [])
-    } else {
-      // Legacy behavior: add "No data" class automatically
-      classes['No data'] = '-10'
-      indicatorDomein = ['No data', ...domeinLabels]
-      const noDataColor = '#333333'
-      indicatorColors = (indicator['kwantitatief / categoraal / geaggregeerd'] !== 'kwantitatief')
-        ? [noDataColor, ...(indicator.Kleur ? indicator.Kleur.split(',').map(c => c.trim()) : [])]
-        : (indicator.Kleur ? indicator.Kleur.split(',').map(c => c.trim()) : [])
-    }
+    // Use domain labels directly from config
+    let indicatorDomein = [...domeinLabels]
+    let indicatorColors = (indicator['kwantitatief / categoraal / geaggregeerd'] !== 'kwantitatief')
+      ? (indicator.Kleur ? indicator.Kleur.split(',').map(c => c.trim()) : [])
+      : (indicator.Kleur ? indicator.Kleur.split(',').map(c => c.trim()) : [])
 
     if (indicator['kwantitatief / categoraal / geaggregeerd'] !== 'categoraal') {
       if (indicator.Indicatornaamtabel) {
-        if (hasRemainderInConfig) {
-          // Config defines remainder class - map all domain labels to tabel items directly
-          indicatorDomein.forEach((d, i) => {
-            if (tabelItems[i]) {
-              classes[d] = tabelItems[i]
-            }
-          });
-        } else {
-          // Legacy: skip "No data" (already added), map rest of domain to tabel items
-          indicatorDomein.slice(1).forEach((d, i) => {
-            if (tabelItems[i]) {
-              classes[d] = tabelItems[i]
-            }
-          });
-        }
+        // Map domain labels to tabel items directly
+        indicatorDomein.forEach((d, i) => {
+          if (tabelItems[i]) {
+            classes[d] = tabelItems[i]
+          }
+        });
       }
     } else {
       if (indicator.klassenthresholds) {
         const thresholds = indicator.klassenthresholds.split(',').map(item => item.trim())
-        if (hasRemainderInConfig) {
-          indicatorDomein.forEach((d, i) => {
-            if (thresholds[i]) {
-              classes[d] = thresholds[i]
-            }
-          });
-        } else {
-          indicatorDomein.slice(1).forEach((d, i) => {
-            if (thresholds[i]) {
-              classes[d] = thresholds[i]
-            }
-          });
-        }
+        indicatorDomein.forEach((d, i) => {
+          if (thresholds[i]) {
+            classes[d] = thresholds[i]
+          }
+        });
       }
     }
 
