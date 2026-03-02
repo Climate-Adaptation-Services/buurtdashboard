@@ -45,9 +45,10 @@ function addIndicatorCategory(indicatorsList, indicators, isEnglish = false) {
     const domeinLabels = (isEnglish && englishDomein) ? englishDomein : dutchDomein
     const tabelItems = indicator.Indicatornaamtabel ? indicator.Indicatornaamtabel.split(',').map(item => item.trim()) : []
 
-    // Check if any tabel item is '-10' (remainder class for filling to 100%)
-    // Only indicators with '-10' will have their remainder filled to 100%
-    const hasRemainderInConfig = tabelItems.includes('-10')
+    // Check if any tabel item is '_REST_' (remainder class for filling to 100%)
+    // Only indicators with '_REST_' will have their remainder filled to 100%
+    // This is clearer than '-10' and won't cause config portal validation issues
+    const hasRemainderInConfig = tabelItems.includes('_REST_')
 
     let classes = {}
     // Use domain labels directly from config

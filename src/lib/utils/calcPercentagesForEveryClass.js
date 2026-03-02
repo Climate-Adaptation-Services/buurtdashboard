@@ -31,13 +31,13 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
 
     // voor deze neighbourhood tel de waardes van elke klasse bij de totale som op
     let noData = true
-    // Find the remainder class (has dummy attribute like "-10" that doesn't exist in CSV)
+    // Find the remainder class (has marker '_REST_' that doesn't exist in CSV)
     // This class will receive the percentage needed to fill up to 100%
-    const remainderClassName = Object.keys(indicator.classes).find(kl => indicator.classes[kl] === '-10')
+    const remainderClassName = Object.keys(indicator.classes).find(kl => indicator.classes[kl] === '_REST_')
 
     Object.keys(indicator.classes).forEach(kl => {
-      // Skip the remainder class for aggregated indicators (it has attribute "-10")
-      if (indicator.classes[kl] === '-10') {
+      // Skip the remainder class for aggregated indicators (it has marker '_REST_')
+      if (indicator.classes[kl] === '_REST_') {
         return // Skip this class - it will be filled with the remainder
       }
 
@@ -91,7 +91,7 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
       // Calculate the sum for THIS neighbourhood and add remainder to fill up to 100%
       let neighbourhoodSum = 0
       Object.keys(indicator.classes).forEach(kl => {
-        if (indicator.classes[kl] === '-10') return // Skip remainder class
+        if (indicator.classes[kl] === '_REST_') return // Skip remainder class
         const attributeName = getIndicatorAttribute(indicator, indicator.classes[kl])
         const propertyValue = getPropertyWithAHNFallback(attributeName, neighbourhood.properties)
         if (isValidValue(propertyValue)) {
