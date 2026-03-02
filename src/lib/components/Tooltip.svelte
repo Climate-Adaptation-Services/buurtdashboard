@@ -46,12 +46,18 @@
 
 {#if $tooltipRegion !== null}
   <div class="tooltip" style="left:{getTooltipLeft()}px;top:{getTooltipTop()}px">
-    <div class="tooltip-title">
-      <strong>{$tooltipRegion.name}</strong>
-    </div>
-    <div class="tooltip-description">
-      {$tooltipRegion.region}
-    </div>
+    {#if $tooltipRegion.mapType === 'main map'}
+      <div class="tooltip-description">
+        {$tooltipRegion.region}
+      </div>
+      <div class="tooltip-title">
+        <strong>{$tooltipRegion.name}</strong>
+      </div>
+    {:else}
+      <div class="tooltip-title">
+        <strong>{$tooltipRegion.name}</strong>
+      </div>
+    {/if}
     {#if $tooltipValues !== null}
       <div class="tooltip-value">
         <p>

@@ -39,38 +39,70 @@ function addIndicatorCategory(indicatorsList, indicators, isEnglish = false) {
     // Get English translation if available
     const translation = isEnglish ? indicatorTranslations.translations[indicator.Titel] : null
 
-    let classes = { 'No data': '-10' }
-    // add no data class - trim whitespace from domain names and colors
-    // Use English domain labels if available
+    // Get domain labels and table items
     const dutchDomein = indicator.Domein ? indicator.Domein.split(',').map(d => d.trim()) : []
     const englishDomein = translation?.domain ? translation.domain.split(',').map(d => d.trim()) : null
     const domeinLabels = (isEnglish && englishDomein) ? englishDomein : dutchDomein
-    const indicatorDomein = ['No data', ...domeinLabels]
+    const tabelItems = indicator.Indicatornaamtabel ? indicator.Indicatornaamtabel.split(',').map(item => item.trim()) : []
 
-    const noDataColor = '#333333'
-    const indicatorColors = (indicator['kwantitatief / categoraal / geaggregeerd'] !== 'kwantitatief')
-      ? [noDataColor, ...(indicator.Kleur ? indicator.Kleur.split(',').map(c => c.trim()) : [])]
-      : (indicator.Kleur ? indicator.Kleur.split(',').map(c => c.trim()) : [])
+    // Check if the first tabel item is '-10' (remainder class defined in config)
+    // If so, use the config's domain labels directly without adding hardcoded "No data"
+    const hasRemainderInConfig = tabelItems.length > 0 && tabelItems[0] === '-10'
+
+    let classes = {}
+    let indicatorDomein
+    let indicatorColors
+
+    if (hasRemainderInConfig) {
+      // Config defines the remainder class - use domain labels as-is
+      indicatorDomein = [...domeinLabels]
+      indicatorColors = (indicator['kwantitatief / categoraal / geaggregeerd'] !== 'kwantitatief')
+        ? (indicator.Kleur ? indicator.Kleur.split(',').map(c => c.trim()) : [])
+        : (indicator.Kleur ? indicator.Kleur.split(',').map(c => c.trim()) : [])
+    } else {
+      // Legacy behavior: add "No data" class automatically
+      classes['No data'] = '-10'
+      indicatorDomein = ['No data', ...domeinLabels]
+      const noDataColor = '#333333'
+      indicatorColors = (indicator['kwantitatief / categoraal / geaggregeerd'] !== 'kwantitatief')
+        ? [noDataColor, ...(indicator.Kleur ? indicator.Kleur.split(',').map(c => c.trim()) : [])]
+        : (indicator.Kleur ? indicator.Kleur.split(',').map(c => c.trim()) : [])
+    }
 
     if (indicator['kwantitatief / categoraal / geaggregeerd'] !== 'categoraal') {
       if (indicator.Indicatornaamtabel) {
-        const tabelItems = indicator.Indicatornaamtabel.split(',').map(item => item.trim())
-        indicatorDomein.slice(1).forEach((d, i) => {
-          // Only add class if the index exists in the tabel items
-          if (tabelItems[i]) {
-            classes[d] = tabelItems[i]
-          }
-        });
+        if (hasRemainderInConfig) {
+          // Config defines remainder class - map all domain labels to tabel items directly
+          indicatorDomein.forEach((d, i) => {
+            if (tabelItems[i]) {
+              classes[d] = tabelItems[i]
+            }
+          });
+        } else {
+          // Legacy: skip "No data" (already added), map rest of domain to tabel items
+          indicatorDomein.slice(1).forEach((d, i) => {
+            if (tabelItems[i]) {
+              classes[d] = tabelItems[i]
+            }
+          });
+        }
       }
     } else {
       if (indicator.klassenthresholds) {
         const thresholds = indicator.klassenthresholds.split(',').map(item => item.trim())
-        indicatorDomein.slice(1).forEach((d, i) => {
-          // Only add class if the index exists in the thresholds
-          if (thresholds[i]) {
-            classes[d] = thresholds[i]
-          }
-        });
+        if (hasRemainderInConfig) {
+          indicatorDomein.forEach((d, i) => {
+            if (thresholds[i]) {
+              classes[d] = thresholds[i]
+            }
+          });
+        } else {
+          indicatorDomein.slice(1).forEach((d, i) => {
+            if (thresholds[i]) {
+              classes[d] = thresholds[i]
+            }
+          });
+        }
       }
     }
 

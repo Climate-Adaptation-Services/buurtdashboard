@@ -213,8 +213,8 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
           ? getMostCommonClass(indicator, feature)
           : getClassByIndicatorValue(indicator, getRawValue(feature, indicator))
 
-        // Use gray color for no-data values (using centralized check)
-        tooltipValueColor = isAnyNoData(categoricalValue) ? '#cccccc' : indicatorValueColorscale(categoricalValue)
+        // Use black color for no-data values (using centralized check)
+        tooltipValueColor = isAnyNoData(categoricalValue) ? '#000000' : indicatorValueColorscale(categoricalValue)
         tooltipIndicator = indicator.title
       }
 
@@ -300,7 +300,8 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
   tooltipRegion.set({
     'region': (get(municipalitySelection) === null) ? t('Gemeente') : t('Buurt'),
     'center': tooltipCenter,
-    'name': feature.properties[get(currentNameAbbreviation)]
+    'name': feature.properties[get(currentNameAbbreviation)],
+    'mapType': mapType
   })
 }
 

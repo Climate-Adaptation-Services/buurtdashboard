@@ -31,10 +31,14 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
 
     // voor deze neighbourhood tel de waardes van elke klasse bij de totale som op
     let noData = true
+    // Find the remainder class (has dummy attribute like "-10" that doesn't exist in CSV)
+    // This class will receive the percentage needed to fill up to 100%
+    const remainderClassName = Object.keys(indicator.classes).find(kl => indicator.classes[kl] === '-10')
+
     Object.keys(indicator.classes).forEach(kl => {
-      // Skip the dummy "No data" class for aggregated indicators (it has attribute "-10")
-      if (kl === 'No data' && indicator.classes[kl] === '-10') {
-        return // Skip this class
+      // Skip the remainder class for aggregated indicators (it has attribute "-10")
+      if (indicator.classes[kl] === '-10') {
+        return // Skip this class - it will be filled with the remainder
       }
 
       // getIndicatorAttribute will automatically apply BEB suffix if needed
@@ -75,10 +79,40 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
     });
     if (noData) {
       if (indicator.title !== t('Gevoelstemperatuur') && indicator.title !== 'Maximale overstromingsdiepte') {
-        // Add 100% to "No data" class for neighborhoods without data (only if that class exists)
-        const noDataClass = totalSumPerClass.find(kl => kl.className === 'No data')
-        if (noDataClass) {
-          noDataClass.som += 100
+        // Add 100% to remainder class for neighborhoods without any valid data
+        if (remainderClassName) {
+          const remainderClass = totalSumPerClass.find(kl => kl.className === remainderClassName)
+          if (remainderClass) {
+            remainderClass.som += 100
+          }
+        }
+      }
+    } else {
+      // Calculate the sum for THIS neighbourhood and add remainder to fill up to 100%
+      let neighbourhoodSum = 0
+      Object.keys(indicator.classes).forEach(kl => {
+        if (indicator.classes[kl] === '-10') return // Skip remainder class
+        const attributeName = getIndicatorAttribute(indicator, indicator.classes[kl])
+        const propertyValue = getPropertyWithAHNFallback(attributeName, neighbourhood.properties)
+        if (isValidValue(propertyValue)) {
+          let value = +propertyValue
+          const isDecimalFormat = attributeName && (
+            attributeName.startsWith('PET') ||
+            (attributeName.startsWith('perc') && !attributeName.startsWith('percPanden'))
+          )
+          if (isDecimalFormat && value >= 0 && value <= 1) {
+            value = value * 100
+          }
+          if (value >= 0 && value <= 100) {
+            neighbourhoodSum += value
+          }
+        }
+      })
+      // Add remainder to the remainder class (e.g., "Voldoet niet", "No data")
+      if (neighbourhoodSum < 100 && remainderClassName) {
+        const remainderClass = totalSumPerClass.find(kl => kl.className === remainderClassName)
+        if (remainderClass) {
+          remainderClass.som += (100 - neighbourhoodSum)
         }
       }
     }
@@ -92,12 +126,8 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
   // we stoppen het resultaat per klasse in een dictionary
   let result = { 'group': regio }
   Object.keys(indicator.classes).forEach(indicatorClass => {
-    // Skip the dummy "No data" class for aggregated indicators in the output
-    if (indicatorClass === 'No data' && indicator.classes[indicatorClass] === '-10') {
-      result[indicatorClass] = 0 // Set to 0 instead of trying to calculate
-    } else {
-      result[indicatorClass] = totalSumPerClass.filter(kl => kl.className === indicatorClass)[0].som
-    }
+    // Include all classes - remainder class contains the percentage needed to fill to 100%
+    result[indicatorClass] = totalSumPerClass.filter(kl => kl.className === indicatorClass)[0].som
   });
 
   return result

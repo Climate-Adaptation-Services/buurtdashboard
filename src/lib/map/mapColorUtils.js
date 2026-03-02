@@ -10,6 +10,7 @@ import {
   getAHNSelection,
   getRawValue,
   isValidValue,
+  isAnyNoData,
 } from "../utils/valueRetrieval.js"
 import { getIndicatorAttribute } from "../utils/getIndicatorAttribute.js"
 
@@ -95,6 +96,11 @@ export function getMapFillColor(feature, indicator, isDifferenceMode, difference
   } else {
     // Use centralized categorical value retrieval
     const categoricalValue = getCategoricalValue(feature, indicator)
+    // Check for any no-data value (including specific reasons like 'no_slow_traffic_route')
+    // These may not be in the colorscale domain, so return black directly
+    if (isAnyNoData(categoricalValue)) {
+      return "#000000"
+    }
     return categoricalValue !== null ? indicatorValueColorscale(categoricalValue) : "#000000"
   }
 }
