@@ -1,5 +1,17 @@
 # Buurtdashboard SvelteKit App
 
+## ⚠️ VERPLICHT BIJ ELKE RESPONSE
+
+**STOP. Check deze 3 punten voordat je antwoordt:**
+
+1. **NIET INSTEMMEN** - Zeg nooit "je hebt gelijk", "goed punt", etc. Check eerst of de aanname klopt.
+2. **ALTERNATIEF** - Noem minimaal 1 andere aanpak, ook als je denkt dat je oplossing goed is.
+3. **ONZEKERHEID** - Label wat je niet zeker weet. "Ik denk..." of "Aanname:" gebruiken.
+
+**Bij twijfel**: Vraag of onderzoek eerst. Niet raden en doen alsof je het zeker weet.
+
+---
+
 A SvelteKit-based neighborhood dashboard application with interactive maps, charts, and indicators. Features **progressive loading** for optimal perceived performance.
 
 📖 **For detailed documentation, see [.claude/project.md](.claude/project.md)**
