@@ -3,6 +3,7 @@
   import Indicator from "$lib/components/Indicator.svelte"
   import Map from "$lib/components/Map.svelte"
   import Tooltip from "$lib/components/Tooltip.svelte"
+  import Tutorial from "$lib/components/Tutorial.svelte"
 
   import {
     neighbourhoodSelection,
@@ -53,6 +54,7 @@
   let allIndicators = []
   let isInitialized = false
   let isUIReady = false
+  let showTutorial = false
 
   // GeoJSON data will be loaded client-side for progressive rendering
   let municipalityGeoJson = null
@@ -204,7 +206,12 @@
     <div class="indicators" style="margin-left:{screenWidth > 800 ? 400 : 0}px">
       {#each displayedIndicators as indicator (indicator.title)}
         {#if getIndicatorAttribute(indicator, indicator.attribute)}
-          <div class="indicator" style="height:{indicatorHeight}px">
+          <div
+            class="indicator"
+            style="height:{indicatorHeight}px"
+            data-indicator-title={indicator.dutchTitle || indicator.title}
+            data-indicator-type={indicator.numerical ? 'numerical' : 'categorical'}
+          >
             <Indicator {indicatorHeight} {indicator} isLoading={isLoadingGeoJSON} />
           </div>
         {/if}
@@ -214,7 +221,20 @@
     <Tooltip />
 
     <Modal show={$modal} style="position:absolute; left:0"></Modal>
+
+    <!-- Tutorial help button -->
+    <button
+      class="tutorial-help-button"
+      on:click={() => showTutorial = true}
+      aria-label="Open tutorial"
+      title="Tutorial openen"
+    >
+      ?
+    </button>
   </div>
+
+  <!-- Tutorial overlay -->
+  <Tutorial bind:isOpen={showTutorial} />
 {/if}
 
 <style>
@@ -313,5 +333,37 @@
     to {
       transform: rotate(360deg);
     }
+  }
+
+  /* Tutorial help button */
+  .tutorial-help-button {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #35575a;
+    color: white;
+    border: none;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s;
+    z-index: 1000;
+  }
+
+  .tutorial-help-button:hover {
+    background: #2a4548;
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  .tutorial-help-button:active {
+    transform: scale(0.95);
   }
 </style>
