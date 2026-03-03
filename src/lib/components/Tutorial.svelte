@@ -18,6 +18,8 @@
   let originalBoomkroonAHN = null // Store original AHN selection
   let municipalitySetupDone = false // Track if we've selected Utrecht
   let neighbourhoodSetupDone = false // Track if we've selected a buurt
+  let viewportWidth = 1920 // Default, will be updated
+  let viewportHeight = 1080 // Default, will be updated
 
   // Tutorial steps - visual guide only (no actions)
   const tutorialSteps = [
@@ -410,9 +412,16 @@
     originalNeighbourhood = null
   }
 
-  // Watch for isOpen changes to save original state
+  // Watch for isOpen changes to save original state and manage body overflow
   $: if (browser && isOpen) {
     saveOriginalState()
+    // Prevent body scroll while tutorial is open
+    document.body.style.overflow = 'hidden'
+  }
+
+  // Restore body overflow when tutorial closes
+  $: if (browser && !isOpen) {
+    document.body.style.overflow = ''
   }
 
   // Watch for step changes and trigger appropriate actions
@@ -455,13 +464,13 @@
   })
 </script>
 
-<svelte:window on:keydown={handleKeydown} />
+<svelte:window on:keydown={handleKeydown} bind:innerWidth={viewportWidth} bind:innerHeight={viewportHeight} />
 
 {#if isOpen}
   <!-- Overlay with cutout for highlighted element -->
   <div class="tutorial-overlay">
     <!-- Dark overlay using SVG with cutout -->
-    <svg class="overlay-svg" viewBox="0 0 {browser ? window.innerWidth : 1920} {browser ? window.innerHeight : 1080}" preserveAspectRatio="none">
+    <svg class="overlay-svg" viewBox="0 0 {viewportWidth} {viewportHeight}" preserveAspectRatio="none">
       <defs>
         <mask id="spotlight-mask">
           <!-- White = visible (dark overlay), Black = hidden (spotlight) -->
@@ -561,10 +570,11 @@
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    height: 100%;
     z-index: 10000;
     pointer-events: none;
+    overflow: hidden;
   }
 
   .overlay-svg {
