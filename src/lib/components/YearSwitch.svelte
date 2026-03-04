@@ -22,12 +22,14 @@
   // Derived current selection from store
   $: currentSelection = $indicatorStore || { baseYear: '', compareYear: null, isDifference: false, beb: 'hele_buurt' }
 
-  // Initialize local state from store when first loaded
-  let hasLoadedFromStore = false
-  $: if (!hasLoadedFromStore && currentSelection.baseYear) {
-    selectedAHN = currentSelection.baseYear
-    selectedDifference = currentSelection.isDifference ? currentSelection.compareYear : "Difference"
-    hasLoadedFromStore = true
+  // Track if user has interacted with dropdown to prevent reactive overwrite
+  let userHasInteracted = false
+
+  // Reset interaction flag when municipality changes (allows re-sync from store)
+  let previousMunicipality = $municipalitySelection
+  $: if ($municipalitySelection !== previousMunicipality) {
+    previousMunicipality = $municipalitySelection
+    userHasInteracted = false
   }
 
   // Parse AHN versions from the indicator
@@ -149,12 +151,11 @@
         selectedAHN = latestOption.AHN
         selectedDifference = "Difference"
       } else {
-        // Only sync on initial load, not on every reactive update
+        // Sync from store only if user hasn't interacted yet
         // This prevents Chrome from resetting the dropdown during user interaction
-        if (!hasLoadedFromStore) {
+        if (!userHasInteracted) {
           selectedAHN = currentSelection.baseYear
           selectedDifference = currentSelection.isDifference ? currentSelection.compareYear : "Difference"
-          hasLoadedFromStore = true
         }
         if (currentSelection.isDifference && !currentCompareYearAvailable) {
           // Compare year no longer available, disable difference mode
@@ -271,6 +272,7 @@
    * Handle base year selection change
    */
   function yearClick(change) {
+    userHasInteracted = true
     const newAHN = change.target.value
     const isDifferenceMode = currentSelection.isDifference
     const compareYear = currentSelection.compareYear
@@ -360,6 +362,7 @@
    * Handle difference year selection change
    */
   function yearClickDifference(change) {
+    userHasInteracted = true
     const differenceAHN = change.target.value
 
     if (differenceAHN === "Difference") {
