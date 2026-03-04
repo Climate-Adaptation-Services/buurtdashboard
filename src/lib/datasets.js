@@ -51,13 +51,3 @@ export async function fetchDashboardConfig(configParam = 'default') {
 // Indicators config URLs (built with config mode)
 export const DEFAULT_INDICATORS_CONFIG_URL = buildConfigCsvUrl('default-nl', CONFIG_MODE);
 export const DORDRECHT_INDICATORS_CONFIG_URL = buildConfigCsvUrl('dordrecht', CONFIG_MODE);
-
-// Legacy exports for backwards compatibility with precalculate-nederland.js script
-// These are fallback URLs - the app now fetches URLs from config portal
-export const DEFAULT_CSV_DATA_URL = `${S3_BASE_URL}/buurtdashboard-KEA/csvdata/Buurt2024BuurtdashboardDataset20260210RMK.csv.gz`;
-export const DORDRECHT_CSV_DATA_URL = `${S3_BASE_URL}/dordrecht-rmk/csvdata/Dordrecht_RMK_011225(b11buurt).csv.gz`;
-export const DEFAULT_DATA_DOWNLOAD_URL = `${S3_BASE_URL}/buurtdashboard-KEA/data-download/Downloadbuurtdashboard_jan26.xlsx`;
-export const DORDRECHT_DATA_DOWNLOAD_URL = `${S3_BASE_URL}/buurtdashboard-KEA/data-download/Downloadbuurtdashboard_jan26.xlsx`;
-
-// Legacy alias for backwards compatibility
-export const buildConfigUrl = buildConfigCsvUrl;

@@ -19,12 +19,25 @@ import { dsvFormat } from 'd3-dsv';
 import { gunzipSync, unzipSync, strFromU8 } from 'fflate';
 import { feature } from 'topojson-client';
 
+// "No data" marker values used in CSV files
+const NO_DATA_VALUES = [-9999, -9995, -9991];
+
+// Helper to check if a value is valid (not null, undefined, NaN, or a "no data" marker)
+function isValidValue(value) {
+  if (value === null || value === undefined || value === '' || isNaN(value)) {
+    return false;
+  }
+  const numValue = +value;
+  return !NO_DATA_VALUES.includes(numValue);
+}
+
 // Import from datasets.js (single source of truth)
 import {
   DATASET_VERSION,
   BUURT_GEOJSON_URL,
-  DEFAULT_CSV_DATA_URL,
-  DEFAULT_INDICATORS_CONFIG_URL
+  DEFAULT_INDICATORS_CONFIG_URL,
+  CONFIG_PORTAL_URL,
+  CONFIG_MODE
 } from '../src/lib/datasets.js';
 
 // Get __dirname equivalent in ES modules
@@ -224,15 +237,25 @@ function calculateNederlandAggregate(indicator, jsonData, year = null, bebOption
     const values = features
       .map(feature => {
         const value = feature.properties[attributeName];
-        return (value !== null && value !== undefined && value !== '' && !isNaN(value)) ? +value : null;
+        return isValidValue(value) ? +value : null;
       })
       .filter(v => v !== null);
     return calcMedian(values);
   } else if (indicator.aggregatedIndicator) {
     // For aggregated indicators, calculate average for each class
     const result = {};
+    let restClassName = null; // Track if there's a _REST_ class to calculate
+
     Object.keys(indicator.classes).forEach(className => {
-      const classAttribute = buildAttributeName(indicator.classes[className], {
+      const classColumnName = indicator.classes[className];
+
+      // _REST_ is a special marker meaning "100% - sum of other classes"
+      if (classColumnName === '_REST_') {
+        restClassName = className;
+        return; // Skip for now, calculate after other classes
+      }
+
+      const classAttribute = buildAttributeName(classColumnName, {
         year,
         bebOption,
         ahnVersion: effectiveAhnVersion,
@@ -242,12 +265,20 @@ function calculateNederlandAggregate(indicator, jsonData, year = null, bebOption
       const values = features
         .map(feature => {
           const value = feature.properties[classAttribute];
-          return (value !== null && value !== undefined && value !== '' && !isNaN(value)) ? +value : null;
+          return isValidValue(value) ? +value : null;
         })
         .filter(v => v !== null);
 
       result[className] = calcAverage(values);
     });
+
+    // Calculate _REST_ class as 100 - sum of other classes
+    if (restClassName) {
+      const otherClassesSum = Object.values(result)
+        .filter(v => v !== null && v !== undefined)
+        .reduce((sum, val) => sum + val, 0);
+      result[restClassName] = 100 - otherClassesSum;
+    }
 
     // Special handling for indicators stored as decimals - multiply by 100
     // The CSV stores values as decimals (0.10667 = 10.667%), but client expects percentages
@@ -272,26 +303,38 @@ function calculateNederlandAggregate(indicator, jsonData, year = null, bebOption
 async function main() {
   console.log('🚀 Starting Nederland aggregates pre-calculation...');
   console.log(`📦 Dataset version: ${DATASET_VERSION}`);
+  console.log(`📋 Config mode: ${CONFIG_MODE}`);
 
   try {
-    // 1. Fetch all data
+    // 1. First fetch dashboard config to get the CSV URL
+    console.log('\n📥 Fetching dashboard config from Config Portal...');
+    const configUrl = `${CONFIG_PORTAL_URL}/api/config/default-nl/json?mode=${CONFIG_MODE}`;
+    const configResponse = await fetch(configUrl);
+    if (!configResponse.ok) {
+      throw new Error(`Failed to fetch dashboard config: ${configResponse.status}`);
+    }
+    const dashboardConfig = await configResponse.json();
+    const csvDataUrl = dashboardConfig.csv_data_url;
+    console.log(`📄 CSV URL: ${csvDataUrl}`);
+
+    // 2. Fetch all data
     console.log('\n📥 Fetching data...');
     const [indicatorsConfigResponse, geoJsonResponse, csvResponse] = await Promise.all([
       fetch(DEFAULT_INDICATORS_CONFIG_URL),
       fetch(BUURT_GEOJSON_URL),
-      fetch(DEFAULT_CSV_DATA_URL)
+      fetch(csvDataUrl)
     ]);
 
-    // 2. Process indicators config
+    // 3. Process indicators config
     console.log('📊 Processing indicators config...');
     const indicatorsConfigText = await indicatorsConfigResponse.text();
     const indicatorsConfig = dsvFormat(';').parse(indicatorsConfigText);
 
-    // 3. Process CSV
+    // 4. Process CSV
     console.log('📄 Processing CSV data...');
     const zipBuffer = await csvResponse.arrayBuffer();
     let csvText;
-    if (DEFAULT_CSV_DATA_URL.endsWith('.gz')) {
+    if (csvDataUrl.endsWith('.gz')) {
       const decompressed = gunzipSync(new Uint8Array(zipBuffer));
       csvText = strFromU8(decompressed);
     } else {
@@ -301,7 +344,7 @@ async function main() {
     }
     const csvData = dsvFormat(';').parse(csvText);
 
-    // 4. Process GeoJSON (convert from TopoJSON if needed)
+    // 5. Process GeoJSON (convert from TopoJSON if needed)
     console.log('🗺️  Processing GeoJSON...');
     let topoJson;
     if (BUURT_GEOJSON_URL.endsWith('.gz')) {
@@ -397,8 +440,7 @@ async function main() {
                     const baseValue = feature.properties[baseAttr];
                     const compareValue = feature.properties[compareAttr];
 
-                    if (baseValue !== null && baseValue !== undefined && baseValue !== '' && !isNaN(baseValue) &&
-                        compareValue !== null && compareValue !== undefined && compareValue !== '' && !isNaN(compareValue)) {
+                    if (isValidValue(baseValue) && isValidValue(compareValue)) {
                       return +compareValue - +baseValue;
                     }
                     return null;
@@ -499,8 +541,7 @@ async function main() {
                   const baseValue = feature.properties[baseAttr];
                   const compareValue = feature.properties[compareAttr];
 
-                  if (baseValue !== null && baseValue !== undefined && baseValue !== '' && !isNaN(baseValue) &&
-                      compareValue !== null && compareValue !== undefined && compareValue !== '' && !isNaN(compareValue)) {
+                  if (isValidValue(baseValue) && isValidValue(compareValue)) {
                     return +compareValue - +baseValue;
                   }
                   return null;

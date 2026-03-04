@@ -25,11 +25,21 @@ export async function load({ url }) {
   }
 
   // Merge portal config with local config (portal takes precedence for URLs)
+  // Config Portal is now the single source of truth for CSV and download URLs
+  const csvUrl = portalConfig?.csv_data_url;
+  const downloadUrl = portalConfig?.data_download_url;
+
+  if (!csvUrl) {
+    throw new Error(
+      'Could not load CSV data URL from Config Portal. ' +
+      'Please ensure the Config Portal is accessible and the dashboard config has a csv_data_url set.'
+    );
+  }
+
   const configObj = {
     ...localConfig,
-    // Use portal URLs if available, otherwise fall back to local config
-    neighbourhoodCSVdataLocation: portalConfig?.csv_data_url || localConfig.neighbourhoodCSVdataLocation,
-    dataDownloadLocation: portalConfig?.data_download_url || localConfig.dataDownloadLocation
+    neighbourhoodCSVdataLocation: csvUrl,
+    dataDownloadLocation: downloadUrl || null
   };
 
   // Start lightweight fetches (indicators config, CSV, and Nederland aggregates)
