@@ -1,6 +1,6 @@
 {
   "version": "20260210",
-  "generatedAt": "2026-02-24T13:40:32.396Z",
+  "generatedAt": "2026-03-04T09:18:19.947Z",
   "aggregates": {
     "Schaduw fiets- en wandelpaden: groen en grijs": {
       "hele_buurt": {
@@ -139,25 +139,63 @@
         "diff_AHN4_AHN5": -0.25913961649999995
       }
     },
-    "Groen": 22.43230312,
-    "Groen openbaar": 51.44659106,
-    "Groen niet-openbaar": 13.26696927,
-    "Verharding ": 31.37530482,
-    "Verharding openbaar": 40.519949315,
-    "Verharding niet-openbaar": 34.76862001,
-    "Water": 3.7402805795000003,
+    "Groen": {
+      "hele_buurt": 22.43230312,
+      "bebouwde_kom": 24.949485985000003
+    },
+    "Groen openbaar": {
+      "hele_buurt": 51.44659106,
+      "bebouwde_kom": 46.293653045
+    },
+    "Groen niet-openbaar": {
+      "hele_buurt": 13.26696927,
+      "bebouwde_kom": 16.307956179999998
+    },
+    "Verharding ": {
+      "hele_buurt": 31.37530482,
+      "bebouwde_kom": 38.625994665
+    },
+    "Verharding openbaar": {
+      "hele_buurt": 40.519949315,
+      "bebouwde_kom": 48.837738290000004
+    },
+    "Verharding niet-openbaar": {
+      "hele_buurt": 34.76862001,
+      "bebouwde_kom": 47.71452102
+    },
+    "Water": {
+      "hele_buurt": 3.7402805795000003,
+      "bebouwde_kom": 1.892744375
+    },
     "Landbedekking ": {
-      "Gebouwen": 13.943662170889672,
-      "Verhard": 27.97771498465827,
-      "Halfverhard": 0.7887654330560419,
-      "Onverhard": 44.69243354048655,
-      "Gras": 9.36568814594543,
-      "Struiken": 3.231735724572109
+      "hele_buurt": {
+        "Gebouwen": 13.943662170889672,
+        "Verhard": 27.97771498465827,
+        "Halfverhard": 0.7887654330560419,
+        "Onverhard": 44.69243354048655,
+        "Gras": 9.36568814594543,
+        "Struiken": 3.231735724572109
+      },
+      "bebouwde_kom": {
+        "Gebouwen": 17.213710735584193,
+        "Verhard": 36.18313073520204,
+        "Halfverhard": 0.9255712864686612,
+        "Onverhard": 30.85050822563477,
+        "Gras": 10.840859212151459,
+        "Struiken": 3.789827598631077
+      }
     },
     "Openbaar en niet-openbaar": {
-      "Gebouwen": 13.88668405919523,
-      "Openbaar": 37.02613188543284,
-      "Niet openbaar": 49.07955715215757
+      "hele_buurt": {
+        "Gebouwen": 13.88668405919523,
+        "Openbaar": 37.02613188543284,
+        "Niet openbaar": 49.07955715215757
+      },
+      "bebouwde_kom": {
+        "Gebouwen": 17.14014300727872,
+        "Openbaar": null,
+        "Niet openbaar": null
+      }
     },
     "Groen per inwoner": 124.2244537,
     "Bevolkingsdichtheid": 1662.5,
@@ -251,29 +289,35 @@
     "10% en 30% regel": {
       "hele_buurt": {
         "AHN3": {
-          "Voldoet aan 10%": 47.047991792470846,
+          "Voldoet niet": null,
+          "Voldoet aan 10%": null,
           "Voldoet aan 30%": 5.729709374647517
         },
         "AHN4": {
-          "Voldoet aan 10%": 50.10612202339065,
+          "Voldoet niet": null,
+          "Voldoet aan 10%": null,
           "Voldoet aan 30%": 6.291080411355157
         },
         "AHN5": {
-          "Voldoet aan 10%": 39.11462966911867,
+          "Voldoet niet": null,
+          "Voldoet aan 10%": null,
           "Voldoet aan 30%": -2492.466012384789
         }
       },
       "bebouwde_kom": {
         "AHN3": {
-          "Voldoet aan 10%": 45.5482123299982,
+          "Voldoet niet": null,
+          "Voldoet aan 10%": null,
           "Voldoet aan 30%": -527.1979331126946
         },
         "AHN4": {
-          "Voldoet aan 10%": 48.57809420423556,
+          "Voldoet niet": null,
+          "Voldoet aan 10%": null,
           "Voldoet aan 30%": -526.7365445555694
         },
         "AHN5": {
-          "Voldoet aan 10%": 38.26506652575826,
+          "Voldoet niet": null,
+          "Voldoet aan 10%": null,
           "Voldoet aan 30%": -2791.1217479691522
         }
       }

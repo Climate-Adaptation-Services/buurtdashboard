@@ -89,23 +89,9 @@
     },
     {
       id: 'beeswarm-plot',
-      title: 'Beeswarm plot',
-      description: 'Bij numerieke indicatoren zie je een beeswarm plot. Elke stip is een buurt. Hiermee kun je snel zien hoe de geselecteerde buurt zich verhoudt tot andere buurten.',
+      title: 'Verdeling van buurten',
+      description: 'Elke stip is een buurt. De stippen zijn gegroepeerd langs de schaal zodat je snel kunt zien hoe de geselecteerde buurt zich verhoudt tot andere buurten.',
       target: '[data-indicator-title="Boomkroonoppervlakte"] .indicator-graph',
-      position: 'left'
-    },
-    {
-      id: 'categorical-indicator',
-      title: 'Categorische indicator: Gevoelstemperatuur',
-      description: 'Dit is een categorische indicator. De waarde valt in één van de voorgedefinieerde klassen (bijvoorbeeld "laag", "gemiddeld", "hoog").',
-      target: '[data-indicator-title="Gevoelstemperatuur"]',
-      position: 'left'
-    },
-    {
-      id: 'bar-chart',
-      title: 'Staafdiagram',
-      description: 'Bij categorische indicatoren zie je een staafdiagram. De staven tonen hoeveel buurten in elke categorie vallen. De legenda toont de kleuren per categorie.',
-      target: '[data-indicator-title="Gevoelstemperatuur"] .indicator-graph',
       position: 'left'
     },
     {
@@ -120,6 +106,20 @@
       title: 'Mediaan',
       description: 'De getoonde waarden zijn medianen: de middelste waarde van alle buurten. Elke buurt telt even zwaar mee, ongeacht grootte of inwoneraantal.',
       target: '[data-indicator-title="Boomkroonoppervlakte"] .indicator-overview',
+      position: 'left'
+    },
+    {
+      id: 'categorical-indicator',
+      title: 'Samengestelde indicator: Gevoelstemperatuur',
+      description: 'Deze indicator toont meerdere waarden tegelijk. De balkjes geven de verdeling van de gevoelstemperatuur in de buurt: hoeveel procent van het oppervlak valt in elke temperatuurklasse.',
+      target: '[data-indicator-title="Gevoelstemperatuur"]',
+      position: 'left'
+    },
+    {
+      id: 'bar-chart',
+      title: 'Staafdiagram',
+      description: 'Het staafdiagram toont de verdeling over de klassen. Hoe langer de balk, hoe groter het aandeel. De kleuren corresponderen met de legenda.',
+      target: '[data-indicator-title="Gevoelstemperatuur"] .indicator-graph',
       position: 'left'
     },
     {
@@ -245,8 +245,18 @@
     const tooltipWidth = 360
     const tooltipHeight = 220
     const padding = 20
+    const minMargin = 20 // Minimum margin from viewport edges
     const viewportWidth = window.innerWidth
     const viewportHeight = window.innerHeight
+
+    // Calculate vertical center of target element
+    let verticalCenter = rect.top + rect.height / 2
+
+    // Clamp vertical position to keep tooltip within viewport
+    // Tooltip is centered vertically with translateY(-50%), so we need half height margin
+    const minTop = minMargin + tooltipHeight / 2
+    const maxTop = viewportHeight - minMargin - tooltipHeight / 2
+    verticalCenter = Math.max(minTop, Math.min(maxTop, verticalCenter))
 
     let style = ''
 
@@ -255,22 +265,22 @@
         // Position to the right of the element
         let leftPos = rect.left + rect.width + padding
         // Check if tooltip would overflow right edge
-        if (leftPos + tooltipWidth > viewportWidth - 20) {
+        if (leftPos + tooltipWidth > viewportWidth - minMargin) {
           // Position to the left instead
-          style = `top: ${rect.top + rect.height / 2}px; right: ${viewportWidth - rect.left + padding}px; transform: translateY(-50%);`
+          style = `top: ${verticalCenter}px; right: ${viewportWidth - rect.left + padding}px; transform: translateY(-50%);`
         } else {
-          style = `top: ${rect.top + rect.height / 2}px; left: ${leftPos}px; transform: translateY(-50%);`
+          style = `top: ${verticalCenter}px; left: ${leftPos}px; transform: translateY(-50%);`
         }
         break
       case 'left':
         // Position to the left of the element
         let rightPos = viewportWidth - rect.left + padding
         // Check if tooltip would overflow left edge
-        if (rect.left - tooltipWidth - padding < 20) {
+        if (rect.left - tooltipWidth - padding < minMargin) {
           // Position to the right instead
-          style = `top: ${rect.top + rect.height / 2}px; left: ${rect.left + rect.width + padding}px; transform: translateY(-50%);`
+          style = `top: ${verticalCenter}px; left: ${rect.left + rect.width + padding}px; transform: translateY(-50%);`
         } else {
-          style = `top: ${rect.top + rect.height / 2}px; right: ${rightPos}px; transform: translateY(-50%);`
+          style = `top: ${verticalCenter}px; right: ${rightPos}px; transform: translateY(-50%);`
         }
         break
       case 'top':
