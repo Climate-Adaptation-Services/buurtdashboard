@@ -26,7 +26,7 @@
     {
       id: 'welcome',
       title: 'Welkom bij het Buurtdashboard',
-      description: 'Deze tutorial legt uit hoe je het dashboard kunt gebruiken. Je kunt de tutorial altijd opnieuw starten via het vraagteken-icoon rechtsboven.',
+      description: 'Deze tutorial legt uit hoe je het dashboard kunt gebruiken. Je kunt de tutorial altijd opnieuw starten via het kompas-icoon linksboven.',
       target: null,
       position: 'center'
     },
@@ -69,8 +69,22 @@
     {
       id: 'numerical-indicator',
       title: 'Numerieke indicator: Boomkroonoppervlakte',
-      description: 'Dit is een numerieke indicator. De waarde is een getal dat je kunt vergelijken met andere buurten, gemeentes en heel Nederland.',
+      description: 'Dit is een numerieke indicator. De waarde is een getal dat je kunt vergelijken met andere buurten, gemeentes, heel Nederland en andere buurten met hetzelfde wijktype.',
       target: '[data-indicator-title="Boomkroonoppervlakte"]',
+      position: 'left'
+    },
+    {
+      id: 'info-icon',
+      title: 'Info icoon',
+      description: 'Klik op het "i" icoon rechtsboven in een indicator voor een korte beschrijving van de indicator.',
+      target: '[data-indicator-title="Boomkroonoppervlakte"] .question-mark',
+      position: 'left'
+    },
+    {
+      id: 'more-info-link',
+      title: 'Meer informatie',
+      description: 'Klik op "Meer info" rechtsonder om naar de bronpagina van de indicator te gaan voor uitgebreide informatie.',
+      target: '[data-indicator-title="Boomkroonoppervlakte"] .info-link',
       position: 'left'
     },
     {
@@ -102,6 +116,13 @@
       position: 'left'
     },
     {
+      id: 'median-explanation',
+      title: 'Mediaan',
+      description: 'De getoonde waarden zijn medianen: de middelste waarde van alle buurten. Elke buurt telt even zwaar mee, ongeacht grootte of inwoneraantal.',
+      target: '[data-indicator-title="Boomkroonoppervlakte"] .indicator-overview',
+      position: 'left'
+    },
+    {
       id: 'year-switch',
       title: 'Jaar selectie',
       description: 'Sommige indicatoren hebben data voor meerdere jaren. Gebruik de dropdown om een ander jaar te selecteren of om jaren met elkaar te vergelijken.',
@@ -118,7 +139,7 @@
     {
       id: 'done',
       title: 'Klaar!',
-      description: 'Je kent nu de basis van het dashboard. Klik op het vraagteken-icoon rechtsboven om deze tutorial opnieuw te bekijken.',
+      description: 'Je kent nu de basis van het dashboard. Klik op het kompas-icoon linksboven om deze tutorial opnieuw te bekijken.',
       target: null,
       position: 'center'
     }
@@ -267,7 +288,7 @@
 
   $: tooltipStyle = browser && isOpen ? getTooltipStyle(currentStepData, highlightRect) : ''
 
-  // Save original state when tutorial opens (without changing anything yet)
+  // Save original state when tutorial opens and reset to clean state
   function saveOriginalState() {
     if (!browser) return
 
@@ -283,6 +304,13 @@
         originalBoomkroonAHN = { ...v }
       }
     })()
+
+    // Reset to clean state for tutorial
+    municipalitySelection.set(null)
+    neighbourhoodSelection.set(null)
+    indicatorsSelection.set([])
+    URLParams.set(new URLSearchParams())
+    window.history.replaceState(null, '', '/')
   }
 
   // Step 1: Select Utrecht municipality

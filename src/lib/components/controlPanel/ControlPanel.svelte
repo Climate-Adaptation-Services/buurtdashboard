@@ -1,4 +1,5 @@
 <script>
+  import { createEventDispatcher } from "svelte"
   import {
     allMunicipalitiesJSONData,
     allNeighbourhoodsJSONData,
@@ -22,6 +23,8 @@
   import GemeenteSelect from "./GemeenteSelect.svelte"
   import BuurtSelect from "./BuurtSelect.svelte"
   import { t } from "$lib/i18n/translate.js"
+
+  const dispatch = createEventDispatcher()
 
   export let allIndicators
   export let isLoading = false
@@ -81,9 +84,15 @@
         <img src="./about.png" width="30px" />
         <p class="download-and-about-text">Intro dashboard</p>
       </div>
+      <!-- Original carousel code (kept for reference):
       <div class="about" on:click={() => laatMeerInfoPanelZien("graphs")}>
         <img src="./uitleg-grafieken.png" width="40px" />
         <p class="download-and-about-text">{t("Uitleg_grafieken")}</p>
+      </div>
+      -->
+      <div class="about" on:click={() => dispatch('openTutorial')}>
+        <img src="./compass.png" width="30px" class="white-icon" alt="Tutorial" />
+        <p class="download-and-about-text">Tutorial</p>
       </div>
       <div class="download">
         <a
@@ -154,6 +163,10 @@
     width: 100%;
     height: 65%;
     z-index: -1000;
+  }
+
+  .white-icon {
+    filter: brightness(0) invert(1);
   }
 
   .loading-indicator {

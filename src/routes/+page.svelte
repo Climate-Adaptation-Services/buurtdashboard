@@ -197,7 +197,7 @@
 {:else}
   <div class="container" style="justify-content:{screenWidth < 800 ? 'center' : 'left'}">
     <div class="sidebar" style="position:{screenWidth > 800 ? 'fixed' : 'relative'}">
-      <div class="control-panel"><ControlPanel {indicatorsSelection} {allIndicators} isLoading={isLoadingGeoJSON} /></div>
+      <div class="control-panel"><ControlPanel {indicatorsSelection} {allIndicators} isLoading={isLoadingGeoJSON} on:openTutorial={() => showTutorial = true} /></div>
       <div class="map" class:dordrecht={$configStore.categoryPath === '-dordrecht'} bind:clientWidth={mapWidth} bind:clientHeight={mapHeight}>
         <Map JSONdata={geoJSONData} CSVdata={data.buurtCSVdata} {mapWidth} {mapHeight} mapType={"main map"} isLoading={isLoadingGeoJSON} />
       </div>
@@ -221,16 +221,6 @@
     <Tooltip />
 
     <Modal show={$modal} style="position:absolute; left:0"></Modal>
-
-    <!-- Tutorial help button -->
-    <button
-      class="tutorial-help-button"
-      on:click={() => showTutorial = true}
-      aria-label="Open tutorial"
-      title="Tutorial openen"
-    >
-      ?
-    </button>
   </div>
 
   <!-- Tutorial overlay -->
@@ -333,37 +323,5 @@
     to {
       transform: rotate(360deg);
     }
-  }
-
-  /* Tutorial help button */
-  .tutorial-help-button {
-    position: fixed;
-    top: 16px;
-    right: 16px;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: #35575a;
-    color: white;
-    border: none;
-    font-size: 20px;
-    font-weight: bold;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-    transition: all 0.2s;
-    z-index: 1000;
-  }
-
-  .tutorial-help-button:hover {
-    background: #2a4548;
-    transform: scale(1.1);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  }
-
-  .tutorial-help-button:active {
-    transform: scale(0.95);
   }
 </style>
