@@ -149,9 +149,12 @@
         selectedAHN = latestOption.AHN
         selectedDifference = "Difference"
       } else {
-        // Sync selectedAHN with store if it doesn't match
-        if (selectedAHN !== currentSelection.baseYear) {
+        // Only sync on initial load, not on every reactive update
+        // This prevents Chrome from resetting the dropdown during user interaction
+        if (!hasLoadedFromStore) {
           selectedAHN = currentSelection.baseYear
+          selectedDifference = currentSelection.isDifference ? currentSelection.compareYear : "Difference"
+          hasLoadedFromStore = true
         }
         if (currentSelection.isDifference && !currentCompareYearAvailable) {
           // Compare year no longer available, disable difference mode
