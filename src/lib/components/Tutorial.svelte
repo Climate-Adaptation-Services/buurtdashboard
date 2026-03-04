@@ -1,10 +1,18 @@
 <script>
-  import { onMount, createEventDispatcher, tick } from 'svelte'
-  import { browser } from '$app/environment'
-  import { goto } from '$app/navigation'
-  import { page } from '$app/stores'
-  import { getIndicatorStore, municipalitySelection, neighbourhoodSelection, indicatorsSelection, URLParams, neighbourhoodsInMunicipalityJSONData, neighbourhoodCodeAbbreviation } from '$lib/stores'
-  import { get } from 'svelte/store'
+  import { onMount, createEventDispatcher, tick } from "svelte"
+  import { browser } from "$app/environment"
+  import { goto } from "$app/navigation"
+  import { page } from "$app/stores"
+  import {
+    getIndicatorStore,
+    municipalitySelection,
+    neighbourhoodSelection,
+    indicatorsSelection,
+    URLParams,
+    neighbourhoodsInMunicipalityJSONData,
+    neighbourhoodCodeAbbreviation,
+  } from "$lib/stores"
+  import { get } from "svelte/store"
 
   const dispatch = createEventDispatcher()
 
@@ -24,125 +32,132 @@
   // Tutorial steps - visual guide only (no actions)
   const tutorialSteps = [
     {
-      id: 'welcome',
-      title: 'Welkom bij het Buurtdashboard',
-      description: 'Deze tutorial legt uit hoe je het dashboard kunt gebruiken. Je kunt de tutorial altijd opnieuw starten via het kompas-icoon linksboven.',
+      id: "welcome",
+      title: "Welkom bij het Buurtdashboard",
+      description:
+        "Deze tutorial legt uit hoe je het dashboard kunt gebruiken. Je kunt de tutorial altijd opnieuw starten via het kompas-icoon linksboven.",
       target: null,
-      position: 'center'
+      position: "center",
     },
     {
-      id: 'map',
-      title: 'Interactieve kaart',
-      description: 'Klik op een gemeente om in te zoomen. Daarna kun je een buurt selecteren om gedetailleerde informatie te zien.',
-      target: '.map',
-      position: 'right'
+      id: "map",
+      title: "Interactieve kaart",
+      description: "Klik op een gemeente om in te zoomen. Daarna kun je een buurt selecteren om gedetailleerde informatie te zien.",
+      target: ".map",
+      position: "right",
     },
     {
-      id: 'demo-select',
-      title: 'Voorbeeld: Utrecht',
-      description: 'We selecteren nu Utrecht als voorbeeld om de indicatoren te bekijken.',
-      target: '.map',
-      position: 'right'
+      id: "demo-select",
+      title: "Voorbeeld: Utrecht",
+      description: "We selecteren nu Utrecht als voorbeeld om de indicatoren te bekijken.",
+      target: ".map",
+      position: "right",
     },
     {
-      id: 'control-panel',
-      title: 'Zoeken en filteren',
-      description: 'Zoek naar een gemeente of buurt, of filter indicatoren op categorie.',
-      target: '.control-panel',
-      position: 'right'
+      id: "control-panel",
+      title: "Zoeken en filteren",
+      description: "Zoek naar een gemeente of buurt, of filter indicatoren op categorie.",
+      target: ".control-panel",
+      position: "right",
     },
     {
-      id: 'demo-buurt',
-      title: 'Voorbeeld: buurt selecteren',
-      description: 'We selecteren nu een buurt om de buurtspecifieke data te bekijken.',
-      target: '.control-panel .svelte-select',
+      id: "demo-buurt",
+      title: "Voorbeeld: buurt selecteren",
+      description: "We selecteren nu een buurt om de buurtspecifieke data te bekijken.",
+      target: ".control-panel .svelte-select",
       targetIndex: 1, // Second svelte-select (buurt, not gemeente)
-      position: 'right'
+      position: "right",
     },
     {
-      id: 'demo-indicators',
-      title: 'Voorbeeld: indicatoren selecteren',
-      description: 'We selecteren nu Boomkroonoppervlakte en Gevoelstemperatuur als voorbeeld indicatoren.',
-      target: '.control-panel .input-container',
-      position: 'right'
+      id: "demo-indicators",
+      title: "Voorbeeld: indicatoren selecteren",
+      description: "We selecteren nu Boomkroonoppervlakte en Gevoelstemperatuur als voorbeeld indicatoren.",
+      target: ".control-panel .input-container",
+      position: "right",
     },
     {
-      id: 'numerical-indicator',
-      title: 'Numerieke indicator: Boomkroonoppervlakte',
-      description: 'Dit is een numerieke indicator. De waarde is een getal dat je kunt vergelijken met andere buurten, gemeentes, heel Nederland en andere buurten met hetzelfde wijktype.',
+      id: "numerical-indicator",
+      title: "Numerieke indicator: Boomkroonoppervlakte",
+      description:
+        "Dit is een numerieke indicator. In de grafiek zie je hoe deze buurt scoort ten opzichte van andere buurten in de gemeente, heel Nederland en vergelijkbare wijktypes.",
       target: '[data-indicator-title="Boomkroonoppervlakte"]',
-      position: 'left'
+      position: "left",
     },
     {
-      id: 'info-icon',
-      title: 'Info icoon',
+      id: "info-icon",
+      title: "Info icoon",
       description: 'Klik op het "i" icoon rechtsboven in een indicator voor een korte beschrijving van de indicator.',
       target: '[data-indicator-title="Boomkroonoppervlakte"] .question-mark',
-      position: 'left'
+      position: "left",
     },
     {
-      id: 'more-info-link',
-      title: 'Meer informatie',
+      id: "more-info-link",
+      title: "Meer informatie",
       description: 'Klik op "Meer info" rechtsonder om naar de bronpagina van de indicator te gaan voor uitgebreide informatie.',
       target: '[data-indicator-title="Boomkroonoppervlakte"] .info-link',
-      position: 'left'
+      position: "left",
     },
     {
-      id: 'indicator-stats',
-      title: 'Statistieken vergelijken',
-      description: 'Vergelijk waarden voor Nederland, gemeente, buurt en wijktype. De gekleurde balk toont waar de waarde valt binnen de schaal.',
+      id: "indicator-stats",
+      title: "Statistieken vergelijken",
+      description: "Vergelijk waarden voor Nederland, gemeente, buurt en wijktype. De gekleurde balk toont waar de waarde valt binnen de schaal.",
       target: '[data-indicator-title="Boomkroonoppervlakte"] .indicator-overview',
-      position: 'left'
+      position: "left",
     },
     {
-      id: 'median-explanation',
-      title: 'Mediaan',
-      description: 'De getoonde waarden zijn medianen: de middelste waarde van alle buurten. Elke buurt telt even zwaar mee, ongeacht grootte of inwoneraantal.',
+      id: "median-explanation",
+      title: "Mediaan",
+      description:
+        "De getoonde waarden zijn medianen: de middelste waarde van alle buurten. Elke buurt telt even zwaar mee, ongeacht grootte of inwoneraantal.",
       target: '[data-indicator-title="Boomkroonoppervlakte"] .indicator-overview',
-      position: 'left'
+      position: "left",
     },
     {
-      id: 'beeswarm-plot',
-      title: 'Verdeling van buurten',
-      description: 'Elke stip is een buurt. De stippen zijn gegroepeerd langs de schaal zodat je snel kunt zien hoe de geselecteerde buurt zich verhoudt tot andere buurten.',
+      id: "beeswarm-plot",
+      title: "Verdeling van buurten",
+      description:
+        "Elke stip is een buurt. De stippen zijn gegroepeerd langs de schaal zodat je snel kunt zien hoe de geselecteerde buurt zich verhoudt tot andere buurten.",
       target: '[data-indicator-title="Boomkroonoppervlakte"] .indicator-graph',
-      position: 'left'
+      position: "left",
     },
     {
-      id: 'categorical-indicator',
-      title: 'Samengestelde indicator: Gevoelstemperatuur',
-      description: 'Deze indicator toont meerdere waarden tegelijk. De balkjes geven de verdeling van de gevoelstemperatuur in de buurt: hoeveel procent van het oppervlak valt in elke temperatuurklasse.',
+      id: "categorical-indicator",
+      title: "Samengestelde indicator: Gevoelstemperatuur",
+      description:
+        "De balkjes geven de verdeling van de gevoelstemperatuur in de buurt: hoeveel procent van het oppervlak valt in elke temperatuurklasse.",
       target: '[data-indicator-title="Gevoelstemperatuur"]',
-      position: 'left'
+      position: "left",
     },
     {
-      id: 'bar-chart',
-      title: 'Staafdiagram',
-      description: 'Het staafdiagram toont de verdeling over de klassen. Hoe langer de balk, hoe groter het aandeel. De kleuren corresponderen met de legenda.',
+      id: "bar-chart",
+      title: "Staafdiagram",
+      description:
+        "Het staafdiagram toont de verdeling over de klassen. Hoe langer de balk, hoe groter het aandeel. De kleuren corresponderen met de legenda.",
       target: '[data-indicator-title="Gevoelstemperatuur"] .indicator-graph',
-      position: 'left'
+      position: "left",
     },
     {
-      id: 'year-switch',
-      title: 'Jaar selectie',
-      description: 'Sommige indicatoren hebben data voor meerdere jaren. Gebruik de dropdown om een ander jaar te selecteren of om jaren met elkaar te vergelijken.',
+      id: "year-switch",
+      title: "Jaar selectie",
+      description:
+        "Sommige indicatoren hebben data voor meerdere jaren. Gebruik de dropdown om een ander jaar te selecteren of om jaren met elkaar te vergelijken.",
       target: '[data-indicator-title="Boomkroonoppervlakte"] .year-switch-dropdowns',
-      position: 'left'
+      position: "left",
     },
     {
-      id: 'indicator-map',
-      title: 'Indicatorkaart',
-      description: 'Een kaartje dat de geselecteerde indicator visualiseert voor alle buurten in de gemeente.',
+      id: "indicator-map",
+      title: "Indicatorkaart",
+      description: "Een kaartje dat de geselecteerde indicator visualiseert voor alle buurten in de gemeente.",
       target: '[data-indicator-title="Boomkroonoppervlakte"] .indicator-map',
-      position: 'left'
+      position: "left",
     },
     {
-      id: 'done',
-      title: 'Klaar!',
-      description: 'Je kent nu de basis van het dashboard. Klik op het kompas-icoon linksboven om deze tutorial opnieuw te bekijken.',
+      id: "done",
+      title: "Klaar!",
+      description: "Je kent nu de basis van het dashboard. Klik op het kompas-icoon linksboven om deze tutorial opnieuw te bekijken.",
       target: null,
-      position: 'center'
-    }
+      position: "center",
+    },
   ]
 
   $: currentStepData = tutorialSteps[currentStep]
@@ -177,10 +192,10 @@
     }
 
     // Scroll element into view if needed
-    targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    targetEl.scrollIntoView({ behavior: "smooth", block: "center" })
 
     // Wait for scroll to finish
-    await new Promise(resolve => setTimeout(resolve, 300))
+    await new Promise((resolve) => setTimeout(resolve, 300))
 
     const rect = targetEl.getBoundingClientRect()
     const padding = 8
@@ -189,7 +204,7 @@
       top: rect.top - padding,
       left: rect.left - padding,
       width: rect.width + padding * 2,
-      height: rect.height + padding * 2
+      height: rect.height + padding * 2,
     }
   }
 
@@ -217,29 +232,29 @@
     // Restore original context
     await restoreTutorialContext()
 
-    dispatch('close')
+    dispatch("close")
 
     if (browser) {
-      localStorage.setItem('buurtdashboard-tutorial-seen', 'true')
+      localStorage.setItem("buurtdashboard-tutorial-seen", "true")
     }
   }
 
   function handleKeydown(event) {
     if (!isOpen) return
 
-    if (event.key === 'Escape') {
+    if (event.key === "Escape") {
       closeTutorial()
-    } else if (event.key === 'ArrowRight' || event.key === 'Enter') {
+    } else if (event.key === "ArrowRight" || event.key === "Enter") {
       nextStep()
-    } else if (event.key === 'ArrowLeft') {
+    } else if (event.key === "ArrowLeft") {
       prevStep()
     }
   }
 
   // Get position for the tooltip based on the target element
   function getTooltipStyle(stepData, rect) {
-    if (!browser || stepData.position === 'center' || !rect) {
-      return 'top: 50%; left: 50%; transform: translate(-50%, -50%);'
+    if (!browser || stepData.position === "center" || !rect) {
+      return "top: 50%; left: 50%; transform: translate(-50%, -50%);"
     }
 
     const tooltipWidth = 360
@@ -258,10 +273,10 @@
     const maxTop = viewportHeight - minMargin - tooltipHeight / 2
     verticalCenter = Math.max(minTop, Math.min(maxTop, verticalCenter))
 
-    let style = ''
+    let style = ""
 
     switch (stepData.position) {
-      case 'right':
+      case "right":
         // Position to the right of the element
         let leftPos = rect.left + rect.width + padding
         // Check if tooltip would overflow right edge
@@ -272,7 +287,7 @@
           style = `top: ${verticalCenter}px; left: ${leftPos}px; transform: translateY(-50%);`
         }
         break
-      case 'left':
+      case "left":
         // Position to the left of the element
         let rightPos = viewportWidth - rect.left + padding
         // Check if tooltip would overflow left edge
@@ -283,20 +298,20 @@
           style = `top: ${verticalCenter}px; right: ${rightPos}px; transform: translateY(-50%);`
         }
         break
-      case 'top':
+      case "top":
         style = `bottom: ${viewportHeight - rect.top + padding}px; left: ${rect.left + rect.width / 2}px; transform: translateX(-50%);`
         break
-      case 'bottom':
+      case "bottom":
         style = `top: ${rect.top + rect.height + padding}px; left: ${rect.left + rect.width / 2}px; transform: translateX(-50%);`
         break
       default:
-        style = 'top: 50%; left: 50%; transform: translate(-50%, -50%);'
+        style = "top: 50%; left: 50%; transform: translate(-50%, -50%);"
     }
 
     return style
   }
 
-  $: tooltipStyle = browser && isOpen ? getTooltipStyle(currentStepData, highlightRect) : ''
+  $: tooltipStyle = browser && isOpen ? getTooltipStyle(currentStepData, highlightRect) : ""
 
   // Save original state when tutorial opens and reset to clean state
   function saveOriginalState() {
@@ -308,8 +323,8 @@
     originalIndicators = [...get(indicatorsSelection)]
 
     // Save original Boomkroonoppervlakte AHN selection
-    const boomkroonStore = getIndicatorStore('Boomkroonoppervlakte')
-    boomkroonStore.subscribe(v => {
+    const boomkroonStore = getIndicatorStore("Boomkroonoppervlakte")
+    boomkroonStore.subscribe((v) => {
       if (originalBoomkroonAHN === null) {
         originalBoomkroonAHN = { ...v }
       }
@@ -320,7 +335,7 @@
     neighbourhoodSelection.set(null)
     indicatorsSelection.set([])
     URLParams.set(new URLSearchParams())
-    window.history.replaceState(null, '', '/')
+    window.history.replaceState(null, "", "/")
   }
 
   // Step 1: Select Utrecht municipality
@@ -329,19 +344,19 @@
     municipalitySetupDone = true
 
     // Select Utrecht (GM0344)
-    municipalitySelection.set('GM0344')
+    municipalitySelection.set("GM0344")
     neighbourhoodSelection.set(null)
 
     // Update URL to match
-    URLParams.update(params => {
-      params.set('gemeente', 'GM0344')
-      params.delete('buurt')
+    URLParams.update((params) => {
+      params.set("gemeente", "GM0344")
+      params.delete("buurt")
       return params
     })
-    window.history.replaceState(null, '', '?' + get(URLParams).toString())
+    window.history.replaceState(null, "", "?" + get(URLParams).toString())
 
     // Wait for map to zoom and data to load
-    await new Promise(resolve => setTimeout(resolve, 1500))
+    await new Promise((resolve) => setTimeout(resolve, 1500))
   }
 
   // Step 2: Select indicators (Boomkroonoppervlakte and Gevoelstemperatuur)
@@ -349,14 +364,14 @@
     if (!browser) return
 
     // Select the two demo indicators
-    indicatorsSelection.set(['Boomkroonoppervlakte', 'Gevoelstemperatuur'])
+    indicatorsSelection.set(["Boomkroonoppervlakte", "Gevoelstemperatuur"])
 
     // Set Boomkroonoppervlakte to AHN4
-    const store = getIndicatorStore('Boomkroonoppervlakte')
-    store.update(v => ({ ...v, baseYear: 'AHN4' }))
+    const store = getIndicatorStore("Boomkroonoppervlakte")
+    store.update((v) => ({ ...v, baseYear: "AHN4" }))
 
     // Wait for indicators to render
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    await new Promise((resolve) => setTimeout(resolve, 1000))
   }
 
   // Step 3: Select a neighbourhood in Utrecht (first available one)
@@ -369,7 +384,7 @@
     const codeAbbrev = get(neighbourhoodCodeAbbreviation)
 
     if (!neighbourhoods?.features?.length) {
-      console.warn('No neighbourhoods available for selection')
+      console.warn("No neighbourhoods available for selection")
       return
     }
 
@@ -378,7 +393,7 @@
     const buurtCode = firstNeighbourhood?.properties?.[codeAbbrev]
 
     if (!buurtCode) {
-      console.warn('Could not get neighbourhood code')
+      console.warn("Could not get neighbourhood code")
       return
     }
 
@@ -386,14 +401,14 @@
     neighbourhoodSelection.set(buurtCode)
 
     // Update URL to match
-    URLParams.update(params => {
-      params.set('buurt', buurtCode)
+    URLParams.update((params) => {
+      params.set("buurt", buurtCode)
       return params
     })
-    window.history.replaceState(null, '', '?' + get(URLParams).toString())
+    window.history.replaceState(null, "", "?" + get(URLParams).toString())
 
     // Wait for data to load
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    await new Promise((resolve) => setTimeout(resolve, 1000))
   }
 
   // Restore original state when tutorial closes
@@ -402,7 +417,7 @@
 
     // Restore original Boomkroonoppervlakte AHN selection
     if (originalBoomkroonAHN) {
-      const store = getIndicatorStore('Boomkroonoppervlakte')
+      const store = getIndicatorStore("Boomkroonoppervlakte")
       store.set(originalBoomkroonAHN)
       originalBoomkroonAHN = null
     }
@@ -416,35 +431,35 @@
     // Restore original municipality and neighbourhood selection
     if (originalMunicipality) {
       municipalitySelection.set(originalMunicipality)
-      URLParams.update(params => {
-        params.set('gemeente', originalMunicipality)
+      URLParams.update((params) => {
+        params.set("gemeente", originalMunicipality)
         return params
       })
     } else {
       municipalitySelection.set(null)
-      URLParams.update(params => {
-        params.delete('gemeente')
+      URLParams.update((params) => {
+        params.delete("gemeente")
         return params
       })
     }
 
     if (originalNeighbourhood) {
       neighbourhoodSelection.set(originalNeighbourhood)
-      URLParams.update(params => {
-        params.set('buurt', originalNeighbourhood)
+      URLParams.update((params) => {
+        params.set("buurt", originalNeighbourhood)
         return params
       })
     } else {
       neighbourhoodSelection.set(null)
-      URLParams.update(params => {
-        params.delete('buurt')
+      URLParams.update((params) => {
+        params.delete("buurt")
         return params
       })
     }
 
     // Update browser URL
     const urlString = get(URLParams).toString()
-    window.history.replaceState(null, '', urlString ? '?' + urlString : '/')
+    window.history.replaceState(null, "", urlString ? "?" + urlString : "/")
 
     originalMunicipality = null
     originalNeighbourhood = null
@@ -454,12 +469,12 @@
   $: if (browser && isOpen) {
     saveOriginalState()
     // Prevent body scroll while tutorial is open
-    document.body.style.overflow = 'hidden'
+    document.body.style.overflow = "hidden"
   }
 
   // Restore body overflow when tutorial closes
   $: if (browser && !isOpen) {
-    document.body.style.overflow = ''
+    document.body.style.overflow = ""
   }
 
   // Watch for step changes and trigger appropriate actions
@@ -514,14 +529,7 @@
           <!-- White = visible (dark overlay), Black = hidden (spotlight) -->
           <rect x="0" y="0" width="100%" height="100%" fill="white" />
           {#if highlightRect}
-            <rect
-              x={highlightRect.left}
-              y={highlightRect.top}
-              width={highlightRect.width}
-              height={highlightRect.height}
-              rx="8"
-              fill="black"
-            />
+            <rect x={highlightRect.left} y={highlightRect.top} width={highlightRect.width} height={highlightRect.height} rx="8" fill="black" />
           {/if}
         </mask>
       </defs>
@@ -556,17 +564,8 @@
     <!-- Tooltip -->
     <!-- svelte-ignore a11y-click-events-have-key-events -->
     <!-- svelte-ignore a11y-no-static-element-interactions -->
-    <div
-      class="tutorial-tooltip"
-      style={tooltipStyle}
-      on:click|stopPropagation
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="tutorial-title"
-    >
-      <button class="close-button" on:click={closeTutorial} aria-label="Sluiten">
-        ×
-      </button>
+    <div class="tutorial-tooltip" style={tooltipStyle} on:click|stopPropagation role="dialog" aria-modal="true" aria-labelledby="tutorial-title">
+      <button class="close-button" on:click={closeTutorial} aria-label="Sluiten"> × </button>
 
       <div class="step-indicator">
         {currentStep + 1} / {totalSteps}
@@ -577,26 +576,19 @@
 
       <div class="tutorial-navigation">
         {#if !isFirstStep}
-          <button class="nav-button prev" on:click={prevStep}>
-            ← Vorige
-          </button>
+          <button class="nav-button prev" on:click={prevStep}> ← Vorige </button>
         {:else}
           <div></div>
         {/if}
 
         <button class="nav-button next" on:click={nextStep}>
-          {isLastStep ? 'Sluiten' : 'Volgende →'}
+          {isLastStep ? "Sluiten" : "Volgende →"}
         </button>
       </div>
 
       <div class="progress-dots">
         {#each tutorialSteps as _, i}
-          <button
-            class="dot"
-            class:active={i === currentStep}
-            on:click={() => currentStep = i}
-            aria-label="Ga naar stap {i + 1}"
-          ></button>
+          <button class="dot" class:active={i === currentStep} on:click={() => (currentStep = i)} aria-label="Ga naar stap {i + 1}"></button>
         {/each}
       </div>
     </div>
@@ -628,17 +620,24 @@
     position: fixed;
     border: 3px solid #35575a;
     border-radius: 8px;
-    box-shadow: 0 0 0 4px rgba(53, 87, 90, 0.3), 0 0 20px rgba(53, 87, 90, 0.5);
+    box-shadow:
+      0 0 0 4px rgba(53, 87, 90, 0.3),
+      0 0 20px rgba(53, 87, 90, 0.5);
     pointer-events: none;
     animation: pulse-border 2s ease-in-out infinite;
   }
 
   @keyframes pulse-border {
-    0%, 100% {
-      box-shadow: 0 0 0 4px rgba(53, 87, 90, 0.3), 0 0 20px rgba(53, 87, 90, 0.5);
+    0%,
+    100% {
+      box-shadow:
+        0 0 0 4px rgba(53, 87, 90, 0.3),
+        0 0 20px rgba(53, 87, 90, 0.5);
     }
     50% {
-      box-shadow: 0 0 0 6px rgba(53, 87, 90, 0.4), 0 0 30px rgba(53, 87, 90, 0.6);
+      box-shadow:
+        0 0 0 6px rgba(53, 87, 90, 0.4),
+        0 0 30px rgba(53, 87, 90, 0.6);
     }
   }
 
@@ -652,7 +651,12 @@
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
     z-index: 10001;
     pointer-events: auto;
-    transition: top 0.4s ease-out, left 0.4s ease-out, right 0.4s ease-out, bottom 0.4s ease-out, transform 0.4s ease-out;
+    transition:
+      top 0.4s ease-out,
+      left 0.4s ease-out,
+      right 0.4s ease-out,
+      bottom 0.4s ease-out,
+      transform 0.4s ease-out;
   }
 
   .close-button {
