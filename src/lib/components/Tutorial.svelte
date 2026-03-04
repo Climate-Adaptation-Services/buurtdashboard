@@ -652,6 +652,7 @@
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
     z-index: 10001;
     pointer-events: auto;
+    transition: top 0.4s ease-out, left 0.4s ease-out, right 0.4s ease-out, bottom 0.4s ease-out, transform 0.4s ease-out;
   }
 
   .close-button {
