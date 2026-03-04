@@ -35,8 +35,8 @@
       id: "welcome",
       title: "Welkom bij het Buurtdashboard",
       description:
-        "Deze tutorial legt uit hoe je het dashboard kunt gebruiken. Je kunt de tutorial altijd opnieuw starten via het kompas-icoon linksboven.",
-      target: null,
+        "Deze tutorial legt uit hoe je het dashboard kunt gebruiken en wat je ziet. Je kunt de tutorial altijd opnieuw starten via het kompas-icoon linksboven.",
+      target: ".tutorial-icon",
       position: "center",
     },
     {
@@ -502,18 +502,12 @@
   }
 
   onMount(() => {
-    // TODO: Remove this - temporarily always show tutorial for testing
-    if (browser) {
+    // Show tutorial for first-time visitors (localStorage check)
+    if (browser && !localStorage.getItem("buurtdashboard-tutorial-seen")) {
       setTimeout(() => {
         isOpen = true
       }, 2000)
     }
-    // Original code:
-    // if (browser && !localStorage.getItem('buurtdashboard-tutorial-seen')) {
-    //   setTimeout(() => {
-    //     isOpen = true
-    //   }, 2000)
-    // }
   })
 </script>
 

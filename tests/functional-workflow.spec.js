@@ -9,6 +9,10 @@ import { test, expect } from '@playwright/test';
 
 test.describe('User Workflow Tests', () => {
   test.beforeEach(async ({ page }) => {
+    // Disable tutorial by setting localStorage before page load
+    await page.addInitScript(() => {
+      localStorage.setItem('buurtdashboard-tutorial-seen', 'true');
+    });
     await page.goto('/?config=dordrecht');
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(5000); // Allow data loading

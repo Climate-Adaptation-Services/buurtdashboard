@@ -91,7 +91,7 @@
       </div>
       -->
       <div class="about" on:click={() => dispatch('openTutorial')}>
-        <img src="./compass.png" width="30px" class="white-icon" alt="Tutorial" />
+        <img src="./compass.png" width="30px" class="white-icon tutorial-icon" alt="Tutorial" />
         <p class="download-and-about-text">Tutorial</p>
       </div>
       <div class="download">
