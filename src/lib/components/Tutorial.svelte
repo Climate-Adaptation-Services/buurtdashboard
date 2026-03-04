@@ -88,13 +88,6 @@
       position: 'left'
     },
     {
-      id: 'beeswarm-plot',
-      title: 'Verdeling van buurten',
-      description: 'Elke stip is een buurt. De stippen zijn gegroepeerd langs de schaal zodat je snel kunt zien hoe de geselecteerde buurt zich verhoudt tot andere buurten.',
-      target: '[data-indicator-title="Boomkroonoppervlakte"] .indicator-graph',
-      position: 'left'
-    },
-    {
       id: 'indicator-stats',
       title: 'Statistieken vergelijken',
       description: 'Vergelijk waarden voor Nederland, gemeente, buurt en wijktype. De gekleurde balk toont waar de waarde valt binnen de schaal.',
@@ -106,6 +99,13 @@
       title: 'Mediaan',
       description: 'De getoonde waarden zijn medianen: de middelste waarde van alle buurten. Elke buurt telt even zwaar mee, ongeacht grootte of inwoneraantal.',
       target: '[data-indicator-title="Boomkroonoppervlakte"] .indicator-overview',
+      position: 'left'
+    },
+    {
+      id: 'beeswarm-plot',
+      title: 'Verdeling van buurten',
+      description: 'Elke stip is een buurt. De stippen zijn gegroepeerd langs de schaal zodat je snel kunt zien hoe de geselecteerde buurt zich verhoudt tot andere buurten.',
+      target: '[data-indicator-title="Boomkroonoppervlakte"] .indicator-graph',
       position: 'left'
     },
     {

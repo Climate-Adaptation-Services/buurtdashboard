@@ -4,9 +4,7 @@ import {
   BUURT_GEOJSON_URL,
   MUNICIPALITY_JSON_URL,
   DEFAULT_INDICATORS_CONFIG_URL,
-  DEFAULT_CSV_DATA_URL,
-  DORDRECHT_INDICATORS_CONFIG_URL,
-  DORDRECHT_CSV_DATA_URL
+  DORDRECHT_INDICATORS_CONFIG_URL
 } from '$lib/datasets';
 
 export const handle: Handle = async ({ event, resolve }) => {
@@ -20,7 +18,7 @@ export const handle: Handle = async ({ event, resolve }) => {
     // Get config parameter to determine which URLs to preload
     // Check if we're in a prerendering environment
     const configParam = import.meta.env.SSR && !import.meta.env.DEV ? 'default' : event.url.searchParams.get('config') || 'default';
-    
+
     // Add preload for GeoJSON data (gzipped)
     response.headers.append(
       'Link',
@@ -28,7 +26,7 @@ export const handle: Handle = async ({ event, resolve }) => {
         'rel=preload; as=fetch; type="application/gzip"; ' +
         'crossorigin; fetchpriority=high'
     );
-    
+
     // Add preload for Municipality GeoJSON data
     response.headers.append(
       'Link',
@@ -36,8 +34,9 @@ export const handle: Handle = async ({ event, resolve }) => {
         'rel=preload; as=fetch; type="application/json"; ' +
         'crossorigin; fetchpriority=high'
     );
-    
-    // Add preload for indicators config and CSV data based on config
+
+    // Add preload for indicators config based on config
+    // Note: CSV data URLs are now dynamic (from Config Portal), so cannot be preloaded here
     if (configParam === 'dordrecht') {
       // Preload Dordrecht indicators config
       response.headers.append(
@@ -46,28 +45,12 @@ export const handle: Handle = async ({ event, resolve }) => {
           'rel=preload; as=fetch; type="text/csv"; ' +
           'crossorigin; fetchpriority=high'
       );
-
-      // Preload Dordrecht CSV data
-      response.headers.append(
-        'Link',
-        `<${DORDRECHT_CSV_DATA_URL}>; ` +
-          'rel=preload; as=fetch; type="application/zip"; ' +
-          'crossorigin; fetchpriority=high'
-      );
     } else {
       // Preload default indicators config (English translations applied client-side)
       response.headers.append(
         'Link',
         `<${DEFAULT_INDICATORS_CONFIG_URL}>; ` +
           'rel=preload; as=fetch; type="text/csv"; ' +
-          'crossorigin; fetchpriority=high'
-      );
-
-      // Preload default CSV data
-      response.headers.append(
-        'Link',
-        `<${DEFAULT_CSV_DATA_URL}>; ` +
-          'rel=preload; as=fetch; type="application/gzip"; ' +
           'crossorigin; fetchpriority=high'
       );
     }

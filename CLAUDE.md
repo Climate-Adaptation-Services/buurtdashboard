@@ -56,13 +56,13 @@ Tests located in `/tests/`
    - CSV Data URL in `dashboard_configs` table
    - Data Download URL
 3. Update indicator configs if column names changed (in `indicators` table)
-4. Update `DATASET_VERSION` and `DEFAULT_CSV_DATA_URL` in `src/lib/datasets.js`
+4. Update `DATASET_VERSION` in `src/lib/datasets.js`
 5. Run `VITE_CONFIG_MODE=dev npm run precalculate-nederland`
 6. Test with `VITE_CONFIG_MODE=dev npm run dev`
 7. Publish to production in Config Portal
 8. Commit and deploy
 
-Note: The precalculate script uses `DEFAULT_CSV_DATA_URL` from datasets.js but fetches indicator config from Config Portal.
+Note: The precalculate script fetches both CSV URL and indicator config from Config Portal (single source of truth).
 
 ### Internationalization
 - Dutch config is single source of truth

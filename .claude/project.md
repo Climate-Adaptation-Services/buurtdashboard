@@ -155,6 +155,120 @@ A SvelteKit-based neighborhood dashboard application for visualizing Dutch neigh
 - `src/lib/components/Stats.svelte` - BEB reactivity
 - `src/lib/components/BarPlot.svelte` - BEB reactivity
 
+## Recent Improvements (2026-03-04)
+
+### Config Portal as Single Source of Truth for CSV URLs
+
+**Problem**: CSV data URLs were hardcoded in `datasets.js`, requiring manual synchronization between codebase and Config Portal.
+
+**Solution**: Config Portal is now the single source of truth for all data URLs:
+
+1. **Removed hardcoded CSV URLs** from `src/lib/datasets.js`:
+   - Removed `DEFAULT_CSV_DATA_URL`, `DORDRECHT_CSV_DATA_URL`, etc.
+   - Only `DATASET_VERSION`, `BUURT_GEOJSON_URL`, and Config Portal URLs remain
+
+2. **Updated `src/lib/config.js`**:
+   - `neighbourhoodCSVdataLocation: null` - fetched from Config Portal
+   - `dataDownloadLocation: null` - fetched from Config Portal
+
+3. **Updated `src/routes/+page.js`**:
+   - Throws error if Config Portal unavailable (no fallback)
+   - CSV URL fetched dynamically from portal config
+
+4. **Updated `scripts/precalculate-nederland.js`**:
+   - Fetches CSV URL from Config Portal instead of using hardcoded URL
+   - Uses `CONFIG_MODE` environment variable for dev/prod
+
+**Files Modified**:
+- `src/lib/datasets.js` - Removed legacy CSV URL exports
+- `src/lib/config.js` - Set CSV/download URLs to null
+- `src/routes/+page.js` - Dynamic URL fetching with error handling
+- `scripts/precalculate-nederland.js` - Config Portal integration
+
+### No-Data Marker Filtering in Precalculation
+
+**Problem**: Nederland aggregates showed strange negative values (e.g., -2458%) because CSV uses special marker values for missing data.
+
+**Solution**: Added filtering for no-data markers:
+
+```javascript
+const NO_DATA_VALUES = [-9999, -9995, -9991];
+
+function isValidValue(value) {
+  if (value === null || value === undefined || value === '' || isNaN(value)) {
+    return false;
+  }
+  const numValue = +value;
+  return !NO_DATA_VALUES.includes(numValue);
+}
+```
+
+### _REST_ Class Calculation for Aggregated Indicators
+
+**Problem**: "10% en 30% regel" indicator showed "Voldoet niet" as null because `_REST_` is a special marker, not a CSV column.
+
+**Solution**: Calculate `_REST_` as `100 - sum of other classes`:
+
+```javascript
+if (classColumnName === '_REST_') {
+  restClassName = className;
+  return; // Skip for now
+}
+// ... calculate other classes ...
+if (restClassName) {
+  const otherClassesSum = Object.values(result)
+    .filter(v => v !== null && v !== undefined)
+    .reduce((sum, val) => sum + val, 0);
+  result[restClassName] = 100 - otherClassesSum;
+}
+```
+
+### YearSwitch Chrome Dropdown Fix
+
+**Problem**: Year selection dropdowns didn't work in Chrome (value wouldn't change after clicking). Worked fine in Firefox.
+
+**Root Cause**: Svelte reactive statement was overwriting `selectedAHN` faster than Chrome's `on:change` handler could update the store. Chrome has different event timing than Firefox.
+
+**Solution**: Changed sync logic to only run before user interaction:
+
+```javascript
+// Track if user has interacted with dropdown
+let userHasInteracted = false
+
+// Reset when municipality changes
+$: if ($municipalitySelection !== previousMunicipality) {
+  previousMunicipality = $municipalitySelection
+  userHasInteracted = false
+}
+
+// In reactive block - only sync if user hasn't interacted yet
+if (!userHasInteracted) {
+  selectedAHN = currentSelection.baseYear
+  selectedDifference = currentSelection.isDifference ? currentSelection.compareYear : "Difference"
+}
+
+// Set flag when user clicks
+function yearClick(change) {
+  userHasInteracted = true
+  // ... rest of handler
+}
+```
+
+**Files Modified**:
+- `src/lib/components/YearSwitch.svelte`
+
+### Tutorial Component
+
+**Added**: Interactive tutorial component (`src/lib/components/Tutorial.svelte`) that guides users through dashboard features.
+
+**Features**:
+- Step-by-step walkthrough of UI elements
+- Highlights target elements with spotlight effect
+- Auto-selects Utrecht as example municipality
+- Covers: map, control panel, indicators, year selection, etc.
+- Accessible via compass icon in top-left corner
+- Stores completion state in localStorage
+
 ## Recent Improvements (2025-11-04)
 
 ### Dataset Version Management & Nederland Aggregates Precalculation
@@ -165,16 +279,16 @@ A SvelteKit-based neighborhood dashboard application for visualizing Dutch neigh
 
 1. **Single Source of Truth** (`src/lib/datasets.js`):
    - Renamed from `datasets.ts` to `.js` to enable Node.js imports
-   - All data URLs and version number defined in one place
+   - Version number and GeoJSON URL defined here
+   - CSV data URLs now fetched from Config Portal (not hardcoded)
    - Both client and server code import from this file
-   - Eliminates duplication and sync issues
 
 ```javascript
 // src/lib/datasets.js
-export const DATASET_VERSION = '20251104'
-export const DEFAULT_INDICATORS_CONFIG_URL = "https://..."
-export const DEFAULT_CSV_DATA_URL = "https://..."
+export const DATASET_VERSION = '20260204'
 export const BUURT_GEOJSON_URL = "https://..."
+export const CONFIG_PORTAL_URL = "https://buurtdashboard-config-portal.vercel.app"
+// Note: CSV URLs are fetched from Config Portal, not hardcoded
 ```
 
 2. **Precalculation Script** (`scripts/precalculate-nederland.js`):
@@ -195,17 +309,21 @@ export const BUURT_GEOJSON_URL = "https://..."
    - Smaller memory footprint during initialization
 
 **Workflow When Updating Data**:
-1. Update URLs and `DATASET_VERSION` in `src/lib/datasets.js`
-2. Run `npm run precalculate-nederland`
-3. Commit both `datasets.js` and `nederland-aggregates.json`
-4. Deploy - version automatically syncs
+1. Upload new CSV to S3
+2. Update URLs in **Config Portal** (https://buurtdashboard-config-portal.vercel.app)
+3. Update `DATASET_VERSION` in `src/lib/datasets.js`
+4. Run `VITE_CONFIG_MODE=dev npm run precalculate-nederland`
+5. Test with `VITE_CONFIG_MODE=dev npm run dev`
+6. Publish to production in Config Portal
+7. Commit `datasets.js` and `nederland-aggregates.json`
+8. Deploy
 
 **Files Modified**:
-- `src/lib/datasets.ts` → `src/lib/datasets.js` - Centralized configuration
-- `scripts/precalculate-nederland.js` - Imports from datasets.js
+- `src/lib/datasets.js` - Version and GeoJSON URL (CSV URLs from Config Portal)
+- `scripts/precalculate-nederland.js` - Fetches CSV URL from Config Portal
 - `static/nederland-aggregates.json` - Generated aggregates with version stamp
 
-**Current Dataset Version**: `20251104`
+**Current Dataset Version**: `20260204`
 
 ## Recent Improvements (2025-11-02)
 
