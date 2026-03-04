@@ -22,15 +22,6 @@
   // Derived current selection from store
   $: currentSelection = $indicatorStore || { baseYear: '', compareYear: null, isDifference: false, beb: 'hele_buurt' }
 
-  // Track if user has interacted with dropdown to prevent reactive overwrite
-  let userHasInteracted = false
-
-  // Reset interaction flag when municipality changes (allows re-sync from store)
-  let previousMunicipality = $municipalitySelection
-  $: if ($municipalitySelection !== previousMunicipality) {
-    previousMunicipality = $municipalitySelection
-    userHasInteracted = false
-  }
 
   // Parse AHN versions from the indicator
   // Handle missing/empty AHNversie gracefully
@@ -151,12 +142,9 @@
         selectedAHN = latestOption.AHN
         selectedDifference = "Difference"
       } else {
-        // Sync from store only if user hasn't interacted yet
-        // This prevents Chrome from resetting the dropdown during user interaction
-        if (!userHasInteracted) {
-          selectedAHN = currentSelection.baseYear
-          selectedDifference = currentSelection.isDifference ? currentSelection.compareYear : "Difference"
-        }
+        // Always sync from store - we use value={} instead of bind:value to avoid race conditions
+        selectedAHN = currentSelection.baseYear
+        selectedDifference = currentSelection.isDifference ? currentSelection.compareYear : "Difference"
         if (currentSelection.isDifference && !currentCompareYearAvailable) {
           // Compare year no longer available, disable difference mode
           indicatorStore.set({
@@ -272,7 +260,6 @@
    * Handle base year selection change
    */
   function yearClick(change) {
-    userHasInteracted = true
     const newAHN = change.target.value
     const isDifferenceMode = currentSelection.isDifference
     const compareYear = currentSelection.compareYear
@@ -362,7 +349,6 @@
    * Handle difference year selection change
    */
   function yearClickDifference(change) {
-    userHasInteracted = true
     const differenceAHN = change.target.value
 
     if (differenceAHN === "Difference") {
@@ -402,7 +388,7 @@
 <!-- Replacing SVG year switch with two dropdowns -->
 <div class="year-switch-dropdowns {selectedDifference === 'Difference' ? 'less-gap' : ''}">
   <div class="dropdown-wrapper {hasDataLoaded && options.length === 0 ? 'wider' : ''}">
-    <select class="year-dropdown {isDisabled || (hasDataLoaded && options.length === 0) ? 'disabled' : ''}" bind:value={selectedAHN} on:change={yearClick} style="border: 2px solid {$configStore.mainColor};" disabled={isDisabled || (hasDataLoaded && options.length === 0)}>
+    <select class="year-dropdown {isDisabled || (hasDataLoaded && options.length === 0) ? 'disabled' : ''}" value={selectedAHN} on:change={yearClick} style="border: 2px solid {$configStore.mainColor};" disabled={isDisabled || (hasDataLoaded && options.length === 0)}>
       {#if !hasDataLoaded}
         <option value="">Laden...</option>
       {:else if options.length === 0}
@@ -428,7 +414,7 @@
     <div class="dropdown-wrapper">
       <select
         class="year-dropdown {selectedDifference === 'Difference' ? 'pseudo-disabled' : ''} {isDisabled ? 'disabled' : ''}"
-        bind:value={selectedDifference}
+        value={selectedDifference}
         on:change={yearClickDifference}
         style="border: 2px solid {$configStore.mainColor};"
         disabled={isDisabled}
