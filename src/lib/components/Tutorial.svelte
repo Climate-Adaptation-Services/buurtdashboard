@@ -41,6 +41,13 @@
       position: "center",
     },
     {
+      id: "top-icons",
+      title: "Snelkoppelingen",
+      description: "Linksboven vind je drie handige knoppen: 'Intro dashboard' voor achtergrondinformatie, 'Tutorial' om deze rondleiding te herstarten, en 'Download data' om de volledige dataset te downloaden.",
+      target: ".top-icons",
+      position: "right",
+    },
+    {
       id: "map",
       title: "Interactieve kaart",
       description: "Klik op een gemeente om in te zoomen. Daarna kun je een buurt selecteren om gedetailleerde informatie te zien.",

@@ -79,8 +79,8 @@
     {#if $configStore.sidebarImage}
       <img src={$configStore.sidebarImage} class="dord-icon" alt="Sidebar background" />
     {/if}
-    <div class="download-and-about">
-      <div class="about" on:click={() => laatMeerInfoPanelZien("intro")}>
+    <div class="download-and-about top-icons">
+      <div class="about intro-icon" on:click={() => laatMeerInfoPanelZien("intro")}>
         <img src="./about.png" width="30px" />
         <p class="download-and-about-text">Intro dashboard</p>
       </div>
@@ -94,7 +94,7 @@
         <img src="./compass.png" width="30px" class="white-icon tutorial-icon" alt="Tutorial" />
         <p class="download-and-about-text">Tutorial</p>
       </div>
-      <div class="download">
+      <div class="download download-icon">
         <a
           href={$configStore.dataDownloadLocation}
           download="BuurtdashboardDataDownload.xlsx"><img src="./download.png" width="30px" /></a

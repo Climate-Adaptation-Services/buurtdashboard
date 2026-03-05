@@ -359,31 +359,22 @@
 
     if (differenceAHN === "Difference") {
       // Turn off difference mode
+      selectedDifference = "Difference"
       indicatorStore.set({
         baseYear: currentSelection.baseYear,
         compareYear: null,
         isDifference: false,
         beb: currentSelection.beb
       })
-      selectedDifference = "Difference"
     } else {
-      // Extract numeric parts for comparison to ensure proper chronological order
-      const compareNum = parseInt(differenceAHN.replace(/\D/g, "") || "0", 10)
-      const baseNum = parseInt(currentSelection.baseYear.replace(/\D/g, "") || "0", 10)
-
-      // Always ensure base year is earlier and compare year is later
-      const [newBaseYear, newCompareYear] = compareNum < baseNum
-        ? [differenceAHN, currentSelection.baseYear]
-        : [currentSelection.baseYear, differenceAHN]
-
-      // Update local UI state to reflect the swap
-      selectedAHN = newBaseYear
-      selectedDifference = newCompareYear
+      // Start difference mode with current base year and selected compare year
+      // No swapping - left dropdown stays as base, right dropdown is the compare year
+      selectedDifference = differenceAHN
 
       // Update the store
       indicatorStore.set({
-        baseYear: newBaseYear,
-        compareYear: newCompareYear,
+        baseYear: currentSelection.baseYear,
+        compareYear: differenceAHN,
         isDifference: true,
         beb: currentSelection.beb
       })
@@ -425,15 +416,11 @@
         style="border: 2px solid {$configStore.mainColor};"
         disabled={isDisabled}
       >
-        {#if selectedDifference === "Difference"}
-          <option value="Difference">Vergelijk</option>
-        {:else}
-          <option value="Difference">Stop vergelijken</option>
-        {/if}
+        <option value="Difference">{selectedDifference === "Difference" ? "Vergelijk" : "Stop vergelijken"}</option>
         {#if options && options.length > 0}
           {#each options as option, index}
-            {#if option && option.AHN && shouldShowInDifferenceDropdown(option.AHN, index)}
-              <option value={option.AHN} selected={option.AHN === selectedDifference}>{option.Jaar}</option>
+            {#if option && option.AHN && (shouldShowInDifferenceDropdown(option.AHN, index) || option.AHN === selectedDifference)}
+              <option value={option.AHN}>{option.Jaar}</option>
             {/if}
           {/each}
         {/if}
