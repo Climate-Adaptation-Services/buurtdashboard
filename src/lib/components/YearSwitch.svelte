@@ -16,6 +16,12 @@
   // Reactive: check if any data source is available
   $: hasDataLoaded = !!($selectedNeighbourhoodJSONData || $neighbourhoodsInMunicipalityJSONData || $allNeighbourhoodsJSONData)
 
+  // Check if selected option contains multiple years (needs wider dropdown)
+  $: selectedOptionHasRange = (() => {
+    const selectedOption = options.find(opt => opt.AHN === selectedAHN)
+    return selectedOption?.Jaar?.includes('-') || selectedOption?.Jaar?.includes(',') || false
+  })()
+
   // YearSwitch is never disabled - it works at Nederland, gemeente, and buurt levels
   $: isDisabled = false
 
@@ -387,7 +393,7 @@
 
 <!-- Replacing SVG year switch with two dropdowns -->
 <div class="year-switch-dropdowns {selectedDifference === 'Difference' ? 'less-gap' : ''}">
-  <div class="dropdown-wrapper {hasDataLoaded && options.length === 0 ? 'wider' : ''}">
+  <div class="dropdown-wrapper {hasDataLoaded && options.length === 0 ? 'wider' : ''} {selectedOptionHasRange ? 'wider' : ''}">
     <select class="year-dropdown {isDisabled || (hasDataLoaded && options.length === 0) ? 'disabled' : ''}" value={selectedAHN} on:change={yearClick} style="border: 2px solid {$configStore.mainColor};" disabled={isDisabled || (hasDataLoaded && options.length === 0)}>
       {#if !hasDataLoaded}
         <option value="">Laden...</option>
@@ -447,10 +453,10 @@
     z-index: 10; /* Ensure dropdown appears above indicator body */
   }
   .dropdown-wrapper.wider {
-    width: 140px;
+    width: 120px;
   }
   .dropdown-wrapper.wider .year-dropdown {
-    width: 140px;
+    width: 120px;
   }
   .dropdown-wrapper:last-child .year-dropdown {
     padding-right: 8px;
