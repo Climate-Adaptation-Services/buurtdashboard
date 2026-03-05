@@ -469,8 +469,9 @@
     const urlString = get(URLParams).toString()
     window.history.replaceState(null, "", urlString ? "?" + urlString : "/")
 
-    // Force map to zoom back to original view
+    // Wait for data to load, then force map to zoom back to original view
     await tick()
+    await new Promise((resolve) => setTimeout(resolve, 500))
     forceMapZoom.update(n => n + 1)
 
     originalMunicipality = null
