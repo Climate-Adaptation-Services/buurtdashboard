@@ -7,6 +7,7 @@
     getIndicatorStore,
     municipalitySelection,
     isUpdatingIndicators,
+    forceMapZoom,
   } from "$lib/stores"
   // Note: Using per-indicator year selection via indicatorStore (not global)
   import { geoMercator, geoPath, select, selectAll } from "d3"
@@ -174,6 +175,11 @@
   // Handle selection changes for zooming
   $: if (mapManager.getMap() && mapType === "main map" && $currentJSONData && mapInitializedWithData) {
     mapManager.handleSelectionChange($municipalitySelection, $neighbourhoodSelection, $currentJSONData, $isUpdatingIndicators)
+  }
+
+  // Force map to re-zoom when forceMapZoom store is incremented
+  $: if ($forceMapZoom > 0 && mapManager.getMap() && mapType === "main map" && $currentJSONData && mapInitializedWithData) {
+    mapManager.fitMapToBounds($currentJSONData)
   }
 
   // Raise selected neighborhood elements to ensure they appear on top

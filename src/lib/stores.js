@@ -25,6 +25,7 @@ export const indicatorsSelection = writable([])
 export const alleIndicatoren = writable([])
 export const AHNSelecties = writable({})
 export const isUpdatingIndicators = writable(false) // Flag to prevent zoom during indicator updates
+export const forceMapZoom = writable(0) // Increment to force map to re-zoom to current selection
 
 // Global filter toggles for indicator filtering
 export const monitoringOverTijdActive = writable(false) // Filter for indicators with year variants

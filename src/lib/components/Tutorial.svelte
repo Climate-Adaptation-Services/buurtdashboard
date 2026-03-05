@@ -11,6 +11,7 @@
     URLParams,
     neighbourhoodsInMunicipalityJSONData,
     neighbourhoodCodeAbbreviation,
+    forceMapZoom,
   } from "$lib/stores"
   import { get } from "svelte/store"
 
@@ -460,6 +461,10 @@
     // Update browser URL
     const urlString = get(URLParams).toString()
     window.history.replaceState(null, "", urlString ? "?" + urlString : "/")
+
+    // Force map to zoom back to original view
+    await tick()
+    forceMapZoom.update(n => n + 1)
 
     originalMunicipality = null
     originalNeighbourhood = null
