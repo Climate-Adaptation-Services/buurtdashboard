@@ -368,13 +368,27 @@
       })
     } else {
       // Start difference mode with current base year and selected compare year
-      // No swapping - left dropdown stays as base, right dropdown is the compare year
-      selectedDifference = differenceAHN
+      let finalBaseYear = currentSelection.baseYear
+      let finalCompareYear = differenceAHN
+
+      // Ensure chronological order: base year should be earlier than compare year
+      const baseNum = parseInt(finalBaseYear.replace(/\D/g, "") || "0", 10)
+      const compareNum = parseInt(finalCompareYear.replace(/\D/g, "") || "0", 10)
+
+      if (compareNum < baseNum) {
+        // Compare year is earlier, so swap them
+        finalBaseYear = differenceAHN
+        finalCompareYear = currentSelection.baseYear
+      }
+
+      // Update local UI state to reflect any swapping
+      selectedAHN = finalBaseYear
+      selectedDifference = finalCompareYear
 
       // Update the store
       indicatorStore.set({
-        baseYear: currentSelection.baseYear,
-        compareYear: differenceAHN,
+        baseYear: finalBaseYear,
+        compareYear: finalCompareYear,
         isDifference: true,
         beb: currentSelection.beb
       })
