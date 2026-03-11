@@ -79,37 +79,37 @@
     {
       id: "demo-indicators",
       title: "Voorbeeld: indicatoren selecteren",
-      description: "We selecteren nu Boomkroonoppervlakte en Gevoelstemperatuur als voorbeeld indicatoren.",
+      description: "We selecteren nu Boomkroonbedekking en Gevoelstemperatuur als voorbeeld indicatoren.",
       target: ".control-panel .input-container",
       position: "right",
     },
     {
       id: "numerical-indicator",
-      title: "Numerieke indicator: Boomkroonoppervlakte",
+      title: "Numerieke indicator: Boomkroonbedekking",
       description:
         "Dit is een numerieke indicator. In de grafiek zie je hoe deze buurt scoort ten opzichte van andere buurten in de gemeente, heel Nederland en vergelijkbare wijktypes.",
-      target: '[data-indicator-title="Boomkroonoppervlakte"]',
+      target: '[data-indicator-title="Boomkroonbedekking"]',
       position: "left",
     },
     {
       id: "info-icon",
       title: "Info icoon",
       description: 'Klik op het "i" icoon rechtsboven in een indicator voor een korte beschrijving van de indicator.',
-      target: '[data-indicator-title="Boomkroonoppervlakte"] .question-mark',
+      target: '[data-indicator-title="Boomkroonbedekking"] .question-mark',
       position: "left",
     },
     {
       id: "more-info-link",
       title: "Meer informatie",
       description: 'Klik op "Meer info" rechtsonder om naar de bronpagina van de indicator te gaan voor uitgebreide informatie.',
-      target: '[data-indicator-title="Boomkroonoppervlakte"] .info-link',
+      target: '[data-indicator-title="Boomkroonbedekking"] .info-link',
       position: "left",
     },
     {
       id: "indicator-stats",
       title: "Statistieken vergelijken",
       description: "Vergelijk waarden voor Nederland, gemeente, buurt en wijktype. De gekleurde balk toont waar de waarde valt binnen de schaal.",
-      target: '[data-indicator-title="Boomkroonoppervlakte"] .indicator-overview',
+      target: '[data-indicator-title="Boomkroonbedekking"] .indicator-overview',
       position: "left",
     },
     {
@@ -117,7 +117,7 @@
       title: "Mediaan",
       description:
         "De getoonde waarden zijn medianen: de middelste waarde van alle buurten. Elke buurt telt even zwaar mee, ongeacht grootte of inwoneraantal.",
-      target: '[data-indicator-title="Boomkroonoppervlakte"] .indicator-overview',
+      target: '[data-indicator-title="Boomkroonbedekking"] .indicator-overview',
       position: "left",
     },
     {
@@ -125,7 +125,7 @@
       title: "Verdeling van buurten",
       description:
         "Elke stip is een buurt. De stippen zijn gegroepeerd langs de schaal zodat je snel kunt zien hoe de geselecteerde buurt zich verhoudt tot andere buurten.",
-      target: '[data-indicator-title="Boomkroonoppervlakte"] .indicator-graph',
+      target: '[data-indicator-title="Boomkroonbedekking"] .indicator-graph',
       position: "left",
     },
     {
@@ -149,14 +149,14 @@
       title: "Jaar selectie",
       description:
         "Sommige indicatoren hebben data voor meerdere jaren. Gebruik de dropdown om een ander jaar te selecteren of om jaren met elkaar te vergelijken.",
-      target: '[data-indicator-title="Boomkroonoppervlakte"] .year-switch-dropdowns',
+      target: '[data-indicator-title="Boomkroonbedekking"] .year-switch-dropdowns',
       position: "left",
     },
     {
       id: "indicator-map",
       title: "Indicatorkaart",
       description: "Een kaartje dat de geselecteerde indicator visualiseert voor alle buurten in de gemeente.",
-      target: '[data-indicator-title="Boomkroonoppervlakte"] .indicator-map',
+      target: '[data-indicator-title="Boomkroonbedekking"] .indicator-map',
       position: "left",
     },
     {
@@ -330,8 +330,8 @@
     originalNeighbourhood = get(neighbourhoodSelection)
     originalIndicators = [...get(indicatorsSelection)]
 
-    // Save original Boomkroonoppervlakte AHN selection
-    const boomkroonStore = getIndicatorStore("Boomkroonoppervlakte")
+    // Save original Boomkroonbedekking AHN selection
+    const boomkroonStore = getIndicatorStore("Boomkroonbedekking")
     boomkroonStore.subscribe((v) => {
       if (originalBoomkroonAHN === null) {
         originalBoomkroonAHN = { ...v }
@@ -367,15 +367,15 @@
     await new Promise((resolve) => setTimeout(resolve, 1500))
   }
 
-  // Step 2: Select indicators (Boomkroonoppervlakte and Gevoelstemperatuur)
+  // Step 2: Select indicators (Boomkroonbedekking and Gevoelstemperatuur)
   async function selectIndicators() {
     if (!browser) return
 
     // Select the two demo indicators
-    indicatorsSelection.set(["Boomkroonoppervlakte", "Gevoelstemperatuur"])
+    indicatorsSelection.set(["Boomkroonbedekking", "Gevoelstemperatuur"])
 
-    // Set Boomkroonoppervlakte to AHN4
-    const store = getIndicatorStore("Boomkroonoppervlakte")
+    // Set Boomkroonbedekking to AHN4
+    const store = getIndicatorStore("Boomkroonbedekking")
     store.update((v) => ({ ...v, baseYear: "AHN4" }))
 
     // Wait for indicators to render
@@ -423,9 +423,9 @@
   async function restoreTutorialContext() {
     if (!browser) return
 
-    // Restore original Boomkroonoppervlakte AHN selection
+    // Restore original Boomkroonbedekking AHN selection
     if (originalBoomkroonAHN) {
-      const store = getIndicatorStore("Boomkroonoppervlakte")
+      const store = getIndicatorStore("Boomkroonbedekking")
       store.set(originalBoomkroonAHN)
       originalBoomkroonAHN = null
     }
@@ -508,7 +508,7 @@
   }
 
   $: if (browser && isOpen && currentStep === 5) {
-    // Select Boomkroonoppervlakte and Gevoelstemperatuur
+    // Select Boomkroonbedekking and Gevoelstemperatuur
     selectIndicators().then(() => {
       updateHighlight(currentStepData)
     })
