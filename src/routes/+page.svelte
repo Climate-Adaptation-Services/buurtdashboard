@@ -3,6 +3,7 @@
   import Indicator from "$lib/components/Indicator.svelte"
   import Map from "$lib/components/Map.svelte"
   import Tooltip from "$lib/components/Tooltip.svelte"
+  import Tutorial from "$lib/components/Tutorial.svelte"
 
   import {
     neighbourhoodSelection,
@@ -28,6 +29,7 @@
   import { onMount, tick } from "svelte"
   import { BUURT_GEOJSON_URL, MUNICIPALITY_JSON_URL } from "$lib/datasets"
   import { prepareJSONData } from "$lib/services/prepareJSONData"
+  import { gunzipSync, strFromU8 } from "fflate"
 
   export let data
 
@@ -43,10 +45,16 @@
     nederlandAggregates.set(data.nederlandAggregates)
   }
 
+  // Set dashboard config with portal URLs (single source of truth)
+  if (data.dashboardConfig) {
+    configStore.set(data.dashboardConfig)
+  }
+
   let displayedIndicators = []
   let allIndicators = []
   let isInitialized = false
   let isUIReady = false
+  let showTutorial = false
 
   // GeoJSON data will be loaded client-side for progressive rendering
   let municipalityGeoJson = null
@@ -86,7 +94,12 @@
       ])
 
       municipalityGeoJson = await municipalityResponse.json()
-      neighbourhoodGeoJson = await neighbourhoodResponse.json()
+
+      // Decompress gzipped buurt TopoJSON
+      const neighbourhoodBuffer = await neighbourhoodResponse.arrayBuffer()
+      const decompressed = gunzipSync(new Uint8Array(neighbourhoodBuffer))
+      neighbourhoodGeoJson = JSON.parse(strFromU8(decompressed))
+
       geoJSONData = [municipalityGeoJson, neighbourhoodGeoJson]
 
       // Process and cache the GeoJSON data
@@ -184,16 +197,21 @@
 {:else}
   <div class="container" style="justify-content:{screenWidth < 800 ? 'center' : 'left'}">
     <div class="sidebar" style="position:{screenWidth > 800 ? 'fixed' : 'relative'}">
-      <div class="control-panel"><ControlPanel {indicatorsSelection} {allIndicators} isLoading={isLoadingGeoJSON} /></div>
+      <div class="control-panel"><ControlPanel {indicatorsSelection} {allIndicators} isLoading={isLoadingGeoJSON} on:openTutorial={() => showTutorial = true} /></div>
       <div class="map" class:dordrecht={$configStore.categoryPath === '-dordrecht'} bind:clientWidth={mapWidth} bind:clientHeight={mapHeight}>
         <Map JSONdata={geoJSONData} CSVdata={data.buurtCSVdata} {mapWidth} {mapHeight} mapType={"main map"} isLoading={isLoadingGeoJSON} />
       </div>
     </div>
 
     <div class="indicators" style="margin-left:{screenWidth > 800 ? 400 : 0}px">
-      {#each displayedIndicators as indicator}
+      {#each displayedIndicators as indicator (indicator.title)}
         {#if getIndicatorAttribute(indicator, indicator.attribute)}
-          <div class="indicator" style="height:{indicatorHeight}px">
+          <div
+            class="indicator"
+            style="height:{indicatorHeight}px"
+            data-indicator-title={indicator.dutchTitle || indicator.title}
+            data-indicator-type={indicator.numerical ? 'numerical' : 'categorical'}
+          >
             <Indicator {indicatorHeight} {indicator} isLoading={isLoadingGeoJSON} />
           </div>
         {/if}
@@ -204,6 +222,9 @@
 
     <Modal show={$modal} style="position:absolute; left:0"></Modal>
   </div>
+
+  <!-- Tutorial overlay -->
+  <Tutorial bind:isOpen={showTutorial} />
 {/if}
 
 <style>

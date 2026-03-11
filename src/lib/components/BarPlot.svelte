@@ -21,6 +21,9 @@
     calcPercentagesForEveryClassSingleIndicator,
   } from "$lib/utils/calcPercentagesForEveryClass"
   import { getNumericalValue } from "$lib/utils/valueRetrieval.js"
+  import { sanitizeClassName } from "$lib/utils/sanitizeClassName.js"
+
+  import { createEventDispatcher } from "svelte"
 
   export let graphWidth
   export let indicatorHeight
@@ -29,26 +32,25 @@
   export let getClassByIndicatorValue
   export let aggregated
 
-  const margin = { bottom: 100, top: 30, left: 30, right: 30 }
+  const dispatch = createEventDispatcher()
 
-  // Helper function to sanitize class names (must match barPlotMouseEvents.js)
-  function sanitizeClassName(str) {
-    return str
-      .replaceAll(' ', '')
-      .replaceAll(',', '_')
-      .replaceAll('/', '_')
-      .replaceAll('(', '')
-      .replaceAll(')', '')
-      .replaceAll(':', '')  // Remove colons
-      .replaceAll('>', '')
-      .replaceAll('%', '')  // Remove percent signs
-  }
+  const margin = { bottom: 100, top: 30, left: 30, right: 30 }
 
   const calcPercentagesForEveryClass = aggregated ? calcPercentagesForEveryClassMultiIndicator : calcPercentagesForEveryClassSingleIndicator
 
   // Get the indicator-specific store for reactivity
   // Use dutchTitle for store key to ensure consistency across languages
   const indicatorStore = getIndicatorStore(indicator.dutchTitle || indicator.title)
+
+  // Always use per-indicator store for year selection
+  $: effectiveYearSelection = $indicatorStore
+
+  // Use per-indicator BEB selection from store
+  $: effectiveBEBSelection = $indicatorStore?.beb || 'hele_buurt'
+
+  // Check if AHN5 is selected - Nederland statistics not available for AHN5
+  // Check for AHNversie being a non-empty string (indicator has AHN versions configured)
+  $: isAHN5Selected = effectiveYearSelection && effectiveYearSelection.baseYear === 'AHN5' && indicator.AHNversie && indicator.AHNversie.length > 0
 
   // Simplified function - always show percentages in bar plot
   function getDisplayValue(percentageValue) {
@@ -57,8 +59,9 @@
 
   let nederlandValues = null
   $: {
-    // Force reactivity by reading the indicator store
-    const ahnSelection = $indicatorStore;
+    // Force reactivity by reading the effective selections
+    const yearSelection = effectiveYearSelection;
+    const bebSelection = effectiveBEBSelection;
 
     // Try cached values first, fall back to client-side calculation if needed
     nederlandValues = null // Reset first
@@ -70,13 +73,12 @@
         // Check for BEB variants first
         if (cached && cached.hele_buurt !== undefined && cached.bebouwde_kom !== undefined) {
           // BEB indicator - get the correct variant
-          const bebSelection = ahnSelection?.beb || 'hele_buurt';
           cached = cached[bebSelection];
         }
 
         if (cached && typeof cached === 'object' && !Array.isArray(cached)) {
           // Check if this is a year-based value, AHN-based value, or class-based aggregated value
-          const selectedYear = ahnSelection?.baseYear;
+          const selectedYear = yearSelection?.baseYear;
 
           // If selectedYear is specified and exists in cache, use it (handles both years like "2020" and AHN versions like "AHN2")
           if (selectedYear && cached[selectedYear] !== undefined) {
@@ -91,7 +93,7 @@
 
     // FALLBACK: If no cached value and we have all neighborhoods data, calculate client-side
     // This handles AHN version switches and other cases where cache doesn't have the exact variant
-    if (!nederlandValues && $allNeighbourhoodsJSONData && $indicatorStore) {
+    if (!nederlandValues && $allNeighbourhoodsJSONData && yearSelection) {
       const calculated = calcPercentagesForEveryClass(indicator, $allNeighbourhoodsJSONData, "Nederland");
       if (calculated && typeof calculated === 'object' && Object.keys(calculated).length > 1) {
         nederlandValues = calculated;
@@ -106,45 +108,43 @@
     const data = []
     const regions = []
 
-    // Helper to add a level if data exists
-    const addLevel = (regio, jsonData) => {
-      if (!jsonData) {
-        console.warn(`BarPlot: No jsonData for ${regio}`)
-        return
-      }
-
-      const calculated = calcPercentagesForEveryClass(indicator, jsonData, regio)
-      if (calculated && typeof calculated === 'object' && Object.keys(calculated).length > 1) {
-        data.push(calculated)
-        regions.push(regio)
-      } else {
-        console.warn(`BarPlot: Failed to calculate data for ${indicator.title} at ${regio} level`, calculated)
-      }
-    }
-
-    // Add Nederland if available (not available for municipality-specific dashboards like Dordrecht)
-    if (nederlandValues) {
+    // 1. Nederland (skip if AHN5 selected - no Nederland data for AHN5)
+    if (nederlandValues && !isAHN5Selected) {
       data.push(nederlandValues)
       regions.push("Nederland")
     }
 
-    // Add municipality level if selected
-    if ($municipalitySelection !== null && $indicatorStore && $allNeighbourhoodsJSONData) {
-      addLevel("Gemeente", $neighbourhoodsInMunicipalityJSONData)
+    // 2. Gemeente
+    if ($municipalitySelection !== null && effectiveYearSelection && $allNeighbourhoodsJSONData) {
+      const gemeenteData = calcPercentagesForEveryClass(indicator, $neighbourhoodsInMunicipalityJSONData, "Gemeente")
+      if (gemeenteData && typeof gemeenteData === 'object' && Object.keys(gemeenteData).length > 1) {
+        data.push(gemeenteData)
+        regions.push("Gemeente")
+      }
     }
 
-    // Add neighbourhood level if selected
-    if ($neighbourhoodSelection !== null && $indicatorStore && $allNeighbourhoodsJSONData && $selectedNeighbourhoodJSONData) {
-      addLevel("Buurt", { type: "FeatureCollection", features: [$selectedNeighbourhoodJSONData] })
+    // 3. Buurt
+    if ($neighbourhoodSelection !== null && effectiveYearSelection && $allNeighbourhoodsJSONData && $selectedNeighbourhoodJSONData) {
+      const buurtData = calcPercentagesForEveryClass(indicator, { type: "FeatureCollection", features: [$selectedNeighbourhoodJSONData] }, "Buurt")
+      if (buurtData && typeof buurtData === 'object' && Object.keys(buurtData).length > 1) {
+        data.push(buurtData)
+        regions.push("Buurt")
+      }
 
-      // Add district type if available
+      // 4. Wijktype
       if ($selectedNeighbourhoodJSONData.properties[$districtTypeAbbreviation]) {
-        addLevel("Wijktype", $districtTypeJSONData)
+        const wijktypeData = calcPercentagesForEveryClass(indicator, $districtTypeJSONData, "Wijktype")
+        if (wijktypeData && typeof wijktypeData === 'object' && Object.keys(wijktypeData).length > 1) {
+          data.push(wijktypeData)
+          regions.push("Wijktype")
+        }
       }
     }
 
     barPlotData = data
     regios = regions
+    // Dispatch data to parent for legend
+    dispatch('dataUpdate', { barPlotData: data })
   }
   // Create stacked data for D3 visualization
   $: stackedData = (() => {
@@ -181,6 +181,15 @@
 
 <svg class={"barplot_" + sanitizeClassName(indicator.title)} style="height:74%">
   <g class="inner-chart-bar" transform="translate(0, {margin.top})">
+    <!-- Show AHN5 notice for Nederland when AHN5 is selected (before other bars) -->
+    {#if isAHN5Selected && graphWidth > 0}
+      <text style="fill:#645F5E" x={graphWidth / 2} text-anchor="middle" font-size="15px" y={-5}
+        >Nederland</text
+      >
+      <text style="fill:#888; font-style:italic" x={graphWidth / 2} text-anchor="middle" font-size="11px" y={12}
+        >Niet voor heel Nederland beschikbaar</text
+      >
+    {/if}
     {#each stackedData as stacked, i}
       <g class="stack" fill={indicatorValueColorscale(stacked.key)}>
         {#each stacked as st}
@@ -189,7 +198,7 @@
             on:mouseout={barPlotMouseOut(indicator, st, stacked)}
             class={"barplot_rect" + sanitizeClassName(indicator.title) + sanitizeClassName(stacked.key) + st.data.group}
             x={xScale(st[0])}
-            y={yScale(st.data.group)}
+            y={yScale(st.data.group) + (isAHN5Selected ? 30 : 0)}
             width={xScale(st[1]) - xScale(st[0])}
             height={yScale.bandwidth() / 2.0}
             stroke-width="4"
@@ -202,7 +211,7 @@
             <text
               text-anchor="middle"
               x={xScale(st[0]) + (xScale(st[1]) - xScale(st[0])) / 2}
-              y={yScale(st.data.group) + 1.5}
+              y={yScale(st.data.group) + 1.5 + (isAHN5Selected ? 30 : 0)}
               fill={checkContrast(indicatorValueColorscale(stacked.key)) ? "white" : "black"}
               dy="1.1em"
               font-size="14px"
@@ -215,7 +224,7 @@
     {#each regios as regio, i}
       {#if regio !== "Nederland" || !($configStore && $configStore.dashboardTitle === "Buurtdashboard Dordrecht")}
         {#if graphWidth > 0 && safeBandwidth > 0}
-          <text style="fill:#645F5E" x={graphWidth / 2} text-anchor="middle" font-size="15px" y={i * safeBandwidth - 5}
+          <text style="fill:#645F5E" x={graphWidth / 2} text-anchor="middle" font-size="15px" y={i * safeBandwidth - 5 + (isAHN5Selected ? 30 : 0)}
             >{getRegionName(regio)}</text
           >
         {/if}

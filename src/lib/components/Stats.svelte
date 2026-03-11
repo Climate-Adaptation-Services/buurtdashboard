@@ -16,7 +16,7 @@
   import { scaleLinear, min, max } from "d3"
   import { calcMedian, calcAverage } from "$lib/utils/calcMedian"
   // MIGRATED: Import centralized value retrieval functions
-  import { getNumericalValue, getDifferenceValue, getIndicatorAttribute, toNumber, isValidValue, getRawValue } from "$lib/utils/valueRetrieval.js"
+  import { getNumericalValue, getDifferenceValue, getIndicatorAttribute, toNumber, isValidValue, getRawValue, getNoDataReason } from "$lib/utils/valueRetrieval.js"
 
   export let bodyHeight
   export let indicator
@@ -33,33 +33,46 @@
   $: isDifferenceMode = currentAHNSelection && currentAHNSelection.isDifference
   $: currentAttribute = getIndicatorAttribute(indicator, indicator.attribute)
 
+  // Check if AHN5 is selected (either as base year or compare year) - Nederland statistics not available for AHN5
+  $: isAHN5Selected = currentAHNSelection && (currentAHNSelection.baseYear === 'AHN5' || currentAHNSelection.compareYear === 'AHN5')
+
   // MIGRATED: Calculate display values (unit-converted) and scale values (original %) separately
   // Force reactivity by reading $indicatorStore directly at the start
   $: medianValuesDict = (() => {
-    // Read the store directly to ensure Svelte tracks this dependency
-    const _storeValue = $indicatorStore
+    // Read the indicator store to ensure Svelte tracks this dependency
+    const storeValue = $indicatorStore
+    const localIsDifferenceMode = storeValue && storeValue.isDifference
+    // Use per-indicator BEB selection from store
+    const bebSelection = storeValue?.beb || 'hele_buurt'
 
     // Nederland calculation - DISPLAY VALUES (weighted average when surface area specified)
     // Try cached values first, fall back to client-side calculation if needed
     let nederlandMedian = null;
 
-    if ($nederlandAggregates && $nederlandAggregates.aggregates) {
+    // In difference mode, always calculate client-side (cache doesn't store diff values for all combinations)
+    if (!localIsDifferenceMode && $nederlandAggregates && $nederlandAggregates.aggregates) {
       let cached = $nederlandAggregates.aggregates[indicator.title];
 
       if (cached !== undefined) {
         // Check for BEB variants first
         if (cached && cached.hele_buurt !== undefined && cached.bebouwde_kom !== undefined) {
-          // BEB indicator - get the correct variant
-          const bebSelection = currentAHNSelection?.beb || 'hele_buurt';
+          // BEB indicator - get the correct variant using global BEB selection
           cached = cached[bebSelection];
         }
 
-        // Now check if it's a year-based object or a simple value
+        // Now check if it's a year/AHN-based object or a simple value
         if (cached && typeof cached === 'object' && !Array.isArray(cached)) {
-          // Multi-year indicator - get the value for the selected year
-          const selectedYear = currentAHNSelection?.baseYear;
+          // Multi-year or AHN indicator - get the value for the selected year/AHN
+          const selectedYear = storeValue?.baseYear;
           if (selectedYear && cached[selectedYear] !== undefined) {
             nederlandMedian = cached[selectedYear];
+          } else {
+            // Check if any key matches an AHN pattern (fallback for indicators without explicit baseYear set yet)
+            const ahnKeys = Object.keys(cached).filter(k => k.startsWith('AHN'));
+            if (ahnKeys.length > 0 && !selectedYear) {
+              // Default to first AHN version if no selection
+              nederlandMedian = cached[ahnKeys[0]];
+            }
           }
         } else if (cached !== undefined && (typeof cached !== 'object' || Array.isArray(cached))) {
           // Simple value or aggregated indicator classes
@@ -70,9 +83,9 @@
 
     // FALLBACK: If no cached value and we have all neighborhoods data, calculate client-side
     // This handles AHN version switches and other cases where cache doesn't have the exact variant
-    if (nederlandMedian === null && $allNeighbourhoodsJSONData && $allNeighbourhoodsJSONData.features && currentAHNSelection) {
+    if (nederlandMedian === null && $allNeighbourhoodsJSONData && $allNeighbourhoodsJSONData.features && storeValue) {
 
-      if (isDifferenceMode) {
+      if (localIsDifferenceMode) {
         nederlandMedian = calcMedian(
           $allNeighbourhoodsJSONData.features
             .map((neighbourhood) => getDifferenceValue(neighbourhood, indicator))
@@ -97,11 +110,11 @@
     }
 
     // Municipality calculation - DISPLAY VALUES
-    const gemeenteMedian = ($municipalitySelection !== null && $allNeighbourhoodsJSONData && $allNeighbourhoodsJSONData.features && currentAHNSelection) ? (() => {
+    const gemeenteMedian = ($municipalitySelection !== null && $allNeighbourhoodsJSONData && $allNeighbourhoodsJSONData.features && storeValue) ? (() => {
       const municipalityFilter = $allNeighbourhoodsJSONData.features.filter(
         (neighbourhood) => neighbourhood?.properties && neighbourhood.properties[$municipalityCodeAbbreviation] === $municipalitySelection
       )
-      return isDifferenceMode
+      return localIsDifferenceMode
         ? calcMedian(
             municipalityFilter
               .map((neighbourhood) => getDifferenceValue(neighbourhood, indicator))
@@ -127,17 +140,18 @@
     
     // Neighborhood and district type calculations - DISPLAY VALUES (unit-converted)
     let buurtValue = 0
+    let buurtRawValueForNoData = null // Store raw value to determine no-data reason
     let wijktypeMedian = 0
 
-    if ($neighbourhoodSelection !== null && $allNeighbourhoodsJSONData && $allNeighbourhoodsJSONData.features && currentAHNSelection) {
+    if ($neighbourhoodSelection !== null && $allNeighbourhoodsJSONData && $allNeighbourhoodsJSONData.features && storeValue) {
       const neighbourhoodFilter = $allNeighbourhoodsJSONData.features.filter(
         (neighbourhood) => neighbourhood?.properties && neighbourhood.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection
       )
-      
-      if (isDifferenceMode) {
+
+      if (localIsDifferenceMode) {
         const diffValue = getDifferenceValue(neighbourhoodFilter[0], indicator)
         buurtValue = diffValue !== null ? Math.round(diffValue * 100) / 100 : "Geen data"
-        
+
         wijktypeMedian = calcMedian(
           $districtTypeJSONData.features
             .map((neighbourhood) => getDifferenceValue(neighbourhood, indicator))
@@ -145,10 +159,12 @@
         )
       } else {
         const feature = neighbourhoodFilter[0]
-        let buurtRawValue = getNumericalValue(feature, indicator)
+        // Get raw value first to check no-data reason
+        buurtRawValueForNoData = getRawValue(feature, indicator)
+        let buurtNumericalValue = getNumericalValue(feature, indicator)
 
-        buurtValue = buurtRawValue !== null
-          ? Math.round(buurtRawValue * 100) / 100
+        buurtValue = buurtNumericalValue !== null
+          ? Math.round(buurtNumericalValue * 100) / 100
           : "Geen data"
 
         wijktypeMedian = calcMedian(
@@ -158,20 +174,22 @@
         )
       }
     }
-    
+
     const result = {
       medianValueNederland: nederlandMedian,
       medianValueGemeente: gemeenteMedian,
       medianValueBuurt: buurtValue,
       medianValueWijktype: wijktypeMedian,
+      rawValueBuurt: buurtRawValueForNoData, // Pass raw value for no-data reason detection
     }
     return result
   })()
   
   // SCALE VALUES: Calculate using original percentage values for consistent positioning/colors
   $: scaleValuesDict = (() => {
-    // Read the store directly to ensure Svelte tracks this dependency
-    const _storeValue = $indicatorStore
+    // Read the indicator store to ensure Svelte tracks this dependency
+    const storeValue = $indicatorStore
+    const localIsDifferenceMode = storeValue && storeValue.isDifference
 
     // Get the original attribute (always percentage, no unit conversion)
     const originalAttribute = getIndicatorAttribute(indicator, indicator.attribute)
@@ -180,23 +198,31 @@
     // Try cached values first, fall back to client-side calculation if needed
     let nederlandScale = null;
 
-    if ($nederlandAggregates && $nederlandAggregates.aggregates) {
+    // In difference mode, always calculate client-side (cache doesn't store diff values for all combinations)
+    if (!localIsDifferenceMode && $nederlandAggregates && $nederlandAggregates.aggregates) {
       let cached = $nederlandAggregates.aggregates[indicator.title];
 
       if (cached !== undefined) {
         // Check for BEB variants first
         if (cached && cached.hele_buurt !== undefined && cached.bebouwde_kom !== undefined) {
           // BEB indicator - get the correct variant
-          const bebSelection = currentAHNSelection?.beb || 'hele_buurt';
+          const bebSelection = storeValue?.beb || 'hele_buurt';
           cached = cached[bebSelection];
         }
 
-        // Now check if it's a year-based object or a simple value
+        // Now check if it's a year/AHN-based object or a simple value
         if (cached && typeof cached === 'object' && !Array.isArray(cached)) {
-          // Multi-year indicator - get the value for the selected year
-          const selectedYear = currentAHNSelection?.baseYear;
+          // Multi-year or AHN indicator - get the value for the selected year/AHN
+          const selectedYear = storeValue?.baseYear;
           if (selectedYear && cached[selectedYear] !== undefined) {
             nederlandScale = cached[selectedYear];
+          } else {
+            // Check if any key matches an AHN pattern (fallback for indicators without explicit baseYear set yet)
+            const ahnKeys = Object.keys(cached).filter(k => k.startsWith('AHN'));
+            if (ahnKeys.length > 0 && !selectedYear) {
+              // Default to first AHN version if no selection
+              nederlandScale = cached[ahnKeys[0]];
+            }
           }
         } else if (cached !== undefined && (typeof cached !== 'object' || Array.isArray(cached))) {
           // Simple value
@@ -206,8 +232,8 @@
     }
 
     // FALLBACK: Calculate client-side if no cached value (e.g., different AHN version)
-    if (nederlandScale === null && $allNeighbourhoodsJSONData && $allNeighbourhoodsJSONData.features && currentAHNSelection) {
-      if (isDifferenceMode) {
+    if (nederlandScale === null && $allNeighbourhoodsJSONData && $allNeighbourhoodsJSONData.features && storeValue) {
+      if (localIsDifferenceMode) {
         nederlandScale = calcMedian(
           $allNeighbourhoodsJSONData.features
             .map((neighbourhood) => getDifferenceValue(neighbourhood, indicator))
@@ -232,11 +258,11 @@
     }
 
     // Municipality scale calculation - ORIGINAL VALUES
-    const gemeenteScale = ($municipalitySelection !== null && $allNeighbourhoodsJSONData && $allNeighbourhoodsJSONData.features && currentAHNSelection) ? (() => {
+    const gemeenteScale = ($municipalitySelection !== null && $allNeighbourhoodsJSONData && $allNeighbourhoodsJSONData.features && storeValue) ? (() => {
       const municipalityFilter = $allNeighbourhoodsJSONData.features.filter(
         (neighbourhood) => neighbourhood?.properties && neighbourhood.properties[$municipalityCodeAbbreviation] === $municipalitySelection
       )
-      return isDifferenceMode
+      return localIsDifferenceMode
         ? calcMedian(
             municipalityFilter
               .map((neighbourhood) => getDifferenceValue(neighbourhood, indicator))
@@ -264,15 +290,15 @@
     let buurtScale = 0
     let wijktypeScale = 0
 
-    if ($neighbourhoodSelection !== null && $allNeighbourhoodsJSONData && $allNeighbourhoodsJSONData.features && currentAHNSelection) {
+    if ($neighbourhoodSelection !== null && $allNeighbourhoodsJSONData && $allNeighbourhoodsJSONData.features && storeValue) {
       const neighbourhoodFilter = $allNeighbourhoodsJSONData.features.filter(
         (neighbourhood) => neighbourhood?.properties && neighbourhood.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection
       )
-      
-      if (isDifferenceMode) {
+
+      if (localIsDifferenceMode) {
         const diffValue = getDifferenceValue(neighbourhoodFilter[0], indicator)
         buurtScale = diffValue !== null ? diffValue : 0
-        
+
         wijktypeScale = calcMedian(
           $districtTypeJSONData.features
             .map((neighbourhood) => getDifferenceValue(neighbourhood, indicator))
@@ -375,20 +401,27 @@
     : ''}"
   bind:clientWidth={statsWidth}
 >
-  <Stat
-    {indicatorValueColorscale}
-    {indicator}
-    medianValueOtherYear={medianValuesDictOtherYear["medianValueNederland"]}
-    graphWidth={statsWidth}
-    indicatorHeight={bodyHeight * 0.2 * 0.25}
-    regio="Nederland"
-    medianValue={medianValuesDict["medianValueNederland"]}
-    scaleValue={scaleValuesDict["medianValueNederland"]}
-    {xScaleStats}
-  />
+  {#if isAHN5Selected && indicator.AHNversie}
+    <div class="ahn5-notice">
+      <span class="region-label">Nederland</span>
+      <span class="notice-text">Niet voor heel Nederland beschikbaar</span>
+    </div>
+  {:else}
+    <Stat
+      {indicatorValueColorscale}
+      {indicator}
+      medianValueOtherYear={medianValuesDictOtherYear["medianValueNederland"]}
+      graphWidth={statsWidth}
+      indicatorHeight={bodyHeight * 0.2 * 0.25}
+      regio="Nederland"
+      medianValue={medianValuesDict["medianValueNederland"]}
+      scaleValue={scaleValuesDict["medianValueNederland"]}
+      {xScaleStats}
+    />
+  {/if}
 </div>
-{#if $municipalitySelection !== null}
-  <div class="indicator-stats" style="height: {bodyHeight * 0.2 * 0.25}px">
+<div class="indicator-stats" style="height: {bodyHeight * 0.2 * 0.25}px">
+  {#if $municipalitySelection !== null}
     <Stat
       {indicatorValueColorscale}
       {indicator}
@@ -400,10 +433,10 @@
       scaleValue={scaleValuesDict["medianValueGemeente"]}
       {xScaleStats}
     />
-  </div>
-{/if}
-{#if $neighbourhoodSelection !== null}
-  <div class="indicator-stats" style="height: {bodyHeight * 0.2 * 0.25}px">
+  {/if}
+</div>
+<div class="indicator-stats" style="height: {bodyHeight * 0.2 * 0.25}px">
+  {#if $neighbourhoodSelection !== null}
     <Stat
       {indicatorValueColorscale}
       {indicator}
@@ -413,25 +446,46 @@
       regio="Buurt"
       medianValue={medianValuesDict["medianValueBuurt"]}
       scaleValue={scaleValuesDict["medianValueBuurt"]}
+      rawValue={medianValuesDict["rawValueBuurt"]}
       {xScaleStats}
     />
-  </div>
-  {#if $selectedNeighbourhoodJSONData && $selectedNeighbourhoodJSONData.properties[$districtTypeAbbreviation]}
-    <div class="indicator-stats" style="height: {bodyHeight * 0.2 * 0.25}px">
-      <Stat
-        {indicatorValueColorscale}
-        {indicator}
-        medianValueOtherYear={medianValuesDictOtherYear["medianValueWijktype"]}
-        graphWidth={statsWidth}
-        indicatorHeight={bodyHeight * 0.2 * 0.25}
-        regio="Wijktype"
-        medianValue={medianValuesDict["medianValueWijktype"]}
-        scaleValue={scaleValuesDict["medianValueWijktype"]}
-        {xScaleStats}
-      />
-    </div>
   {/if}
-{/if}
+</div>
+<div class="indicator-stats" style="height: {bodyHeight * 0.2 * 0.25}px">
+  {#if $neighbourhoodSelection !== null && $selectedNeighbourhoodJSONData && $selectedNeighbourhoodJSONData.properties[$districtTypeAbbreviation]}
+    <Stat
+      {indicatorValueColorscale}
+      {indicator}
+      medianValueOtherYear={medianValuesDictOtherYear["medianValueWijktype"]}
+      graphWidth={statsWidth}
+      indicatorHeight={bodyHeight * 0.2 * 0.25}
+      regio="Wijktype"
+      medianValue={medianValuesDict["medianValueWijktype"]}
+      scaleValue={scaleValuesDict["medianValueWijktype"]}
+      {xScaleStats}
+    />
+  {/if}
+</div>
 
 <style>
+  .ahn5-notice {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    padding: 0 10px;
+    gap: 10px;
+  }
+
+  .region-label {
+    min-width: 165px;
+    text-align: right;
+    font-size: 13px;
+    color: #645f5e;
+  }
+
+  .notice-text {
+    font-size: 11px;
+    color: #888;
+    font-style: italic;
+  }
 </style>

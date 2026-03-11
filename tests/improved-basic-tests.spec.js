@@ -10,12 +10,16 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Basic Dashboard Functionality', () => {
   test.beforeEach(async ({ page }) => {
+    // Disable tutorial by setting localStorage before page load
+    await page.addInitScript(() => {
+      localStorage.setItem('buurtdashboard-tutorial-seen', 'true');
+    });
     // Navigate to local development server
     await page.goto('/?config=dordrecht');
-    
+
     // Wait for initial page load
     await page.waitForLoadState('domcontentloaded');
-    
+
     // Allow time for data loading and component initialization
     await page.waitForTimeout(3000);
   });

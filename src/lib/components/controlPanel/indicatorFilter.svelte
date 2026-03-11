@@ -1,5 +1,5 @@
 <script>
-  import { indicatorsSelection, URLParams } from "$lib/stores"
+  import { indicatorsSelection, URLParams, monitoringOverTijdActive, gebiedsselectieActive } from "$lib/stores"
   import { addURLParameter, removeURLParameter } from "$lib/services/urlManager"
   import { t } from "$lib/i18n/translate.js"
 
@@ -11,10 +11,90 @@
   let isOpen = false
   let dropdownRef
 
-  // Group indicators by category
-  const indicatorsByCategory = categories.map(category => ({
+  // Tooltip state
+  let hoveredTooltip = null
+  let tooltipPosition = { x: 0, y: 0 }
+
+  function showTooltip(event, tooltipId) {
+    hoveredTooltip = tooltipId
+    const rect = event.target.getBoundingClientRect()
+    tooltipPosition = {
+      x: rect.left + rect.width / 2,
+      y: rect.top - 10
+    }
+  }
+
+  function hideTooltip() {
+    hoveredTooltip = null
+  }
+
+  // Indicators with year/AHN variants
+  $: indicatorsWithYears = allIndicators.filter(ind => ind.AHNversie && ind.AHNversie.length > 0)
+
+  // Filter indicators based on active global filters
+  $: filteredByGlobalFilters = allIndicators.filter(ind => {
+    // If no filters active, show all
+    if (!$monitoringOverTijdActive && !$gebiedsselectieActive) return true
+
+    let passesFilter = true
+
+    // If monitoring filter active, indicator must have year variants
+    if ($monitoringOverTijdActive) {
+      passesFilter = passesFilter && ind.AHNversie && ind.AHNversie.length > 0
+    }
+
+    // If gebiedsselectie filter active, indicator must have BEB variants
+    if ($gebiedsselectieActive) {
+      const hasBEB = ind.variants && ind.variants.split(",").map(v => v.trim()).some(v => v !== 'M2' && v !== '')
+      passesFilter = passesFilter && hasBEB
+    }
+
+    return passesFilter
+  })
+
+  // Track previous filter states to detect changes
+  let prevMonitoringActive = false
+  let prevGebiedsselectieActive = false
+
+  // Auto-select filtered indicators when a filter is activated
+  $: {
+    const monitoringJustActivated = $monitoringOverTijdActive && !prevMonitoringActive
+    const gebiedsselectieJustActivated = $gebiedsselectieActive && !prevGebiedsselectieActive
+    const monitoringJustDeactivated = !$monitoringOverTijdActive && prevMonitoringActive
+    const gebiedsselectieJustDeactivated = !$gebiedsselectieActive && prevGebiedsselectieActive
+
+    // When a filter is activated, select all matching indicators
+    if (monitoringJustActivated || gebiedsselectieJustActivated) {
+      const titlesToSelect = filteredByGlobalFilters.map(ind => ind.title)
+      $indicatorsSelection = titlesToSelect
+
+      // Update URL params
+      const newParams = new URLSearchParams($URLParams)
+      newParams.delete("indicator")
+      titlesToSelect.forEach(title => newParams.append("indicator", title))
+      $URLParams = newParams
+      addURLParameter()
+    }
+
+    // When both filters are deactivated, clear selection
+    if ((monitoringJustDeactivated || gebiedsselectieJustDeactivated) &&
+        !$monitoringOverTijdActive && !$gebiedsselectieActive) {
+      $indicatorsSelection = []
+      const newParams = new URLSearchParams($URLParams)
+      newParams.delete("indicator")
+      $URLParams = newParams
+      removeURLParameter()
+    }
+
+    // Update previous states
+    prevMonitoringActive = $monitoringOverTijdActive
+    prevGebiedsselectieActive = $gebiedsselectieActive
+  }
+
+  // Group filtered indicators by category
+  $: indicatorsByCategory = categories.map(category => ({
     category,
-    indicators: allIndicators.filter(ind => ind.category === category)
+    indicators: filteredByGlobalFilters.filter(ind => ind.category === category)
   }))
 
   // Filter indicators based on search and exclude already selected ones
@@ -30,6 +110,29 @@
   $: showCategoryHeaders = true
 
   function selectIndicator(title) {
+    // Find the indicator object
+    const indicator = allIndicators.find(ind => ind.title === title)
+
+    // Check if indicator fits the active filters, if not - deactivate the filters
+    if (indicator) {
+      // Check monitoring filter
+      if ($monitoringOverTijdActive) {
+        const hasYears = indicator.AHNversie && indicator.AHNversie.length > 0
+        if (!hasYears) {
+          $monitoringOverTijdActive = false
+        }
+      }
+
+      // Check gebiedsselectie filter
+      if ($gebiedsselectieActive) {
+        const hasBEB = indicator.variants && indicator.variants.split(",").map(v => v.trim()).some(v => v !== 'M2' && v !== '')
+        if (!hasBEB) {
+          $gebiedsselectieActive = false
+        }
+      }
+
+    }
+
     // Add to indicatorsSelection store
     $indicatorsSelection = [...$indicatorsSelection, title]
 
@@ -64,6 +167,10 @@
     // Clear indicatorsSelection store
     $indicatorsSelection = []
 
+    // Deactivate filter toggles
+    $monitoringOverTijdActive = false
+    $gebiedsselectieActive = false
+
     // Update URL params
     const newParams = new URLSearchParams($URLParams)
     newParams.delete("indicator")
@@ -84,6 +191,33 @@
 {#if allIndicators && allIndicators.length > 0}
 <div class="custom-multiselect" bind:this={dropdownRef}>
   <p style="margin-bottom:5px">{`Filter ${t("indicatoren")}:`}</p>
+
+  <!-- Global filter toggles -->
+  <div class="global-filters">
+    <button
+      class="filter-toggle"
+      class:active={$monitoringOverTijdActive}
+      on:click={() => $monitoringOverTijdActive = !$monitoringOverTijdActive}
+      on:mouseenter={(e) => showTooltip(e, 'monitoring')}
+      on:mouseleave={hideTooltip}
+    >
+      {t("Monitoring over tijd")}
+    </button>
+  </div>
+
+  <!-- Custom tooltips - rendered at document level for proper z-index -->
+  {#if hoveredTooltip}
+    <div class="custom-tooltip" style="left: {tooltipPosition.x}px; top: {tooltipPosition.y}px;">
+      {#if hoveredTooltip === 'monitoring'}
+        {t("tooltip_monitoring")}
+      {/if}
+    </div>
+  {/if}
+
+  <!-- Divider between filters and indicator selection -->
+  {#if $monitoringOverTijdActive}
+    <div class="divider"></div>
+  {/if}
 
   <!-- Input area with selected tags -->
   <div class="input-container" on:click={() => isOpen = true}>
@@ -132,6 +266,7 @@
     color: white;
     font-size: 12px;
     position: relative;
+    margin-top: 16px;
   }
 
   .input-container {
@@ -178,11 +313,12 @@
 
   .input-container input {
     flex: 1;
-    min-width: 100px;
+    min-width: 80px;
     border: none;
     outline: none;
     font-size: 12px;
     padding: 4px;
+    padding-right: 70px;
     color: white;
     background: transparent;
   }
@@ -252,4 +388,57 @@
     text-align: center;
     color: #999;
   }
+
+  .global-filters {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .filter-toggle {
+    flex: 1;
+    background: transparent;
+    color: white;
+    border: 1px solid white;
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .filter-toggle:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .filter-toggle.active {
+    background: white;
+    color: #36575a;
+    font-weight: 500;
+  }
+
+  .divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.3);
+    margin: 12px 0;
+  }
+
+  .custom-tooltip {
+    position: fixed;
+    background-color: white;
+    color: #333;
+    padding: 15px 20px;
+    border-radius: 10px;
+    font-size: 12px;
+    line-height: 1.5;
+    max-width: 300px;
+    text-align: left;
+    transform: translate(-50%, -100%);
+    z-index: 99999;
+    pointer-events: none;
+    box-shadow:
+      rgba(0, 0, 0, 0.3) 0px 19px 38px,
+      rgba(0, 0, 0, 0.22) 0px 15px 12px;
+  }
+
 </style>

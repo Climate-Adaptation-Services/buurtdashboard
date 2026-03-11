@@ -108,6 +108,167 @@ A SvelteKit-based neighborhood dashboard application for visualizing Dutch neigh
 4. Projection created (only after step 3)
 5. Paths rendered
 
+## Recent Improvements (2026-02-12)
+
+### Per-Indicator Year Selection & Global BEB Selection
+
+**Problem**: The previous implementation used global year selection when "Monitoring over tijd" filter was active, which caused confusion and "no data" errors. Additionally, the BEB (Bebouwde kom) selection needed to be more intuitive.
+
+**Solution**: Reverted to per-indicator year selection while implementing global BEB selection:
+
+1. **Per-Indicator Year Selection** (`YearSwitch.svelte` in `IndicatorTitle.svelte`):
+   - Each indicator has its own year dropdown
+   - Appears below the indicator title for indicators with AHN versions
+   - Uses `getIndicatorStore(indicator.dutchTitle)` for isolated state
+   - No global year override - each indicator maintains its own selection
+
+2. **Global BEB Selection** (`indicatorFilter.svelte`):
+   - Radio buttons styled like filter toggle buttons
+   - "Hele buurt" (default) shows full neighborhood data
+   - "Bebouwde kom" filters to built-up area data only
+   - Selecting "Bebouwde kom" auto-selects all indicators with BEB variants
+   - Adding an indicator without BEB variant switches back to "Hele buurt"
+   - Clear All resets BEB to "Hele buurt"
+
+3. **Simplified Filter Logic** (`getIndicatorAttribute.js`):
+   - Removed `globalYearSelection` dependency
+   - Always uses per-indicator store for year selection
+   - Always uses `globalBEBSelection` for BEB variant selection
+   - Cleaner code with fewer conditional branches
+
+4. **Component Updates for BEB Reactivity**:
+   - `IndicatorContent.svelte` - Uses `$globalBEBSelection` directly
+   - `BeeswarmPlot.svelte` - Added `globalBEBSelection` import
+   - `Stats.svelte` - Uses `$globalBEBSelection` for cached values
+   - `BarPlot.svelte` - Uses `$globalBEBSelection` for Nederland values
+
+5. **Tooltips Added**:
+   - "Monitoring over tijd": Explains filtering for multi-year indicators
+   - "Bebouwde kom": Explains built-up area data filtering
+
+**Files Modified**:
+- `src/lib/components/IndicatorTitle.svelte` - YearSwitch placement
+- `src/lib/components/controlPanel/indicatorFilter.svelte` - BEB radio buttons, tooltips
+- `src/lib/utils/getIndicatorAttribute.js` - Simplified logic
+- `src/lib/components/IndicatorContent.svelte` - BEB reactivity
+- `src/lib/components/BeeswarmPlot.svelte` - BEB reactivity
+- `src/lib/components/Stats.svelte` - BEB reactivity
+- `src/lib/components/BarPlot.svelte` - BEB reactivity
+
+## Recent Improvements (2026-03-04)
+
+### Config Portal as Single Source of Truth for CSV URLs
+
+**Problem**: CSV data URLs were hardcoded in `datasets.js`, requiring manual synchronization between codebase and Config Portal.
+
+**Solution**: Config Portal is now the single source of truth for all data URLs:
+
+1. **Removed hardcoded CSV URLs** from `src/lib/datasets.js`:
+   - Removed `DEFAULT_CSV_DATA_URL`, `DORDRECHT_CSV_DATA_URL`, etc.
+   - Only `DATASET_VERSION`, `BUURT_GEOJSON_URL`, and Config Portal URLs remain
+
+2. **Updated `src/lib/config.js`**:
+   - `neighbourhoodCSVdataLocation: null` - fetched from Config Portal
+   - `dataDownloadLocation: null` - fetched from Config Portal
+
+3. **Updated `src/routes/+page.js`**:
+   - Throws error if Config Portal unavailable (no fallback)
+   - CSV URL fetched dynamically from portal config
+
+4. **Updated `scripts/precalculate-nederland.js`**:
+   - Fetches CSV URL from Config Portal instead of using hardcoded URL
+   - Uses `CONFIG_MODE` environment variable for dev/prod
+
+**Files Modified**:
+- `src/lib/datasets.js` - Removed legacy CSV URL exports
+- `src/lib/config.js` - Set CSV/download URLs to null
+- `src/routes/+page.js` - Dynamic URL fetching with error handling
+- `scripts/precalculate-nederland.js` - Config Portal integration
+
+### No-Data Marker Filtering in Precalculation
+
+**Problem**: Nederland aggregates showed strange negative values (e.g., -2458%) because CSV uses special marker values for missing data.
+
+**Solution**: Added filtering for no-data markers:
+
+```javascript
+const NO_DATA_VALUES = [-9999, -9995, -9991];
+
+function isValidValue(value) {
+  if (value === null || value === undefined || value === '' || isNaN(value)) {
+    return false;
+  }
+  const numValue = +value;
+  return !NO_DATA_VALUES.includes(numValue);
+}
+```
+
+### _REST_ Class Calculation for Aggregated Indicators
+
+**Problem**: "10% en 30% regel" indicator showed "Voldoet niet" as null because `_REST_` is a special marker, not a CSV column.
+
+**Solution**: Calculate `_REST_` as `100 - sum of other classes`:
+
+```javascript
+if (classColumnName === '_REST_') {
+  restClassName = className;
+  return; // Skip for now
+}
+// ... calculate other classes ...
+if (restClassName) {
+  const otherClassesSum = Object.values(result)
+    .filter(v => v !== null && v !== undefined)
+    .reduce((sum, val) => sum + val, 0);
+  result[restClassName] = 100 - otherClassesSum;
+}
+```
+
+### YearSwitch Chrome Dropdown Fix
+
+**Problem**: Year selection dropdowns didn't work in Chrome (value wouldn't change after clicking). Worked fine in Firefox.
+
+**Root Cause**: Svelte reactive statement was overwriting `selectedAHN` faster than Chrome's `on:change` handler could update the store. Chrome has different event timing than Firefox.
+
+**Solution**: Changed sync logic to only run before user interaction:
+
+```javascript
+// Track if user has interacted with dropdown
+let userHasInteracted = false
+
+// Reset when municipality changes
+$: if ($municipalitySelection !== previousMunicipality) {
+  previousMunicipality = $municipalitySelection
+  userHasInteracted = false
+}
+
+// In reactive block - only sync if user hasn't interacted yet
+if (!userHasInteracted) {
+  selectedAHN = currentSelection.baseYear
+  selectedDifference = currentSelection.isDifference ? currentSelection.compareYear : "Difference"
+}
+
+// Set flag when user clicks
+function yearClick(change) {
+  userHasInteracted = true
+  // ... rest of handler
+}
+```
+
+**Files Modified**:
+- `src/lib/components/YearSwitch.svelte`
+
+### Tutorial Component
+
+**Added**: Interactive tutorial component (`src/lib/components/Tutorial.svelte`) that guides users through dashboard features.
+
+**Features**:
+- Step-by-step walkthrough of UI elements
+- Highlights target elements with spotlight effect
+- Auto-selects Utrecht as example municipality
+- Covers: map, control panel, indicators, year selection, etc.
+- Accessible via compass icon in top-left corner
+- Stores completion state in localStorage
+
 ## Recent Improvements (2025-11-04)
 
 ### Dataset Version Management & Nederland Aggregates Precalculation
@@ -118,16 +279,16 @@ A SvelteKit-based neighborhood dashboard application for visualizing Dutch neigh
 
 1. **Single Source of Truth** (`src/lib/datasets.js`):
    - Renamed from `datasets.ts` to `.js` to enable Node.js imports
-   - All data URLs and version number defined in one place
+   - Version number and GeoJSON URL defined here
+   - CSV data URLs now fetched from Config Portal (not hardcoded)
    - Both client and server code import from this file
-   - Eliminates duplication and sync issues
 
 ```javascript
 // src/lib/datasets.js
-export const DATASET_VERSION = '20251104'
-export const DEFAULT_INDICATORS_CONFIG_URL = "https://..."
-export const DEFAULT_CSV_DATA_URL = "https://..."
+export const DATASET_VERSION = '20260204'
 export const BUURT_GEOJSON_URL = "https://..."
+export const CONFIG_PORTAL_URL = "https://buurtdashboard-config-portal.vercel.app"
+// Note: CSV URLs are fetched from Config Portal, not hardcoded
 ```
 
 2. **Precalculation Script** (`scripts/precalculate-nederland.js`):
@@ -148,17 +309,21 @@ export const BUURT_GEOJSON_URL = "https://..."
    - Smaller memory footprint during initialization
 
 **Workflow When Updating Data**:
-1. Update URLs and `DATASET_VERSION` in `src/lib/datasets.js`
-2. Run `npm run precalculate-nederland`
-3. Commit both `datasets.js` and `nederland-aggregates.json`
-4. Deploy - version automatically syncs
+1. Upload new CSV to S3
+2. Update URLs in **Config Portal** (https://buurtdashboard-config-portal.vercel.app)
+3. Update `DATASET_VERSION` in `src/lib/datasets.js`
+4. Run `VITE_CONFIG_MODE=dev npm run precalculate-nederland`
+5. Test with `VITE_CONFIG_MODE=dev npm run dev`
+6. Publish to production in Config Portal
+7. Commit `datasets.js` and `nederland-aggregates.json`
+8. Deploy
 
 **Files Modified**:
-- `src/lib/datasets.ts` → `src/lib/datasets.js` - Centralized configuration
-- `scripts/precalculate-nederland.js` - Imports from datasets.js
+- `src/lib/datasets.js` - Version and GeoJSON URL (CSV URLs from Config Portal)
+- `scripts/precalculate-nederland.js` - Fetches CSV URL from Config Portal
 - `static/nederland-aggregates.json` - Generated aggregates with version stamp
 
-**Current Dataset Version**: `20251104`
+**Current Dataset Version**: `20260204`
 
 ## Recent Improvements (2025-11-02)
 
@@ -313,6 +478,48 @@ For "Boomkroonoppervlakte openbaar" (tree crown in public areas):
 **Helper Functions Available**:
 - `calcWeightedAverage` - Used for Nederland/Gemeente aggregates
 - `applySurfaceAreaConversion` - Available but not currently used (preserved for future use)
+
+### Available Surface Area Columns
+
+The following `Oppervlakte` columns are available in the CSV dataset, each with a `_BK` (bebouwde kom) variant:
+
+| Column | Description | BK Variant |
+|--------|-------------|------------|
+| `Oppervlakte_Land_ONO_m2` | Land (openbaar, niet-openbaar) | `Oppervlakte_Land_ONO_m2_BK` |
+| `Oppervlakte_Land_VSK_m2` | Land (verkeersruimte, spoorweg) | `Oppervlakte_Land_VSK_m2_BK` |
+| `Oppervlakte_NietOpenbaar_m2` | Niet-openbare ruimte | `Oppervlakte_NietOpenbaar_m2_BK` |
+| `Oppervlakte_Openbaar_m2` | Openbare ruimte | `Oppervlakte_Openbaar_m2_BK` |
+| `Oppervlakte_Totaal_m2` | Totale oppervlakte | `Oppervlakte_Totaal_m2_BK` |
+| `Oppervlakte_Water_ONO_m2` | Water (openbaar, niet-openbaar) | `Oppervlakte_Water_ONO_m2_BK` |
+| `Oppervlakte_Water_VSK_m2` | Water (verkeersruimte, spoorweg) | `Oppervlakte_Water_VSK_m2_BK` |
+
+Special value: `Totale buurt` is automatically mapped to `Oppervlakte_Totaal_m2`.
+
+### Surface Area Usage
+
+Surface area columns are used in two ways:
+
+1. **Popup Tooltips (m² calculation)**
+   - When `indicator.surfaceArea` is set, tooltips show both percentage AND m² values
+   - Formula: `percentage × oppervlakte = m²`
+   - Example: `35% (3.500 m²)`
+   - Configured in Config Portal via the `Oppervlakte` field
+
+2. **Weighted Averages (gemeente/Nederland aggregates)**
+   - Uses `calcWeightedAverage()` in `src/lib/utils/calcMedian.js`
+   - Larger neighborhoods weigh more heavily
+   - Only for aggregate statistics, not individual neighborhood values
+
+### BK (Bebouwde Kom) Variant Support
+
+When an indicator has a `BK` variant configured:
+- The BEBSwitch component appears, allowing users to toggle between "hele buurt" and "bebouwde kom"
+- Surface area columns automatically switch to `_BK` variant (e.g., `Oppervlakte_Openbaar_m2` → `Oppervlakte_Openbaar_m2_BK`)
+- **No fallback**: If BK data is missing, "Geen data" is shown (intentional for data quality visibility)
+
+**Files handling BK surface area:**
+- `src/lib/utils/valueRetrieval.js:getSurfaceAreaM2()` - Popup m² calculation
+- `src/lib/utils/calcMedian.js:calcWeightedAverage()` - Weighted averages
 
 ## Development Workflow
 
@@ -1336,6 +1543,66 @@ Sentry.init({
 - Retry failed requests (with exponential backoff)
 - Show offline indicator
 - Cache data for offline viewing (via IndexedDB)
+
+## Claude Interaction Rules
+
+### 1) Begrijp eerst precies wat ik wil
+- Vat het verzoek in 1–2 zinnen samen in eigen woorden.
+- Schrijf expliciet op: **Doel**, **beperkingen**, **succescriteria**.
+- Bij ambiguïteit: kies de meest waarschijnlijke interpretatie en ga alvast aan de slag, terwijl je 1–3 gerichte vragen stelt.
+
+### 2) Wees standaard sceptisch op aannames
+- Identificeer de top 3 aannames in de vraag.
+- Label elke aanname als: **onzeker** / **mogelijk fout** / **verifieerbaar** / **normatief**.
+- Als een aanname waarschijnlijk fout is: zeg dat direct en stel een betere aanname voor.
+
+### 3) Pushback wanneer nodig
+Geef tegengas als:
+- De vraag onrealistische constraints heeft (tijd, scope, budget, data)
+- Er gevraagd wordt naar een "snel antwoord" op iets dat nuance vereist
+- Er een oplossing gekozen wordt voordat het probleem scherp is
+- Er risico's zijn (juridisch, privacy, reputatie, veiligheid)
+
+Gebruik dan:
+- "Ik denk dat dit misgaat omdat…"
+- "De zwakste schakel is…"
+- "Als we dit serieus nemen, dan…"
+
+### 4) Bewijsniveau en onzekerheid zijn verplicht
+Markeer belangrijke claims met een bewijslabel:
+- **Hard** (direct controleerbaar / bron)
+- **Redelijk** (sterke indicaties, maar niet bewezen)
+- **Speculatie** (hypothese)
+
+Als iets niet zeker is: zeg wat je wél weet, wat ontbreekt, en hoe je het zou checken.
+
+### 5) Alternatieven en contra-argumenten
+- Geef altijd minimaal 2 alternatieve routes of interpretaties.
+- Voeg een korte "beste tegenargument" sectie toe tegen eigen advies.
+- Geef ook aan wanneer niets doen of uitstellen rationeel is.
+
+### 6) Heldere output, geen fluff
+Standaard format voor complexe vragen:
+1. Samenvatting
+2. Belangrijkste onzekerheden & aannames
+3. Aanpak / antwoord
+4. Risico's & mitigaties
+5. Alternatieven
+6. Volgende 3 acties
+
+### 7) Vragenbeleid (zuinig maar scherp)
+- Stel alleen vragen die het antwoord materieel verbeteren.
+- Max 3 vragen tegelijk.
+- Als je kunt voortgaan met aannames: doe dat, en label ze duidelijk.
+
+### 8) Bescherm tegen biases
+- Check op: confirmation bias, sunk cost, scope creep, overconfidence.
+- Als een richting "te graag" gewild wordt: benoem dat patroon en forceer een reality check.
+
+### 9) Privacy & veiligheid
+- Waarschuw bij het delen van gevoelige info.
+- Geef geen instructies voor schadelijk/illegaal gedrag.
+- Stel veilige alternatieven voor als iets riskant is.
 
 ## Notes for Future Development
 

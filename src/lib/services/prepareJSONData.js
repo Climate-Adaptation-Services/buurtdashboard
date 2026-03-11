@@ -106,9 +106,11 @@ export async function prepareJSONData(JSONdata, CSVdata, options = {}) {
           const objectName = Object.keys(neighbourhoodTopojson.objects)[0];
 
 
-          // Apply topology-preserving simplification with a moderate tolerance
+          // Apply topology-preserving simplification with a very small tolerance
+          // Note: Using 0.000001 instead of 0.00001 to preserve small polygons like Paesens (BU19700401)
+          // which otherwise get reduced to degenerate triangles causing D3 spherical geometry issues
           neighbourhoodTopojson = topojsonsimplify.presimplify(neighbourhoodTopojson);
-          neighbourhoodTopojson = topojsonsimplify.simplify(neighbourhoodTopojson, 0.00001); // Small value preserves most details
+          neighbourhoodTopojson = topojsonsimplify.simplify(neighbourhoodTopojson, 0.000001); // Very small value preserves more details
           neighbourhoodTopojson = topojson.feature(neighbourhoodTopojson, neighbourhoodTopojson.objects[objectName]);
 
           // Filter out null/invalid features before caching

@@ -3,6 +3,7 @@ import { t } from "$lib/i18n/translate.js"
 import { getIndicatorAttribute } from "./getIndicatorAttribute.js";
 import { getNumericalValue, getRawValue, isValidValue } from "./valueRetrieval.js";
 import { getIndicatorStore } from "$lib/stores";
+import { getPropertyWithAHNFallback } from "./resolveAHNColumnName.js";
 
 export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regio) {
   // Check if data exists
@@ -30,53 +31,41 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
 
     // voor deze neighbourhood tel de waardes van elke klasse bij de totale som op
     let noData = true
+    // Find the remainder class (has marker '_REST_' that doesn't exist in CSV)
+    // This class will receive the percentage needed to fill up to 100%
+    const remainderClassName = Object.keys(indicator.classes).find(kl => indicator.classes[kl] === '_REST_')
+
     Object.keys(indicator.classes).forEach(kl => {
-      // Skip the dummy "No data" class for aggregated indicators (it has attribute "-10")
-      if (kl === 'No data' && indicator.classes[kl] === '-10') {
-        return // Skip this class
+      // Skip the remainder class for aggregated indicators (it has marker '_REST_')
+      if (indicator.classes[kl] === '_REST_') {
+        return // Skip this class - it will be filled with the remainder
       }
 
       // getIndicatorAttribute will automatically apply BEB suffix if needed
       const attributeName = getIndicatorAttribute(indicator, indicator.classes[kl])
-      let propertyValue = neighbourhood.properties?.[attributeName]
-
-      // FALLBACK 1: Handle Dordrecht's AHN underscore naming (e.g., "BKB_AHN3" vs "BKBAHN3")
-      if ((propertyValue === null || propertyValue === undefined || propertyValue === '') && attributeName && typeof attributeName === 'string' && attributeName.includes('AHN')) {
-        const ahnPattern = /(AHN\d+)$/
-        const fallbackAttribute = attributeName.replace(ahnPattern, '_$1')
-        if (fallbackAttribute !== attributeName && neighbourhood.properties) {
-          propertyValue = neighbourhood.properties[fallbackAttribute]
-        }
-      }
-
-      // FALLBACK 2: Handle Gevoelstemperatuur columns without underscore (e.g., "PET29tm34pAHN4" vs "PET29tm34p_AHN4")
-      if ((propertyValue === null || propertyValue === undefined || propertyValue === '') && attributeName && typeof attributeName === 'string' && attributeName.includes('_AHN')) {
-        // Try removing the underscore before AHN
-        const fallbackWithoutUnderscore = attributeName.replace('_AHN', 'AHN')
-        if (neighbourhood.properties) {
-          propertyValue = neighbourhood.properties[fallbackWithoutUnderscore]
-        }
-      }
+      // Use centralized AHN column name resolution (handles Dordrecht naming differences)
+      const propertyValue = getPropertyWithAHNFallback(attributeName, neighbourhood.properties)
 
       // Use isValidValue to filter out -9999 and other invalid values
       if (isValidValue(propertyValue)) {
         let value = +propertyValue
-        const originalValue = value
 
-        // Sanity check: For percentage data, values should be 0-100
-        // Values > 100 are likely data errors (e.g., 10099 instead of 100)
-        if (value > 100 && value < 10000) {
-          // Common error pattern: extra digit(s) added (10099 -> 100, 999 -> 99)
-          // Try to fix by removing extra leading digit
-          const strValue = value.toString()
-          if (strValue.startsWith('100') && strValue.length > 3) {
-            value = 100 // 10099 -> 100
-          } else if (strValue.length === 3 && value > 100) {
-            value = parseFloat(strValue.substring(1)) // 999 -> 99
-          }
+        // Handle 0-1 decimal format: convert to 0-100 percentage
+        // Some columns are stored as decimals (0-1 range), others as percentages (0-100 range):
+        // - 0-1 format: PET (Gevoelstemperatuur), perc5_10cm etc (Waterdiepte) - max values ~0.5
+        // - 0-100 format: SHD (Schaduw), P_* (Overstroming), *PercLand (Landbedekking), percPanden* - already 0-100
+        // Detect by column name pattern: PET* and perc[0-9]* columns use 0-1 format
+        // Note: percPanden* columns are already in 0-100 format (max=100), so exclude them
+        const isDecimalFormat = attributeName && (
+          attributeName.startsWith('PET') ||
+          (attributeName.startsWith('perc') && !attributeName.startsWith('percPanden'))
+        )
+
+        if (isDecimalFormat && value >= 0 && value <= 1) {
+          value = value * 100
         }
 
-        // Only use valid percentage values (0-100)
+        // Values should be between 0 and 100
         if (value >= 0 && value <= 100) {
           noData = false
           // pak de klasse erbij in totalSumPerClass
@@ -90,10 +79,40 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
     });
     if (noData) {
       if (indicator.title !== t('Gevoelstemperatuur') && indicator.title !== 'Maximale overstromingsdiepte') {
-        // Add 100% to "No data" class for neighborhoods without data (only if that class exists)
-        const noDataClass = totalSumPerClass.find(kl => kl.className === 'No data')
-        if (noDataClass) {
-          noDataClass.som += 100
+        // Add 100% to remainder class for neighborhoods without any valid data
+        if (remainderClassName) {
+          const remainderClass = totalSumPerClass.find(kl => kl.className === remainderClassName)
+          if (remainderClass) {
+            remainderClass.som += 100
+          }
+        }
+      }
+    } else {
+      // Calculate the sum for THIS neighbourhood and add remainder to fill up to 100%
+      let neighbourhoodSum = 0
+      Object.keys(indicator.classes).forEach(kl => {
+        if (indicator.classes[kl] === '_REST_') return // Skip remainder class
+        const attributeName = getIndicatorAttribute(indicator, indicator.classes[kl])
+        const propertyValue = getPropertyWithAHNFallback(attributeName, neighbourhood.properties)
+        if (isValidValue(propertyValue)) {
+          let value = +propertyValue
+          const isDecimalFormat = attributeName && (
+            attributeName.startsWith('PET') ||
+            (attributeName.startsWith('perc') && !attributeName.startsWith('percPanden'))
+          )
+          if (isDecimalFormat && value >= 0 && value <= 1) {
+            value = value * 100
+          }
+          if (value >= 0 && value <= 100) {
+            neighbourhoodSum += value
+          }
+        }
+      })
+      // Add remainder to the remainder class (e.g., "Voldoet niet", "No data")
+      if (neighbourhoodSum < 100 && remainderClassName) {
+        const remainderClass = totalSumPerClass.find(kl => kl.className === remainderClassName)
+        if (remainderClass) {
+          remainderClass.som += (100 - neighbourhoodSum)
         }
       }
     }
@@ -102,20 +121,13 @@ export function calcPercentagesForEveryClassMultiIndicator(indicator, data, regi
   // Divide by total number of neighborhoods to get average
   totalSumPerClass.forEach(kl => {
     kl.som = totalCount > 0 ? (kl.som / totalCount) : 0
-    if (indicator.title === t('Gevoelstemperatuur') || indicator.title === 'Gevoelstemperatuur') {
-      kl.som *= 100
-    }
   })
 
   // we stoppen het resultaat per klasse in een dictionary
   let result = { 'group': regio }
   Object.keys(indicator.classes).forEach(indicatorClass => {
-    // Skip the dummy "No data" class for aggregated indicators in the output
-    if (indicatorClass === 'No data' && indicator.classes[indicatorClass] === '-10') {
-      result[indicatorClass] = 0 // Set to 0 instead of trying to calculate
-    } else {
-      result[indicatorClass] = totalSumPerClass.filter(kl => kl.className === indicatorClass)[0].som
-    }
+    // Include all classes - remainder class contains the percentage needed to fill to 100%
+    result[indicatorClass] = totalSumPerClass.filter(kl => kl.className === indicatorClass)[0].som
   });
 
   return result

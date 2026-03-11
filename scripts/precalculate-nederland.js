@@ -19,12 +19,25 @@ import { dsvFormat } from 'd3-dsv';
 import { gunzipSync, unzipSync, strFromU8 } from 'fflate';
 import { feature } from 'topojson-client';
 
+// "No data" marker values used in CSV files
+const NO_DATA_VALUES = [-9999, -9995, -9991];
+
+// Helper to check if a value is valid (not null, undefined, NaN, or a "no data" marker)
+function isValidValue(value) {
+  if (value === null || value === undefined || value === '' || isNaN(value)) {
+    return false;
+  }
+  const numValue = +value;
+  return !NO_DATA_VALUES.includes(numValue);
+}
+
 // Import from datasets.js (single source of truth)
 import {
   DATASET_VERSION,
   BUURT_GEOJSON_URL,
-  DEFAULT_CSV_DATA_URL,
-  DEFAULT_INDICATORS_CONFIG_URL
+  DEFAULT_INDICATORS_CONFIG_URL,
+  CONFIG_PORTAL_URL,
+  CONFIG_MODE
 } from '../src/lib/datasets.js';
 
 // Get __dirname equivalent in ES modules
@@ -177,9 +190,19 @@ function buildAttributeName(baseAttribute, { year, bebOption, ahnVersion, bebVar
     attributeName = `${attributeName}_${year}`;
   }
 
-  // Add AHN suffix (direct concatenation, no underscore)
+  // Add AHN suffix
+  // Two naming conventions in CSV:
+  // - Old-style (PET, etc): no underscore before AHN (e.g., PET29tm34pAHN4)
+  // - New-style (BKB, SHD, etc): underscore before AHN (e.g., BKBgraad_Tot_percLand_AHN3)
   if (ahnVersion && ahnVersion !== '') {
-    attributeName = `${attributeName}${ahnVersion}`;
+    const underscoreCount = (attributeName.match(/_/g) || []).length;
+    if (underscoreCount >= 1) {
+      // New-style: use underscore
+      attributeName = `${attributeName}_${ahnVersion}`;
+    } else {
+      // Old-style: no underscore
+      attributeName = `${attributeName}${ahnVersion}`;
+    }
   }
 
   // Add BEB suffix (with underscore, read from config not hardcoded)
@@ -214,15 +237,25 @@ function calculateNederlandAggregate(indicator, jsonData, year = null, bebOption
     const values = features
       .map(feature => {
         const value = feature.properties[attributeName];
-        return (value !== null && value !== undefined && value !== '' && !isNaN(value)) ? +value : null;
+        return isValidValue(value) ? +value : null;
       })
       .filter(v => v !== null);
     return calcMedian(values);
   } else if (indicator.aggregatedIndicator) {
     // For aggregated indicators, calculate average for each class
     const result = {};
+    let restClassName = null; // Track if there's a _REST_ class to calculate
+
     Object.keys(indicator.classes).forEach(className => {
-      const classAttribute = buildAttributeName(indicator.classes[className], {
+      const classColumnName = indicator.classes[className];
+
+      // _REST_ is a special marker meaning "100% - sum of other classes"
+      if (classColumnName === '_REST_') {
+        restClassName = className;
+        return; // Skip for now, calculate after other classes
+      }
+
+      const classAttribute = buildAttributeName(classColumnName, {
         year,
         bebOption,
         ahnVersion: effectiveAhnVersion,
@@ -232,12 +265,20 @@ function calculateNederlandAggregate(indicator, jsonData, year = null, bebOption
       const values = features
         .map(feature => {
           const value = feature.properties[classAttribute];
-          return (value !== null && value !== undefined && value !== '' && !isNaN(value)) ? +value : null;
+          return isValidValue(value) ? +value : null;
         })
         .filter(v => v !== null);
 
       result[className] = calcAverage(values);
     });
+
+    // Calculate _REST_ class as 100 - sum of other classes
+    if (restClassName) {
+      const otherClassesSum = Object.values(result)
+        .filter(v => v !== null && v !== undefined)
+        .reduce((sum, val) => sum + val, 0);
+      result[restClassName] = 100 - otherClassesSum;
+    }
 
     // Special handling for indicators stored as decimals - multiply by 100
     // The CSV stores values as decimals (0.10667 = 10.667%), but client expects percentages
@@ -262,26 +303,38 @@ function calculateNederlandAggregate(indicator, jsonData, year = null, bebOption
 async function main() {
   console.log('🚀 Starting Nederland aggregates pre-calculation...');
   console.log(`📦 Dataset version: ${DATASET_VERSION}`);
+  console.log(`📋 Config mode: ${CONFIG_MODE}`);
 
   try {
-    // 1. Fetch all data
+    // 1. First fetch dashboard config to get the CSV URL
+    console.log('\n📥 Fetching dashboard config from Config Portal...');
+    const configUrl = `${CONFIG_PORTAL_URL}/api/config/default-nl/json?mode=${CONFIG_MODE}`;
+    const configResponse = await fetch(configUrl);
+    if (!configResponse.ok) {
+      throw new Error(`Failed to fetch dashboard config: ${configResponse.status}`);
+    }
+    const dashboardConfig = await configResponse.json();
+    const csvDataUrl = dashboardConfig.csv_data_url;
+    console.log(`📄 CSV URL: ${csvDataUrl}`);
+
+    // 2. Fetch all data
     console.log('\n📥 Fetching data...');
     const [indicatorsConfigResponse, geoJsonResponse, csvResponse] = await Promise.all([
       fetch(DEFAULT_INDICATORS_CONFIG_URL),
       fetch(BUURT_GEOJSON_URL),
-      fetch(DEFAULT_CSV_DATA_URL)
+      fetch(csvDataUrl)
     ]);
 
-    // 2. Process indicators config
+    // 3. Process indicators config
     console.log('📊 Processing indicators config...');
     const indicatorsConfigText = await indicatorsConfigResponse.text();
     const indicatorsConfig = dsvFormat(';').parse(indicatorsConfigText);
 
-    // 3. Process CSV
+    // 4. Process CSV
     console.log('📄 Processing CSV data...');
     const zipBuffer = await csvResponse.arrayBuffer();
     let csvText;
-    if (DEFAULT_CSV_DATA_URL.endsWith('.gz')) {
+    if (csvDataUrl.endsWith('.gz')) {
       const decompressed = gunzipSync(new Uint8Array(zipBuffer));
       csvText = strFromU8(decompressed);
     } else {
@@ -291,9 +344,16 @@ async function main() {
     }
     const csvData = dsvFormat(';').parse(csvText);
 
-    // 4. Process GeoJSON (convert from TopoJSON if needed)
+    // 5. Process GeoJSON (convert from TopoJSON if needed)
     console.log('🗺️  Processing GeoJSON...');
-    const topoJson = await geoJsonResponse.json();
+    let topoJson;
+    if (BUURT_GEOJSON_URL.endsWith('.gz')) {
+      const geoBuffer = await geoJsonResponse.arrayBuffer();
+      const decompressed = gunzipSync(new Uint8Array(geoBuffer));
+      topoJson = JSON.parse(strFromU8(decompressed));
+    } else {
+      topoJson = await geoJsonResponse.json();
+    }
 
     // Convert TopoJSON to GeoJSON
     let geoJson;
@@ -331,8 +391,86 @@ async function main() {
 
       console.log(`   Processing: ${indicator.title} (${years.length > 0 ? years.join(', ') : 'single value'}${hasBEBVariant ? ', BEB' : ''}${hasAHNVersions ? `, AHN: ${indicator.ahnVersions.join(', ')}` : ''})`);
 
-      if (hasBEBVariant) {
-        // BEB variant indicator - calculate for both hele_buurt and bebouwde_kom
+      if (hasBEBVariant && hasAHNVersions) {
+        // BEB variant indicator WITH AHN versions - calculate for both hele_buurt and bebouwde_kom, per AHN version
+        nederlandAggregates[indicator.title] = {
+          hele_buurt: {},
+          bebouwde_kom: {}
+        };
+
+        const bebOptions = ['hele_buurt', 'bebouwde_kom'];
+
+        for (const bebOption of bebOptions) {
+          nederlandAggregates[indicator.title][bebOption] = {};
+
+          // Calculate values for each AHN version
+          for (const ahnVersion of indicator.ahnVersions) {
+            const indicatorWithAHN = { ...indicator, ahnVersions: [ahnVersion] };
+            const value = calculateNederlandAggregate(indicatorWithAHN, jsonData, null, bebOption, ahnVersion);
+            if (value !== null) {
+              nederlandAggregates[indicator.title][bebOption][ahnVersion] = value;
+            }
+          }
+
+          // Calculate differences between AHN versions for this BEB option
+          const ahnVersionsWithData = indicator.ahnVersions.filter(v =>
+            nederlandAggregates[indicator.title][bebOption][v] !== undefined
+          );
+
+          if (ahnVersionsWithData.length >= 2 && indicator.numerical) {
+            for (let i = 0; i < ahnVersionsWithData.length; i++) {
+              for (let j = i + 1; j < ahnVersionsWithData.length; j++) {
+                const baseAHN = ahnVersionsWithData[i];
+                const compareAHN = ahnVersionsWithData[j];
+                const diffKey = `diff_${baseAHN}_${compareAHN}`;
+
+                // Calculate difference for each neighbourhood, then take median
+                const differences = jsonData.features
+                  .map(feature => {
+                    const baseAttr = buildAttributeName(indicator.attribute, {
+                      ahnVersion: baseAHN,
+                      bebOption,
+                      bebVariant
+                    });
+                    const compareAttr = buildAttributeName(indicator.attribute, {
+                      ahnVersion: compareAHN,
+                      bebOption,
+                      bebVariant
+                    });
+                    const baseValue = feature.properties[baseAttr];
+                    const compareValue = feature.properties[compareAttr];
+
+                    if (isValidValue(baseValue) && isValidValue(compareValue)) {
+                      return +compareValue - +baseValue;
+                    }
+                    return null;
+                  })
+                  .filter(v => v !== null);
+
+                const diffMedian = calcMedian(differences);
+                if (diffMedian !== null) {
+                  nederlandAggregates[indicator.title][bebOption][diffKey] = diffMedian;
+                }
+              }
+            }
+          }
+        }
+
+        // Clean up completely empty entries
+        const helebuurtEmpty =
+          (nederlandAggregates[indicator.title].hele_buurt === undefined) ||
+          (typeof nederlandAggregates[indicator.title].hele_buurt === 'object' &&
+           Object.keys(nederlandAggregates[indicator.title].hele_buurt).length === 0);
+        const bebouwdekomEmpty =
+          (nederlandAggregates[indicator.title].bebouwde_kom === undefined) ||
+          (typeof nederlandAggregates[indicator.title].bebouwde_kom === 'object' &&
+           Object.keys(nederlandAggregates[indicator.title].bebouwde_kom).length === 0);
+
+        if (helebuurtEmpty && bebouwdekomEmpty) {
+          delete nederlandAggregates[indicator.title];
+        }
+      } else if (hasBEBVariant) {
+        // BEB variant indicator WITHOUT AHN versions - calculate for both hele_buurt and bebouwde_kom
         nederlandAggregates[indicator.title] = {
           hele_buurt: {},
           bebouwde_kom: {}
@@ -384,6 +522,40 @@ async function main() {
             nederlandAggregates[indicator.title][ahnVersion] = value;
           }
         }
+
+        // Calculate differences between AHN versions
+        const ahnVersionsWithData = indicator.ahnVersions.filter(v => nederlandAggregates[indicator.title][v] !== undefined);
+        if (ahnVersionsWithData.length >= 2 && indicator.numerical) {
+          // For numerical indicators, calculate median of differences
+          for (let i = 0; i < ahnVersionsWithData.length; i++) {
+            for (let j = i + 1; j < ahnVersionsWithData.length; j++) {
+              const baseAHN = ahnVersionsWithData[i];
+              const compareAHN = ahnVersionsWithData[j];
+              const diffKey = `diff_${baseAHN}_${compareAHN}`;
+
+              // Calculate difference for each neighbourhood, then take median
+              const differences = jsonData.features
+                .map(feature => {
+                  const baseAttr = buildAttributeName(indicator.attribute, { ahnVersion: baseAHN });
+                  const compareAttr = buildAttributeName(indicator.attribute, { ahnVersion: compareAHN });
+                  const baseValue = feature.properties[baseAttr];
+                  const compareValue = feature.properties[compareAttr];
+
+                  if (isValidValue(baseValue) && isValidValue(compareValue)) {
+                    return +compareValue - +baseValue;
+                  }
+                  return null;
+                })
+                .filter(v => v !== null);
+
+              const diffMedian = calcMedian(differences);
+              if (diffMedian !== null) {
+                nederlandAggregates[indicator.title][diffKey] = diffMedian;
+              }
+            }
+          }
+        }
+
         // Only add to aggregates if we got at least one version's data
         if (Object.keys(nederlandAggregates[indicator.title]).length === 0) {
           delete nederlandAggregates[indicator.title];

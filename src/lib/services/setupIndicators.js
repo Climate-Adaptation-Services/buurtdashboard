@@ -39,24 +39,28 @@ function addIndicatorCategory(indicatorsList, indicators, isEnglish = false) {
     // Get English translation if available
     const translation = isEnglish ? indicatorTranslations.translations[indicator.Titel] : null
 
-    let classes = { 'No data': '-10' }
-    // add no data class - trim whitespace from domain names and colors
-    // Use English domain labels if available
+    // Get domain labels and table items
     const dutchDomein = indicator.Domein ? indicator.Domein.split(',').map(d => d.trim()) : []
     const englishDomein = translation?.domain ? translation.domain.split(',').map(d => d.trim()) : null
     const domeinLabels = (isEnglish && englishDomein) ? englishDomein : dutchDomein
-    const indicatorDomein = ['No data', ...domeinLabels]
+    const tabelItems = indicator.Indicatornaamtabel ? indicator.Indicatornaamtabel.split(',').map(item => item.trim()) : []
 
-    const noDataColor = '#333333'
-    const indicatorColors = (indicator['kwantitatief / categoraal / geaggregeerd'] !== 'kwantitatief')
-      ? [noDataColor, ...(indicator.Kleur ? indicator.Kleur.split(',').map(c => c.trim()) : [])]
+    // Check if any tabel item is '_REST_' (remainder class for filling to 100%)
+    // Only indicators with '_REST_' will have their remainder filled to 100%
+    // This is clearer than '-10' and won't cause config portal validation issues
+    const hasRemainderInConfig = tabelItems.includes('_REST_')
+
+    let classes = {}
+    // Use domain labels directly from config
+    let indicatorDomein = [...domeinLabels]
+    let indicatorColors = (indicator['kwantitatief / categoraal / geaggregeerd'] !== 'kwantitatief')
+      ? (indicator.Kleur ? indicator.Kleur.split(',').map(c => c.trim()) : [])
       : (indicator.Kleur ? indicator.Kleur.split(',').map(c => c.trim()) : [])
 
     if (indicator['kwantitatief / categoraal / geaggregeerd'] !== 'categoraal') {
       if (indicator.Indicatornaamtabel) {
-        const tabelItems = indicator.Indicatornaamtabel.split(',').map(item => item.trim())
-        indicatorDomein.slice(1).forEach((d, i) => {
-          // Only add class if the index exists in the tabel items
+        // Map domain labels to tabel items directly
+        indicatorDomein.forEach((d, i) => {
           if (tabelItems[i]) {
             classes[d] = tabelItems[i]
           }
@@ -65,8 +69,7 @@ function addIndicatorCategory(indicatorsList, indicators, isEnglish = false) {
     } else {
       if (indicator.klassenthresholds) {
         const thresholds = indicator.klassenthresholds.split(',').map(item => item.trim())
-        indicatorDomein.slice(1).forEach((d, i) => {
-          // Only add class if the index exists in the thresholds
+        indicatorDomein.forEach((d, i) => {
           if (thresholds[i]) {
             classes[d] = thresholds[i]
           }

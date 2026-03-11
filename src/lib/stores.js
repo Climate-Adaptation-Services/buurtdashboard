@@ -1,4 +1,4 @@
-import { writable, derived, readable } from 'svelte/store';
+import { writable, derived, readable, get } from 'svelte/store';
 import { defaultConfig, setupThemeSubscription } from './config';
 
 export const municipalitySelection = writable(null);
@@ -25,15 +25,28 @@ export const indicatorsSelection = writable([])
 export const alleIndicatoren = writable([])
 export const AHNSelecties = writable({})
 export const isUpdatingIndicators = writable(false) // Flag to prevent zoom during indicator updates
+export const forceMapZoom = writable(0) // Increment to force map to re-zoom to current selection
+
+// Global filter toggles for indicator filtering
+export const monitoringOverTijdActive = writable(false) // Filter for indicators with year variants
+export const gebiedsselectieActive = writable(false) // Filter for indicators with BEB variants
+
+// Global selections (apply to all relevant indicators)
+export const globalYearSelection = writable({
+  baseYear: '',
+  compareYear: null,
+  isDifference: false
+})
+// Note: globalBEBSelection is kept for backwards compatibility but no longer used
+// BEB selection is now per-indicator in the indicator stores
+export const globalBEBSelection = writable('hele_buurt') // 'hele_buurt' or 'bebouwde_kom'
 
 const indicatorStores = new Map()
 
 export function getIndicatorStore(indicatorTitle) {
   if (!indicatorStores.has(indicatorTitle)) {
-    // Get current AHNSelecties value without subscribing
-    let currentAHNSelecties
-    const unsubscribe = AHNSelecties.subscribe(v => currentAHNSelecties = v)
-    unsubscribe() // Immediately unsubscribe to avoid loops
+    // Get current AHNSelecties value synchronously
+    const currentAHNSelecties = get(AHNSelecties)
 
     // Initialize from existing data if available
     const existing = currentAHNSelecties[indicatorTitle]
@@ -45,7 +58,7 @@ export function getIndicatorStore(indicatorTitle) {
           baseYear: existing.baseYear || '',
           compareYear: existing.compareYear || null,
           isDifference: existing.isDifference || false,
-          beb: existing.beb || 'hele_buurt'
+          beb: existing.beb || 'hele_buurt' // Per-indicator BEB, default to hele_buurt
         }
       } else {
         // Legacy string format
@@ -53,7 +66,7 @@ export function getIndicatorStore(indicatorTitle) {
           baseYear: existing,
           compareYear: null,
           isDifference: false,
-          beb: 'hele_buurt'
+          beb: 'hele_buurt' // Default to hele_buurt
         }
       }
     } else {
@@ -62,7 +75,7 @@ export function getIndicatorStore(indicatorTitle) {
         baseYear: '',
         compareYear: null,
         isDifference: false,
-        beb: 'hele_buurt'
+        beb: 'hele_buurt' // Default to hele_buurt
       }
     }
 
@@ -80,7 +93,7 @@ export function getIndicatorSelection(indicatorTitle) {
   return value
 }
 
-// Note: No automatic sync to prevent loops. 
+// Note: No automatic sync to prevent loops.
 // Components should use the new indicator stores directly.
 
 // Initialize indicator stores from the old AHNSelecties data
@@ -95,7 +108,7 @@ export function initializeIndicatorStores(data) {
       baseYear: baseYear,
       compareYear: null,
       isDifference: false,
-      beb: 'hele_buurt'
+      beb: 'hele_buurt' // Default to hele_buurt per indicator
     })
   })
 }

@@ -7,6 +7,42 @@ import { AHNSelecties, getIndicatorStore } from '$lib/stores'
 import { getIndicatorAttribute } from './getIndicatorAttribute.js'
 import { getMostCommonClass } from './getMostCommonClass.js'
 import { getClassByIndicatorValue } from './getClassByIndicatorValue.js'
+import { getPropertyWithAHNFallback } from './resolveAHNColumnName.js'
+
+// No-data code meanings - single source of truth
+// -9991: No slow traffic route in this neighbourhood
+// -9995: No AHN5 data available
+// -9999: No built-up area (bebouwde kom) in this neighbourhood
+export const NO_DATA_CODES = {
+  '-9991': 'no_slow_traffic_route',
+  '-9995': 'no_ahn5_data',
+  '-9999': 'no_bebouwde_kom'
+}
+
+// List of all specific no-data reason keys (for checking if a value is a no-data reason)
+export const NO_DATA_REASON_KEYS = Object.values(NO_DATA_CODES)
+
+// Get the specific reason for no-data based on the code
+export function getNoDataReason(value) {
+  if (value === null || value === undefined || value === '' || value === 'null') {
+    return 'no_data'
+  }
+  const numValue = typeof value === 'number' ? value : parseFloat(value)
+  if (isNaN(numValue)) return 'no_data'
+
+  const reason = NO_DATA_CODES[String(Math.round(numValue))]
+  return reason || null // Return reason if found, null if value is valid
+}
+
+// Check if a value is a specific no-data reason (not generic 'no_data' or 'No data')
+export function isSpecificNoDataReason(value) {
+  return NO_DATA_REASON_KEYS.includes(value)
+}
+
+// Check if a value is any kind of no-data (specific reason, generic, or 'No data')
+export function isAnyNoData(value) {
+  return value === 'No data' || value === 'no_data' || NO_DATA_REASON_KEYS.includes(value)
+}
 
 // Utilities
 export function isValidValue(value) {
@@ -16,12 +52,9 @@ export function isValidValue(value) {
   if (isNaN(value)) {
     return false
   }
-  // Treat -9999 as missing/invalid data (common convention)
+  // Check if value is a no-data code using centralized lookup
   const numValue = typeof value === 'number' ? value : parseFloat(value)
-  if (numValue === -9999) {
-    return false
-  }
-  return true
+  return !NO_DATA_CODES[String(Math.round(numValue))]
 }
 
 export function toNumber(value, defaultValue = null) {
@@ -72,28 +105,8 @@ function getRawValue(feature, indicator, { year, attributeOverride, forceM2 = fa
     (year ? getIndicatorAttribute(indicator, baseAttribute, year) :
       getIndicatorAttribute(indicator, baseAttribute))
 
-  let value = feature.properties?.[attribute]
-
-  // FALLBACK 1: If AHN version attribute doesn't exist, try with underscore before AHN
-  // NOTE: This is a workaround for Dordrecht data which uses "BKB_AHN3" instead of "BKBAHN3"
-  // TODO: Standardize Dordrecht CSV column naming to match default dataset (remove underscores before AHN)
-  if (!isValidValue(value) && attribute && typeof attribute === 'string' && attribute.includes('AHN')) {
-    // Try adding underscore before AHN (e.g., "PET29tm34pAHN4" -> "PET29tm34p_AHN4")
-    const ahnPattern = /(AHN\d+)$/
-    const fallbackAttribute = attribute.replace(ahnPattern, '_$1')
-    if (fallbackAttribute !== attribute) {
-      value = feature.properties?.[fallbackAttribute]
-    }
-  }
-
-  // FALLBACK 2: Handle Gevoelstemperatuur columns without underscore (e.g., "PET29tm34pAHN4" vs "PET29tm34p_AHN4")
-  if (!isValidValue(value) && attribute && typeof attribute === 'string' && attribute.includes('_AHN')) {
-    // Try removing the underscore before AHN
-    const fallbackWithoutUnderscore = attribute.replace('_AHN', 'AHN')
-    value = feature.properties?.[fallbackWithoutUnderscore]
-  }
-
-  return value
+  // Use centralized AHN column name resolution (handles Dordrecht naming differences)
+  return getPropertyWithAHNFallback(attribute, feature.properties)
 }
 
 function getNumberValue(feature, indicator, options = {}) {
@@ -115,29 +128,32 @@ function getCategoryValue(feature, indicator, { defaultValue = 'No data', ...opt
   }
 }
 
-// AHN selection helper
+// AHN selection helper - uses per-indicator store
 export function getAHNSelection(indicator) {
   // Use indicator-specific store for proper reactivity
   // Use dutchTitle for store key to ensure consistency across languages
   const indicatorStore = getIndicatorStore(indicator.dutchTitle || indicator.title)
-  let selection = null;
-  
-  // Get the current value from the store
-  const unsubscribe = indicatorStore.subscribe(value => {
-    selection = value
-  })
-  unsubscribe() // Immediately unsubscribe to avoid memory leaks
-  
-  if (!selection) return { baseYear: '', compareYear: null, isDifference: false, beb: 'hele_buurt' }
+  const selection = get(indicatorStore)
+
+  // Get default baseYear from indicator config if store has no baseYear
+  const getDefaultBaseYear = () => {
+    if (indicator.AHNversie) {
+      const versions = indicator.AHNversie.split(',').map(v => v.trim())
+      return versions[versions.length - 1]
+    }
+    return ''
+  }
+
+  if (!selection) return { baseYear: getDefaultBaseYear(), compareYear: null, isDifference: false, beb: 'hele_buurt' }
   if (typeof selection === 'object') {
-    return { 
-      baseYear: selection.baseYear || '', 
-      compareYear: selection.compareYear || null, 
+    return {
+      baseYear: selection.baseYear || getDefaultBaseYear(),
+      compareYear: selection.compareYear || null,
       isDifference: selection.isDifference || false,
       beb: selection.beb || 'hele_buurt'
     }
   }
-  return { baseYear: selection, compareYear: null, isDifference: false, beb: 'hele_buurt' }
+  return { baseYear: selection || getDefaultBaseYear(), compareYear: null, isDifference: false, beb: 'hele_buurt' }
 }
 
 // Difference calculation - now supports M2 variants
@@ -214,7 +230,7 @@ function getSurfaceAreaM2(feature, indicator) {
 
   // Special handling for "Totale buurt" - map to standard column
   if (surfaceAreaColumn === 'Totale buurt') {
-    surfaceAreaColumn = 'Oppervlakte_Land_m2'
+    surfaceAreaColumn = 'Oppervlakte_Totaal_m2'
   }
 
   // Check if we need to apply BEB suffix to surface area column
@@ -224,21 +240,12 @@ function getSurfaceAreaM2(feature, indicator) {
   if (surfaceBebVariant) {
     // Use dutchTitle for store key to ensure consistency across languages
     const indicatorStore = getIndicatorStore(indicator.dutchTitle || indicator.title)
-    let ahnSelection
-
-    const unsubscribe = indicatorStore.subscribe(value => {
-      ahnSelection = value
-    })
-    unsubscribe()
+    const ahnSelection = get(indicatorStore)
 
     const bebSelection = ahnSelection?.beb || 'hele_buurt'
     if (bebSelection === 'bebouwde_kom') {
-      const bebColumn = surfaceAreaColumn + '_' + surfaceBebVariant
-      // Try BEB variant first, fall back to base column if not available
-      const bebValue = feature.properties[bebColumn]
-      if (bebValue !== null && bebValue !== undefined && !isNaN(bebValue)) {
-        surfaceAreaColumn = bebColumn
-      }
+      // Use BK surface area column - no fallback, return null if not available
+      surfaceAreaColumn = surfaceAreaColumn + '_' + surfaceBebVariant
     }
   }
 

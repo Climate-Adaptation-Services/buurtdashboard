@@ -26,6 +26,7 @@
   let baseFilteredData = []
 
   // Reactive data filtering using value retrieval system
+  // Uses per-indicator BEB selection from indicatorStore
   $: {
     if ($indicatorStore) {
       // MIGRATED: Filter using centralized value retrieval system
@@ -76,7 +77,7 @@
     originalAttribute = indicatorAttribute // Keep this for backward compatibility but use getRawValue for colors
   }
 
-  // Use dedicated indicator store for difference mode detection (naturally isolated)
+  // Use indicator store for difference mode detection
   $: isDifferenceMode = $indicatorStore && typeof $indicatorStore === "object" && $indicatorStore.isDifference
 
   // Calculate difference values reactive only to this indicator's selection
@@ -143,7 +144,7 @@
 
   // FIXED: Let Svelte handle reactivity naturally - run simulation when AHN selection changes
   $: {
-    // This reactive block will trigger whenever this indicator's store changes OR indicatorAttribute changes
+    // This reactive block will trigger whenever this indicator's store selection changes OR indicatorAttribute changes
     const currentSelection = $indicatorStore
     const currentIndicatorAttribute = indicatorAttribute
     const currentBEB = currentSelection?.beb || 'hele_buurt'
@@ -356,12 +357,13 @@
       class:selected-node={node.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection}
       cx={node.x}
       cy={node.y}
-      r={$circleRadius}
+      r={node.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection ? $circleRadius + 2 : $circleRadius}
       fill={differenceValues
         ? indicatorValueColorscale(node.diffValue)
         : indicatorValueColorscale(getRawValue(node, indicator))
       }
       stroke-width="3"
+      style={node.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection ? "filter: drop-shadow(0 0 5px #36575a);" : ""}
       on:mouseover={(e) => {
         // If we're showing a difference plot, add the diffValue to the node properties
         // so the mouseOver handler can access it

@@ -3,6 +3,7 @@
   import { afterUpdate } from "svelte"
   import { getIndicatorAttribute } from "$lib/utils/getIndicatorAttribute"
   import { t } from "$lib/i18n/translate.js"
+  import { sanitizeClassName } from "$lib/utils/sanitizeClassName.js"
 
   export let indicator
   export let graphWidth
@@ -11,7 +12,7 @@
   let isRightmost = false
 
   afterUpdate(() => {
-    const className = "indicator-info-" + indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', '').replaceAll('|', '_')
+    const className = "indicator-info-" + sanitizeClassName(indicator.title)
     const infoElement = document.getElementsByClassName(className)[0]
     if (!infoElement) return
 
@@ -57,7 +58,7 @@
   on:mouseover={handleCategoryMouseOver}
   on:mouseout={handleCategoryMouseOut}
 />
-<div class={"indicator-info indicator-info-" + indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', '').replaceAll('|', '_')} style="left:{indicatorInfoPosition}px">
+<div class={"indicator-info indicator-info-" + sanitizeClassName(indicator.title)} style="left:{indicatorInfoPosition}px">
   <p class="title" style="background-color:{$configStore.mainColor}">
     <strong>{indicator.title}</strong>
   </p>
@@ -71,27 +72,35 @@
     right: 5px;
     top: 5px;
     z-index: 10;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    font-size: 14px;
   }
 
   .category {
-    width: 29px;
-    padding: 0px 6px;
+    width: 28px;
+    height: 28px;
+    padding: 0;
     margin: 0;
     position: absolute;
-    border-radius: 50px;
+    border-radius: 50%;
     top: 5px;
     left: 5px;
     z-index: 10;
+    object-fit: contain;
   }
 
   h3 {
-    padding: 3px 11px;
     margin: 0;
     position: absolute;
-    border-radius: 50px;
-    top: 5px;
+    border-radius: 50%;
     color: white;
     cursor: default;
+    box-sizing: border-box;
   }
 
   .indicator-info {
@@ -110,14 +119,15 @@
     padding: 3px 10px;
     border-radius: 50px;
     color: white;
-    float: left;
+    display: inline-block;
     margin: 0;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
   }
 
   hr {
     width: 100%;
-    margin: 1rem 0;
+    margin: 0.5rem 0;
+    clear: both;
   }
 
   .description {

@@ -7,12 +7,15 @@
     getIndicatorStore,
     municipalitySelection,
     isUpdatingIndicators,
+    forceMapZoom,
   } from "$lib/stores"
+  // Note: Using per-indicator year selection via indicatorStore (not global)
   import { geoMercator, geoPath, select, selectAll } from "d3"
   import { t } from "$lib/i18n/translate.js"
   import MapPath from "./MapPath.svelte"
   import { onMount, tick } from "svelte"
   import { LeafletMapManager } from "$lib/map/LeafletMapManager.js"
+  import { sanitizeClassName } from "$lib/utils/sanitizeClassName.js"
 
   // Leaflet map manager
   let mapManager = new LeafletMapManager()
@@ -72,13 +75,18 @@
       }
     } else {
       // For indicator maps: use the original static projection
-      projection = geoMercator().fitExtent(
-        [
-          [10, topYPosition],
-          [mapWidth - 10, mapHeight - 45],
-        ],
-        $currentJSONData,
-      )
+      // Only create projection when we have valid dimensions and data
+      if (mapWidth > 0 && mapHeight > 0 && $currentJSONData?.features?.length > 0) {
+        projection = geoMercator().fitExtent(
+          [
+            [10, topYPosition],
+            [mapWidth - 10, mapHeight - 45],
+          ],
+          $currentJSONData,
+        )
+      } else {
+        projection = null
+      }
     }
   }
 
@@ -87,22 +95,23 @@
   }
 
   function aggregatedMapInfo() {
-    const className = ".tooltip-multi" + indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', '').replaceAll('|', '_')
+    const className = ".tooltip-multi" + sanitizeClassName(indicator.title)
     select(className).style("visibility", "visible")
   }
 
   function aggregatedMapInfoOut() {
-    const className = ".tooltip-multi" + indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', '').replaceAll('|', '_')
+    const className = ".tooltip-multi" + sanitizeClassName(indicator.title)
     select(className).style("visibility", "hidden")
   }
 
   // Use dedicated indicator store for difference mode detection (naturally isolated)
   // Use dutchTitle for store key to ensure consistency across languages
   $: indicatorStore = indicator ? getIndicatorStore(indicator.dutchTitle || indicator.title) : null
+
+  // Use per-indicator year selection
   $: isDifferenceMode = $indicatorStore && typeof $indicatorStore === "object" && $indicatorStore.isDifference
 
   // Pre-calculate difference values for map features to match BeeswarmPlot approach
-  // Watch for changes to indicatorStore to recalculate when BEB selection changes
   $: differenceValues = calculateDifferenceValues(
     $currentJSONData,
     indicator,
@@ -168,6 +177,11 @@
     mapManager.handleSelectionChange($municipalitySelection, $neighbourhoodSelection, $currentJSONData, $isUpdatingIndicators)
   }
 
+  // Force map to re-zoom when forceMapZoom store is incremented
+  $: if ($forceMapZoom > 0 && mapManager.getMap() && mapType === "main map" && $currentJSONData && mapInitializedWithData) {
+    mapManager.fitMapToBounds($currentJSONData)
+  }
+
   // Raise selected neighborhood elements to ensure they appear on top
   $: if ($neighbourhoodSelection) {
     tick().then(() => {
@@ -231,7 +245,7 @@
     {/if}
   </div>
 {:else}
-  <svg class={"indicator-map-" + indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', '')} style="filter:drop-shadow(0 0 15px rgb(160, 160, 160))">
+  <svg class={"indicator-map-" + sanitizeClassName(indicator.title)} style="filter:drop-shadow(0 0 15px rgb(160, 160, 160))">
     <!-- svelte-ignore a11y-mouse-events-have-key-events -->
     <!-- svelte-ignore a11y-no-static-element-interactions -->
     {#if $currentJSONData.features && path && projection}
@@ -266,7 +280,7 @@
 {/if}
 
 {#if indicator && indicator.aggregatedIndicator === true}
-  <div class={"tooltip-multi tooltip-multi" + indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', '').replaceAll('|', '_')}>
+  <div class={"tooltip-multi tooltip-multi" + sanitizeClassName(indicator.title)}>
     <p>{t("multi-indicator-map-explanation")}</p>
   </div>
 {/if}

@@ -12,7 +12,11 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Surface Area Weighting Tests', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    // Disable tutorial by setting localStorage before page load
+    await page.addInitScript(() => {
+      localStorage.setItem('buurtdashboard-tutorial-seen', 'true');
+    });
+    await page.goto('/?config=dordrecht');
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(8000); // Allow data loading
     // Wait for the custom multiselect to be ready
@@ -106,7 +110,11 @@ test.describe('Surface Area Weighting Tests', () => {
 
 test.describe('BEB Variant Switching Tests', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    // Disable tutorial by setting localStorage before page load
+    await page.addInitScript(() => {
+      localStorage.setItem('buurtdashboard-tutorial-seen', 'true');
+    });
+    await page.goto('/?config=dordrecht');
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(8000);
     // Wait for the custom multiselect to be ready
@@ -251,7 +259,11 @@ test.describe('BEB Variant Switching Tests', () => {
 
 test.describe('Data Integrity with Surface Area Weighting', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    // Disable tutorial by setting localStorage before page load
+    await page.addInitScript(() => {
+      localStorage.setItem('buurtdashboard-tutorial-seen', 'true');
+    });
+    await page.goto('/?config=dordrecht');
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(8000);
     // Wait for the custom multiselect to be ready
@@ -345,7 +357,11 @@ test.describe('Data Integrity with Surface Area Weighting', () => {
 
 test.describe('Regression Tests - Prevent Previous Issues', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    // Disable tutorial by setting localStorage before page load
+    await page.addInitScript(() => {
+      localStorage.setItem('buurtdashboard-tutorial-seen', 'true');
+    });
+    await page.goto('/?config=dordrecht');
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(8000);
     // Wait for the custom multiselect to be ready

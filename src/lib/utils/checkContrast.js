@@ -32,6 +32,7 @@ function hexToRgb(hex) {
 }
 
 export function checkContrast(color){
+  if(!color) return false
   let colorcode = ''
   if(color[0] === '#'){
     colorcode = hexToRgb(color)

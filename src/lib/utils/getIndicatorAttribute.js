@@ -11,21 +11,38 @@ import { get } from "svelte/store"
 export function getIndicatorAttribute(indicator, attribute, specificYear) {
   let resultAttribute = attribute
 
-  // Determine the year to use first
-  let yearToUse = specificYear;
-  if (!yearToUse) {
-    // Use dutchTitle for store key to ensure consistency across languages
-    const indicatorStore = getIndicatorStore(indicator.dutchTitle || indicator.title);
-    const ahnSelection = get(indicatorStore);
-    yearToUse = ahnSelection?.baseYear;
+  // Get the indicator store to read both year and BEB selection
+  // Use dutchTitle for store key to ensure consistency across languages
+  const indicatorStore = getIndicatorStore(indicator.dutchTitle || indicator.title);
+  const ahnSelection = get(indicatorStore);
+
+  // Determine the year to use first - always use per-indicator store
+  // Fallback to the last AHN version from indicator config if store has no baseYear
+  let yearToUse = specificYear || ahnSelection?.baseYear;
+
+  // If no year is selected but indicator has AHN versions, use the last one as default
+  if (!yearToUse && indicator.AHNversie) {
+    const versions = indicator.AHNversie.split(',').map(v => v.trim());
+    yearToUse = versions[versions.length - 1];
   }
 
   // Add year/AHN suffix first (if it exists)
   if (yearToUse && yearToUse !== '') {
     // Check if this is an AHN version (starts with "AHN") or a regular year (numeric)
     if (yearToUse.startsWith('AHN')) {
-      // For AHN versions: no underscore (e.g., PET29tm34pAHN4)
-      resultAttribute = resultAttribute + yearToUse;
+      // AHN versions have two naming conventions in the CSV data:
+      // - Old-style (PET, etc): no underscore before AHN (e.g., PET29tm34pAHN4)
+      // - New-style (BKB, SHD, etc): underscore before AHN (e.g., BKBgraad_Tot_percLand_AHN3)
+      // Detect by checking if attribute ends with underscore-separated component
+      // New style attributes typically have multiple underscore-separated parts
+      const underscoreCount = (resultAttribute.match(/_/g) || []).length
+      if (underscoreCount >= 1 && resultAttribute.includes('_')) {
+        // New-style: use underscore (e.g., BKBgraad_Tot_percLand_AHN3)
+        resultAttribute = resultAttribute + '_' + yearToUse;
+      } else {
+        // Old-style: no underscore (e.g., PET29tm34pAHN4)
+        resultAttribute = resultAttribute + yearToUse;
+      }
     } else {
       // For regular years: use underscore (e.g., attribute_2020)
       resultAttribute = resultAttribute + '_' + yearToUse;
@@ -38,9 +55,7 @@ export function getIndicatorAttribute(indicator, attribute, specificYear) {
   const bebVariant = variants.find(v => v !== 'M2' && v !== '') // Find the BEB variant (not M2)
 
   if (bebVariant) {
-    // Use dutchTitle for store key to ensure consistency across languages
-    const indicatorStore = getIndicatorStore(indicator.dutchTitle || indicator.title);
-    const ahnSelection = get(indicatorStore);
+    // Use per-indicator BEB selection from the indicator store
     const bebSelection = ahnSelection?.beb || 'hele_buurt'
 
     if (bebSelection === 'bebouwde_kom') {

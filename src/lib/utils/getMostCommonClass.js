@@ -1,42 +1,63 @@
 import { getIndicatorAttribute } from "./getIndicatorAttribute";
+import { getNoDataReason, isValidValue } from "./valueRetrieval.js";
+import { getPropertyWithAHNFallback } from "./resolveAHNColumnName.js";
 
 // Function to determine the color of a neighbourhood in aggregated indicator maps
 export function getMostCommonClass(indicator, feature) {
 
-
-
   let mostCommon = ''
   let highestValue = 0
+  let firstNoDataReason = null
+  let sumOfRealClasses = 0
+  let hasAnyValidData = false
+
+  // Find the remainder class name (the class with '_REST_' marker)
+  const remainderClassName = Object.keys(indicator.classes).find(
+    key => indicator.classes[key] === '_REST_'
+  )
+
   Object.keys(indicator.classes).forEach(key => {
+    // Skip the remainder class marker - it's not a real CSV column, we'll calculate it
+    if (indicator.classes[key] === '_REST_') {
+      return
+    }
     const attribute = getIndicatorAttribute(indicator, indicator.classes[key])
-    let value = feature.properties?.[attribute]
+    // Use centralized AHN column name resolution (handles Dordrecht naming differences)
+    const value = getPropertyWithAHNFallback(attribute, feature.properties)
 
-    // FALLBACK 1: Handle Dordrecht's AHN underscore naming (e.g., "BKB_AHN3" vs "BKBAHN3")
-    if ((value === null || value === undefined || value === '') && attribute && typeof attribute === 'string' && attribute.includes('AHN')) {
-      const ahnPattern = /(AHN\d+)$/
-      const fallbackAttribute = attribute.replace(ahnPattern, '_$1')
-      if (fallbackAttribute !== attribute && feature.properties) {
-        value = feature.properties[fallbackAttribute]
+    // Check for specific no-data codes before processing
+    if (!firstNoDataReason && value !== null && value !== undefined && value !== '') {
+      const reason = getNoDataReason(value)
+      if (reason && reason !== 'no_data' && reason !== null) {
+        firstNoDataReason = reason
       }
     }
 
-    // FALLBACK 2: Handle Gevoelstemperatuur columns without underscore (e.g., "PET29tm34pAHN4" vs "PET29tm34p_AHN4")
-    if ((value === null || value === undefined || value === '') && attribute && typeof attribute === 'string' && attribute.includes('_AHN')) {
-      const fallbackWithoutUnderscore = attribute.replace('_AHN', 'AHN')
-      if (feature.properties) {
-        value = feature.properties[fallbackWithoutUnderscore]
+    // Only count valid values (skip no-data codes)
+    if (isValidValue(value)) {
+      hasAnyValidData = true
+      const numValue = +value
+      sumOfRealClasses += numValue
+      if (numValue > highestValue) {
+        highestValue = numValue
+        mostCommon = key
       }
-    }
-
-    if (+value > highestValue) {
-      highestValue = +value
-      mostCommon = key
     }
   });
 
+  // If there's a remainder class, calculate its value (100 - sum of real classes)
+  // and check if it's the highest
+  if (remainderClassName && hasAnyValidData) {
+    const remainderValue = 100 - sumOfRealClasses
+    if (remainderValue > highestValue) {
+      highestValue = remainderValue
+      mostCommon = remainderClassName
+    }
+  }
 
   if (mostCommon === '') {
-    return 'No data'
+    // Return specific no-data reason if found, otherwise generic 'No data'
+    return firstNoDataReason || 'No data'
   }
 
 

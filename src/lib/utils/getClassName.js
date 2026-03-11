@@ -1,5 +1,6 @@
 import { currentCodeAbbreviation } from "$lib/stores"
 import { get } from "svelte/store"
+import { sanitizeClassName } from "./sanitizeClassName.js"
 
 export function getClassName(feature, type, indicator, mapType) {
   // Defensive check to prevent errors when feature is undefined or missing properties
@@ -15,15 +16,5 @@ export function getClassName(feature, type, indicator, mapType) {
     className += '_' + indicator.title
   }
 
-  // Remove spaces, parentheses, commas, and other special characters that are invalid in CSS selectors
-  return className
-    .replaceAll(' ', '')
-    .replaceAll('(', '')
-    .replaceAll(')', '')
-    .replaceAll(',', '_')
-    .replaceAll('/', '_')
-    .replaceAll('|', '_')
-    .replaceAll('%', 'pct')
-    .replaceAll('.', '_')
-    .replaceAll(':', '_')
+  return sanitizeClassName(className)
 }

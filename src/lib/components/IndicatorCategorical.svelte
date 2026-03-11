@@ -7,6 +7,12 @@
   export let indicatorValueColorscale
   export let graphWidth
   export let graphHeight
+
+  let barPlotData = []
+
+  function handleDataUpdate(event) {
+    barPlotData = event.detail.barPlotData
+  }
 </script>
 
 <div class="indicator-graph" style="height:{graphHeight}px" bind:clientWidth={graphWidth}>
@@ -16,8 +22,9 @@
     aggregated={indicator.aggregatedIndicator ? true : false}
     {indicator}
     {indicatorValueColorscale}
+    on:dataUpdate={handleDataUpdate}
   />
-  <BarPlotLegend {graphWidth} {indicatorValueColorscale} {indicator} />
+  <BarPlotLegend {graphWidth} {indicatorValueColorscale} {indicator} {barPlotData} />
 </div>
 
 <style>

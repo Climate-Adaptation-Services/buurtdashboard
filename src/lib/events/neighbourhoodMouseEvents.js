@@ -1,4 +1,5 @@
 import { getClassName } from '$lib/utils/getClassName';
+import { sanitizeClassName } from '$lib/utils/sanitizeClassName.js';
 import { currentCodeAbbreviation, neighbourhoodSelection, mousePosition, circleRadius, municipalitySelection, currentNameAbbreviation, URLParams, currentOverviewLevel, neighbourhoodCodeAbbreviation, tooltipValues, tooltipRegion, AHNSelecties } from '$lib/stores';
 import { addURLParameter } from '$lib/services/urlManager.js';
 import { get } from 'svelte/store';
@@ -19,7 +20,10 @@ import {
   getAHNSelection,
   isValidValue,
   getPopupValue,
-  formatM2Value
+  formatM2Value,
+  isSpecificNoDataReason,
+  isAnyNoData,
+  getNoDataReason
 } from '../utils/valueRetrieval.js';
 
 export function mouseOver(e, feature, indicator, mapType, indicatorValueColorscale, projection, beeswarmMargin) {
@@ -29,6 +33,36 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
 
   let attributeWithoutYear = ''
   let indicatorAttribute = ''
+
+  // Reset any lingering hover states from other elements before applying new hover
+  // This prevents multiple elements staying highlighted when mouse moves quickly
+  if (mapType !== 'main map') {
+    const indicatorClassName = sanitizeClassName(indicator.title)
+    const currentSelection = get(neighbourhoodSelection)
+    const selectedClass = currentSelection ? 'svgelements_' + currentSelection : null
+
+    // Reset all paths in this indicator's map/beeswarm (exclude selected neighbourhood)
+    selectAll('path[class*="path_' + indicatorClassName + '"]')
+      .filter(function() {
+        // Keep the selected neighbourhood's styling intact
+        const el = /** @type {Element} */ (this)
+        return !selectedClass || !el.classList?.contains(selectedClass)
+      })
+      .attr('stroke-width', 0.5)
+      .style('filter', 'none')
+
+    // Reset all circles in this indicator's beeswarm (exclude selected neighbourhood)
+    if (indicator.numerical) {
+      selectAll('circle[class*="node_' + indicatorClassName + '"]')
+        .filter(function() {
+          const el = /** @type {Element} */ (this)
+          return !selectedClass || !el.classList?.contains(selectedClass)
+        })
+        .attr('stroke', 'none')
+        .attr('r', get(circleRadius))
+        .style('filter', 'none')
+    }
+  }
 
   if (mapType === 'main map') {
     if (feature.properties[get(currentCodeAbbreviation)] !== get(neighbourhoodSelection)) {
@@ -111,7 +145,14 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
               tooltipValue += ` (${m2Sign}${formattedM2} m²)`
             }
           } else {
-            tooltipValue = 'Geen data'
+            // Check for specific no-data reason from raw value
+            const rawValue = getRawValue(feature, indicator)
+            const noDataReason = getNoDataReason(rawValue)
+            if (noDataReason && noDataReason !== 'no_data') {
+              tooltipValue = t(noDataReason)
+            } else {
+              tooltipValue = 'Geen data'
+            }
           }
           
           tooltipValueColor = originalDiffValue !== null && !isNaN(originalDiffValue)
@@ -130,14 +171,21 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
           if (popupResult.value !== null && !isNaN(popupResult.value)) {
             const roundedValue = Math.round(popupResult.value * 100) / 100
             tooltipValue = `${roundedValue}${popupResult.unit}`
-            
+
             // Add M2 value if available with nice formatting
             if (popupResult.hasM2 && popupResult.m2Value !== null) {
               const formattedM2 = formatM2Value(popupResult.m2Value)
               tooltipValue += ` (${formattedM2} m²)`
             }
           } else {
-            tooltipValue = 'Geen data'
+            // Check for specific no-data reason from raw value
+            const rawValue = getRawValue(feature, indicator)
+            const noDataReason = getNoDataReason(rawValue)
+            if (noDataReason && noDataReason !== 'no_data') {
+              tooltipValue = t(noDataReason)
+            } else {
+              tooltipValue = 'Geen data'
+            }
           }
           
           // Use original value for consistent colors
@@ -149,18 +197,24 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
       } else {
         // MIGRATED: Use centralized categorical value retrieval
         tooltipValue = getCategoricalValue(feature, indicator)
-        
+
         // Handle special case for flood depth indicator
         if (indicator.title === 'Maximale overstromingsdiepte' && tooltipValue === 'No data') {
           tooltipValue = 'Geen'
         }
-        
+
+        // Translate specific no-data reasons using centralized check
+        if (isSpecificNoDataReason(tooltipValue)) {
+          tooltipValue = t(tooltipValue)
+        }
+
         // Get color for categorical value (use getRawValue for Dordrecht AHN underscore naming)
         const categoricalValue = indicator.aggregatedIndicator
           ? getMostCommonClass(indicator, feature)
           : getClassByIndicatorValue(indicator, getRawValue(feature, indicator))
-        
-        tooltipValueColor = indicatorValueColorscale(categoricalValue)
+
+        // Use black color for no-data values (using centralized check)
+        tooltipValueColor = isAnyNoData(categoricalValue) ? '#000000' : indicatorValueColorscale(categoricalValue)
         tooltipIndicator = indicator.title
       }
 
@@ -171,7 +225,7 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
         color: tooltipValueColor
       })
 
-      const mapElement = document.getElementsByClassName("indicator-map-" + indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', ''))[0]
+      const mapElement = document.getElementsByClassName("indicator-map-" + sanitizeClassName(indicator.title))[0]
       const rectmap = mapElement.getBoundingClientRect();
       const featureCenter = projection(center(feature).geometry.coordinates)
       tooltipCenter = [featureCenter[0] + rectmap.left, featureCenter[1] + rectmap.top]
@@ -237,7 +291,7 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
         })
       }
 
-      let elem = document.getElementsByClassName('beeswarm_' + indicator.title.replaceAll(' ', '').replaceAll(',', '_').replaceAll('/', '_').replaceAll('(', '').replaceAll(')', ''))[0]
+      let elem = document.getElementsByClassName('beeswarm_' + sanitizeClassName(indicator.title))[0]
       let rectmap = elem.getBoundingClientRect();
       tooltipCenter = [feature.x + rectmap.left + beeswarmMargin.left, rectmap.top + beeswarmMargin.top + feature.y + 10]
     }
@@ -246,7 +300,8 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
   tooltipRegion.set({
     'region': (get(municipalitySelection) === null) ? t('Gemeente') : t('Buurt'),
     'center': tooltipCenter,
-    'name': feature.properties[get(currentNameAbbreviation)]
+    'name': feature.properties[get(currentNameAbbreviation)],
+    'mapType': mapType
   })
 }
 
@@ -284,7 +339,7 @@ export function click(feature, indicator, mapType) {
   selectAll('.svgelements_' + feature.properties[get(neighbourhoodCodeAbbreviation)])
     .raise()
 
-  const newSelection = feature.properties[get(currentCodeAbbreviation)].replaceAll(' ', '').replaceAll('(', '').replaceAll(')', '')
+  const newSelection = sanitizeClassName(feature.properties[get(currentCodeAbbreviation)])
   if (get(currentOverviewLevel) === 'Nederland') {
     get(URLParams).set('gemeente', newSelection);
     addURLParameter();

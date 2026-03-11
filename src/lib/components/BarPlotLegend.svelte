@@ -4,35 +4,47 @@
   export let indicatorValueColorscale
   export let graphWidth
   export let indicator
-
-  // const padding3 = 90
-  // const padding2 = 120
-  // $: innerwidth3 = (graphWidth - 2*padding3) / 3
-  // $: innerwidth2 = (graphWidth - 2*padding2) / 2
+  export let barPlotData = [] // Actual data to check if "No data" class has values
 
   // Make klasseNamen reactive to ensure it updates when indicator changes
   $: klasseNamen = indicator ? Object.keys(indicator.classes) : []
   $: marginTop = klasseNamen.length > 6 ? 0 : 15
   $: margin = { top: marginTop, bottom: 30, left: 30, right: 0 }
   $: legendElementWidth = (graphWidth - margin.left - margin.right) / 3
+
+  // Reactive: Check if "No data" has any values > 0 in any region
+  $: hasNoDataValues = barPlotData && barPlotData.length > 0
+    ? barPlotData.some(regionData => regionData["No data"] > 0)
+    : true // Show by default if no data yet
+
+  // Determine if a class should be shown in the legend (reactive version)
+  $: visibleClasses = klasseNamen.filter(klasse => {
+    // Always hide "No data" for specific indicators (legacy behavior)
+    if (["Waterdiepte bij hevige bui", t("Gevoelstemperatuur"), "Maximale overstromingsdiepte"].includes(indicator?.title) && klasse === "No data") {
+      return false
+    }
+    // Hide "No data" class if it has 0% in all regions
+    if (klasse === "No data" && !hasNoDataValues) {
+      return false
+    }
+    return true
+  })
 </script>
 
-{#if indicator && indicator.classes && klasseNamen.length > 0}
+{#if indicator && indicator.classes && visibleClasses.length > 0}
 <div
   class="barplot-legend"
   style="height:26%; width:{graphWidth - margin.left - margin.right}px; margin-left:{margin.left}px; margin-top:{margin.top}px"
 >
-  {#each klasseNamen as klasse, i}
-    {#if !(["Waterdiepte bij hevige bui", t("Gevoelstemperatuur"), "Maximale overstromingsdiepte"].includes(indicator.title) && klasse === "No data")}
-      <div class="legend-element" style="width:{legendElementWidth}px">
-        <svg>
-          <g>
-            <rect x={0} y={0} width={12} height={12} fill={indicatorValueColorscale(klasse)}></rect>
-            <text style="fill:#645F5E" dx="20px" dy="0.74em" font-size="13px">{klasse}</text>
-          </g>
-        </svg>
-      </div>
-    {/if}
+  {#each visibleClasses as klasse, i}
+    <div class="legend-element" style="width:{legendElementWidth}px">
+      <svg>
+        <g>
+          <rect x={0} y={0} width={12} height={12} fill={indicatorValueColorscale(klasse)}></rect>
+          <text style="fill:#645F5E" dx="20px" dy="0.74em" font-size="13px">{klasse}</text>
+        </g>
+      </svg>
+    </div>
   {/each}
 </div>
 {/if}

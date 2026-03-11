@@ -10,6 +10,10 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Integration Tests', () => {
   test.beforeEach(async ({ page }) => {
+    // Disable tutorial by setting localStorage before page load
+    await page.addInitScript(() => {
+      localStorage.setItem('buurtdashboard-tutorial-seen', 'true');
+    });
     await page.goto('/?config=dordrecht');
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(5000); // Full data loading
@@ -106,24 +110,30 @@ test.describe('Integration Tests', () => {
 
   test('Data integrity checks', async ({ page }) => {
     await page.waitForTimeout(3000);
-    
+
     // Check for broken data states
     const noDataElements = await page.locator('text=Geen data').count();
     const nanElements = await page.locator('text=NaN').count();
-    
+
     console.log(`Data integrity: ${noDataElements} "Geen data" elements, ${nanElements} NaN elements`);
-    
+
     // Ensure no NaN values appear in UI
     expect(nanElements).toBe(0);
-    
-    // Check for statistical content
+
+    // Check for statistical content - this is informational only since stats
+    // require indicator selection which may not happen in base page load
     const statElements = await page.locator('.stat, .statistics, [class*="stat"]').count();
     if (statElements > 0) {
       const statTexts = await page.locator('.stat, .statistics, [class*="stat"]').allTextContents();
       const hasNumericValues = statTexts.some(text => /\d+/.test(text));
-      
+
       console.log(`✅ Statistics contain valid numeric values: ${hasNumericValues}`);
-      expect(hasNumericValues).toBe(true);
+      // Only check if we actually have stat elements visible
+      if (statTexts.length > 0) {
+        expect(hasNumericValues).toBe(true);
+      }
+    } else {
+      console.log('ℹ️  No statistics visible (expected when no indicators selected)');
     }
   });
 

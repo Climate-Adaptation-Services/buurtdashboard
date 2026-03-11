@@ -4,7 +4,7 @@
   import IndicatorInfo from "./IndicatorInfo.svelte"
   import IndicatorTitle from "./IndicatorTitle.svelte"
   import IndicatorBody from "./IndicatorBody.svelte"
-  import { getIndicatorAttribute } from "$lib/utils/getIndicatorAttribute"
+    import { getIndicatorAttribute } from "$lib/utils/getIndicatorAttribute"
   import { getRawValue, isValidValue } from "$lib/utils/valueRetrieval"
 
   export let indicatorHeight
@@ -18,8 +18,8 @@
 
 
   let graphWidth
-  const titleHeight = indicatorHeight * 0.23
-  const bodyHeight = indicatorHeight * 0.77
+  const titleHeight = 150
+  const bodyHeight = indicatorHeight - titleHeight
 
   // Initialize with a default color scale to prevent null errors
   let indicatorValueColorscale = (value) => "#cccccc"
@@ -35,13 +35,15 @@
       // Get the current AHN selection including BEB
       const ahnSelection = $indicatorStore || {}
       const isDifferenceMode = ahnSelection && typeof ahnSelection === "object" && ahnSelection.isDifference
-      
+
+      // Use per-indicator BEB selection from indicator store
+      const bebSelection = ahnSelection.beb || 'hele_buurt'
+
       // Create base attribute considering BEB selection
       let baseAttribute = indicator.attribute
       const variants = indicator.variants ? indicator.variants.split(',').map(v => v.trim()) : []
       const bebVariant = variants.find(v => v !== 'M2' && v !== '') // Find the BEB variant (not M2)
       if (bebVariant) {
-        const bebSelection = ahnSelection.beb || 'hele_buurt'
         if (bebSelection === 'bebouwde_kom') {
           baseAttribute = baseAttribute + '_' + bebVariant
         }
@@ -56,7 +58,7 @@
         indicatorAttribute,
         isDifferenceMode,
         municipalitySelection: $municipalitySelection,
-        bebSelection: ahnSelection.beb, // Include BEB selection in memo key
+        bebSelection: bebSelection, // Include BEB selection in memo key
         // Use getRawValue to handle Dordrecht's AHN underscore naming (e.g., "BKB_AHN3" vs "BKBAHN3")
         dataValues: relevantData?.features?.map((d) => getRawValue(d, indicator)).sort(),
         hasData: !!relevantData?.features
@@ -87,7 +89,7 @@
           // this can deal with any amount of colors in the scale
           const step = (rangeExtent[1] - rangeExtent[0]) / (indicator.color.range.length - 1)
 
-          // Check if we're in difference mode (use derived store to prevent unnecessary recreations)
+          // Check if we're in difference mode
           const ahnSelection = $indicatorStore || {}
           const isDifferenceMode = ahnSelection && typeof ahnSelection === "object" && ahnSelection.isDifference
 
@@ -101,7 +103,8 @@
             indicatorValueColorscale = scaleLinear().domain(domain).range(indicator.color.range)
           }
         } else {
-          indicatorValueColorscale = scaleOrdinal().domain(indicator.color.domain).range(indicator.color.range)
+          // Use .unknown() to set black color for no-data values (no_slow_traffic_route, no_ahn5_data, no_bebouwde_kom, No data)
+          indicatorValueColorscale = scaleOrdinal().domain(indicator.color.domain).range(indicator.color.range).unknown('#000000')
         }
       } // Close memoization key check
     } // Close main if block
@@ -170,4 +173,5 @@
       background-position: -200% 0;
     }
   }
+
 </style>

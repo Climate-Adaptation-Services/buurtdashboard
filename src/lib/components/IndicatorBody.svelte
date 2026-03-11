@@ -26,7 +26,7 @@
   {:else}
     <IndicatorCategorical {indicator} {graphWidth} {graphHeight} {indicatorValueColorscale} {isLoading} />
   {/if}
-  <div class="indicator-map" style="height:{mapHeight}px" bind:clientWidth={mapWidth}>
+  <div class="indicator-map" style="height:{mapHeight}px; position: relative;" bind:clientWidth={mapWidth}>
     {#if $municipalitySelection !== null && !isLoading}
       <Map {mapWidth} {mapHeight} mapType={"indicator map"} {indicatorValueColorscale} {indicator} />
     {:else if isLoading}

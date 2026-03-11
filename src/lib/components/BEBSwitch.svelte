@@ -1,5 +1,6 @@
 <script>
   import { getIndicatorStore, configStore } from "$lib/stores"
+  import { t } from "$lib/i18n/translate.js"
 
   export let indicator
 
@@ -7,89 +8,124 @@
   // Use dutchTitle for store key to ensure consistency across languages
   const indicatorStore = getIndicatorStore(indicator.dutchTitle || indicator.title)
 
+  // Check if this indicator has BEB variants
+  $: hasBEBVariant = indicator.variants &&
+    indicator.variants.split(',').map(v => v.trim()).some(v => v !== 'M2' && v !== '')
+
   /**
-   * Handle BEB selection change from user interaction
+   * Toggle between hele_buurt and bebouwde_kom for this indicator
    */
-  function handleChange(event) {
-    indicatorStore.update(selection => ({ ...selection, beb: event.target.value }))
+  function toggleBEB() {
+    indicatorStore.update(state => ({
+      ...state,
+      beb: state.beb === 'bebouwde_kom' ? 'hele_buurt' : 'bebouwde_kom'
+    }))
   }
+
+  $: isActive = $indicatorStore.beb === 'bebouwde_kom'
 </script>
 
-<div class="beb-switch">
-  <div class="dropdown-wrapper">
-    <select class="beb-dropdown" value={$indicatorStore.beb || "hele_buurt"} on:change={handleChange} style="border-color: {$configStore.mainColor};">
-      <option value="hele_buurt">Hele buurt</option>
-      <option value="bebouwde_kom">Bebouwde kom</option>
-    </select>
-    <span class="dropdown-arrow">&#9662;</span>
+{#if hasBEBVariant}
+  <div class="beb-wrapper">
+    <button
+      class="beb-pill"
+      class:active={isActive}
+      on:click={toggleBEB}
+      style="--main-color: {$configStore.mainColor}; border-color: {$configStore.mainColor}"
+    >
+      <svg class="beb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/>
+      </svg>
+      <span class="beb-label">Bebouwde</span>
+      <span class="beb-label">kom</span>
+    </button>
+    <div class="beb-tooltip">
+      <p class="tooltip-text">
+        {isActive ? t("Toont alleen data binnen de bebouwde kom. Klik om hele buurt te tonen.") : t("Klik om alleen data binnen de bebouwde kom te tonen.")}
+      </p>
+    </div>
   </div>
-</div>
+{/if}
 
 <style>
-  .beb-switch {
+  .beb-wrapper {
+    position: relative;
+    margin-top: 8px;
+    margin-left: 8px;
+    margin-right: -4px;
+  }
+
+  .beb-pill {
     display: inline-flex;
     flex-direction: column;
     align-items: center;
-    gap: 4px;
-    margin-left: 8px;
-    background-color: #e8e8e8;
-    padding: 8px 12px;
-    border-radius: 8px;
+    justify-content: center;
+    gap: 0px;
+    padding: 4px 6px;
+    background-color: #fff;
+    border: 1.5px solid var(--main-color);
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    color: #666;
+    transition: all 0.2s ease;
+    height: auto;
+    min-width: 50px;
+    box-shadow: 0 1px 4px rgba(54, 87, 91, 0.08);
+  }
+
+  .beb-pill:hover {
+    background-color: #f5f5f5;
+  }
+
+  .beb-pill.active {
+    background-color: var(--main-color);
+    color: white;
+  }
+
+  .beb-pill.active:hover {
+    opacity: 0.9;
+    background-color: var(--main-color);
+  }
+
+  .beb-icon {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
   }
 
   .beb-label {
-    font-size: 18px;
-    color: #333;
-    font-weight: normal;
-    text-align: center;
+    font-size: 10px;
+    letter-spacing: 0.2px;
+    line-height: 1.1;
   }
 
-  .dropdown-wrapper {
-    position: relative;
-    display: inline-block;
-    width: 120px;
-  }
-
-  .dropdown-arrow {
-    pointer-events: none;
+  .beb-tooltip {
+    visibility: hidden;
+    opacity: 0;
     position: absolute;
-    right: 8px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 14px;
-    color: var(--background-color);
-    z-index: 2;
+    top: 100%;
+    right: 0;
+    margin-top: 8px;
+    width: 220px;
+    background-color: white;
+    z-index: 1000;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    border-radius: 12px;
+    padding: 10px 14px;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
   }
 
-  .beb-dropdown {
-    width: 120px;
-    height: 32px;
-    border-radius: 8px;
-    font-size: 16px;
-    padding: 4px 24px 4px 8px;
-    color: #333;
-    background: #fff;
-    box-shadow: 0 2px 8px rgba(54, 87, 91, 0.08);
-    transition:
-      border 0.3s,
-      background 0.3s,
-      color 0.3s;
-    appearance: none;
-    cursor: pointer;
-    outline: none;
-    border: 2px solid var(--background-color);
+  .beb-wrapper:hover .beb-tooltip {
+    visibility: visible;
+    opacity: 1;
   }
 
-  .beb-dropdown:hover {
-    background: #f8f8f8;
-  }
-
-  .beb-dropdown:focus {
-    box-shadow: 0 0 0 3px rgba(54, 87, 91, 0.1);
-  }
-
-  .beb-dropdown option {
-    color: #333;
-    background: #f8f8f8;
+  .tooltip-text {
+    margin: 0;
+    font-size: 12px;
+    color: #555;
+    line-height: 1.4;
   }
 </style>

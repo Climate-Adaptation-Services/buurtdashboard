@@ -28,16 +28,22 @@ Het Buurtdashboard is een interactieve kaartvisualisatie-applicatie voor het ton
 
 ### Config Portal Integratie
 
-De sveltekitapp haalt indicator configuraties van de Vercel-hosted config portal:
+De sveltekitapp haalt configuraties van de Vercel-hosted config portal:
 
-**URL**: `https://buurtdashboard-config-portal.vercel.app/api/config/[slug]/csv?mode=[dev|published]`
+**API Endpoints**:
+- CSV (indicators): `https://buurtdashboard-config-portal.vercel.app/api/config/[slug]/csv?mode=[dev|published]`
+- JSON (dashboard config): `https://buurtdashboard-config-portal.vercel.app/api/config/[slug]/json?mode=[dev|published]`
 
 **Environment variabele** (in `.env`):
 ```
-PUBLIC_CONFIG_MODE=dev      # of 'published' voor productie
+VITE_CONFIG_MODE=dev      # of 'published' voor productie
 ```
 
-De config portal URL is hardcoded in `src/lib/datasets.js` - altijd Vercel production.
+**Single Source of Truth**: De config portal is nu de single source of truth voor data URLs:
+- `csv_data_url` - URL naar de CSV data (gzip)
+- `data_download_url` - URL naar de Excel download
+
+De app haalt deze URLs op via het JSON endpoint. Fallback URLs in `datasets.js` worden alleen gebruikt als de portal niet bereikbaar is.
 
 ### Indicator Types
 
@@ -97,8 +103,12 @@ npm install
 
 Maak `.env` bestand:
 ```
-PUBLIC_CONFIG_MODE=dev
+VITE_CONFIG_MODE=dev
 ```
+
+**Vercel Environment Variables**:
+- Preview deployments: `VITE_CONFIG_MODE=dev`
+- Production deployment: `VITE_CONFIG_MODE=published`
 
 ### Starten
 ```bash
@@ -159,11 +169,14 @@ Ongeldige waarden worden gefilterd:
 
 ### Data URLs
 
-Geconfigureerd in `src/lib/datasets.js`:
+**Config Portal** (single source of truth voor data URLs):
+- CSV Data URL: ingesteld per dashboard in de portal
+- Data Download URL: ingesteld per dashboard in de portal
+
+**Fallbacks in `src/lib/datasets.js`**:
 - GeoJSON buurten: AWS S3
 - Gemeente grenzen: AWS S3
-- CSV indicator data: AWS S3 (gzip)
-- Indicator config: Config Portal API
+- Indicator config: Config Portal CSV API
 
 ### Dashboard Varianten
 
@@ -173,5 +186,6 @@ De applicatie ondersteunt meerdere dashboard configuraties:
 
 Elke variant heeft eigen:
 - Indicator configuratie (via config portal slug)
-- CSV data URL
+- CSV data URL (beheerd in config portal)
+- Data download URL (beheerd in config portal)
 - GeoJSON data (optioneel)
