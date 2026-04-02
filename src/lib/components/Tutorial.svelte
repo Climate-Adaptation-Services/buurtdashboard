@@ -516,7 +516,8 @@
 
   onMount(() => {
     // Show tutorial for first-time visitors (localStorage check)
-    if (browser && !localStorage.getItem("buurtdashboard-tutorial-seen")) {
+    // Don't show on mobile (screen width < 800px)
+    if (browser && !localStorage.getItem("buurtdashboard-tutorial-seen") && window.innerWidth >= 800) {
       setTimeout(() => {
         isOpen = true
       }, 2000)
