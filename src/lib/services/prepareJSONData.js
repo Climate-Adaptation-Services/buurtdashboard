@@ -18,6 +18,50 @@ function measurePerformance(label, fn) {
 }
 
 /**
+ * Process municipality GeoJSON only and update the store immediately.
+ * Call this as soon as municipality data arrives to show the map faster.
+ */
+/**
+ * @param {any} municipalityGeoJson
+ * @param {string|undefined} municipalityUrl
+ */
+export async function processMunicipalityData(municipalityGeoJson, municipalityUrl) {
+  /** @type {any} */
+  let municipalityTopojson;
+  let cached = false;
+
+  if (municipalityUrl) {
+    const cachedData = await getFromCache(municipalityUrl);
+    if (cachedData) {
+      municipalityTopojson = cachedData;
+      cached = true;
+    }
+  }
+
+  if (!cached) {
+    let topoData = topojsonsimplify.presimplify(municipalityGeoJson);
+    const converted = /** @type {any} */ (topojson.feature(topoData, topoData.objects.GemeenteGrenzen2023));
+    municipalityTopojson = {
+      ...converted,
+      features: converted.features.filter(/** @param {any} f */ f => f?.properties)
+    };
+    if (municipalityUrl) {
+      saveToCache(municipalityUrl, municipalityTopojson);
+    }
+  }
+
+  if (municipalityTopojson?.features) {
+    municipalityTopojson = {
+      ...municipalityTopojson,
+      features: municipalityTopojson.features.filter(/** @param {any} f */ f => f?.properties)
+    };
+  }
+
+  allMunicipalitiesJSONData.set(municipalityTopojson);
+  return municipalityTopojson;
+}
+
+/**
  * Process TopoJSON data with caching for improved performance
  * @param {Array} JSONdata - Array containing municipality and neighborhood TopoJSON data
  * @param {Array} CSVdata - CSV data for neighborhoods

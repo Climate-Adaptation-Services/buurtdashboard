@@ -293,9 +293,38 @@ function calculateNederlandAggregate(indicator, jsonData, year = null, bebOption
 
     return result;
   } else {
-    // For categorical indicators, we can't really pre-calculate a single value
-    // Return null for now - these will be calculated dynamically
-    return null;
+    // For categorical indicators, calculate class distribution using threshold logic
+    const classCounts = {};
+    Object.keys(indicator.classes).forEach(className => { classCounts[className] = 0; });
+
+    let totalAmount = 0;
+    features.forEach(feature => {
+      const value = feature.properties[attributeName];
+      if (value === undefined || value === null || value === '') return;
+      const numValue = +value;
+      if (NO_DATA_VALUES.includes(numValue) || isNaN(numValue)) return;
+
+      // Same logic as getClassByIndicatorValue: find lowest class whose threshold > value
+      let assignedClass = '';
+      Object.keys(indicator.classes).reverse().forEach(klasse => {
+        if (numValue < +indicator.classes[klasse]) {
+          assignedClass = klasse;
+        }
+      });
+
+      if (assignedClass && classCounts[assignedClass] !== undefined) {
+        classCounts[assignedClass]++;
+        totalAmount++;
+      }
+    });
+
+    if (totalAmount === 0) return null;
+
+    const result = {};
+    Object.keys(indicator.classes).forEach(className => {
+      result[className] = (classCounts[className] / totalAmount) * 100;
+    });
+    return result;
   }
 }
 

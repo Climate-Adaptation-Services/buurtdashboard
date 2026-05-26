@@ -82,10 +82,10 @@
 
           // If selectedYear is specified and exists in cache, use it (handles both years like "2020" and AHN versions like "AHN2")
           if (selectedYear && cached[selectedYear] !== undefined) {
-            nederlandValues = cached[selectedYear];
+            nederlandValues = { ...cached[selectedYear], group: 'Nederland' };
           } else if (!selectedYear || !Object.keys(cached).some(key => /^\d{4}$/.test(key) || /^AHN\d+$/.test(key))) {
             // No years or AHN versions in keys, so it's class-based aggregated data (Landbedekking, etc)
-            nederlandValues = cached;
+            nederlandValues = { ...cached, group: 'Nederland' };
           }
         }
       }
@@ -191,6 +191,7 @@
       >
     {/if}
     {#each stackedData as stacked, i}
+      {#if graphWidth > 0}
       <g class="stack" fill={indicatorValueColorscale(stacked.key)}>
         {#each stacked as st}
           <rect
@@ -220,6 +221,7 @@
           {/if}
         {/each}
       </g>
+      {/if}
     {/each}
     {#each regios as regio, i}
       {#if regio !== "Nederland" || !($configStore && $configStore.dashboardTitle === "Buurtdashboard Dordrecht")}
@@ -238,7 +240,4 @@
     width: 100%;
   }
 
-  rect {
-    transition: all 2s;
-  }
 </style>

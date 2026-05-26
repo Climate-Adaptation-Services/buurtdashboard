@@ -86,6 +86,9 @@ export class LeafletMapManager {
       bounceAtZoomLimits: false,
     })
 
+    // Set default Netherlands view immediately — map is usable before data arrives
+    this.leafletMap.setView([52.1, 5.3], 7)
+
     // Add a subtle tile layer
     this.L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       opacity: 0.7,

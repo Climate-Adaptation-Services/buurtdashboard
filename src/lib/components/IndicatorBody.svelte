@@ -27,12 +27,14 @@
     <IndicatorCategorical {indicator} {graphWidth} {graphHeight} {indicatorValueColorscale} {isLoading} />
   {/if}
   <div class="indicator-map" style="height:{mapHeight}px; position: relative;" bind:clientWidth={mapWidth}>
-    {#if $municipalitySelection !== null && !isLoading}
-      <Map {mapWidth} {mapHeight} mapType={"indicator map"} {indicatorValueColorscale} {indicator} />
-    {:else if isLoading}
-      <div class="map-loading">
-        <div class="loading-spinner"></div>
-      </div>
+    {#if $municipalitySelection !== null}
+      {#if isLoading}
+        <div class="map-loading">
+          <div class="loading-spinner"></div>
+        </div>
+      {:else}
+        <Map {mapWidth} {mapHeight} mapType={"indicator map"} {indicatorValueColorscale} {indicator} />
+      {/if}
     {/if}
     <div class="footer">
       <h5 class="source"><strong>{indicator.source}</strong></h5>

@@ -58,12 +58,12 @@
   
 
 
-  // Format region name
-  let regioNaam = ""
-  $: if ($neighbourhoodSelection || $municipalitySelection || $allNeighbourhoodsJSONData) {
-    regioNaam = getRegionName(regio)
-    if (regioNaam && regioNaam.length > 25) {
-      regioNaam = regioNaam.slice(0, 23) + "..."
+  // Format region name — initialize with regio so label is visible immediately
+  let regioNaam = regio
+  $: {
+    const name = getRegionName(regio)
+    if (name) {
+      regioNaam = name.length > 25 ? name.slice(0, 23) + "..." : name
     }
   }
 
@@ -230,7 +230,7 @@
   }
 
   rect {
-    transition: all 2s;
+    transition: width 0.3s ease-out;
   }
 
   text {

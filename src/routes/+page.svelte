@@ -28,8 +28,9 @@
   import { getIndicatorAttribute } from "$lib/utils/getIndicatorAttribute.js"
   import { onMount, tick } from "svelte"
   import { BUURT_GEOJSON_URL, MUNICIPALITY_JSON_URL } from "$lib/datasets"
-  import { prepareJSONData } from "$lib/services/prepareJSONData"
-  import { gunzipSync, strFromU8 } from "fflate"
+  import { prepareJSONData, processMunicipalityData } from "$lib/services/prepareJSONData"
+  import { gunzipSync, unzipSync, strFromU8 } from "fflate"
+  import { dsvFormat } from "d3-dsv"
 
   export let data
 
@@ -84,35 +85,49 @@
     const loader = document.getElementById('app-loading')
     if (loader) loader.remove()
 
-    // Load data in background
+    // Load all data in background — municipality first so map appears early
     ;(async () => {
       try {
-      // Fetch GeoJSON data in parallel
-      const [municipalityResponse, neighbourhoodResponse] = await Promise.all([
-        fetch(MUNICIPALITY_JSON_URL),
-        fetch(BUURT_GEOJSON_URL)
-      ])
+        const csvUrl = data.dashboardConfig.neighbourhoodCSVdataLocation
 
-      municipalityGeoJson = await municipalityResponse.json()
+        // Start all three fetches simultaneously
+        const municipalityFetch = fetch(MUNICIPALITY_JSON_URL)
+        const neighbourhoodFetch = fetch(BUURT_GEOJSON_URL)
+        const csvFetch = fetch(csvUrl)
 
-      // Decompress gzipped buurt TopoJSON
-      const neighbourhoodBuffer = await neighbourhoodResponse.arrayBuffer()
-      const decompressed = gunzipSync(new Uint8Array(neighbourhoodBuffer))
-      neighbourhoodGeoJson = JSON.parse(strFromU8(decompressed))
+        // Process municipality as soon as it arrives (small file ~500KB)
+        // This sets allMunicipalitiesJSONData → map overlay disappears
+        municipalityGeoJson = await municipalityFetch.then(r => r.json())
+        await processMunicipalityData(municipalityGeoJson, MUNICIPALITY_JSON_URL)
 
-      geoJSONData = [municipalityGeoJson, neighbourhoodGeoJson]
+        // Wait for neighborhood GeoJSON + CSV in parallel (both larger files)
+        const [neighbourhoodResponse, csvResponse] = await Promise.all([neighbourhoodFetch, csvFetch])
 
-      // Process and cache the GeoJSON data
-      const dataUrls = {
-        municipalityUrl: MUNICIPALITY_JSON_URL,
-        neighbourhoodUrl: BUURT_GEOJSON_URL
-      }
+        const neighbourhoodBuffer = await neighbourhoodResponse.arrayBuffer()
+        const decompressed = gunzipSync(new Uint8Array(neighbourhoodBuffer))
+        neighbourhoodGeoJson = JSON.parse(strFromU8(decompressed))
 
-      await prepareJSONData([municipalityGeoJson, neighbourhoodGeoJson], data.buurtCSVdata, dataUrls)
+        const csvBuffer = await csvResponse.arrayBuffer()
+        let csvText
+        if (csvUrl.endsWith('.gz')) {
+          csvText = strFromU8(gunzipSync(new Uint8Array(csvBuffer)))
+        } else {
+          const files = unzipSync(new Uint8Array(csvBuffer))
+          const fileName = Object.keys(files).find(name => name.endsWith('.csv'))
+          csvText = strFromU8(files[fileName])
+        }
+        const buurtCSVdata = dsvFormat(';').parse(csvText)
+
+        geoJSONData = [municipalityGeoJson, neighbourhoodGeoJson]
+
+        await prepareJSONData([municipalityGeoJson, neighbourhoodGeoJson], buurtCSVdata, {
+          municipalityUrl: MUNICIPALITY_JSON_URL,
+          neighbourhoodUrl: BUURT_GEOJSON_URL
+        })
 
         isLoadingGeoJSON = false
       } catch (error) {
-        console.error('Error loading GeoJSON data:', error)
+        console.error('Error loading data:', error)
         isLoadingGeoJSON = false
       }
     })()
@@ -197,9 +212,9 @@
 {:else}
   <div class="container" style="justify-content:{screenWidth < 800 ? 'center' : 'left'}">
     <div class="sidebar" style="position:{screenWidth > 800 ? 'fixed' : 'relative'}">
-      <div class="control-panel"><ControlPanel {indicatorsSelection} {allIndicators} isLoading={isLoadingGeoJSON} on:openTutorial={() => showTutorial = true} /></div>
+      <div class="control-panel"><ControlPanel {indicatorsSelection} {allIndicators} on:openTutorial={() => showTutorial = true} /></div>
       <div class="map" class:dordrecht={$configStore.categoryPath === '-dordrecht'} bind:clientWidth={mapWidth} bind:clientHeight={mapHeight}>
-        <Map JSONdata={geoJSONData} CSVdata={data.buurtCSVdata} {mapWidth} {mapHeight} mapType={"main map"} isLoading={isLoadingGeoJSON} />
+        <Map JSONdata={geoJSONData} {mapWidth} {mapHeight} mapType={"main map"} isLoading={isLoadingGeoJSON} />
       </div>
     </div>
 
