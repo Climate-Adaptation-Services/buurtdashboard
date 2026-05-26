@@ -7,7 +7,6 @@
     neighbourhoodsInMunicipalityJSONData,
     neighbourhoodSelection,
     selectedNeighbourhoodJSONData,
-    AHNSelecties,
     configStore,
     getIndicatorStore,
     nederlandAggregates,
@@ -20,7 +19,6 @@
     calcPercentagesForEveryClassMultiIndicator,
     calcPercentagesForEveryClassSingleIndicator,
   } from "$lib/utils/calcPercentagesForEveryClass"
-  import { getNumericalValue } from "$lib/utils/valueRetrieval.js"
   import { sanitizeClassName } from "$lib/utils/sanitizeClassName.js"
 
   import { createEventDispatcher } from "svelte"
@@ -29,7 +27,6 @@
   export let indicatorHeight
   export let indicator
   export let indicatorValueColorscale
-  export let getClassByIndicatorValue
   export let aggregated
 
   const dispatch = createEventDispatcher()
@@ -240,4 +237,7 @@
     width: 100%;
   }
 
+  rect {
+    transition: width 1.2s ease-out, x 1.2s ease-out;
+  }
 </style>

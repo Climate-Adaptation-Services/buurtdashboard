@@ -230,7 +230,7 @@
   }
 
   rect {
-    transition: width 0.3s ease-out;
+    transition: width 1.2s ease-out;
   }
 
   text {
