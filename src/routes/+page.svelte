@@ -54,7 +54,6 @@
   let displayedIndicators = []
   let allIndicators = []
   let isInitialized = false
-  let isUIReady = false
   let showTutorial = false
 
   // GeoJSON data will be loaded client-side for progressive rendering
@@ -74,14 +73,9 @@
     displayedIndicators = allIndicators
     isInitialized = true
 
-    // Show UI immediately with loading states, data will load in background
-    isUIReady = true
-
-    // Wait for Svelte to render the UI and browser to paint
+    // Wait for Svelte to render the UI and browser to paint, then remove loading screen
     await tick()
     await new Promise(resolve => requestAnimationFrame(resolve))
-
-    // Remove the static HTML loading screen after UI is rendered
     const loader = document.getElementById('app-loading')
     if (loader) loader.remove()
 
@@ -201,46 +195,36 @@
 
 <svelte:head><link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" /></svelte:head>
 
-{#if !isUIReady}
-  <!-- Full-page loading screen -->
-  <div class="loading-screen">
-    <div class="loading-content">
-      <div class="loading-spinner-large"></div>
-      <p class="loading-text">Dashboard wordt geladen...</p>
+<div class="container" style="justify-content:{screenWidth < 800 ? 'center' : 'left'}">
+  <div class="sidebar" style="position:{screenWidth > 800 ? 'fixed' : 'relative'}">
+    <div class="control-panel"><ControlPanel {indicatorsSelection} {allIndicators} on:openTutorial={() => showTutorial = true} /></div>
+    <div class="map" class:dordrecht={$configStore.categoryPath === '-dordrecht'} bind:clientWidth={mapWidth} bind:clientHeight={mapHeight}>
+      <Map JSONdata={geoJSONData} {mapWidth} {mapHeight} mapType={"main map"} isLoading={isLoadingGeoJSON} />
     </div>
   </div>
-{:else}
-  <div class="container" style="justify-content:{screenWidth < 800 ? 'center' : 'left'}">
-    <div class="sidebar" style="position:{screenWidth > 800 ? 'fixed' : 'relative'}">
-      <div class="control-panel"><ControlPanel {indicatorsSelection} {allIndicators} on:openTutorial={() => showTutorial = true} /></div>
-      <div class="map" class:dordrecht={$configStore.categoryPath === '-dordrecht'} bind:clientWidth={mapWidth} bind:clientHeight={mapHeight}>
-        <Map JSONdata={geoJSONData} {mapWidth} {mapHeight} mapType={"main map"} isLoading={isLoadingGeoJSON} />
-      </div>
-    </div>
 
-    <div class="indicators" style="margin-left:{screenWidth > 800 ? 400 : 0}px">
-      {#each displayedIndicators as indicator (indicator.title)}
-        {#if getIndicatorAttribute(indicator, indicator.attribute)}
-          <div
-            class="indicator"
-            style="height:{indicatorHeight}px"
-            data-indicator-title={indicator.dutchTitle || indicator.title}
-            data-indicator-type={indicator.numerical ? 'numerical' : 'categorical'}
-          >
-            <Indicator {indicatorHeight} {indicator} isLoading={isLoadingGeoJSON} />
-          </div>
-        {/if}
-      {/each}
-    </div>
-
-    <Tooltip />
-
-    <Modal show={$modal} style="position:absolute; left:0"></Modal>
+  <div class="indicators" style="margin-left:{screenWidth > 800 ? 400 : 0}px">
+    {#each displayedIndicators as indicator (indicator.title)}
+      {#if getIndicatorAttribute(indicator, indicator.attribute)}
+        <div
+          class="indicator"
+          style="height:{indicatorHeight}px"
+          data-indicator-title={indicator.dutchTitle || indicator.title}
+          data-indicator-type={indicator.numerical ? 'numerical' : 'categorical'}
+        >
+          <Indicator {indicatorHeight} {indicator} isLoading={isLoadingGeoJSON} />
+        </div>
+      {/if}
+    {/each}
   </div>
 
-  <!-- Tutorial overlay -->
-  <Tutorial bind:isOpen={showTutorial} />
-{/if}
+  <Tooltip />
+
+  <Modal show={$modal} style="position:absolute; left:0"></Modal>
+</div>
+
+<!-- Tutorial overlay -->
+<Tutorial bind:isOpen={showTutorial} />
 
 <style>
   .container {
@@ -300,43 +284,5 @@
     border-radius: 10px;
   }
 
-  /* Full-page loading screen */
-  .loading-screen {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-  }
 
-  .loading-content {
-    text-align: center;
-  }
-
-  .loading-spinner-large {
-    width: 60px;
-    height: 60px;
-    margin: 0 auto 20px;
-    border: 5px solid rgba(255, 255, 255, 0.3);
-    border-top-color: white;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-  }
-
-  .loading-text {
-    font-size: 18px;
-    color: white;
-    font-weight: 500;
-    margin: 0;
-  }
-
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
-  }
 </style>
