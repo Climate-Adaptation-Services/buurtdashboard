@@ -14,7 +14,7 @@
 
 <div class="indicator-title" style="height: {titleHeight}px">
   <!-- <h4 class="category">{t("Categorie")}: {indicator.category}</h4> -->
-  <h2 class="title" class:long-title={indicator.title.length > 25} style="background-color:{$configStore.mainColor}">
+  <h2 class="title" style="background-color:{$configStore.mainColor}">
     {indicator.title}
   </h2>
   {#if indicator.subtitle}
@@ -38,10 +38,11 @@
     flex-direction: column;
     background-color: whitesmoke;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     border-radius: 10px;
     position: relative;
     z-index: 2;
+    padding-top: 28px;
     padding-bottom: 10px;
   }
 
@@ -56,10 +57,6 @@
     border-radius: 15px;
     color: white;
     text-align: center;
-    font-size: 1.3rem;
-  }
-
-  .title.long-title {
     font-size: 1.0rem;
   }
 

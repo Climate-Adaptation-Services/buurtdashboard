@@ -50,7 +50,6 @@
 </script>
 
 <h3 class="question-mark" style="background-color:{$configStore.mainColor}">i</h3>
-<!-- <h3 class="category" style="background-color:{$configStore.mainColor}">C</h3> -->
 <img
   class="category"
   src="{(indicator.dutchCategory || indicator.category) + $configStore.categoryPath}.png"
@@ -113,6 +112,7 @@
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
     border-radius: 20px;
     padding: 10px 20px;
+    pointer-events: none;
   }
 
   .title {

@@ -1,8 +1,6 @@
 import { dsvFormat } from 'd3-dsv'
 import { defaultConfig, dordrechtConfig } from '$lib/config'
-import { unzipSync, gunzipSync, strFromU8 } from 'fflate'
-import { BUURT_GEOJSON_URL, MUNICIPALITY_JSON_URL, DATASET_VERSION, fetchDashboardConfig } from '$lib/datasets'
-import { prepareJSONData } from '$lib/services/prepareJSONData'
+import { DATASET_VERSION, fetchDashboardConfig } from '$lib/datasets'
 
 export async function load({ url }) {
   // Access the URLSearchParams object
@@ -42,41 +40,14 @@ export async function load({ url }) {
     dataDownloadLocation: downloadUrl || null
   };
 
-  // Start lightweight fetches (indicators config, CSV, and Nederland aggregates)
-  // GeoJSON will be loaded client-side for progressive rendering
-  // Note: English translations are now applied client-side from indicator-translations.json
-  const [indicatorsConfigPromise, csvPromise, nederlandAggregatesPromise] = [
+  // Fetch indicators config and Nederland aggregates - CSV loads client-side in background
+  const [indicatorsConfigResponse, nederlandAggregatesResponse] = await Promise.all([
     fetch(configObj.indicatorsConfigLocation),
-    fetch(configObj.neighbourhoodCSVdataLocation),
-    fetch('/nederland-aggregates.json').catch(() => null) // Don't fail if file doesn't exist
-  ];
-
-  // Wait for lightweight data only
-  const [indicatorsConfigResponse, csvResponse, nederlandAggregatesResponse] = await Promise.all([
-    indicatorsConfigPromise,
-    csvPromise,
-    nederlandAggregatesPromise
+    fetch('/nederland-aggregates.json').catch(() => null)
   ]);
 
-  // Process the responses
   const indicatorsConfigText = await indicatorsConfigResponse.text();
-  const zipBuffer = await csvResponse.arrayBuffer();
-
-  // Parse indicators config
   const indicatorsConfig = dsvFormat(';').parse(indicatorsConfigText);
-
-  // Handle both zip and gzip formats
-  let csvText;
-  if (configObj.neighbourhoodCSVdataLocation.endsWith('.gz')) {
-    const decompressed = gunzipSync(new Uint8Array(zipBuffer));
-    csvText = strFromU8(decompressed);
-  } else {
-    const files = unzipSync(new Uint8Array(zipBuffer));
-    const fileName = Object.keys(files).find(name => name.endsWith('.csv'));
-    csvText = strFromU8(files[fileName]);
-  }
-
-  const buurtCSVdata = dsvFormat(';').parse(csvText);
 
   // Parse Nederland aggregates if available
   let nederlandAggregates = null;
@@ -100,7 +71,6 @@ export async function load({ url }) {
   return {
     lang,
     indicatorsConfig,
-    buurtCSVdata,
     nederlandAggregates,
     neighbourhoodGeoJson: null,
     municipalityGeoJson: null,

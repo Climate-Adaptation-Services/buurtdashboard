@@ -27,7 +27,6 @@
   const dispatch = createEventDispatcher()
 
   export let allIndicators
-  export let isLoading = false
 
   let lijstAlleGemeentesVoorDropdown
   let lijstAlleBuurtenInMunicipalityVoorDropdown
@@ -103,13 +102,6 @@
       </div>
     </div>
     <br />
-    {#if isLoading}
-      <div class="loading-indicator">
-        <div class="loading-spinner-small"></div>
-        <span>Gegevens laden...</span>
-      </div>
-    {/if}
-
     <GemeenteSelect {lijstAlleGemeentesVoorDropdown} />
     <BuurtSelect {lijstAlleBuurtenInMunicipalityVoorDropdown} />
     {#if $neighbourhoodSelection !== null}
@@ -169,29 +161,4 @@
     filter: brightness(0) invert(1);
   }
 
-  .loading-indicator {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    margin-bottom: 16px;
-    color: white;
-    font-size: 14px;
-  }
-
-  .loading-spinner-small {
-    width: 20px;
-    height: 20px;
-    border: 3px solid rgba(255, 255, 255, 0.3);
-    border-top: 3px solid white;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-  }
-
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
 </style>

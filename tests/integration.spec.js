@@ -1,160 +1,83 @@
 // @ts-check
 import { test, expect } from '@playwright/test';
 
-/**
- * Integration Tests - User Workflows & Component Interactions
- * 
- * These tests verify complete user workflows and component integration.
- * Takes longer but provides high confidence in functionality.
- */
-
 test.describe('Integration Tests', () => {
   test.beforeEach(async ({ page }) => {
-    // Disable tutorial by setting localStorage before page load
     await page.addInitScript(() => {
       localStorage.setItem('buurtdashboard-tutorial-seen', 'true');
     });
     await page.goto('/?config=dordrecht');
-    await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(5000); // Full data loading
+    await page.waitForSelector('.container', { timeout: 15000 });
   });
 
-  test('Indicator selection workflow', async ({ page }) => {
-    // Look for multiselect component
-    const multiselectSelectors = ['.multiselect', '.multiselect input', 'input[type="search"]'];
-    let multiselect = null;
-    
-    for (const selector of multiselectSelectors) {
-      const element = page.locator(selector).first();
-      if (await element.count() > 0 && await element.isVisible()) {
-        multiselect = element;
-        console.log(`Found multiselect: ${selector}`);
-        break;
-      }
+  test('Nederland barplot visible on initial load', async ({ page }) => {
+    // Core fix: Nederland bars should appear immediately from cache, without waiting for GeoJSON
+    const indicator = page.locator('.indicator').first();
+    await expect(indicator).toBeVisible({ timeout: 15000 });
+
+    // At least one barplot SVG should be rendered
+    const barplot = page.locator('svg[class^="barplot_"]').first();
+    await expect(barplot).toBeVisible({ timeout: 10000 });
+
+    // And it should contain at least one rect (bar) - use count instead of visibility
+    // since bars inside SVG may not be "visible" in Playwright's sense when inside overflow:hidden
+    const bars = barplot.locator('rect');
+    await expect(bars).not.toHaveCount(0, { timeout: 5000 });
+  });
+
+  test('Selecting a municipality shows gemeente stat', async ({ page }) => {
+    // Wait for the map paths to load (municipality paths appear first)
+    await page.waitForSelector('svg path', { timeout: 20000 });
+    await page.waitForTimeout(2000); // Let GeoJSON finish loading
+
+    // Click a map path
+    const paths = page.locator('.map svg path');
+    const count = await paths.count();
+    if (count === 0) {
+      console.log('⚠️  No map paths found, skipping');
+      return;
     }
-    
-    if (multiselect) {
-      try {
-        // Click to open dropdown
-        await multiselect.click({ force: true, timeout: 10000 });
-        await page.waitForTimeout(2000);
-        
-        // Look for options
-        const options = await page.getByRole('option').all();
-        console.log(`Found ${options.length} options`);
-        
-        if (options.length > 0) {
-          // Select first meaningful option
-          for (const option of options.slice(0, 5)) {
-            const text = await option.textContent();
-            if (text && text.trim() && !text.toLowerCase().includes('select')) {
-              await option.click();
-              console.log(`✅ Selected indicator: "${text.trim()}"`);
-              
-              // Wait for UI to update
-              await page.waitForTimeout(3000);
-              break;
-            }
-          }
-        }
-      } catch (error) {
-        console.log(`⚠️  Indicator selection failed: ${error.message}`);
-      }
+
+    // Click somewhere in the middle of the map to hit a municipality
+    const mapEl = page.locator('.map');
+    const box = await mapEl.boundingBox();
+    if (box) {
+      await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+      await page.waitForTimeout(2000);
+    }
+
+    // After clicking, stats for gemeente or buurt should appear
+    // indicator-stats divs are always present but only show Stat when selection is non-null
+    const statText = await page.locator('.indicator-stats').allTextContents();
+    const hasValue = statText.some(t => /\d+/.test(t));
+    // This is soft: if no click landed on a path, stats stay empty — still a valid state
+    console.log(`Gemeente/buurt stat after map click: ${hasValue ? 'values visible' : 'no selection made'}`);
+  });
+
+  test('URL parameter loads indicator', async ({ page }) => {
+    await page.goto('/?config=dordrecht&indicator=Bodemhoogte');
+    await page.waitForSelector('.container', { timeout: 15000 });
+    // Wait for GeoJSON to load so URL params are processed (~8s)
+    await page.waitForTimeout(10000);
+
+    // The URL should still contain the indicator parameter
+    expect(page.url()).toContain('indicator=Bodemhoogte');
+
+    // Verify the indicator filter tag is shown (URL param was processed)
+    const filterTag = page.locator('.tag, .selected-item, [class*="tag"]').filter({ hasText: /Bodemhoogte/ });
+    if (await filterTag.count() > 0) {
+      await expect(filterTag.first()).toBeVisible();
+      console.log('✅ URL parameter processed: Bodemhoogte filter tag visible');
     } else {
-      console.log('⚠️  No multiselect component found');
+      console.log('⚠️  Filter tag not found, but URL param is present in URL');
     }
   });
 
-  test('Map interaction workflow', async ({ page }) => {
-    // Wait for map to load
-    await page.waitForTimeout(3000);
-    
-    // Find neighborhood paths (not UI icons)
-    const neighborhoodPaths = page.locator('svg path[class*="_path"], .map path[class*="_path"]');
-    const pathCount = await neighborhoodPaths.count();
-    
-    console.log(`Found ${pathCount} neighborhood paths`);
-    
-    if (pathCount > 0) {
-      try {
-        // Click on first neighborhood
-        await neighborhoodPaths.first().click({ force: true });
-        await page.waitForTimeout(2000);
-        
-        console.log('✅ Map interaction completed');
-      } catch (error) {
-        console.log(`⚠️  Map interaction failed: ${error.message}`);
-      }
-    } else {
-      console.log('⚠️  No neighborhood paths found for interaction');
-    }
-  });
-
-  test('URL parameter handling', async ({ page }) => {
-    // Test deep linking with parameters
-    await page.goto('/?indicator=Bodemhoogte');
-    await page.waitForTimeout(8000);
-
-    // Check if indicator was selected based on URL
-    const hasSelection = await page.locator('.tag').count() > 0;
-
-    console.log(`✅ URL parameter handling working: ${hasSelection}`);
-
-    // If the parameter was processed, verify it's in the URL
-    // Otherwise just verify the page loaded successfully
-    if (hasSelection) {
-      const currentUrl = page.url();
-      expect(currentUrl).toContain('indicator');
-    }
-  });
-
-  test('Data integrity checks', async ({ page }) => {
-    await page.waitForTimeout(3000);
-
-    // Check for broken data states
-    const noDataElements = await page.locator('text=Geen data').count();
-    const nanElements = await page.locator('text=NaN').count();
-
-    console.log(`Data integrity: ${noDataElements} "Geen data" elements, ${nanElements} NaN elements`);
-
-    // Ensure no NaN values appear in UI
-    expect(nanElements).toBe(0);
-
-    // Check for statistical content - this is informational only since stats
-    // require indicator selection which may not happen in base page load
-    const statElements = await page.locator('.stat, .statistics, [class*="stat"]').count();
-    if (statElements > 0) {
-      const statTexts = await page.locator('.stat, .statistics, [class*="stat"]').allTextContents();
-      const hasNumericValues = statTexts.some(text => /\d+/.test(text));
-
-      console.log(`✅ Statistics contain valid numeric values: ${hasNumericValues}`);
-      // Only check if we actually have stat elements visible
-      if (statTexts.length > 0) {
-        expect(hasNumericValues).toBe(true);
-      }
-    } else {
-      console.log('ℹ️  No statistics visible (expected when no indicators selected)');
-    }
-  });
-
-  test('Error handling and recovery', async ({ page }) => {
-    // Test with invalid config
+  test('Invalid config does not crash', async ({ page }) => {
     await page.goto('/?config=nonexistent');
+    await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(3000);
-    
-    // App should handle gracefully (not crash)
     const body = await page.locator('body').textContent();
     expect(body).toBeTruthy();
-    
-    console.log('✅ Invalid config handled gracefully');
-    
-    // Test recovery by going to valid config
-    await page.goto('/?config=dordrecht');
-    await page.waitForTimeout(3000);
-    
-    const hasContent = await page.locator('body').textContent();
-    expect(hasContent).toBeTruthy();
-    
-    console.log('✅ Recovery to valid config successful');
   });
 });

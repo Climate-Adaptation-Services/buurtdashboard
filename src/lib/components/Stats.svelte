@@ -401,27 +401,29 @@
     : ''}"
   bind:clientWidth={statsWidth}
 >
-  {#if isAHN5Selected && indicator.AHNversie}
-    <div class="ahn5-notice">
-      <span class="region-label">Nederland</span>
-      <span class="notice-text">Niet voor heel Nederland beschikbaar</span>
-    </div>
-  {:else}
-    <Stat
-      {indicatorValueColorscale}
-      {indicator}
-      medianValueOtherYear={medianValuesDictOtherYear["medianValueNederland"]}
-      graphWidth={statsWidth}
-      indicatorHeight={bodyHeight * 0.2 * 0.25}
-      regio="Nederland"
-      medianValue={medianValuesDict["medianValueNederland"]}
-      scaleValue={scaleValuesDict["medianValueNederland"]}
-      {xScaleStats}
-    />
+  {#if statsWidth > 0}
+    {#if isAHN5Selected && indicator.AHNversie}
+      <div class="ahn5-notice">
+        <span class="region-label">Nederland</span>
+        <span class="notice-text">Niet voor heel Nederland beschikbaar</span>
+      </div>
+    {:else}
+      <Stat
+        {indicatorValueColorscale}
+        {indicator}
+        medianValueOtherYear={medianValuesDictOtherYear["medianValueNederland"]}
+        graphWidth={statsWidth}
+        indicatorHeight={bodyHeight * 0.2 * 0.25}
+        regio="Nederland"
+        medianValue={medianValuesDict["medianValueNederland"]}
+        scaleValue={scaleValuesDict["medianValueNederland"]}
+        {xScaleStats}
+      />
+    {/if}
   {/if}
 </div>
 <div class="indicator-stats" style="height: {bodyHeight * 0.2 * 0.25}px">
-  {#if $municipalitySelection !== null}
+  {#if statsWidth > 0 && $municipalitySelection !== null}
     <Stat
       {indicatorValueColorscale}
       {indicator}
@@ -436,7 +438,7 @@
   {/if}
 </div>
 <div class="indicator-stats" style="height: {bodyHeight * 0.2 * 0.25}px">
-  {#if $neighbourhoodSelection !== null}
+  {#if statsWidth > 0 && $neighbourhoodSelection !== null}
     <Stat
       {indicatorValueColorscale}
       {indicator}
@@ -452,7 +454,7 @@
   {/if}
 </div>
 <div class="indicator-stats" style="height: {bodyHeight * 0.2 * 0.25}px">
-  {#if $neighbourhoodSelection !== null && $selectedNeighbourhoodJSONData && $selectedNeighbourhoodJSONData.properties[$districtTypeAbbreviation]}
+  {#if statsWidth > 0 && $neighbourhoodSelection !== null && $selectedNeighbourhoodJSONData && $selectedNeighbourhoodJSONData.properties[$districtTypeAbbreviation]}
     <Stat
       {indicatorValueColorscale}
       {indicator}

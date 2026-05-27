@@ -28,8 +28,9 @@
   import { getIndicatorAttribute } from "$lib/utils/getIndicatorAttribute.js"
   import { onMount, tick } from "svelte"
   import { BUURT_GEOJSON_URL, MUNICIPALITY_JSON_URL } from "$lib/datasets"
-  import { prepareJSONData } from "$lib/services/prepareJSONData"
-  import { gunzipSync, strFromU8 } from "fflate"
+  import { prepareJSONData, processMunicipalityData } from "$lib/services/prepareJSONData"
+  import { gunzipSync, unzipSync, strFromU8 } from "fflate"
+  import { dsvFormat } from "d3-dsv"
 
   export let data
 
@@ -53,7 +54,6 @@
   let displayedIndicators = []
   let allIndicators = []
   let isInitialized = false
-  let isUIReady = false
   let showTutorial = false
 
   // GeoJSON data will be loaded client-side for progressive rendering
@@ -73,46 +73,55 @@
     displayedIndicators = allIndicators
     isInitialized = true
 
-    // Show UI immediately with loading states, data will load in background
-    isUIReady = true
-
-    // Wait for Svelte to render the UI and browser to paint
+    // Wait for Svelte to render the UI and browser to paint, then remove loading screen
     await tick()
     await new Promise(resolve => requestAnimationFrame(resolve))
-
-    // Remove the static HTML loading screen after UI is rendered
     const loader = document.getElementById('app-loading')
     if (loader) loader.remove()
 
-    // Load data in background
+    // Load all data in background — municipality first so map appears early
     ;(async () => {
       try {
-      // Fetch GeoJSON data in parallel
-      const [municipalityResponse, neighbourhoodResponse] = await Promise.all([
-        fetch(MUNICIPALITY_JSON_URL),
-        fetch(BUURT_GEOJSON_URL)
-      ])
+        const csvUrl = data.dashboardConfig.neighbourhoodCSVdataLocation
 
-      municipalityGeoJson = await municipalityResponse.json()
+        // Start all three fetches simultaneously
+        const municipalityFetch = fetch(MUNICIPALITY_JSON_URL)
+        const neighbourhoodFetch = fetch(BUURT_GEOJSON_URL)
+        const csvFetch = fetch(csvUrl)
 
-      // Decompress gzipped buurt TopoJSON
-      const neighbourhoodBuffer = await neighbourhoodResponse.arrayBuffer()
-      const decompressed = gunzipSync(new Uint8Array(neighbourhoodBuffer))
-      neighbourhoodGeoJson = JSON.parse(strFromU8(decompressed))
+        // Process municipality as soon as it arrives (small file ~500KB)
+        // This sets allMunicipalitiesJSONData → map overlay disappears
+        municipalityGeoJson = await municipalityFetch.then(r => r.json())
+        await processMunicipalityData(municipalityGeoJson, MUNICIPALITY_JSON_URL)
 
-      geoJSONData = [municipalityGeoJson, neighbourhoodGeoJson]
+        // Wait for neighborhood GeoJSON + CSV in parallel (both larger files)
+        const [neighbourhoodResponse, csvResponse] = await Promise.all([neighbourhoodFetch, csvFetch])
 
-      // Process and cache the GeoJSON data
-      const dataUrls = {
-        municipalityUrl: MUNICIPALITY_JSON_URL,
-        neighbourhoodUrl: BUURT_GEOJSON_URL
-      }
+        const neighbourhoodBuffer = await neighbourhoodResponse.arrayBuffer()
+        const decompressed = gunzipSync(new Uint8Array(neighbourhoodBuffer))
+        neighbourhoodGeoJson = JSON.parse(strFromU8(decompressed))
 
-      await prepareJSONData([municipalityGeoJson, neighbourhoodGeoJson], data.buurtCSVdata, dataUrls)
+        const csvBuffer = await csvResponse.arrayBuffer()
+        let csvText
+        if (csvUrl.endsWith('.gz')) {
+          csvText = strFromU8(gunzipSync(new Uint8Array(csvBuffer)))
+        } else {
+          const files = unzipSync(new Uint8Array(csvBuffer))
+          const fileName = Object.keys(files).find(name => name.endsWith('.csv'))
+          csvText = strFromU8(files[fileName])
+        }
+        const buurtCSVdata = dsvFormat(';').parse(csvText)
+
+        geoJSONData = [municipalityGeoJson, neighbourhoodGeoJson]
+
+        await prepareJSONData([municipalityGeoJson, neighbourhoodGeoJson], buurtCSVdata, {
+          municipalityUrl: MUNICIPALITY_JSON_URL,
+          neighbourhoodUrl: BUURT_GEOJSON_URL
+        })
 
         isLoadingGeoJSON = false
       } catch (error) {
-        console.error('Error loading GeoJSON data:', error)
+        console.error('Error loading data:', error)
         isLoadingGeoJSON = false
       }
     })()
@@ -186,46 +195,36 @@
 
 <svelte:head><link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" /></svelte:head>
 
-{#if !isUIReady}
-  <!-- Full-page loading screen -->
-  <div class="loading-screen">
-    <div class="loading-content">
-      <div class="loading-spinner-large"></div>
-      <p class="loading-text">Dashboard wordt geladen...</p>
+<div class="container" style="justify-content:{screenWidth < 800 ? 'center' : 'left'}">
+  <div class="sidebar" style="position:{screenWidth > 800 ? 'fixed' : 'relative'}">
+    <div class="control-panel"><ControlPanel {indicatorsSelection} {allIndicators} on:openTutorial={() => showTutorial = true} /></div>
+    <div class="map" class:dordrecht={$configStore.categoryPath === '-dordrecht'} bind:clientWidth={mapWidth} bind:clientHeight={mapHeight}>
+      <Map JSONdata={geoJSONData} {mapWidth} {mapHeight} mapType={"main map"} isLoading={isLoadingGeoJSON} />
     </div>
   </div>
-{:else}
-  <div class="container" style="justify-content:{screenWidth < 800 ? 'center' : 'left'}">
-    <div class="sidebar" style="position:{screenWidth > 800 ? 'fixed' : 'relative'}">
-      <div class="control-panel"><ControlPanel {indicatorsSelection} {allIndicators} isLoading={isLoadingGeoJSON} on:openTutorial={() => showTutorial = true} /></div>
-      <div class="map" class:dordrecht={$configStore.categoryPath === '-dordrecht'} bind:clientWidth={mapWidth} bind:clientHeight={mapHeight}>
-        <Map JSONdata={geoJSONData} CSVdata={data.buurtCSVdata} {mapWidth} {mapHeight} mapType={"main map"} isLoading={isLoadingGeoJSON} />
-      </div>
-    </div>
 
-    <div class="indicators" style="margin-left:{screenWidth > 800 ? 400 : 0}px">
-      {#each displayedIndicators as indicator (indicator.title)}
-        {#if getIndicatorAttribute(indicator, indicator.attribute)}
-          <div
-            class="indicator"
-            style="height:{indicatorHeight}px"
-            data-indicator-title={indicator.dutchTitle || indicator.title}
-            data-indicator-type={indicator.numerical ? 'numerical' : 'categorical'}
-          >
-            <Indicator {indicatorHeight} {indicator} isLoading={isLoadingGeoJSON} />
-          </div>
-        {/if}
-      {/each}
-    </div>
-
-    <Tooltip />
-
-    <Modal show={$modal} style="position:absolute; left:0"></Modal>
+  <div class="indicators" style="margin-left:{screenWidth > 800 ? 400 : 0}px">
+    {#each displayedIndicators as indicator (indicator.title)}
+      {#if getIndicatorAttribute(indicator, indicator.attribute)}
+        <div
+          class="indicator"
+          style="height:{indicatorHeight}px"
+          data-indicator-title={indicator.dutchTitle || indicator.title}
+          data-indicator-type={indicator.numerical ? 'numerical' : 'categorical'}
+        >
+          <Indicator {indicatorHeight} {indicator} isLoading={isLoadingGeoJSON} />
+        </div>
+      {/if}
+    {/each}
   </div>
 
-  <!-- Tutorial overlay -->
-  <Tutorial bind:isOpen={showTutorial} />
-{/if}
+  <Tooltip />
+
+  <Modal show={$modal} style="position:absolute; left:0"></Modal>
+</div>
+
+<!-- Tutorial overlay -->
+<Tutorial bind:isOpen={showTutorial} />
 
 <style>
   .container {
@@ -285,43 +284,5 @@
     border-radius: 10px;
   }
 
-  /* Full-page loading screen */
-  .loading-screen {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-  }
 
-  .loading-content {
-    text-align: center;
-  }
-
-  .loading-spinner-large {
-    width: 60px;
-    height: 60px;
-    margin: 0 auto 20px;
-    border: 5px solid rgba(255, 255, 255, 0.3);
-    border-top-color: white;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-  }
-
-  .loading-text {
-    font-size: 18px;
-    color: white;
-    font-weight: 500;
-    margin: 0;
-  }
-
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
-  }
 </style>

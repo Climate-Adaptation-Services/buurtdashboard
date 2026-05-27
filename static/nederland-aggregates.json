@@ -1,6 +1,6 @@
 {
   "version": "20260210",
-  "generatedAt": "2026-03-04T09:38:17.189Z",
+  "generatedAt": "2026-05-26T08:35:54.894Z",
   "aggregates": {
     "Gevoelstemperatuur": {
       "AHN2": {
@@ -18,24 +18,6 @@
         "51°C": 0.046663375763428036
       }
     },
-    "Schaduw fiets- en wandelpaden": {
-      "hele_buurt": {
-        "AHN3": 35.858762115000005,
-        "AHN4": 36.813910605000004,
-        "AHN5": 36.490055635000004,
-        "diff_AHN3_AHN4": 1.0047921399999993,
-        "diff_AHN3_AHN5": 1.156377840000001,
-        "diff_AHN4_AHN5": 0.29269490000000076
-      },
-      "bebouwde_kom": {
-        "AHN3": 35.517055424999995,
-        "AHN4": 36.48986337,
-        "AHN5": 36.61446677,
-        "diff_AHN3_AHN4": 1.076421364999998,
-        "diff_AHN3_AHN5": 1.2952700099999959,
-        "diff_AHN4_AHN5": 0.339596929999999
-      }
-    },
     "Waterdiepte bij hevige bui": {
       "5 - 10cm": 7.8490293624262355,
       "10 - 15cm": 4.460297987943613,
@@ -48,6 +30,27 @@
     "Extreem lage grondwaterstand ": 1.8777691275000001,
     "Hoge grondwaterstand ": 1.098987579,
     "Extreem hoge grondwaterstand ": 0.733189174,
+    "Risico Paalrot huidig": {
+      "Zeer laag": 82.00077249903438,
+      "Laag": 13.65005793742758,
+      "Midden": 3.0204712244109695,
+      "Hoog": 0.8651989185013519,
+      "Zeer hoog": 0.4634994206257242
+    },
+    "Risico Paalrot 2050 hoog": {
+      "Zeer laag": 80.84202394747007,
+      "Laag": 14.159907300115876,
+      "Midden": 3.476245654692932,
+      "Hoog": 1.0505986867516415,
+      "Zeer hoog": 0.47122441096948625
+    },
+    "Risico Verschilzetting 2050H": {
+      "Zeer laag": 50.845886442641955,
+      "Laag": 40.32444959443801,
+      "Matig": 3.422170722286597,
+      "Hoog": 3.429895712630359,
+      "Zeer hoog": 1.97759752800309
+    },
     "Maximale overstromingsdiepte": {
       "tot 20cm": 6.846912936532617,
       "20-50cm": 9.244197064290205,
@@ -55,7 +58,7 @@
       ">200cm": 41.28018137787938
     },
     "Droge verdiepingen": 94,
-    "Boomkroonoppervlakte": {
+    "Boomkroonbedekking": {
       "hele_buurt": {
         "AHN3": 10.100646130000001,
         "AHN4": 10.696119015,
@@ -73,7 +76,7 @@
         "diff_AHN4_AHN5": 0.43806418800000024
       }
     },
-    "Boomkroonoppervlakte openbaar": {
+    "Boomkroonbedekking openbaar": {
       "hele_buurt": {
         "AHN3": 19.93800308,
         "AHN4": 21.352272255000003,
@@ -91,7 +94,7 @@
         "diff_AHN4_AHN5": 1.0036537999999986
       }
     },
-    "Boomkroonoppervlakte niet-openbaar ": {
+    "Boomkroonbedekking niet-openbaar ": {
       "hele_buurt": {
         "AHN3": 6.271943993500001,
         "AHN4": 6.5202728914999994,
@@ -148,13 +151,19 @@
     "Percentage boomkroon per pand": {
       "hele_buurt": {
         "AHN3": 10.775756625,
+        "AHN4": 11.498586074999999,
         "AHN5": 11.80841948,
-        "diff_AHN3_AHN5": 0.9916213100000011
+        "diff_AHN3_AHN4": 0.5427608309999998,
+        "diff_AHN3_AHN5": 0.9916213100000011,
+        "diff_AHN4_AHN5": 0.33640950000000025
       },
       "bebouwde_kom": {
         "AHN3": 10.68258001,
+        "AHN4": 11.34261571,
         "AHN5": 11.68553382,
-        "diff_AHN3_AHN5": 0.9842133180000001
+        "diff_AHN3_AHN4": 0.5164149479999995,
+        "diff_AHN3_AHN5": 0.9842133180000001,
+        "diff_AHN4_AHN5": 0.32360158699999975
       }
     },
     "Schaduw totaal": {
@@ -173,66 +182,6 @@
         "diff_AHN3_AHN4": 0.45968097999999813,
         "diff_AHN3_AHN5": 0.2582781800000049,
         "diff_AHN4_AHN5": -0.021310780000000307
-      }
-    },
-    "Schaduw groen en grijs": {
-      "hele_buurt": {
-        "AHN3": {
-          "Grijze schaduw": 9.136572638908522,
-          "Groene schaduw": 19.914964950314985
-        },
-        "AHN4": {
-          "Grijze schaduw": 9.208772231047949,
-          "Groene schaduw": 20.11396701199951
-        },
-        "AHN5": {
-          "Grijze schaduw": 9.839743980521844,
-          "Groene schaduw": 19.724818482741597
-        }
-      },
-      "bebouwde_kom": {
-        "AHN3": {
-          "Grijze schaduw": 11.342095241224728,
-          "Groene schaduw": 22.409382740204386
-        },
-        "AHN4": {
-          "Grijze schaduw": 11.412865724327734,
-          "Groene schaduw": 22.697333191621652
-        },
-        "AHN5": {
-          "Grijze schaduw": 11.871354637633857,
-          "Groene schaduw": 21.792503008852716
-        }
-      }
-    },
-    "Schaduw fiets- en wandelpaden: groen en grijs": {
-      "hele_buurt": {
-        "AHN3": {
-          "Grijze schaduw": 9.210971251693286,
-          "Groene schaduw": 26.943865224251752
-        },
-        "AHN4": {
-          "Grijze schaduw": 9.684011796340199,
-          "Groene schaduw": 27.2853230566292
-        },
-        "AHN5": {
-          "Grijze schaduw": 10.6781373676383,
-          "Groene schaduw": 25.91037202900572
-        }
-      },
-      "bebouwde_kom": {
-        "AHN3": {
-          "Grijze schaduw": 10.158386956877935,
-          "Groene schaduw": 25.74725952398896
-        },
-        "AHN4": {
-          "Grijze schaduw": 10.695256292076653,
-          "Groene schaduw": 26.210827154801834
-        },
-        "AHN5": {
-          "Grijze schaduw": 11.638710538917831,
-          "Groene schaduw": 25.224019169175538
-        }
       }
     },
     "Schaduw openbaar gebied": {
@@ -269,6 +218,84 @@
         "diff_AHN3_AHN4": 0.5002597599999987,
         "diff_AHN3_AHN5": 0,
         "diff_AHN4_AHN5": -0.3783198400000032
+      }
+    },
+    "Schaduw groen en grijs": {
+      "hele_buurt": {
+        "AHN3": {
+          "Grijze schaduw": 9.136572638908522,
+          "Groene schaduw": 19.914964950314985
+        },
+        "AHN4": {
+          "Grijze schaduw": 9.208772231047949,
+          "Groene schaduw": 20.11396701199951
+        },
+        "AHN5": {
+          "Grijze schaduw": 9.839743980521844,
+          "Groene schaduw": 19.724818482741597
+        }
+      },
+      "bebouwde_kom": {
+        "AHN3": {
+          "Grijze schaduw": 11.342095241224728,
+          "Groene schaduw": 22.409382740204386
+        },
+        "AHN4": {
+          "Grijze schaduw": 11.412865724327734,
+          "Groene schaduw": 22.697333191621652
+        },
+        "AHN5": {
+          "Grijze schaduw": 11.871354637633857,
+          "Groene schaduw": 21.792503008852716
+        }
+      }
+    },
+    "Schaduw fiets- en wandelpaden": {
+      "hele_buurt": {
+        "AHN3": 35.858762115000005,
+        "AHN4": 36.813910605000004,
+        "AHN5": 36.490055635000004,
+        "diff_AHN3_AHN4": 1.0047921399999993,
+        "diff_AHN3_AHN5": 1.156377840000001,
+        "diff_AHN4_AHN5": 0.29269490000000076
+      },
+      "bebouwde_kom": {
+        "AHN3": 35.517055424999995,
+        "AHN4": 36.48986337,
+        "AHN5": 36.61446677,
+        "diff_AHN3_AHN4": 1.076421364999998,
+        "diff_AHN3_AHN5": 1.2952700099999959,
+        "diff_AHN4_AHN5": 0.339596929999999
+      }
+    },
+    "Schaduw fiets- en wandelpaden: groen en grijs": {
+      "hele_buurt": {
+        "AHN3": {
+          "Grijze schaduw": 9.210971251693286,
+          "Groene schaduw": 26.943865224251752
+        },
+        "AHN4": {
+          "Grijze schaduw": 9.684011796340199,
+          "Groene schaduw": 27.2853230566292
+        },
+        "AHN5": {
+          "Grijze schaduw": 10.6781373676383,
+          "Groene schaduw": 25.91037202900572
+        }
+      },
+      "bebouwde_kom": {
+        "AHN3": {
+          "Grijze schaduw": 10.158386956877935,
+          "Groene schaduw": 25.74725952398896
+        },
+        "AHN4": {
+          "Grijze schaduw": 10.695256292076653,
+          "Groene schaduw": 26.210827154801834
+        },
+        "AHN5": {
+          "Grijze schaduw": 11.638710538917831,
+          "Groene schaduw": 25.224019169175538
+        }
       }
     },
     "Groen": {
@@ -318,16 +345,9 @@
       }
     },
     "Openbaar en niet-openbaar": {
-      "hele_buurt": {
-        "Gebouwen": 13.88668405919523,
-        "Openbaar": 37.02613188543284,
-        "Niet openbaar": 49.07955715215757
-      },
-      "bebouwde_kom": {
-        "Gebouwen": 17.14014300727872,
-        "Openbaar": null,
-        "Niet openbaar": null
-      }
+      "Gebouwen": 13.88668405919523,
+      "Openbaar": 37.02613188543284,
+      "Niet openbaar": 49.07955715215757
     },
     "Groen per inwoner": 124.2244537,
     "Bevolkingsdichtheid": 1662.5,

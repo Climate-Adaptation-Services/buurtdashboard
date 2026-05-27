@@ -1,124 +1,56 @@
 // @ts-check
 import { test, expect } from '@playwright/test';
 
-/**
- * Smoke Tests - Fast, Essential Checks
- * 
- * These tests run quickly and catch major issues.
- * Perfect for CI/CD and development feedback loops.
- */
-
 test.describe('Smoke Tests', () => {
   test.beforeEach(async ({ page }) => {
-    // Disable tutorial by setting localStorage before page load
     await page.addInitScript(() => {
       localStorage.setItem('buurtdashboard-tutorial-seen', 'true');
     });
     await page.goto('/?config=dordrecht');
-    await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(3000); // Basic data loading
+    // Wait for the app container to appear instead of fixed timeout
+    await page.waitForSelector('.container', { timeout: 15000 });
   });
 
-  test('Application loads without errors', async ({ page }) => {
-    // Verify page has loaded by checking for body content
-    await expect(page.locator('body')).toBeVisible();
-    
-    // Check for main container
-    const mainSelectors = ['main', '.app', '.container', '#app', 'body > div'];
-    let hasMainContainer = false;
-    
-    for (const selector of mainSelectors) {
-      if (await page.locator(selector).count() > 0) {
-        hasMainContainer = true;
-        console.log(`Main container found: ${selector}`);
-        break;
-      }
-    }
-    
-    expect(hasMainContainer).toBe(true);
-    console.log('✅ Application loaded successfully');
+  test('Application loads and shows indicators', async ({ page }) => {
+    // At least one indicator card must be visible
+    await expect(page.locator('.indicator').first()).toBeVisible({ timeout: 15000 });
   });
 
-  test('Map component renders', async ({ page }) => {
-    // Look for map containers
-    const mapSelectors = ['.map', '.map-container', 'svg', '.leaflet-container'];
-    let mapElement = null;
-    
-    for (const selector of mapSelectors) {
-      const element = page.locator(selector).first();
-      if (await element.count() > 0) {
-        mapElement = element;
-        console.log(`Map found: ${selector}`);
-        break;
-      }
-    }
-    
-    if (mapElement) {
-      await expect(mapElement).toBeVisible();
-      
-      // Check for SVG paths (map data)
-      const pathElements = await page.locator('path').count();
-      console.log(`✅ Map rendered with ${pathElements} path elements`);
-      expect(pathElements).toBeGreaterThan(0);
-    } else {
-      console.log('⚠️  No map component found');
-    }
+  test('Map renders with paths', async ({ page }) => {
+    // Wait for Leaflet map container to appear (SVG paths inside Leaflet may be few initially)
+    await page.waitForSelector('.leaflet-container', { timeout: 15000 });
+    const pathCount = await page.locator('svg path').count();
+    expect(pathCount).toBeGreaterThan(0);
+  });
+
+  test('No NaN values in the UI', async ({ page }) => {
+    // Wait for indicators to render (indicator-stats is visibility:hidden for Dordrecht, use indicator instead)
+    await page.waitForSelector('.indicator', { timeout: 20000 });
+    const bodyText = await page.locator('body').textContent();
+    expect(bodyText).not.toContain('NaN');
+    expect(bodyText).not.toContain('undefined');
   });
 
   test('No critical JavaScript errors', async ({ page }) => {
     const criticalErrors = [];
-    
+
+    page.on('pageerror', error => criticalErrors.push(error.message));
     page.on('console', msg => {
-      const text = msg.text();
       if (msg.type() === 'error') {
-        // Filter out known non-critical issues (SVG rendering edge cases)
-        if (!text.includes('Failed to decode downloaded font') &&
-            !text.includes('OTS parsing error') &&
-            !text.includes('Error: <path> attribute') &&
-            !text.includes('Error: <rect> attribute') &&
-            !text.includes('Error: <text> attribute') &&
-            !text.includes('Error: <line> attribute') &&
-            !text.includes('Error: <circle> attribute')) {
+        const text = msg.text();
+        // Ignore known SVG rendering edge cases
+        if (!text.includes('<path>') && !text.includes('<rect>') &&
+            !text.includes('<text>') && !text.includes('<line>') &&
+            !text.includes('font')) {
           criticalErrors.push(text);
         }
       }
     });
-    
-    page.on('pageerror', error => {
-      criticalErrors.push(`Page error: ${error.message}`);
-    });
-    
-    // Reload to capture errors
-    await page.reload();
-    await page.waitForTimeout(3000);
-    
-    console.log(`Found ${criticalErrors.length} critical errors`);
-    if (criticalErrors.length > 0) {
-      console.log('Critical errors:', criticalErrors);
-    }
-    
-    // Allow minimal errors but fail if too many
-    expect(criticalErrors.length).toBeLessThan(3);
-    console.log('✅ JavaScript errors within acceptable limits');
-  });
 
-  test('Control interface is present', async ({ page }) => {
-    // Look for interactive elements
-    const controlSelectors = [
-      '.sidebar', '.control-panel', '.panel', 'aside', 
-      '.multiselect', 'select', 'input', 'button'
-    ];
-    
-    let hasControls = false;
-    for (const selector of controlSelectors) {
-      if (await page.locator(selector).count() > 0) {
-        hasControls = true;
-        console.log(`Controls found: ${selector}`);
-        break;
-      }
-    }
-    
-    // This is informational - UI might be different
-    console.log(`✅ Interactive controls present: ${hasControls}`);
+    await page.reload();
+    await page.waitForSelector('.container', { timeout: 15000 });
+
+    // Allow up to 1 error for known edge cases (e.g. font loading)
+    expect(criticalErrors.length).toBeLessThanOrEqual(1);
   });
 });

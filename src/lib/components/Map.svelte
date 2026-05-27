@@ -8,6 +8,7 @@
     municipalitySelection,
     isUpdatingIndicators,
     forceMapZoom,
+    allMunicipalitiesJSONData,
   } from "$lib/stores"
   // Note: Using per-indicator year selection via indicatorStore (not global)
   import { geoMercator, geoPath, select, selectAll } from "d3"
@@ -153,23 +154,21 @@
     }
   })
 
-  // Initialize map when container and dimensions are available
+  // Initialize map as soon as Leaflet is ready — default Netherlands center set in initializeMap
   $: {
     if (leafletReady && mapContainer && mapWidth && mapHeight && mapType === "main map" && !mapManager.getMap()) {
       const success = mapManager.initializeMap(mapContainer, mapWidth, mapHeight)
-      if (success && $currentJSONData && $currentJSONData.features) {
-        mapManager.initializeWithData($currentJSONData)
+      if (success) {
         mapInitializedWithData = true
       }
     }
   }
 
-  // Initialize map with data when data arrives after map creation
-  $: {
-    if (mapManager.getMap() && mapType === "main map" && $currentJSONData && $currentJSONData.features && !mapInitializedWithData) {
-      mapManager.initializeWithData($currentJSONData)
-      mapInitializedWithData = true
-    }
+  // Fit to actual data bounds once when municipality data first arrives
+  let hasFitInitialBounds = false
+  $: if (!hasFitInitialBounds && mapManager.getMap() && mapType === "main map" && $currentJSONData?.features?.length > 0) {
+    mapManager.initializeWithData($currentJSONData)
+    hasFitInitialBounds = true
   }
 
   // Handle selection changes for zooming
@@ -197,7 +196,7 @@
   <div class="map-container">
     <!-- Background Leaflet map -->
     <div class="leaflet-background" bind:this={mapContainer}></div>
-    {#if isLoading || !leafletReady || !mapManager.getMap() || !mapInitializedWithData || !projection || !path}
+    {#if !leafletReady || !mapManager.getMap() || !mapInitializedWithData || !projection || !path || !$allMunicipalitiesJSONData}
       <!-- Loading overlay -->
       <div class="loading-overlay">
         <div class="loading-spinner"></div>
@@ -208,7 +207,7 @@
       <svg class="main-map {isZooming ? 'zooming' : ''} {isPanning ? 'panning' : ''}" style="filter:drop-shadow(0 0 15px rgb(160, 160, 160))">
         <!-- svelte-ignore a11y-mouse-events-have-key-events -->
         <!-- svelte-ignore a11y-no-static-element-interactions -->
-        {#if $currentJSONData.features}
+        {#if $currentJSONData?.features}
           {#each $currentJSONData.features as feature, i}
             <MapPath
               {feature}
