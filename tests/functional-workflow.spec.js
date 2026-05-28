@@ -150,7 +150,7 @@ test.describe('Error Handling Tests', () => {
     await page.waitForTimeout(2000);
     
     // Then block only data requests (not the page itself)
-    await page.route('**/s3.eu-north-1.amazonaws.com/**', route => route.abort());
+    await page.route('**/fsn1.your-objectstorage.com/**', route => route.abort());
     
     // Reload to trigger data loading failures
     await page.reload();
