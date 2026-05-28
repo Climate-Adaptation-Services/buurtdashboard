@@ -25,7 +25,7 @@ const CONFIG_MODE = process.env.PUBLIC_CONFIG_MODE || 'published';
 
 const DEFAULT_INDICATORS_CONFIG_URL = `${CONFIG_PORTAL_URL}/api/config/default-nl/csv?mode=${CONFIG_MODE}`;
 const DEFAULT_INDICATORS_CONFIG_ENGLISH_URL =
-  "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com/buurtdashboard-KEA/metadata/EN-buurtdashboard-metadata-050825-01.csv";
+  "https://buurtdashboard-data.fsn1.your-objectstorage.com/buurtdashboard-KEA/metadata/EN-buurtdashboard-metadata-050825-01.csv";
 
 // Get __dirname equivalent in ES modules
 const __filename = fileURLToPath(import.meta.url);

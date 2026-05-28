@@ -9,7 +9,7 @@ export const DATASET_VERSION = '20260210';
 export const CONFIG_PORTAL_URL = "https://buurtdashboard-config-portal.vercel.app";
 
 // S3 base URL for preconnect
-export const S3_BASE_URL = "https://buurtdashboard-data.s3.eu-north-1.amazonaws.com";
+export const S3_BASE_URL = "https://buurtdashboard-data.fsn1.your-objectstorage.com";
 
 // Config mode: 'dev' or 'published' (default)
 // VITE_ prefix ensures the variable is available at build time
