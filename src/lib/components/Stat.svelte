@@ -3,7 +3,7 @@
   import { neighbourhoodSelection, municipalitySelection, allNeighbourhoodsJSONData, getIndicatorStore } from "$lib/stores"
   import { onMount } from 'svelte'
   import { getRegionName } from "$lib/utils/getRegionName"
-  import { getNoDataReason, isSpecificNoDataReason } from "$lib/utils/valueRetrieval.js"
+  import { getNoDataReason, isSpecificNoDataReason, formatDutchNumber } from "$lib/utils/valueRetrieval.js"
   import { t } from "$lib/i18n/translate.js"
 
   export let graphWidth
@@ -32,7 +32,7 @@
     return isSpecificNoDataReason(reason) ? t(reason) : "Geen data"
   })()
 
-  $: displayValue = medianValue !== "Geen data" ? Math.round(medianValue * 100) / 100 : noDataText
+  $: displayValue = medianValue !== "Geen data" ? formatDutchNumber(medianValue, 1) : noDataText
 
   // Determine the unit suffix for the indicator value
   $: unitSuffix = (() => {
@@ -217,7 +217,7 @@
         text-anchor={textAnchor}
         fill={isDifferenceMode ? (medianValue > 0 ? "#4682b4" : medianValue < 0 ? "#E1575A" : "#666666") : "#645f5e"}
       >
-        {typeof displayValue === 'number' ? textPlus + displayValue + unitSuffix : displayValue}
+        {medianValue !== "Geen data" ? textPlus + displayValue + unitSuffix : displayValue}
       </text>
     {/if}
   </g>
