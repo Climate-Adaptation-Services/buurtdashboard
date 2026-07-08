@@ -72,22 +72,13 @@ export function formatValue(value, { decimals = 2, showSign = false, nullText = 
 }
 
 // Helper function to format M2 values for better readability
+// Dutch format: dot as thousand separator, comma as decimal separator
 function formatM2Value(value) {
   if (value === null || value === undefined || isNaN(value)) return null
 
-  const absValue = Math.abs(value)
-  const isNegative = value < 0
-
-  // Format large numbers with thousand separators (Dutch format: dots as thousand separator)
-  if (absValue >= 1000) {
-    // Round to whole number for readability
-    const rounded = Math.round(absValue)
-    // Add thousand separators (dots in Dutch format)
-    const formatted = rounded.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
-    return isNegative ? `-${formatted}` : formatted
-  } else {
-    return Math.round(value * 100) / 100
-  }
+  const rounded = Math.round(value)
+  const formatted = Math.abs(rounded).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+  return rounded < 0 ? `-${formatted}` : formatted
 }
 
 // Property access
