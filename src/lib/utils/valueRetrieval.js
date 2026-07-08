@@ -71,14 +71,19 @@ export function formatValue(value, { decimals = 2, showSign = false, nullText = 
   return showSign && num > 0 ? `+${formatted}` : formatted
 }
 
+// Format a number in Dutch locale: dot as thousand separator, comma as decimal separator
+function formatDutchNumber(value, decimals = 0) {
+  if (value === null || value === undefined || isNaN(value)) return null
+  return Number(value).toLocaleString('nl-NL', {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals
+  })
+}
+
 // Helper function to format M2 values for better readability
-// Dutch format: dot as thousand separator, comma as decimal separator
 function formatM2Value(value) {
   if (value === null || value === undefined || isNaN(value)) return null
-
-  const rounded = Math.round(value)
-  const formatted = Math.abs(rounded).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
-  return rounded < 0 ? `-${formatted}` : formatted
+  return formatDutchNumber(value, 0)
 }
 
 // Property access
@@ -300,4 +305,4 @@ export const getDisplayValue = (feature, indicator, options = {}) => getValue(fe
 export const getBatchValues = (features, indicator, { valueType = 'display', ...options } = {}) => getValues(features, indicator, { mode: valueType, ...options })
 
 // Utilities
-export { getIndicatorAttribute, getMostCommonClass, getClassByIndicatorValue, formatM2Value }
+export { getIndicatorAttribute, getMostCommonClass, getClassByIndicatorValue, formatM2Value, formatDutchNumber }

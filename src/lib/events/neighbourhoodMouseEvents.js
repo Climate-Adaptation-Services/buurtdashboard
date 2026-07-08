@@ -21,6 +21,7 @@ import {
   isValidValue,
   getPopupValue,
   formatM2Value,
+  formatDutchNumber,
   isSpecificNoDataReason,
   isAnyNoData,
   getNoDataReason
@@ -134,9 +135,8 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
           
           // Format the difference value with proper sign and units
           if (popupResult.value !== null && !isNaN(popupResult.value)) {
-            const roundedValue = Math.round(popupResult.value * 100) / 100
             const sign = popupResult.value > 0 ? "+" : ""
-            tooltipValue = `${sign}${roundedValue.toFixed(1)}${popupResult.unit}`
+            tooltipValue = `${sign}${formatDutchNumber(popupResult.value, 1)}${popupResult.unit}`
             
             // Add M2 difference if available
             if (popupResult.hasM2 && popupResult.m2Value !== null) {
@@ -169,8 +169,7 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
           
           // Format the value with proper rounding and unit
           if (popupResult.value !== null && !isNaN(popupResult.value)) {
-            const roundedValue = Math.round(popupResult.value * 100) / 100
-            tooltipValue = `${roundedValue}${popupResult.unit}`
+            tooltipValue = `${formatDutchNumber(popupResult.value, 1)}${popupResult.unit}`
 
             // Add M2 value if available with nice formatting
             if (popupResult.hasM2 && popupResult.m2Value !== null) {
@@ -244,9 +243,8 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
         
         let formattedDiffValue
         if (popupResult.value !== null && !isNaN(popupResult.value)) {
-          const roundedValue = Math.round(popupResult.value * 100) / 100
           const sign = popupResult.value > 0 ? "+" : ""
-          formattedDiffValue = `${sign}${roundedValue.toFixed(1)}${popupResult.unit}`
+          formattedDiffValue = `${sign}${formatDutchNumber(popupResult.value, 1)}${popupResult.unit}`
           
           // Add M2 difference if available
           if (popupResult.hasM2 && popupResult.m2Value !== null) {
@@ -269,8 +267,7 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
         
         let displayValue
         if (popupResult.value !== null && !isNaN(popupResult.value)) {
-          const roundedValue = Math.round(popupResult.value * 100) / 100
-          displayValue = `${roundedValue}${popupResult.unit}`
+          displayValue = `${formatDutchNumber(popupResult.value, 1)}${popupResult.unit}`
           
           // Add M2 value if available with nice formatting
           if (popupResult.hasM2 && popupResult.m2Value !== null) {

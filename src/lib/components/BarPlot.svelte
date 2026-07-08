@@ -20,6 +20,7 @@
     calcPercentagesForEveryClassSingleIndicator,
   } from "$lib/utils/calcPercentagesForEveryClass"
   import { sanitizeClassName } from "$lib/utils/sanitizeClassName.js"
+  import { formatDutchNumber } from "$lib/utils/valueRetrieval.js"
 
   import { createEventDispatcher } from "svelte"
 
@@ -51,7 +52,7 @@
 
   // Simplified function - always show percentages in bar plot
   function getDisplayValue(percentageValue) {
-    return Math.round(percentageValue * 10) / 10
+    return formatDutchNumber(percentageValue, 1)
   }
 
   let nederlandValues = null
