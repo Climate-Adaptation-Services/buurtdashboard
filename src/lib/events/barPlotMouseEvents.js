@@ -1,16 +1,16 @@
 import { getRegionName } from "../utils/getRegionName.js";
 import { sanitizeClassName } from "../utils/sanitizeClassName.js";
+import { formatDutchNumber } from "../utils/valueRetrieval.js";
 import { tooltipValues, tooltipRegion, municipalitySelection } from "$lib/stores";
 import { select } from "d3";
 import { get } from "svelte/store";
 
 export function barPlotMouseOver(indicator, indicatorValueColorscale, st, stacked) {
   const percentageValue = st[1] - st[0]
-  const displayValue = Math.round(percentageValue * 100) / 100
 
   tooltipValues.set({
     indicator: stacked.key,
-    value: displayValue + '%',
+    value: formatDutchNumber(percentageValue, 1) + '%',
     color: indicatorValueColorscale(stacked.key)
   })
 
