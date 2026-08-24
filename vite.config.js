@@ -3,15 +3,7 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
 	plugins: [
-		sveltekit({
-			onwarn: (warning, handler) => {
-				// Suppress warnings about svelte-carousel missing exports condition
-				if (warning.code === 'missing-exports-condition' && warning.message.includes('svelte-carousel')) {
-					return;
-				}
-				handler(warning);
-			}
-		})
+		sveltekit()
 	],
 	optimizeDeps: {
 		include: [
