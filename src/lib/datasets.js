@@ -3,7 +3,7 @@
 // This file is imported by both the client app AND Node.js scripts (precalculate-nederland.js)
 
 // Current dataset version
-export const DATASET_VERSION = '20260210';
+export const DATASET_VERSION = '20260922';
 
 // Config Portal base URL (always uses Vercel production)
 export const CONFIG_PORTAL_URL = "https://buurtdashboard-config-portal.vercel.app";
