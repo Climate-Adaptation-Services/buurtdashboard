@@ -13,10 +13,12 @@ import { getPropertyWithAHNFallback } from './resolveAHNColumnName.js'
 // -9991: No slow traffic route in this neighbourhood
 // -9995: No AHN5 data available
 // -9999: No built-up area (bebouwde kom) in this neighbourhood
+// -99997: CBS suppression (percentage_huurwoningen) - no specific reason shown
 export const NO_DATA_CODES = {
   '-9991': 'no_slow_traffic_route',
   '-9995': 'no_ahn5_data',
-  '-9999': 'no_bebouwde_kom'
+  '-9999': 'no_bebouwde_kom',
+  '-99997': 'no_data'
 }
 
 // List of all specific no-data reason keys (for checking if a value is a no-data reason)
