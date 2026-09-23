@@ -1,6 +1,6 @@
 <script>
 
-  import { neighbourhoodSelection, municipalitySelection, allNeighbourhoodsJSONData, getIndicatorStore } from "$lib/stores"
+  import { neighbourhoodSelection, municipalitySelection, allNeighbourhoodsJSONData, allMunicipalitiesJSONData, selectedNeighbourhoodJSONData, getIndicatorStore } from "$lib/stores"
   import { onMount } from 'svelte'
   import { getRegionName } from "$lib/utils/getRegionName"
   import { getNoDataReason, isSpecificNoDataReason, formatDutchNumber } from "$lib/utils/valueRetrieval.js"
@@ -59,8 +59,13 @@
 
 
   // Format region name — initialize with regio so label is visible immediately
+  // getRegionName leest de selectiestores met get(), wat Svelte niet volgt. Noem de
+  // stores hier expliciet, anders bevriest het label op de selectie bij het aanmaken.
   let regioNaam = regio
   $: {
+    $selectedNeighbourhoodJSONData
+    $municipalitySelection
+    $allMunicipalitiesJSONData
     const name = getRegionName(regio)
     if (name) {
       regioNaam = name.length > 25 ? name.slice(0, 23) + "..." : name
