@@ -288,6 +288,30 @@
     flex: 3;
   }
 
+  /* Onder 800px staat de sidebar boven de indicatoren in plaats van ernaast.
+     De vaste hoogte van 100dvh knelt daar: het controlepaneel is over de volle
+     breedte hoger dan zijn 1/3 en kan niet krimpen onder zijn eigen inhoud
+     (min-height: auto op flexitems), waardoor de kaart de rest kreeg. Laat de
+     sidebar meegroeien en geef de kaart een eigen hoogte. */
+  @media (max-width: 800px) {
+    .sidebar {
+      height: auto;
+    }
+
+    .control-panel {
+      flex: 0 0 auto;
+    }
+
+    .map {
+      flex: 0 0 auto;
+      height: 60dvh;
+    }
+
+    .map.dordrecht {
+      flex: 0 0 auto;
+    }
+  }
+
   .indicator {
     flex: 1;
     margin: 10px;
