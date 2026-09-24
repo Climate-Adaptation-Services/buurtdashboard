@@ -1,5 +1,6 @@
 <script>
   import { neighbourhoodSelection, neighbourhoodCodeAbbreviation } from "$lib/stores"
+  import { getSelectionStroke } from "$lib/utils/getSelectionStroke"
   import { getClassName } from "$lib/utils/getClassName"
   import { click, mouseOver, mouseOut } from "$lib/events/neighbourhoodMouseEvents"
 
@@ -77,7 +78,7 @@
   stroke={mapType === "main map"
     ? "grey"
     : feature.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection
-      ? "#E1575A"
+      ? getSelectionStroke(indicator)
       : "white"}
   style="filter:{feature.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection ? 'drop-shadow(0 0 15px black)' : 'none'}"
   fill-opacity={mapType === "main map" ? shapeOpacity : 1}

@@ -14,7 +14,7 @@
   // MIGRATED: Import centralized value retrieval system
   import { getNumericalValue, getDifferenceValue, getAHNSelection, isValidValue, getRawValue } from "$lib/utils/valueRetrieval.js"
 
-  // #E1575A valt weg tegen een rood of roze palet; dan bijna-zwart
+  // Waterdiepte gebruikt een blauwe selectiekleur; de rest blijft rood
   $: selectionStroke = getSelectionStroke(indicator)
 
   export let graphWidth
