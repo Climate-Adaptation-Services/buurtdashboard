@@ -11,6 +11,17 @@
   export let graphHeight
 
   let buttonElement
+  let screenWidth = 1000 // zelfde startwaarde als +page.svelte
+
+  // De modal toont grafiek en kaart naast elkaar; onder dit breekpunt is daar geen
+  // ruimte voor. 800px is het breekpunt dat de rest van de app ook aanhoudt.
+  const MODAL_MIN_WIDTH = 800
+  $: modalAvailable = screenWidth >= MODAL_MIN_WIDTH
+
+  // Sluit een open modal als het venster alsnog onder het breekpunt zakt
+  $: if (!modalAvailable && $mapModal) {
+    mapModal.set(null)
+  }
 
   function openMapModal() {
     // De graphWidth-prop is in de tegel nooit gevuld (de bind:clientWidth zit pas
@@ -34,26 +45,30 @@
   $: topOffset = indicator.aggregatedIndicator === true ? 38 : 6
 </script>
 
-<button
-  bind:this={buttonElement}
-  type="button"
-  class="expand-map"
-  style="background-color:{$configStore.mainColor}; top:{topOffset}px"
-  on:click={openMapModal}
-  aria-label="{t('Kaart_vergroten')}: {indicator.title}"
->
-  <!-- Vier hoeken naar buiten: het gangbare "vergroten"-symbool -->
-  <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" focusable="false">
-    <path
-      d="M9 3H3v6M15 3h6v6M9 21H3v-6M15 21h6v-6"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="2.4"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    />
-  </svg>
-</button>
+<svelte:window bind:innerWidth={screenWidth} />
+
+{#if modalAvailable}
+  <button
+    bind:this={buttonElement}
+    type="button"
+    class="expand-map"
+    style="background-color:{$configStore.mainColor}; top:{topOffset}px"
+    on:click={openMapModal}
+    aria-label="{t('Kaart_vergroten')}: {indicator.title}"
+  >
+    <!-- Vier hoeken naar buiten: het gangbare "vergroten"-symbool -->
+    <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" focusable="false">
+      <path
+        d="M9 3H3v6M15 3h6v6M9 21H3v-6M15 21h6v-6"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.4"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </svg>
+  </button>
+{/if}
 
 <style>
   .expand-map {
