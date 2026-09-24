@@ -1,4 +1,4 @@
-import { get } from "svelte/store"
+import { get, writable } from "svelte/store"
 import { dsvFormat } from "d3-dsv"
 import { gunzipSync, strFromU8 } from "fflate"
 import { allNeighbourhoodsJSONData, neighbourhoodCodeAbbreviation, municipalityCodeAbbreviation } from "$lib/stores"
@@ -13,6 +13,13 @@ import { buildMunicipalityCsvUrl } from "$lib/datasets"
  * tabblad af. Het dashboard toont er maar één gemeente van tegelijk, en
  * Nederland-brede cijfers komen uit static/nederland-aggregates.json.
  */
+
+/**
+ * Waar terwijl de gegevens van een gemeente onderweg zijn. De geometrie staat er
+ * dan al, maar zonder waarden kleurt elke buurt zwart - dat is de "geen data"-
+ * kleur. Componenten gebruiken dit om zolang het laadscherm te tonen.
+ */
+export const isLoadingMunicipalityData = writable(false)
 
 // Welke gemeenten al binnen zijn, zodat er niet opnieuw geladen wordt
 const loaded = new Set()
@@ -74,6 +81,8 @@ export async function ensureMunicipalityDataLoaded(municipalityCode) {
   if (loaded.has(municipalityCode)) return true
   if (inFlight.has(municipalityCode)) return inFlight.get(municipalityCode)
 
+  isLoadingMunicipalityData.set(true)
+
   const request = (async () => {
     const rows = await fetchMunicipalityRows(municipalityCode)
 
@@ -110,5 +119,6 @@ export async function ensureMunicipalityDataLoaded(municipalityCode) {
     return await request
   } finally {
     inFlight.delete(municipalityCode)
+    if (inFlight.size === 0) isLoadingMunicipalityData.set(false)
   }
 }

@@ -30,7 +30,7 @@
   import { onMount, tick } from "svelte"
   import { BUURT_GEOJSON_URL, MUNICIPALITY_JSON_URL } from "$lib/datasets"
   import { prepareJSONData, processMunicipalityData } from "$lib/services/prepareJSONData"
-  import { ensureMunicipalityDataLoaded } from "$lib/services/loadMunicipalityData"
+  import { ensureMunicipalityDataLoaded, isLoadingMunicipalityData } from "$lib/services/loadMunicipalityData"
   import { gunzipSync, strFromU8 } from "fflate"
 
   export let data
@@ -213,7 +213,7 @@
           data-indicator-title={indicator.dutchTitle || indicator.title}
           data-indicator-type={indicator.numerical ? 'numerical' : 'categorical'}
         >
-          <Indicator {indicatorHeight} {indicator} isLoading={isLoadingGeoJSON} />
+          <Indicator {indicatorHeight} {indicator} isLoading={isLoadingGeoJSON || $isLoadingMunicipalityData} />
         </div>
       {/if}
     {/each}
