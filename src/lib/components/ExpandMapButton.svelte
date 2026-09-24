@@ -1,6 +1,6 @@
 <script>
   import { bind } from "svelte-simple-modal"
-  import { mapModal, configStore, tooltipRegion } from "$lib/stores"
+  import { mapModal, configStore, tooltipRegion, tooltipValues } from "$lib/stores"
   import { t } from "$lib/i18n/translate.js"
   import MapModal from "./MapModal.svelte"
 
@@ -40,6 +40,11 @@
 
   // Zelfde tooltip-mechaniek als het categorie-icoon in IndicatorInfo
   function showTooltip(event) {
+    // Tooltip.svelte toont tooltipRegion en tooltipValues samen. De knop ligt op de
+    // kaart, dus je komt er altijd vanaf een buurt-hover - zonder dit blijft die
+    // waarde onder "Kaart vergroten" staan.
+    tooltipValues.set(null)
+
     const rect = buttonElement?.getBoundingClientRect()
     tooltipRegion.set({
       region: "",

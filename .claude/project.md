@@ -40,10 +40,15 @@ A SvelteKit-based neighborhood dashboard application for visualizing Dutch neigh
    - Progressive enhancement as data loads
 
 3. **Data Processing**: `src/lib/services/prepareJSONData.js`
-   - Converts GeoJSON to TopoJSON for efficiency
-   - Merges CSV attributes with geographic features
-   - Caches processed data in IndexedDB
+   - Converts TopoJSON to GeoJSON features
+   - Caches processed data via de Cache API
    - Updates reactive stores
+   - **Voegt geen CSV meer samen**: `+page.svelte` geeft een lege array mee
+
+4. **Per-municipality data**: `src/lib/services/loadMunicipalityData.js`
+   - Haalt bij gemeenteselectie `csvdata/per-gemeente-<versie>/<code>.csv.gz` op
+   - Voegt de waarden toe aan de features van die gemeente
+   - `isLoadingMunicipalityData` is waar zolang er een verzoek loopt
 
 ### Component Structure
 
@@ -108,52 +113,84 @@ A SvelteKit-based neighborhood dashboard application for visualizing Dutch neigh
 4. Projection created (only after step 3)
 5. Paths rendered
 
-## Recent Improvements (2026-02-12)
+## Recent Improvements (2026-09-24)
 
-### Per-Indicator Year Selection & Global BEB Selection
+### Data laadt per gemeente in plaats van landelijk
 
-**Problem**: The previous implementation used global year selection when "Monitoring over tijd" filter was active, which caused confusion and "no data" errors. Additionally, the BEB (Bebouwde kom) selection needed to be more intuitive.
+**Aanleiding**: op iPhone bleef de app herladen. Geen `location.reload()` in de code
+en geen service worker - Safari schoot het tabblad af wegens geheugengebruik.
 
-**Solution**: Reverted to per-indicator year selection while implementing global BEB selection:
+**Gemeten oorzaken** (Node/V8, met de echte bestanden):
 
-1. **Per-Indicator Year Selection** (`YearSwitch.svelte` in `IndicatorTitle.svelte`):
-   - Each indicator has its own year dropdown
-   - Appears below the indicator title for indicators with AHN versions
-   - Uses `getIndicatorStore(indicator.dutchTitle)` for isolated state
-   - No global year override - each indicator maintains its own selection
+| stap | heap |
+|---|---|
+| TopoJSON geparsed | 108 MB |
+| na `presimplify` + `simplify` | **345 MB** |
+| omgezet naar features | 354 MB |
+| CSV geparsed (14.574 x 257) | 223 MB |
+| eindtoestand | ~264 MB |
 
-2. **Global BEB Selection** (`indicatorFilter.svelte`):
-   - Radio buttons styled like filter toggle buttons
-   - "Hele buurt" (default) shows full neighborhood data
-   - "Bebouwde kom" filters to built-up area data only
-   - Selecting "Bebouwde kom" auto-selects all indicators with BEB variants
-   - Adding an indicator without BEB variant switches back to "Hele buurt"
-   - Clear All resets BEB to "Hele buurt"
+**Twee ingrepen:**
 
-3. **Simplified Filter Logic** (`getIndicatorAttribute.js`):
-   - Removed `globalYearSelection` dependency
-   - Always uses per-indicator store for year selection
-   - Always uses `globalBEBSelection` for BEB variant selection
-   - Cleaner code with fewer conditional branches
+1. **Geometrie offline vereenvoudigd** (`scripts/simplify-buurt-topojson.js`).
+   De client deed `presimplify()` + `simplify(0.000001)` bij elke lading; dat hing aan
+   elk van 1.045.845 punten een gewicht en gaf een piek van 237 MB. Het resultaat is
+   elke keer identiek. Offline gedraaid levert 171.219 punten (83,6% minder), 2,4 MB
+   gzipped tegen 3,4 MB. Geverifieerd op identieke hash over alle 14.574 features
+   voordat de omschakeling gemaakt werd.
 
-4. **Component Updates for BEB Reactivity**:
-   - `IndicatorContent.svelte` - Uses `$globalBEBSelection` directly
-   - `BeeswarmPlot.svelte` - Added `globalBEBSelection` import
-   - `Stats.svelte` - Uses `$globalBEBSelection` for cached values
-   - `BarPlot.svelte` - Uses `$globalBEBSelection` for Nederland values
+2. **CSV gesplitst per gemeente** (`scripts/split-csv-per-gemeente.js`).
+   342 bestanden, gemiddeld 40 KB, grootste 433 KB (Amsterdam, 517 buurten).
+   Geverifieerd: 14.574 rijen, nul afwijkingen, alle 257 kolommen behouden.
 
-5. **Tooltips Added**:
-   - "Monitoring over tijd": Explains filtering for multi-year indicators
-   - "Bebouwde kom": Explains built-up area data filtering
+**Resultaat**: ~264 MB -> ~31 MB. Download bij opstarten 17,6 MB -> 2,9 MB.
 
-**Files Modified**:
-- `src/lib/components/IndicatorTitle.svelte` - YearSwitch placement
-- `src/lib/components/controlPanel/indicatorFilter.svelte` - BEB radio buttons, tooltips
-- `src/lib/utils/getIndicatorAttribute.js` - Simplified logic
-- `src/lib/components/IndicatorContent.svelte` - BEB reactivity
-- `src/lib/components/BeeswarmPlot.svelte` - BEB reactivity
-- `src/lib/components/Stats.svelte` - BEB reactivity
-- `src/lib/components/BarPlot.svelte` - BEB reactivity
+### Gevolgen voor de code
+
+- `$allNeighbourhoodsJSONData` bevat buiten de gekozen gemeente **geen
+  indicatorwaarden**, alleen geometrie met `buurtcode2024`, `buurtnaam`,
+  `gemeentecode` en `gemeentenaam`. Wie landelijke cijfers nodig heeft, gebruikt
+  `nederlandAggregates`.
+- `nederland-aggregates.json` heeft er `ahnOptions` bij: per indicator welke
+  AHN-versies landelijk data hebben en welke jaren. `YearSwitch` en
+  `GlobalYearSwitch` gebruiken dat, met terugval op de oude berekening.
+- Bij een gemeentewissel zijn de buurten kort zwart (dat is de "geen data"-kleur).
+  `isLoadingMunicipalityData` toont zolang de bestaande spinner.
+
+### Kaartmodal
+
+`MapModal.svelte` toont de kaart vergroot naast de grafiek, geopend via
+`ExpandMapButton` (verborgen onder 800px). Twee dingen om te weten:
+
+- **Klassenamen zijn afgeleid van `indicator.title`**, dus met de modal open staat
+  dezelfde indicator twee keer in de DOM en vonden DOM-lookups de kopie in de tegel
+  erachter. `src/lib/utils/interactionScope.js` beperkt die lookups tot de modal
+  zolang die open is. Gebruik `scopedSelect` / `scopedElementByClass` in plaats van
+  `select()` en `document.getElementsByClassName()` voor alles wat op indicatornaam
+  zoekt.
+- **De kleurschaal wordt in de modal zelf opgebouwd**, niet als prop meegegeven.
+  Via `bind()` is een prop een momentopname, waardoor de kleuren op de oude
+  AHN-selectie bleven staan na een jaarwissel. Gedeelde logica staat in
+  `src/lib/utils/createIndicatorColorScale.js`.
+
+### Losse fixes
+
+- **`Stat.svelte`**: het regiolabel bevroor op de selectie bij het aanmaken.
+  `getRegionName` leest de stores met `get()`, wat Svelte niet volgt; de stores staan
+  nu expliciet in het reactieve blok. Zelfde valkuil dook later op bij de kleurschaal.
+- **`-99997`** (CBS-onderdrukking in `percentage_huurwoningen`) toegevoegd aan
+  `GENERIC_NO_DATA_CODES`. Niet aan `NO_DATA_CODES`: die waarden zijn vertaalsleutels
+  en zonder vertaling verschijnt de sleutel letterlijk in beeld.
+- **0-1-heuristiek** in `calcPercentagesForEveryClass.js` teruggebracht tot `PET*`.
+  Hij gold voor alles wat met `perc` begon, waardoor de nieuwe `perc_*cm`-kolommen
+  (al 0-100) x100 gingen en de balk tot 560% opliep.
+- **`body { width: 99vw }`** in `static/global.css` naar `100%`. `vw` telt de
+  verticale scrollbar mee, waardoor er een horizontale scrollbar verscheen.
+- **Mobiel**: `min-width` op sidebar en tegels naar `min(...)`, `100vh` naar `100dvh`,
+  en onder 800px krijgt de hoofdkaart een eigen hoogte van 60dvh in plaats van wat er
+  na het controlepaneel overbleef.
+- **SvelteKit gepind op `~2.21.5`**. De lockfile was doorgelopen naar 2.70.3, dat
+  Svelte 5 vereist, waardoor de Vercel-build brak terwijl hij lokaal nog slaagde.
 
 ## Recent Improvements (2026-03-04)
 
@@ -269,6 +306,53 @@ function yearClick(change) {
 - Accessible via compass icon in top-left corner
 - Stores completion state in localStorage
 
+## Recent Improvements (2026-02-12)
+
+### Per-Indicator Year Selection & Global BEB Selection
+
+**Problem**: The previous implementation used global year selection when "Monitoring over tijd" filter was active, which caused confusion and "no data" errors. Additionally, the BEB (Bebouwde kom) selection needed to be more intuitive.
+
+**Solution**: Reverted to per-indicator year selection while implementing global BEB selection:
+
+1. **Per-Indicator Year Selection** (`YearSwitch.svelte` in `IndicatorTitle.svelte`):
+   - Each indicator has its own year dropdown
+   - Appears below the indicator title for indicators with AHN versions
+   - Uses `getIndicatorStore(indicator.dutchTitle)` for isolated state
+   - No global year override - each indicator maintains its own selection
+
+2. **Global BEB Selection** (`indicatorFilter.svelte`):
+   - Radio buttons styled like filter toggle buttons
+   - "Hele buurt" (default) shows full neighborhood data
+   - "Bebouwde kom" filters to built-up area data only
+   - Selecting "Bebouwde kom" auto-selects all indicators with BEB variants
+   - Adding an indicator without BEB variant switches back to "Hele buurt"
+   - Clear All resets BEB to "Hele buurt"
+
+3. **Simplified Filter Logic** (`getIndicatorAttribute.js`):
+   - Removed `globalYearSelection` dependency
+   - Always uses per-indicator store for year selection
+   - Always uses `globalBEBSelection` for BEB variant selection
+   - Cleaner code with fewer conditional branches
+
+4. **Component Updates for BEB Reactivity**:
+   - `IndicatorContent.svelte` - Uses `$globalBEBSelection` directly
+   - `BeeswarmPlot.svelte` - Added `globalBEBSelection` import
+   - `Stats.svelte` - Uses `$globalBEBSelection` for cached values
+   - `BarPlot.svelte` - Uses `$globalBEBSelection` for Nederland values
+
+5. **Tooltips Added**:
+   - "Monitoring over tijd": Explains filtering for multi-year indicators
+   - "Bebouwde kom": Explains built-up area data filtering
+
+**Files Modified**:
+- `src/lib/components/IndicatorTitle.svelte` - YearSwitch placement
+- `src/lib/components/controlPanel/indicatorFilter.svelte` - BEB radio buttons, tooltips
+- `src/lib/utils/getIndicatorAttribute.js` - Simplified logic
+- `src/lib/components/IndicatorContent.svelte` - BEB reactivity
+- `src/lib/components/BeeswarmPlot.svelte` - BEB reactivity
+- `src/lib/components/Stats.svelte` - BEB reactivity
+- `src/lib/components/BarPlot.svelte` - BEB reactivity
+
 ## Recent Improvements (2025-11-04)
 
 ### Dataset Version Management & Nederland Aggregates Precalculation
@@ -382,40 +466,6 @@ export const CONFIG_PORTAL_URL = "https://buurtdashboard-config-portal.vercel.ap
 - `src/lib/stores.js` - Adaptive circle radius based on neighborhood count
 - `src/routes/+page.svelte` - Uses new Indicator wrapper (no API changes)
 
-## Recent Improvements (2025-10-20)
-
-### Progressive Loading Implementation
-
-**Problem**: App showed blank screen for 2-3 seconds while loading all data.
-
-**Solution**: Implemented progressive loading to show UI immediately:
-
-1. **Modified `src/routes/+page.js`**:
-   - Removed blocking GeoJSON fetch from server-side load
-   - Only loads lightweight indicators config and CSV
-   - Page renders ~2-3 seconds faster
-
-2. **Updated `src/routes/+page.svelte`**:
-   - Added `onMount()` hook for client-side GeoJSON loading
-   - UI renders immediately with loading states
-   - Progressive enhancement as data arrives
-
-3. **Enhanced Components**:
-   - `Map.svelte`: Shows Leaflet background immediately + loading spinner
-   - `ControlPanel.svelte`: Shows panel structure + loading indicator
-   - Original `Indicator.svelte`: Animated skeleton loaders with shimmer effect
-
-4. **Fixed Leaflet Initialization Bug**:
-   - Added `mapInitializedWithData` flag to track full initialization
-   - Ensures projection only created after map has center/zoom set
-   - Prevents "Set map center and zoom first" error
-
-**Result**:
-- UI appears in 0-100ms (instant)
-- Data loads in background (1-3 seconds)
-- Smooth transition to full functionality
-- Dramatically improved perceived performance
-
 ## Recent Improvements (2025-10-22)
 
 ### Surface Area Weighting - Hybrid Approach
@@ -521,6 +571,40 @@ When an indicator has a `BK` variant configured:
 - `src/lib/utils/valueRetrieval.js:getSurfaceAreaM2()` - Popup m² calculation
 - `src/lib/utils/calcMedian.js:calcWeightedAverage()` - Weighted averages
 
+## Recent Improvements (2025-10-20)
+
+### Progressive Loading Implementation
+
+**Problem**: App showed blank screen for 2-3 seconds while loading all data.
+
+**Solution**: Implemented progressive loading to show UI immediately:
+
+1. **Modified `src/routes/+page.js`**:
+   - Removed blocking GeoJSON fetch from server-side load
+   - Only loads lightweight indicators config and CSV
+   - Page renders ~2-3 seconds faster
+
+2. **Updated `src/routes/+page.svelte`**:
+   - Added `onMount()` hook for client-side GeoJSON loading
+   - UI renders immediately with loading states
+   - Progressive enhancement as data arrives
+
+3. **Enhanced Components**:
+   - `Map.svelte`: Shows Leaflet background immediately + loading spinner
+   - `ControlPanel.svelte`: Shows panel structure + loading indicator
+   - Original `Indicator.svelte`: Animated skeleton loaders with shimmer effect
+
+4. **Fixed Leaflet Initialization Bug**:
+   - Added `mapInitializedWithData` flag to track full initialization
+   - Ensures projection only created after map has center/zoom set
+   - Prevents "Set map center and zoom first" error
+
+**Result**:
+- UI appears in 0-100ms (instant)
+- Data loads in background (1-3 seconds)
+- Smooth transition to full functionality
+- Dramatically improved perceived performance
+
 ## Development Workflow
 
 ### Commands
@@ -532,7 +616,13 @@ npm run preview                  # Preview production build
 npm run check                    # Run Svelte type checking
 npm run check:watch              # Type checking in watch mode
 npm run precalculate-nederland   # Precalculate Nederland aggregates (required after data updates)
+
+node scripts/split-csv-per-gemeente.js    # Splits de landelijke CSV per gemeente
+node scripts/simplify-buurt-topojson.js   # Vereenvoudigt de buurtgeometrie offline
 ```
+
+Beide scripts schrijven naar `generated/` (gitignored). Die uitvoer hoort in de
+Hetzner-bucket, niet in `static/` - anders gaat hij bij elke deploy mee naar Vercel.
 
 ### Updating Data Sources
 
