@@ -1,5 +1,5 @@
 <script>
-  import { getIndicatorStore, selectedNeighbourhoodJSONData, neighbourhoodsInMunicipalityJSONData, configStore, municipalitySelection, allNeighbourhoodsJSONData } from "$lib/stores"
+  import { getIndicatorStore, selectedNeighbourhoodJSONData, neighbourhoodsInMunicipalityJSONData, configStore, municipalitySelection, allNeighbourhoodsJSONData, nederlandAggregates } from "$lib/stores"
   import { isValidValue } from "$lib/utils/valueRetrieval.js"
   import { getIndicatorAttribute } from "$lib/utils/getIndicatorAttribute.js"
 
@@ -126,8 +126,13 @@
         })
     } else if ($neighbourhoodsInMunicipalityJSONData) {
       findAHNyearsWithoutDuplicatesAndSort()
-    } else if ($allNeighbourhoodsJSONData) {
-      findAHNyearsForAllNetherlands()
+    } else {
+      const precalculated = getPrecalculatedAHNOptions()
+      if (precalculated) {
+        options = precalculated
+      } else if ($allNeighbourhoodsJSONData) {
+        findAHNyearsForAllNetherlands()
+      }
     }
 
     // Initialize store with latest available year if no selection exists
@@ -212,6 +217,26 @@
 
     // Filter out AHN versions that have no valid data OR no year data
     options = options.filter(opt => opt.hasValidData && opt.hasYearData)
+  }
+
+  /**
+   * Landelijke AHN-opties uit de voorberekende aggregaten. Scheelt het doorlopen
+   * van alle 14.574 buurten, en daarmee de noodzaak om de landelijke CSV in te
+   * laden. Levert null als de gegevens er niet zijn, dan wordt er teruggevallen
+   * op de berekening in de browser.
+   */
+  function getPrecalculatedAHNOptions() {
+    const perIndicator = $nederlandAggregates?.ahnOptions
+    if (!perIndicator) return null
+
+    const forThis = perIndicator[indicator.dutchTitle || indicator.title]
+    if (!forThis) return null
+
+    const result = ahnVersions
+      .filter((ahn) => Array.isArray(forThis[ahn]) && forThis[ahn].length > 0)
+      .map((ahn) => ({ AHN: ahn, Jaar: formatYearRanges(forThis[ahn]) }))
+
+    return result.length > 0 ? result : null
   }
 
   function findAHNyearsForAllNetherlands() {

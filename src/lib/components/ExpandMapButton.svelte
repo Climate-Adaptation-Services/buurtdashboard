@@ -5,7 +5,6 @@
   import MapModal from "./MapModal.svelte"
 
   export let indicator
-  export let indicatorValueColorscale
   // Maten van de tegel, zodat de linkerkolom in de modal even groot blijft
   export let bodyHeight
   export let graphHeight
@@ -32,7 +31,6 @@
     mapModal.set(
       bind(MapModal, {
         indicator,
-        indicatorValueColorscale,
         graphWidth: cardWidth,
         bodyHeight,
         graphHeight,

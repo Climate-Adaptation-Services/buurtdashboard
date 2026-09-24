@@ -11,7 +11,7 @@
  * Gebruik:
  *   node scripts/simplify-buurt-topojson.js
  *
- * Schrijft static/Buurt2024_presimplified.json.gz. Upload dat bestand naar de
+ * Schrijft generated/Buurt2024_presimplified.json.gz. Upload dat bestand naar de
  * bucket en wijs BUURT_GEOJSON_URL in src/lib/datasets.js ernaartoe.
  */
 
@@ -28,7 +28,8 @@ import { BUURT_GEOJSON_URL } from '../src/lib/datasets.js';
 const TOLERANCE = 0.000001;
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const OUTPUT = path.join(__dirname, '..', 'static', 'Buurt2024_presimplified.json.gz');
+// Buiten static/: dit bestand wordt vanuit de bucket geserveerd.
+const OUTPUT = path.join(__dirname, '..', 'generated', 'Buurt2024_presimplified.json.gz');
 
 const mb = (bytes) => (bytes / 1048576).toFixed(1) + ' MB';
 const countPoints = (topo) => topo.arcs.reduce((sum, arc) => sum + arc.length, 0);
@@ -60,6 +61,7 @@ async function main() {
 
   const json = JSON.stringify(topo);
   const out = zlib.gzipSync(json, { level: 9 });
+  fs.mkdirSync(path.dirname(OUTPUT), { recursive: true });
   fs.writeFileSync(OUTPUT, out);
 
   console.log('\nGeschreven:', path.relative(process.cwd(), OUTPUT));

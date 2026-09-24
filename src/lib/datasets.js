@@ -31,6 +31,14 @@ export const buildConfigJsonUrl = (slug, configMode) =>
 export const BUURT_GEOJSON_URL = `${S3_BASE_URL}/buurtdashboard-KEA/geojsondata/Buurt2024_presimplified.json.gz`;
 export const MUNICIPALITY_JSON_URL = `${S3_BASE_URL}/buurtdashboard-KEA/geojsondata/gemeentes.json`;
 
+// Buurtgegevens per gemeente, gegenereerd met scripts/split-csv-per-gemeente.js.
+// Het dashboard toont één gemeente tegelijk; de landelijke CSV in één keer inladen
+// kostte ruim 220 MB geheugen en liet iOS Safari het tabblad afschieten.
+export const PER_MUNICIPALITY_CSV_BASE = `${S3_BASE_URL}/buurtdashboard-KEA/csvdata/per-gemeente-20260922`;
+
+export const buildMunicipalityCsvUrl = (municipalityCode) =>
+  `${PER_MUNICIPALITY_CSV_BASE}/${municipalityCode}.csv.gz`;
+
 // Dashboard config slugs
 export const DASHBOARD_SLUGS = {
   default: 'default-nl',

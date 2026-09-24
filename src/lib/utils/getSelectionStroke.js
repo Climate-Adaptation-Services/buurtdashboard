@@ -16,7 +16,8 @@ const WATERDIEPTE_PREFIX = "Waterdiepte bij extreme regen"
  */
 export function getSelectionStroke(indicator) {
   const title = indicator?.dutchTitle || indicator?.title || ""
-  return title.startsWith(WATERDIEPTE_PREFIX)
-    ? WATERDIEPTE_SELECTION_STROKE
-    : DEFAULT_SELECTION_STROKE
+  // Alleen de drie beeswarms, niet de categorische variant: die heeft precies de
+  // titel zonder achtervoegsel en houdt de standaardkleur.
+  const isWaterdiepteBeeswarm = title.startsWith(WATERDIEPTE_PREFIX) && indicator?.numerical === true
+  return isWaterdiepteBeeswarm ? WATERDIEPTE_SELECTION_STROKE : DEFAULT_SELECTION_STROKE
 }

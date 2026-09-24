@@ -35,7 +35,7 @@
         </div>
       {:else}
         <Map {mapWidth} {mapHeight} mapType={"indicator map"} {indicatorValueColorscale} {indicator} />
-        <ExpandMapButton {indicator} {indicatorValueColorscale} {bodyHeight} {graphHeight} />
+        <ExpandMapButton {indicator} {bodyHeight} {graphHeight} />
       {/if}
     {/if}
     <div class="footer">

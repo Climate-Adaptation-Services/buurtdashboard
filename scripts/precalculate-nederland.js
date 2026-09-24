@@ -134,6 +134,70 @@ function setupIndicators(indicatorsConfig) {
   return indicatorsList;
 }
 
+/**
+ * Landelijke AHN-opties per indicator: welke AHN-versies hebben ergens in
+ * Nederland geldige data, en welke jaren komen daarin voor.
+ *
+ * YearSwitch berekende dit in de browser door alle 14.574 buurten te doorlopen.
+ * Dat was de laatste reden om de volledige landelijke CSV in te laden.
+ * Spiegelt hasValidDataForAHN() en findAHNyearsForAllNetherlands() uit
+ * src/lib/components/YearSwitch.svelte.
+ */
+function calculateAHNOptions(indicators, features) {
+  const result = {};
+
+  for (const indicator of indicators) {
+    if (!indicator.ahnVersions || indicator.ahnVersions.length === 0) continue;
+
+    const perAHN = {};
+    for (const ahn of indicator.ahnVersions) {
+      // Kolomnamen zoals getIndicatorAttribute ze samenstelt
+      const attributes = indicator.aggregatedIndicator && indicator.classes
+        ? Object.values(indicator.classes).filter(a => a && a !== '_REST_')
+        : [indicator.attribute];
+
+      const columns = attributes.map(attr =>
+        attr.includes('_') ? `${attr}_${ahn}` : `${attr}${ahn}`
+      );
+
+      let hasValidData = false;
+      const jaren = new Set();
+
+      for (const f of features) {
+        const props = f?.properties;
+        if (!props) continue;
+
+        if (!hasValidData) {
+          for (const col of columns) {
+            // Beide schrijfwijzen, net als resolveAHNColumnName
+            const value = props[col] !== undefined ? props[col]
+              : props[col.includes('_' + ahn) ? col.replace('_' + ahn, ahn) : col.replace(ahn, '_' + ahn)];
+            if (isValidValue(value)) { hasValidData = true; break; }
+          }
+        }
+
+        const yearData = props['Jaar' + ahn];
+        if (yearData && yearData.toString().trim() !== '') {
+          yearData.toString().split(/[.,]\s*/).forEach(y => {
+            const trimmed = y.trim();
+            if (trimmed) jaren.add(trimmed);
+          });
+        }
+      }
+
+      // Zelfde filter als de client: zonder geldige data of zonder jaren valt
+      // de AHN-versie af
+      if (hasValidData && jaren.size > 0) {
+        perAHN[ahn] = [...jaren].map(Number).filter(n => !isNaN(n)).sort((a, b) => a - b);
+      }
+    }
+
+    if (Object.keys(perAHN).length > 0) result[indicator.title] = perAHN;
+  }
+
+  return result;
+}
+
 // Get available years for an indicator
 function getAvailableYears(csvData, attributeBase) {
   const years = new Set();
@@ -614,10 +678,15 @@ async function main() {
 
     // 7. Save to file
     const outputPath = join(__dirname, '..', 'static', 'nederland-aggregates.json');
+    console.log('\n🗓️  Calculating Nederland AHN options...');
+    const ahnOptions = calculateAHNOptions(indicators, jsonData.features);
+    console.log(`   AHN options for ${Object.keys(ahnOptions).length} indicators`);
+
     const output = {
       version: DATASET_VERSION,
       generatedAt: new Date().toISOString(),
-      aggregates: nederlandAggregates
+      aggregates: nederlandAggregates,
+      ahnOptions: ahnOptions
     };
 
     // Ensure static directory exists

@@ -5,8 +5,12 @@
   import YearSwitch from "./YearSwitch.svelte"
   import BEBSwitch from "./BEBSwitch.svelte"
   import { t } from "$lib/i18n/translate.js"
+  import { createIndicatorColorScale } from "$lib/utils/createIndicatorColorScale"
   import {
     configStore,
+    getIndicatorStore,
+    neighbourhoodsInMunicipalityJSONData,
+    allNeighbourhoodsJSONData,
     allMunicipalitiesJSONData,
     municipalitySelection,
     municipalityCodeAbbreviation,
@@ -16,7 +20,6 @@
   } from "$lib/stores"
 
   export let indicator
-  export let indicatorValueColorscale
   // Maten uit de indicatortegel, zodat de grafiek er identiek uitziet
   export let graphWidth
   export let bodyHeight
@@ -24,6 +27,20 @@
 
   let mapWidth = 0
   let mapHeight = 0
+
+  // De kleurschaal zelf opbouwen in plaats van hem als prop te ontvangen: via
+  // bind() is een prop een momentopname, en dan bleven de kleuren op de oude
+  // AHN-selectie staan zodra je hier het jaar wisselde.
+  const indicatorStore = getIndicatorStore(indicator.dutchTitle || indicator.title)
+  $: ahnSelection = $indicatorStore || {}
+  $: isDifferenceMode = typeof ahnSelection === "object" && ahnSelection.isDifference
+  $: relevantData =
+    $municipalitySelection !== null ? $neighbourhoodsInMunicipalityJSONData : $allNeighbourhoodsJSONData
+  // ahnSelection expliciet noemen: createIndicatorColorScale leest de gekozen
+  // AHN-versie via getRawValue, en zonder deze verwijzing zou Svelte de schaal
+  // niet opnieuw berekenen bij een jaarwissel zonder verschilmodus.
+  $: indicatorValueColorscale =
+    (ahnSelection, createIndicatorColorScale(indicator, relevantData, isDifferenceMode))
 
   // Exact dezelfde maten als in de tegel (zie IndicatorBody.svelte), alleen
   // zonder de kaart - die neemt daar de onderste 40% in.

@@ -30,8 +30,8 @@
   import { onMount, tick } from "svelte"
   import { BUURT_GEOJSON_URL, MUNICIPALITY_JSON_URL } from "$lib/datasets"
   import { prepareJSONData, processMunicipalityData } from "$lib/services/prepareJSONData"
-  import { gunzipSync, unzipSync, strFromU8 } from "fflate"
-  import { dsvFormat } from "d3-dsv"
+  import { ensureMunicipalityDataLoaded } from "$lib/services/loadMunicipalityData"
+  import { gunzipSync, strFromU8 } from "fflate"
 
   export let data
 
@@ -83,42 +83,33 @@
     // Load all data in background — municipality first so map appears early
     ;(async () => {
       try {
-        const csvUrl = data.dashboardConfig.neighbourhoodCSVdataLocation
-
-        // Start all three fetches simultaneously
+        // De landelijke CSV wordt niet meer in één keer ingeladen; de gegevens
+        // komen per gemeente binnen via ensureMunicipalityDataLoaded.
         const municipalityFetch = fetch(MUNICIPALITY_JSON_URL)
         const neighbourhoodFetch = fetch(BUURT_GEOJSON_URL)
-        const csvFetch = fetch(csvUrl)
 
         // Process municipality as soon as it arrives (small file ~500KB)
         // This sets allMunicipalitiesJSONData → map overlay disappears
         municipalityGeoJson = await municipalityFetch.then(r => r.json())
         await processMunicipalityData(municipalityGeoJson, MUNICIPALITY_JSON_URL)
 
-        // Wait for neighborhood GeoJSON + CSV in parallel (both larger files)
-        const [neighbourhoodResponse, csvResponse] = await Promise.all([neighbourhoodFetch, csvFetch])
-
+        const neighbourhoodResponse = await neighbourhoodFetch
         const neighbourhoodBuffer = await neighbourhoodResponse.arrayBuffer()
         const decompressed = gunzipSync(new Uint8Array(neighbourhoodBuffer))
         neighbourhoodGeoJson = JSON.parse(strFromU8(decompressed))
 
-        const csvBuffer = await csvResponse.arrayBuffer()
-        let csvText
-        if (csvUrl.endsWith('.gz')) {
-          csvText = strFromU8(gunzipSync(new Uint8Array(csvBuffer)))
-        } else {
-          const files = unzipSync(new Uint8Array(csvBuffer))
-          const fileName = Object.keys(files).find(name => name.endsWith('.csv'))
-          csvText = strFromU8(files[fileName])
-        }
-        const buurtCSVdata = dsvFormat(';').parse(csvText)
-
         geoJSONData = [municipalityGeoJson, neighbourhoodGeoJson]
 
-        await prepareJSONData([municipalityGeoJson, neighbourhoodGeoJson], buurtCSVdata, {
+        // Lege CSV: de geometrie wordt verwerkt, de waarden volgen per gemeente
+        await prepareJSONData([municipalityGeoJson, neighbourhoodGeoJson], [], {
           municipalityUrl: MUNICIPALITY_JSON_URL,
           neighbourhoodUrl: BUURT_GEOJSON_URL
         })
+
+        // Was er al een gemeente gekozen via de URL, dan die meteen ophalen
+        if ($municipalitySelection) {
+          await ensureMunicipalityDataLoaded($municipalitySelection)
+        }
 
         isLoadingGeoJSON = false
       } catch (error) {
@@ -158,6 +149,15 @@
     urlParametersProcessed = true
   }
 
+
+  // Buurtgegevens van de gekozen gemeente bijladen zodra er een selectie is
+  let municipalityDataError = null
+  $: if (browser && $municipalitySelection && $allNeighbourhoodsJSONData) {
+    ensureMunicipalityDataLoaded($municipalitySelection).catch((error) => {
+      console.error('Kon gemeentegegevens niet laden:', error)
+      municipalityDataError = error
+    })
+  }
 
   // Only react to indicator selection changes after initialization
   $: if (isInitialized) {

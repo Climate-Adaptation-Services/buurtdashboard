@@ -1,5 +1,5 @@
 <script>
-  import { globalYearSelection, configStore, allNeighbourhoodsJSONData, alleIndicatoren } from "$lib/stores"
+  import { globalYearSelection, configStore, allNeighbourhoodsJSONData, alleIndicatoren, nederlandAggregates } from "$lib/stores"
   import { isValidValue } from "$lib/utils/valueRetrieval.js"
   import { getIndicatorAttribute } from "$lib/utils/getIndicatorAttribute.js"
 
@@ -58,9 +58,20 @@
 
     // Convert to array and build options with year labels
     options = Array.from(allAHNVersions).sort().map(ahn => {
-      // Try to find year data from neighborhoods
+      // Eerst de voorberekende landelijke jaren: scheelt het doorlopen van de
+      // landelijke buurtdata. De JaarAHN-kolommen zijn niet indicatorspecifiek,
+      // dus elke indicator met deze AHN-versie geeft dezelfde jaren.
       let yearData = null
-      if ($allNeighbourhoodsJSONData?.features) {
+      const precalculated = $nederlandAggregates?.ahnOptions
+      if (precalculated) {
+        for (const perAHN of Object.values(precalculated)) {
+          if (Array.isArray(perAHN?.[ahn]) && perAHN[ahn].length > 0) {
+            yearData = perAHN[ahn].join(",")
+            break
+          }
+        }
+      }
+      if (!yearData && $allNeighbourhoodsJSONData?.features) {
         for (const nh of $allNeighbourhoodsJSONData.features) {
           if (nh?.properties?.["Jaar" + ahn]) {
             yearData = nh.properties["Jaar" + ahn]

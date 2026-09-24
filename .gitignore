@@ -13,3 +13,6 @@ vite.config.ts.timestamp-*
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# Uitvoer van scripts/ die naar de bucket gaat, niet naar Vercel
+/generated
