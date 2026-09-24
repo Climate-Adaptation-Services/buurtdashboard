@@ -14,6 +14,7 @@ export const nederlands = {
   "Kwetsbaarheid": "Kwetsbaarheid",
   "Nederland": "Nederland",
   "Wijktype": "Wijktype",
+  "Kaart_vergroten": "Kaart vergroten",
   "geen_wijktype": "Geen wijktype",
   "Geen_data": "Geen data",
   "no_slow_traffic_route": "Geen langzaamverkeerroute",

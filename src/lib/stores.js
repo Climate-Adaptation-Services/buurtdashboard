@@ -11,6 +11,9 @@ export const tooltipValues = writable(null)
 // mousePosition is used for positioning the tooltip
 export const mousePosition = writable(null)
 export const modal = writable(null);
+// Aparte modal voor de uitvergrote kaart: die heeft een bredere window nodig
+// dan de standaard 40rem van svelte-simple-modal
+export const mapModal = writable(null);
 export const lang = writable('')
 
 export const URLParams = writable(new URLSearchParams("foo=1"))

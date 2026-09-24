@@ -14,6 +14,7 @@ export const english = {
   "Kwetsbaarheid": "Vulnerability",
   "Nederland": "Netherlands",
   "Wijktype": "District type",
+  "Kaart_vergroten": "Enlarge map",
   "geen_wijktype": "No district type",
   "Geen_data": "No data",
   "no_slow_traffic_route": "No slow traffic route",

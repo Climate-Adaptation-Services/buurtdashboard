@@ -10,6 +10,7 @@
     indicatorsSelection,
     municipalitySelection,
     modal,
+    mapModal,
     URLParams,
     allNeighbourhoodsJSONData,
     nederlandAggregates,
@@ -221,6 +222,14 @@
   <Tooltip />
 
   <Modal show={$modal} style="position:absolute; left:0"></Modal>
+
+  <!-- Eigen instantie voor de uitvergrote kaart: bredere window, eigen context-key -->
+  <Modal
+    show={$mapModal}
+    key="map-modal"
+    styleWindow={{ width: "min(1100px, 92vw)" }}
+    ariaLabel={t("Kaart_vergroten")}
+  ></Modal>
 </div>
 
 <!-- Tutorial overlay -->
@@ -236,8 +245,12 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    min-width: 400px;
+    /* min() zodat de sidebar nooit breder wordt dan het scherm: een vaste 400px
+       liep op iPhones van 375 en 390px buiten beeld */
+    min-width: min(400px, 100%);
     height: 100vh;
+    /* dvh volgt de zichtbare hoogte op iOS, waar 100vh de adresbalk negeert */
+    height: 100dvh;
   }
 
   .indicators {
@@ -246,7 +259,7 @@
     flex-wrap: wrap;
     align-items: center;
     justify-content: center;
-    min-width: 360px;
+    min-width: min(360px, 100%);
   }
 
   .title {
@@ -278,7 +291,8 @@
   .indicator {
     flex: 1;
     margin: 10px;
-    min-width: 360px;
+    /* 360px plus 2x10px marge is 380px en past niet op een iPhone SE (375px) */
+    min-width: min(360px, calc(100% - 20px));
     max-width: 450px;
     background-color: white;
     border-radius: 10px;

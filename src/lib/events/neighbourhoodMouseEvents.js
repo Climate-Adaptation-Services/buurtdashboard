@@ -26,6 +26,7 @@ import {
   isAnyNoData,
   getNoDataReason
 } from '../utils/valueRetrieval.js';
+import { scopedSelect, scopedSelectAll, scopedElementByClass } from '../utils/interactionScope.js';
 
 export function mouseOver(e, feature, indicator, mapType, indicatorValueColorscale, projection, beeswarmMargin) {
   const shapeClassName = getClassName(feature, 'path', indicator, mapType)
@@ -43,7 +44,7 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
     const selectedClass = currentSelection ? 'svgelements_' + currentSelection : null
 
     // Reset all paths in this indicator's map/beeswarm (exclude selected neighbourhood)
-    selectAll('path[class*="path_' + indicatorClassName + '"]')
+    scopedSelectAll('path[class*="path_' + indicatorClassName + '"]')
       .filter(function() {
         // Keep the selected neighbourhood's styling intact
         const el = /** @type {Element} */ (this)
@@ -54,7 +55,7 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
 
     // Reset all circles in this indicator's beeswarm (exclude selected neighbourhood)
     if (indicator.numerical) {
-      selectAll('circle[class*="node_' + indicatorClassName + '"]')
+      scopedSelectAll('circle[class*="node_' + indicatorClassName + '"]')
         .filter(function() {
           const el = /** @type {Element} */ (this)
           return !selectedClass || !el.classList?.contains(selectedClass)
@@ -67,7 +68,7 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
 
   if (mapType === 'main map') {
     if (feature.properties[get(currentCodeAbbreviation)] !== get(neighbourhoodSelection)) {
-      select('.' + shapeClassName).attr('fill', '#36575A')
+      scopedSelect('.' + shapeClassName).attr('fill', '#36575A')
       mousePosition.set(window.innerHeight - e.screenY)
     }
 
@@ -104,13 +105,13 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
     const ahnSelection = get(AHNSelecties)[indicator.title]
     const isDifferenceMode = ahnSelection && typeof ahnSelection === 'object' && ahnSelection.isDifference
 
-    select('.' + shapeClassName)
+    scopedSelect('.' + shapeClassName)
       .attr('stroke-width', 3)
       .style('filter', 'drop-shadow(0 0 15px black)')
       .raise()
     if (indicator.numerical === true) {
       if (feature.properties[get(currentCodeAbbreviation)] !== get(neighbourhoodSelection)) {
-        select('.' + circleClassName)
+        scopedSelect('.' + circleClassName)
           .attr('stroke', 'white')
           .attr('r', get(circleRadius) + 3)
           .style('filter', 'drop-shadow(0 0 5px black)')
@@ -224,7 +225,8 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
         color: tooltipValueColor
       })
 
-      const mapElement = document.getElementsByClassName("indicator-map-" + sanitizeClassName(indicator.title))[0]
+      const mapElement = scopedElementByClass("indicator-map-" + sanitizeClassName(indicator.title))
+      if (!mapElement) return
       const rectmap = mapElement.getBoundingClientRect();
       const featureCenter = projection(center(feature).geometry.coordinates)
       tooltipCenter = [featureCenter[0] + rectmap.left, featureCenter[1] + rectmap.top]
@@ -288,7 +290,8 @@ export function mouseOver(e, feature, indicator, mapType, indicatorValueColorsca
         })
       }
 
-      let elem = document.getElementsByClassName('beeswarm_' + sanitizeClassName(indicator.title))[0]
+      let elem = scopedElementByClass('beeswarm_' + sanitizeClassName(indicator.title))
+      if (!elem) return
       let rectmap = elem.getBoundingClientRect();
       tooltipCenter = [feature.x + rectmap.left + beeswarmMargin.left, rectmap.top + beeswarmMargin.top + feature.y + 10]
     }
@@ -309,16 +312,16 @@ export function mouseOut(feature, indicator, mapType) {
   if (feature.properties[get(currentCodeAbbreviation)] !== get(neighbourhoodSelection)) {
 
     if (mapType === 'main map') {
-      select('.' + shapeClassName)
+      scopedSelect('.' + shapeClassName)
         .attr('fill', 'whitesmoke')
       mousePosition.set(null)
     } else {
-      select('.' + shapeClassName)
+      scopedSelect('.' + shapeClassName)
         .attr('stroke-width', 0.5)
         .style('filter', 'none')
         .lower()
       if (indicator.numerical) {
-        select('.' + circleClassName)
+        scopedSelect('.' + circleClassName)
           .attr('stroke', 'none')
           .attr('r', get(circleRadius))
           .style('filter', 'none')

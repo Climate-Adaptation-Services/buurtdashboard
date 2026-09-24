@@ -17,6 +17,7 @@
   import { onMount, tick } from "svelte"
   import { LeafletMapManager } from "$lib/map/LeafletMapManager.js"
   import { sanitizeClassName } from "$lib/utils/sanitizeClassName.js"
+  import { scopedSelect } from "$lib/utils/interactionScope.js"
 
   // Leaflet map manager
   let mapManager = new LeafletMapManager()
@@ -53,6 +54,16 @@
   export let indicatorValueColorscale
   export let indicator
   export let isLoading = false
+  // Maat en marge van het info-icoon op de indicatorkaart. Standaard 28px met 6px
+  // marge, gelijk aan ExpandMapButton in de tegel; de modal zet hem op 24px zodat
+  // hij onder het sluitkruisje uitlijnt.
+  export let infoIconSize = 28
+  export let infoIconInset = 6
+  // "right" (tegel, naast de vergrootknop) of "left" (modal, weg van het kruisje)
+  export let infoIconAlign = "right"
+
+  $: infoIconX =
+    infoIconAlign === "left" ? infoIconInset : mapWidth - infoIconInset - infoIconSize
 
   // Define projection and path variables
   let projection
@@ -97,12 +108,13 @@
 
   function aggregatedMapInfo() {
     const className = ".tooltip-multi" + sanitizeClassName(indicator.title)
-    select(className).style("visibility", "visible")
+    // scopedSelect: met de kaartmodal open staat deze tooltip twee keer in de DOM
+    scopedSelect(className).style("visibility", "visible")
   }
 
   function aggregatedMapInfoOut() {
     const className = ".tooltip-multi" + sanitizeClassName(indicator.title)
-    select(className).style("visibility", "hidden")
+    scopedSelect(className).style("visibility", "hidden")
   }
 
   // Use dedicated indicator store for difference mode detection (naturally isolated)
@@ -268,9 +280,10 @@
       <image
         href="info.png"
         opacity="0.7"
-        width="20"
-        y="5"
-        x={mapWidth - 25}
+        width={infoIconSize}
+        height={infoIconSize}
+        y={infoIconInset}
+        x={infoIconX}
         on:mouseover={() => aggregatedMapInfo()}
         on:mouseout={() => aggregatedMapInfoOut()}
       />

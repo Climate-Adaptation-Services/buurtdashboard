@@ -13,13 +13,18 @@ import { getPropertyWithAHNFallback } from './resolveAHNColumnName.js'
 // -9991: No slow traffic route in this neighbourhood
 // -9995: No AHN5 data available
 // -9999: No built-up area (bebouwde kom) in this neighbourhood
-// -99997: CBS suppression (percentage_huurwoningen) - no specific reason shown
+// Only codes with a reason to show in the UI belong here - the values are
+// translation keys and end up in NO_DATA_REASON_KEYS.
 export const NO_DATA_CODES = {
   '-9991': 'no_slow_traffic_route',
   '-9995': 'no_ahn5_data',
-  '-9999': 'no_bebouwde_kom',
-  '-99997': 'no_data'
+  '-9999': 'no_bebouwde_kom'
 }
+
+// Codes that mean "no data" without a reason worth showing. Treated as invalid,
+// but rendered as plain "Geen data".
+// -99997: CBS suppression (percentage_huurwoningen)
+export const GENERIC_NO_DATA_CODES = [-99997]
 
 // List of all specific no-data reason keys (for checking if a value is a no-data reason)
 export const NO_DATA_REASON_KEYS = Object.values(NO_DATA_CODES)
@@ -56,6 +61,9 @@ export function isValidValue(value) {
   }
   // Check if value is a no-data code using centralized lookup
   const numValue = typeof value === 'number' ? value : parseFloat(value)
+  if (GENERIC_NO_DATA_CODES.includes(Math.round(numValue))) {
+    return false
+  }
   return !NO_DATA_CODES[String(Math.round(numValue))]
 }
 

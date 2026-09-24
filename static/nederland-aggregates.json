@@ -1,6 +1,6 @@
 {
-  "version": "20260210",
-  "generatedAt": "2026-05-26T08:35:54.894Z",
+  "version": "20260922",
+  "generatedAt": "2026-09-23T15:10:48.900Z",
   "aggregates": {
     "Gevoelstemperatuur": {
       "AHN2": {
@@ -18,46 +18,39 @@
         "51°C": 0.046663375763428036
       }
     },
-    "Waterdiepte bij hevige bui": {
-      "5 - 10cm": 7.8490293624262355,
-      "10 - 15cm": 4.460297987943613,
-      "15 - 20cm": 2.3932343869617054,
-      "20 - 30cm": 1.7597871884602663,
-      ">30cm": 0.9355107195030854
-    },
     "Lage grondwaterstand": 1.744941962,
     "Lage grondwaterstand | 2050 hoog": -0.035739432,
     "Extreem lage grondwaterstand ": 1.8777691275000001,
     "Hoge grondwaterstand ": 1.098987579,
     "Extreem hoge grondwaterstand ": 0.733189174,
     "Risico Paalrot huidig": {
-      "Zeer laag": 82.00077249903438,
-      "Laag": 13.65005793742758,
-      "Midden": 3.0204712244109695,
-      "Hoog": 0.8651989185013519,
-      "Zeer hoog": 0.4634994206257242
+      "Zeer laag": 81.75620840772602,
+      "Laag": 13.845155007304008,
+      "Midden": 3.0676838175620844,
+      "Hoog": 0.876481090732024,
+      "Zeer hoog": 0.45447167667586436
     },
     "Risico Paalrot 2050 hoog": {
-      "Zeer laag": 80.84202394747007,
-      "Laag": 14.159907300115876,
-      "Midden": 3.476245654692932,
-      "Hoog": 1.0505986867516415,
-      "Zeer hoog": 0.47122441096948625
+      "Zeer laag": 80.61191365038142,
+      "Laag": 14.315857815289727,
+      "Midden": 3.5465021912027264,
+      "Hoog": 1.0631391007953255,
+      "Zeer hoog": 0.46258724233079046
     },
     "Risico Verschilzetting 2050H": {
-      "Zeer laag": 50.845886442641955,
-      "Laag": 40.32444959443801,
-      "Matig": 3.422170722286597,
-      "Hoog": 3.429895712630359,
-      "Zeer hoog": 1.97759752800309
+      "Zeer laag": 50.66547638370395,
+      "Laag": 40.69956175945463,
+      "Matig": 3.28680409024509,
+      "Hoog": 3.3598441811394255,
+      "Zeer hoog": 1.9883135854569065
     },
     "Maximale overstromingsdiepte": {
-      "tot 20cm": 6.846912936532617,
-      "20-50cm": 9.244197064290205,
-      "50-200cm": 38.57698761290407,
-      ">200cm": 41.28018137787938
+      "tot 20cm": 8.346168946883127,
+      "20-50cm": 8.684681175579087,
+      "50-200cm": 37.48355287549681,
+      ">200cm": 38.367773743577175
     },
-    "Droge verdiepingen": 94,
+    "Droge verdiepingen": 95,
     "Boomkroonbedekking": {
       "hele_buurt": {
         "AHN3": 10.100646130000001,
@@ -339,7 +332,7 @@
         "Gebouwen": 17.213710735584193,
         "Verhard": 36.18313073520204,
         "Halfverhard": 0.9255712864686612,
-        "Onverhard": 30.85050822563477,
+        "Onverhard": 30.850508229497137,
         "Gras": 10.840859212151459,
         "Struiken": 3.789827598631077
       }
@@ -350,13 +343,30 @@
       "Niet openbaar": 49.07955715215757
     },
     "Groen per inwoner": 124.2244537,
-    "Bevolkingsdichtheid": 1662.5,
-    "Gemiddelde WOZ-waarde": 337,
-    "Sociaal minimum huishoudens": 4,
-    "Hitte en broze 65-plussers": 24.3,
-    "Ernstige eenzaamheid": 8.7,
-    "Moeite met rondkomen": 9.7,
-    "Ernstig overgewicht": 14.4,
-    "Percentage huurwoningen": 26
+    "Waterdiepte bij extreme regen": {
+      "0-2cm": 63.742577262693366,
+      "2-10cm": 20.419587472406224,
+      "10-15cm": 4.139235651214106,
+      "15-20cm": 2.065706401766009,
+      "20-30cm": 1.974944812362029,
+      "30+cm": 3.5977483443708524,
+      "onbekend": 4.060155905077259
+    },
+    "Waterdiepte bij extreme regen >10cm": 7.73,
+    "Waterdiepte bij extreme regen >15cm": 4.1,
+    "Waterdiepte bij extreme regen >20cm": 2.55,
+    "Bouwblokken met weinig schaduw": 29.82005141,
+    "Schaduw op gebouwen": {
+      "0 - 30%": 0.8832431070586252,
+      "30 - 45%": 29.299473750296396,
+      "45 - 55%": 39.41408237292377,
+      "55 - 70%": 19.327443967511176,
+      "70 - 100%": 11.041269286669639
+    },
+    "Ervaren koelte binnen": 64.9,
+    "Sociaal economische status": 0.157,
+    "Broze gezondheid": 25,
+    "Sterke eenzaamheid": 10.9,
+    "Percentage huurwoningen": 25
   }
 }

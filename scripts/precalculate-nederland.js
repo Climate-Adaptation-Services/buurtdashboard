@@ -20,7 +20,8 @@ import { gunzipSync, unzipSync, strFromU8 } from 'fflate';
 import { feature } from 'topojson-client';
 
 // "No data" marker values used in CSV files
-const NO_DATA_VALUES = [-9999, -9995, -9991];
+// Houd in sync met NO_DATA_CODES in src/lib/utils/valueRetrieval.js
+const NO_DATA_VALUES = [-9999, -9995, -9991, -99997];
 
 // Helper to check if a value is valid (not null, undefined, NaN, or a "no data" marker)
 function isValidValue(value) {

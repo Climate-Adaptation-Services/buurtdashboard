@@ -2,7 +2,7 @@ import { getRegionName } from "../utils/getRegionName.js";
 import { sanitizeClassName } from "../utils/sanitizeClassName.js";
 import { formatDutchNumber } from "../utils/valueRetrieval.js";
 import { tooltipValues, tooltipRegion, municipalitySelection } from "$lib/stores";
-import { select } from "d3";
+import { scopedSelect, scopedElementByClass } from "../utils/interactionScope.js";
 import { get } from "svelte/store";
 
 export function barPlotMouseOver(indicator, indicatorValueColorscale, st, stacked) {
@@ -15,7 +15,7 @@ export function barPlotMouseOver(indicator, indicatorValueColorscale, st, stacke
   })
 
   const className = 'barplot_rect' + sanitizeClassName(indicator.title) + sanitizeClassName(stacked.key) + st.data.group
-  let elem = document.getElementsByClassName(className)[0]
+  let elem = scopedElementByClass(className)
 
   if (!elem) return // Guard against missing element
 
@@ -32,7 +32,7 @@ export function barPlotMouseOver(indicator, indicatorValueColorscale, st, stacke
 export function barPlotMouseOut(indicator, st, stacked) {
   const className = 'barplot_rect' + sanitizeClassName(indicator.title) + sanitizeClassName(stacked.key) + st.data.group
 
-  select('.' + className)
+  scopedSelect('.' + className)
     .attr('stroke', 'none')
 
   tooltipValues.set(null)

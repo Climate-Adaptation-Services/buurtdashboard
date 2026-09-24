@@ -6,6 +6,7 @@
   import { t } from "$lib/i18n/translate.js"
   import IndicatorQuantitative from "./IndicatorQuantitative.svelte"
   import IndicatorCategorical from "./IndicatorCategorical.svelte"
+  import ExpandMapButton from "./ExpandMapButton.svelte"
 
   export let indicator
   export let bodyHeight
@@ -34,6 +35,7 @@
         </div>
       {:else}
         <Map {mapWidth} {mapHeight} mapType={"indicator map"} {indicatorValueColorscale} {indicator} />
+        <ExpandMapButton {indicator} {indicatorValueColorscale} {bodyHeight} {graphHeight} />
       {/if}
     {/if}
     <div class="footer">
