@@ -1,6 +1,6 @@
 {
   "version": "20260922",
-  "generatedAt": "2026-09-24T10:11:30.971Z",
+  "generatedAt": "2026-09-24T18:14:53.846Z",
   "aggregates": {
     "Gevoelstemperatuur": {
       "AHN2": {
@@ -343,7 +343,7 @@
       "Niet openbaar": 49.07955715215757
     },
     "Groen per inwoner": 124.2244537,
-    "Waterdiepte bij extreme regen": {
+    "Waterdiepte bij korte extreme regen": {
       "0-2cm": 63.742577262693366,
       "2-10cm": 20.419587472406224,
       "10-15cm": 4.139235651214106,
@@ -367,7 +367,7 @@
     "Sociaal economische status": 0.157,
     "Broze gezondheid": 25,
     "Sterke eenzaamheid": 10.9,
-    "Percentage huurwoningen": 25
+    "Huurwoningen": 25
   },
   "ahnOptions": {
     "Gevoelstemperatuur": {
