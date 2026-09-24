@@ -1,6 +1,6 @@
 <script>
   import { bind } from "svelte-simple-modal"
-  import { mapModal, configStore } from "$lib/stores"
+  import { mapModal, configStore, tooltipRegion } from "$lib/stores"
   import { t } from "$lib/i18n/translate.js"
   import MapModal from "./MapModal.svelte"
 
@@ -40,6 +40,21 @@
     )
   }
 
+  // Zelfde tooltip-mechaniek als het categorie-icoon in IndicatorInfo
+  function showTooltip(event) {
+    const rect = buttonElement?.getBoundingClientRect()
+    tooltipRegion.set({
+      region: "",
+      // Bij toetsenbordfocus is er geen muispositie; val dan terug op de knop zelf
+      center: event?.clientX ? [event.clientX, event.clientY] : [rect?.left ?? 0, rect?.bottom ?? 0],
+      name: t("Kaart_vergroten"),
+    })
+  }
+
+  function hideTooltip() {
+    tooltipRegion.set(null)
+  }
+
   // Geaggregeerde kaarten tekenen zelf al een info-icoon rechtsboven (28px op y=6),
   // dus daar zakt de knop eronder in plaats van ernaast
   $: topOffset = indicator.aggregatedIndicator === true ? 38 : 6
@@ -54,6 +69,10 @@
     class="expand-map"
     style="background-color:{$configStore.mainColor}; top:{topOffset}px"
     on:click={openMapModal}
+    on:mouseover={showTooltip}
+    on:mouseout={hideTooltip}
+    on:focus={showTooltip}
+    on:blur={hideTooltip}
     aria-label="{t('Kaart_vergroten')}: {indicator.title}"
   >
     <!-- Vier hoeken naar buiten: het gangbare "vergroten"-symbool -->

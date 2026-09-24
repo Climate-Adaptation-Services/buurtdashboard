@@ -4,7 +4,9 @@
 }
 
 body {
-  width: 99vw;
+  /* Niet 99vw: vw telt de verticale scrollbar mee, de beschikbare layoutbreedte
+     niet. Dat gaf een horizontale scrollbar van een fractie van een pixel. */
+  width: 100%;
   height: 97vh;
   margin: 0;
   font-family: Roboto;

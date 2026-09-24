@@ -8,9 +8,14 @@
   import { onMount, onDestroy, tick } from "svelte"
   import { getIndicatorAttribute } from "$lib/utils/getIndicatorAttribute"
   import { getGlobalExtent } from "$lib/utils/getGlobalExtent"
+  import { getSelectionStroke } from "$lib/utils/getSelectionStroke"
+
 
   // MIGRATED: Import centralized value retrieval system
   import { getNumericalValue, getDifferenceValue, getAHNSelection, isValidValue, getRawValue } from "$lib/utils/valueRetrieval.js"
+
+  // #E1575A valt weg tegen een rood of roze palet; dan bijna-zwart
+  $: selectionStroke = getSelectionStroke(indicator)
 
   export let graphWidth
   export let indicatorHeight
@@ -353,7 +358,9 @@
   {#each nodes as node (node.properties[$neighbourhoodCodeAbbreviation])}
     <circle
       class={getClassName(node, "node", indicator, "") + " " + "svgelements_" + node.properties[$neighbourhoodCodeAbbreviation]}
-      stroke={node.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection ? "#E1575A" : "none"}
+      stroke={node.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection
+        ? selectionStroke
+        : "none"}
       class:selected-node={node.properties[$neighbourhoodCodeAbbreviation] === $neighbourhoodSelection}
       cx={node.x}
       cy={node.y}
