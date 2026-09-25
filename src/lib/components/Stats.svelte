@@ -17,6 +17,8 @@
   import { calcMedian, calcAverage } from "$lib/utils/calcMedian"
   // MIGRATED: Import centralized value retrieval functions
   import { getNumericalValue, getDifferenceValue, getIndicatorAttribute, toNumber, isValidValue, getRawValue, getNoDataReason } from "$lib/utils/valueRetrieval.js"
+  import { warnMissingNederlandValue } from "$lib/utils/warnMissingNederlandValue"
+  import { getNederlandDifference } from "$lib/utils/getNederlandDifference"
 
   export let bodyHeight
   export let indicator
@@ -49,9 +51,12 @@
     // Try cached values first, fall back to client-side calculation if needed
     let nederlandMedian = null;
 
-    // In difference mode, always calculate client-side (cache doesn't store diff values for all combinations)
-    if (!localIsDifferenceMode && $nederlandAggregates && $nederlandAggregates.aggregates) {
-      let cached = $nederlandAggregates.aggregates[indicator.title];
+    // Ook in verschilmodus uit de cache: het precalculate-script slaat die op als
+    // diff_<base>_<compare>.
+    if ($nederlandAggregates && $nederlandAggregates.aggregates) {
+      // dutchTitle: het precalculate-script gebruikt de Nederlandse titel als sleutel.
+      // indicator.title is in de Engelse versie vertaald en matcht dan nooit.
+      let cached = $nederlandAggregates.aggregates[indicator.dutchTitle || indicator.title];
 
       if (cached !== undefined) {
         // Check for BEB variants first
@@ -64,7 +69,9 @@
         if (cached && typeof cached === 'object' && !Array.isArray(cached)) {
           // Multi-year or AHN indicator - get the value for the selected year/AHN
           const selectedYear = storeValue?.baseYear;
-          if (selectedYear && cached[selectedYear] !== undefined) {
+          if (localIsDifferenceMode) {
+            nederlandMedian = getNederlandDifference(cached, selectedYear, storeValue?.compareYear);
+          } else if (selectedYear && cached[selectedYear] !== undefined) {
             nederlandMedian = cached[selectedYear];
           } else {
             // Check if any key matches an AHN pattern (fallback for indicators without explicit baseYear set yet)
@@ -81,32 +88,11 @@
       }
     }
 
-    // FALLBACK: If no cached value and we have all neighborhoods data, calculate client-side
-    // This handles AHN version switches and other cases where cache doesn't have the exact variant
-    if (nederlandMedian === null && $allNeighbourhoodsJSONData && $allNeighbourhoodsJSONData.features && storeValue) {
-
-      if (localIsDifferenceMode) {
-        nederlandMedian = calcMedian(
-          $allNeighbourhoodsJSONData.features
-            .map((neighbourhood) => getDifferenceValue(neighbourhood, indicator))
-            .filter((value) => value !== null)
-        )
-      } else {
-        // Use median for numerical indicators, average for aggregated indicators
-        if (indicator.aggregatedIndicator) {
-          nederlandMedian = calcAverage(
-            $allNeighbourhoodsJSONData.features
-              .map((neighbourhood) => getNumericalValue(neighbourhood, indicator))
-              .filter((value) => value !== null)
-          )
-        } else {
-          nederlandMedian = calcMedian(
-            $allNeighbourhoodsJSONData.features
-              .map((neighbourhood) => getNumericalValue(neighbourhood, indicator))
-              .filter((value) => value !== null)
-          )
-        }
-      }
+    // Geen terugval meer op allNeighbourhoodsJSONData: die bevat sinds de
+    // per-gemeente-lading buiten de gekozen gemeente geen waarden, dus zo'n
+    // berekening geeft een veel te laag landelijk cijfer.
+    if (nederlandMedian === null) {
+      warnMissingNederlandValue(indicator, 'Stats')
     }
 
     // Municipality calculation - DISPLAY VALUES
@@ -198,9 +184,12 @@
     // Try cached values first, fall back to client-side calculation if needed
     let nederlandScale = null;
 
-    // In difference mode, always calculate client-side (cache doesn't store diff values for all combinations)
-    if (!localIsDifferenceMode && $nederlandAggregates && $nederlandAggregates.aggregates) {
-      let cached = $nederlandAggregates.aggregates[indicator.title];
+    // Ook in verschilmodus uit de cache: het precalculate-script slaat die op als
+    // diff_<base>_<compare>.
+    if ($nederlandAggregates && $nederlandAggregates.aggregates) {
+      // dutchTitle: het precalculate-script gebruikt de Nederlandse titel als sleutel.
+      // indicator.title is in de Engelse versie vertaald en matcht dan nooit.
+      let cached = $nederlandAggregates.aggregates[indicator.dutchTitle || indicator.title];
 
       if (cached !== undefined) {
         // Check for BEB variants first
@@ -214,7 +203,9 @@
         if (cached && typeof cached === 'object' && !Array.isArray(cached)) {
           // Multi-year or AHN indicator - get the value for the selected year/AHN
           const selectedYear = storeValue?.baseYear;
-          if (selectedYear && cached[selectedYear] !== undefined) {
+          if (localIsDifferenceMode) {
+            nederlandScale = getNederlandDifference(cached, selectedYear, storeValue?.compareYear);
+          } else if (selectedYear && cached[selectedYear] !== undefined) {
             nederlandScale = cached[selectedYear];
           } else {
             // Check if any key matches an AHN pattern (fallback for indicators without explicit baseYear set yet)
@@ -231,31 +222,7 @@
       }
     }
 
-    // FALLBACK: Calculate client-side if no cached value (e.g., different AHN version)
-    if (nederlandScale === null && $allNeighbourhoodsJSONData && $allNeighbourhoodsJSONData.features && storeValue) {
-      if (localIsDifferenceMode) {
-        nederlandScale = calcMedian(
-          $allNeighbourhoodsJSONData.features
-            .map((neighbourhood) => getDifferenceValue(neighbourhood, indicator))
-            .filter((value) => value !== null)
-        )
-      } else {
-        // Use median for numerical indicators, average for aggregated indicators
-        if (indicator.aggregatedIndicator) {
-          nederlandScale = calcAverage(
-            $allNeighbourhoodsJSONData.features
-              .map((neighbourhood) => getNumericalValue(neighbourhood, indicator))
-              .filter((value) => value !== null)
-          )
-        } else {
-          nederlandScale = calcMedian(
-            $allNeighbourhoodsJSONData.features
-              .map((neighbourhood) => getNumericalValue(neighbourhood, indicator))
-              .filter((value) => value !== null)
-          )
-        }
-      }
-    }
+    // Zelfde reden als hierboven: geen terugval op de landelijke set meer.
 
     // Municipality scale calculation - ORIGINAL VALUES
     const gemeenteScale = ($municipalitySelection !== null && $allNeighbourhoodsJSONData && $allNeighbourhoodsJSONData.features && storeValue) ? (() => {

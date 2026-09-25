@@ -23,6 +23,7 @@
   import { formatDutchNumber } from "$lib/utils/valueRetrieval.js"
 
   import { createEventDispatcher } from "svelte"
+  import { warnMissingNederlandValue } from "$lib/utils/warnMissingNederlandValue"
 
   export let graphWidth
   export let indicatorHeight
@@ -65,7 +66,9 @@
     nederlandValues = null // Reset first
 
     if ($nederlandAggregates && $nederlandAggregates.aggregates) {
-      let cached = $nederlandAggregates.aggregates[indicator.title];
+      // dutchTitle: het precalculate-script gebruikt de Nederlandse titel als sleutel.
+      // indicator.title is in de Engelse versie vertaald en matcht dan nooit.
+      let cached = $nederlandAggregates.aggregates[indicator.dutchTitle || indicator.title];
 
       if (cached !== undefined) {
         // Check for BEB variants first
@@ -89,13 +92,12 @@
       }
     }
 
-    // FALLBACK: If no cached value and we have all neighborhoods data, calculate client-side
-    // This handles AHN version switches and other cases where cache doesn't have the exact variant
-    if (!nederlandValues && $allNeighbourhoodsJSONData && yearSelection) {
-      const calculated = calcPercentagesForEveryClass(indicator, $allNeighbourhoodsJSONData, "Nederland");
-      if (calculated && typeof calculated === 'object' && Object.keys(calculated).length > 1) {
-        nederlandValues = calculated;
-      }
+    // Geen terugval meer op allNeighbourhoodsJSONData: die bevat sinds de
+    // per-gemeente-lading buiten de gekozen gemeente geen waarden. De berekening
+    // deelde dan door alle 14.574 buurten terwijl er een vijftigtal gevuld waren,
+    // wat een stille en veel te lage Nederland-balk opleverde.
+    if (!nederlandValues) {
+      warnMissingNederlandValue(indicator, 'BarPlot')
     }
   }
   let barPlotData = []
