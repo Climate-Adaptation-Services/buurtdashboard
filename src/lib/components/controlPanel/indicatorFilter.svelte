@@ -10,6 +10,45 @@
   let searchText = ''
   let isOpen = false
   let dropdownRef
+  let inputContainerRef
+
+  // Plaatsing van het keuzemenu. Standaard onder het invoerveld; is daar te weinig
+  // ruimte - wat op lagere laptopschermen gebeurt omdat het filter laag in het
+  // controlepaneel staat - dan ernaast. Niet op mobiel: daar is geen breedte over.
+  const MENU_MAX_HEIGHT = 300
+  const MENU_MIN_HEIGHT = 200
+  const SIDE_PLACEMENT_MIN_WIDTH = 800
+  const VIEWPORT_MARGIN = 12
+
+  let placeMenuBeside = false
+  let menuMaxHeight = MENU_MAX_HEIGHT
+  let menuTopOffset = 0
+
+  function updateMenuPlacement() {
+    if (!isOpen || !inputContainerRef || typeof window === "undefined") return
+
+    const rect = inputContainerRef.getBoundingClientRect()
+    const spaceBelow = window.innerHeight - rect.bottom - VIEWPORT_MARGIN
+    const wideEnough = window.innerWidth >= SIDE_PLACEMENT_MIN_WIDTH
+
+    placeMenuBeside = wideEnough && spaceBelow < MENU_MIN_HEIGHT
+
+    if (placeMenuBeside) {
+      // Uitlijnen op het invoerveld, maar omhoog schuiven als het menu anders
+      // onder de onderkant van het scherm zou uitkomen
+      const available = window.innerHeight - rect.top - VIEWPORT_MARGIN
+      menuMaxHeight = Math.min(MENU_MAX_HEIGHT, window.innerHeight - 2 * VIEWPORT_MARGIN)
+      menuTopOffset = Math.min(0, available - menuMaxHeight)
+    } else {
+      menuMaxHeight = Math.min(MENU_MAX_HEIGHT, Math.max(MENU_MIN_HEIGHT, spaceBelow))
+      menuTopOffset = 0
+    }
+  }
+
+  $: if (isOpen) {
+    // tick niet nodig: we meten het invoerveld, dat staat er al
+    updateMenuPlacement()
+  }
 
   // Tooltip state
   let hoveredTooltip = null
@@ -220,7 +259,7 @@
   {/if}
 
   <!-- Input area with selected tags -->
-  <div class="input-container" on:click={() => isOpen = true}>
+  <div class="input-container" bind:this={inputContainerRef} on:click={() => isOpen = true}>
     {#each $indicatorsSelection as selected}
       <span class="tag">
         {selected}
@@ -241,7 +280,11 @@
 
   <!-- Dropdown menu -->
   {#if isOpen}
-    <div class="dropdown-menu">
+    <div
+      class="dropdown-menu"
+      class:beside={placeMenuBeside}
+      style="max-height: {menuMaxHeight}px; {placeMenuBeside ? `top: ${menuTopOffset}px;` : ''}"
+    >
       {#each filteredCategories as { category, indicators }}
         {#if showCategoryHeaders}
           <div class="category-header">{category}</div>
@@ -353,7 +396,6 @@
     top: 100%;
     left: 0;
     width: 100%;
-    max-height: 300px;
     overflow-y: auto;
     background: white;
     border: 1px solid #ccc;
@@ -361,6 +403,15 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     z-index: 1000;
     margin-top: 2px;
+  }
+
+  /* Naast het invoerveld wanneer er onder te weinig ruimte is */
+  .dropdown-menu.beside {
+    top: 0;
+    left: 100%;
+    width: 330px;
+    margin-top: 0;
+    margin-left: 8px;
   }
 
   .category-header {

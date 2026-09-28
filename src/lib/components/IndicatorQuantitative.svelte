@@ -25,7 +25,6 @@
   export let graphWidth
   export let graphHeight
   export let overviewHeight
-  export let indicatorAttribute = getIndicatorAttribute(indicator, indicator.attribute)
 
   $: indicatorPlottitle = $AHNSelecties[indicator.title] === "Difference" ? indicator.plottitle.replace("%", "% verandering") : indicator.plottitle
 </script>

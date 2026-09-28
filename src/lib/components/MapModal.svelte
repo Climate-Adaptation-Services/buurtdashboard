@@ -260,22 +260,4 @@
     color: inherit;
   }
 
-  /* Onder 900px past de kaart niet meer naast de grafiek */
-  @media (max-width: 900px) {
-    .map-modal {
-      height: auto;
-    }
-
-    .modal-main {
-      flex-direction: column;
-    }
-
-    .chart-column {
-      width: 100% !important;
-    }
-
-    .map-side {
-      height: 55vh;
-    }
-  }
 </style>

@@ -6,7 +6,6 @@
   import { sanitizeClassName } from "$lib/utils/sanitizeClassName.js"
 
   export let indicator
-  export let graphWidth
 
   let indicatorInfoPosition
   let isRightmost = false
@@ -27,12 +26,12 @@
     // Get the actual indicator element width from the DOM
     const indicatorElement = infoElement.closest('.indicator-div')
     const indicatorRect = indicatorElement ? indicatorElement.getBoundingClientRect() : null
-    const actualIndicatorWidth = indicatorRect ? indicatorRect.width : (graphWidth || 400)
+    // 400 als noodgreep wanneer de meting mislukt; graphWidth was hier altijd undefined
+    const actualIndicatorWidth = indicatorRect ? indicatorRect.width : 400
 
     // Position flush with indicator borders:
     // - If rightmost: position at left edge (0px) flush with left side
     // - If not rightmost: position at indicator's right edge (actualIndicatorWidth) to be flush
-    const tooltipWidth = 300
     indicatorInfoPosition = isRightmost ? 0 : actualIndicatorWidth
   })
 

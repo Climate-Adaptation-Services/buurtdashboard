@@ -46,10 +46,6 @@
     padding-bottom: 10px;
   }
 
-  .category {
-    margin: 0;
-    color: #bb9012;
-  }
 
   .title {
     padding: 5px 15px;

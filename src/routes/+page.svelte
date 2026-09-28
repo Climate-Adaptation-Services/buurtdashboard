@@ -60,7 +60,6 @@
   // GeoJSON data will be loaded client-side for progressive rendering
   let municipalityGeoJson = null
   let neighbourhoodGeoJson = null
-  let geoJSONData = [null, null]
   let isLoadingGeoJSON = true
 
   // Load GeoJSON data client-side after component mounts
@@ -97,8 +96,6 @@
         const neighbourhoodBuffer = await neighbourhoodResponse.arrayBuffer()
         const decompressed = gunzipSync(new Uint8Array(neighbourhoodBuffer))
         neighbourhoodGeoJson = JSON.parse(strFromU8(decompressed))
-
-        geoJSONData = [municipalityGeoJson, neighbourhoodGeoJson]
 
         // Lege CSV: de geometrie wordt verwerkt, de waarden volgen per gemeente
         await prepareJSONData([municipalityGeoJson, neighbourhoodGeoJson], [], {
@@ -151,11 +148,9 @@
 
 
   // Buurtgegevens van de gekozen gemeente bijladen zodra er een selectie is
-  let municipalityDataError = null
   $: if (browser && $municipalitySelection && $allNeighbourhoodsJSONData) {
     ensureMunicipalityDataLoaded($municipalitySelection).catch((error) => {
       console.error('Kon gemeentegegevens niet laden:', error)
-      municipalityDataError = error
     })
   }
 
@@ -198,9 +193,9 @@
 
 <div class="container" style="justify-content:{screenWidth < 800 ? 'center' : 'left'}">
   <div class="sidebar" style="position:{screenWidth > 800 ? 'fixed' : 'relative'}">
-    <div class="control-panel"><ControlPanel {indicatorsSelection} {allIndicators} on:openTutorial={() => showTutorial = true} /></div>
+    <div class="control-panel"><ControlPanel {allIndicators} on:openTutorial={() => showTutorial = true} /></div>
     <div class="map" class:dordrecht={$configStore.categoryPath === '-dordrecht'} bind:clientWidth={mapWidth} bind:clientHeight={mapHeight}>
-      <Map JSONdata={geoJSONData} {mapWidth} {mapHeight} mapType={"main map"} isLoading={isLoadingGeoJSON} />
+      <Map {mapWidth} {mapHeight} mapType={"main map"} />
     </div>
   </div>
 
@@ -221,7 +216,7 @@
 
   <Tooltip />
 
-  <Modal show={$modal} style="position:absolute; left:0"></Modal>
+  <Modal show={$modal}></Modal>
 
   <!-- Eigen instantie voor de uitvergrote kaart: bredere window, eigen context-key -->
   <Modal
@@ -262,18 +257,7 @@
     min-width: min(360px, 100%);
   }
 
-  .title {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: #35575a;
-    color: white;
-  }
 
-  h1 {
-    margin-bottom: 5px;
-  }
 
   .control-panel {
     flex: 3;

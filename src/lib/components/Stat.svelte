@@ -6,7 +6,6 @@
   import { getNoDataReason, isSpecificNoDataReason, formatDutchNumber } from "$lib/utils/valueRetrieval.js"
   import { t } from "$lib/i18n/translate.js"
 
-  export let graphWidth
   export let indicatorHeight
   export let indicator
   export let medianValueOtherYear

@@ -13,7 +13,6 @@
   export let shapeOpacity
   export let indicatorValueColorscale
   export let projection
-  export let leafletMap = null
   export let isDifferenceMode
   export let AHNSelecties
 

@@ -11,7 +11,7 @@
     allMunicipalitiesJSONData,
   } from "$lib/stores"
   // Note: Using per-indicator year selection via indicatorStore (not global)
-  import { geoMercator, geoPath, select, selectAll } from "d3"
+  import { geoMercator, geoPath, selectAll } from "d3"
   import { t } from "$lib/i18n/translate.js"
   import MapPath from "./MapPath.svelte"
   import { onMount, tick } from "svelte"
@@ -53,17 +53,12 @@
   export let mapType
   export let indicatorValueColorscale
   export let indicator
-  export let isLoading = false
   // Maat en marge van het info-icoon op de indicatorkaart. Standaard 28px met 6px
   // marge, gelijk aan ExpandMapButton in de tegel; de modal zet hem op 24px zodat
   // hij onder het sluitkruisje uitlijnt.
   export let infoIconSize = 28
   export let infoIconInset = 6
-  // "right" (tegel, naast de vergrootknop) of "left" (modal, weg van het kruisje)
-  export let infoIconAlign = "right"
-
-  $: infoIconX =
-    infoIconAlign === "left" ? infoIconInset : mapWidth - infoIconInset - infoIconSize
+  $: infoIconX = mapWidth - infoIconInset - infoIconSize
 
   // Define projection and path variables
   let projection
@@ -230,7 +225,6 @@
               {shapeOpacity}
               {indicatorValueColorscale}
               {projection}
-              {leafletMap}
               {isDifferenceMode}
               AHNSelecties={$AHNSelecties}
             />
@@ -270,7 +264,6 @@
           {shapeOpacity}
           {indicatorValueColorscale}
           {projection}
-          leafletMap={null}
           {isDifferenceMode}
           AHNSelecties={$AHNSelecties}
         />
@@ -315,18 +308,12 @@
   }
 
   /* Enable pointer events for paths and info icons */
-  svg path {
-    pointer-events: auto;
-  }
 
   svg image[href="info.png"] {
     pointer-events: auto;
   }
 
   /* Ensure wheel events can pass through shapes to Leaflet map */
-  svg path:hover {
-    fill-opacity: 1 !important;
-  }
 
   .leaflet-background {
     position: absolute;
@@ -425,11 +412,6 @@
 
   /* CSS transitions for smooth shape animation during reprojection */
   /* Different transition speeds for zoom vs pan operations */
-  svg circle {
-    transition:
-      cx 0.21s ease-out,
-      cy 0.21s ease-out;
-  }
 
   svg image {
     transition:
@@ -438,11 +420,6 @@
   }
 
   /* Fast transitions during panning */
-  svg.panning circle {
-    transition:
-      cx 0.05s ease-out,
-      cy 0.05s ease-out;
-  }
 
   svg.panning image {
     transition:

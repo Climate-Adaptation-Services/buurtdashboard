@@ -37,19 +37,6 @@
 </div>
 
 <style>
-  .header {
-    /* margin-top: 50px; */
-    display: flex;
-    flex-direction: column;
-  }
-  h1 {
-    color: #ff3e00;
-    font-size: 48px;
-    font-weight: 400;
-    margin-top: 0;
-    margin-bottom: 10px;
-    text-align: center;
-  }
 
   .spinner-item {
     width: 100%;
@@ -67,35 +54,5 @@
   .spinner-title {
     position: absolute;
     bottom: 100px;
-  }
-  .btn {
-    margin-top: 20px;
-    padding: 10px 30px;
-    border-radius: 30px;
-    display: block;
-    margin: 0 auto;
-    color: #fff;
-    background-color: rgba(255, 62, 0, 1);
-    transition: all 0.15s ease;
-    box-sizing: border-box;
-    text-transform: uppercase;
-    text-decoration: none;
-  }
-  .btn:hover {
-    background-color: rgba(255, 62, 0, 0.8);
-  }
-  input[type="color"] {
-    display: none;
-  }
-  .color-value {
-    display: block;
-    margin-bottom: 10px;
-  }
-  .color-picker {
-    position: sticky;
-    margin-left: 35px;
-    top: 50px;
-    display: inline-block;
-    z-index: 1;
   }
 </style>

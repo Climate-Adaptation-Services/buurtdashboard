@@ -11,7 +11,6 @@
   export let indicator
   export let bodyHeight
   export let indicatorValueColorscale
-  export let graphWidth
   export let isLoading = false
 
   let mapWidth
@@ -23,9 +22,9 @@
 
 <div class="indicator-body" style="height: {bodyHeight}px">
   {#if indicator.numerical === true}
-    <IndicatorQuantitative {indicator} {graphWidth} {overviewHeight} {graphHeight} {indicatorValueColorscale} {bodyHeight} {isLoading} />
+    <IndicatorQuantitative {indicator} {overviewHeight} {graphHeight} {indicatorValueColorscale} {bodyHeight} />
   {:else}
-    <IndicatorCategorical {indicator} {graphWidth} {graphHeight} {indicatorValueColorscale} {isLoading} />
+    <IndicatorCategorical {indicator} {graphHeight} {indicatorValueColorscale} />
   {/if}
   <div class="indicator-map" style="height:{mapHeight}px; position: relative;" bind:clientWidth={mapWidth}>
     {#if $municipalitySelection !== null}

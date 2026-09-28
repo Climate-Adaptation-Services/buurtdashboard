@@ -347,7 +347,9 @@ function calculateNederlandAggregate(indicator, jsonData, year = null, bebOption
 
     // Special handling for indicators stored as decimals - multiply by 100
     // The CSV stores values as decimals (0.10667 = 10.667%), but client expects percentages
-    const indicatorsNeedingConversion = ['Gevoelstemperatuur', 'Waterdiepte bij hevige bui'];
+    // 'Waterdiepte bij hevige bui' bestaat niet meer; de nieuwe perc_*cm-kolommen
+    // staan al in 0-100 en hoeven geen conversie
+    const indicatorsNeedingConversion = ['Gevoelstemperatuur'];
     if (indicatorsNeedingConversion.includes(indicator.title)) {
       Object.keys(result).forEach(className => {
         if (result[className] !== null && result[className] !== undefined) {

@@ -379,7 +379,6 @@
         {indicatorValueColorscale}
         {indicator}
         medianValueOtherYear={medianValuesDictOtherYear["medianValueNederland"]}
-        graphWidth={statsWidth}
         indicatorHeight={bodyHeight * 0.2 * 0.25}
         regio="Nederland"
         medianValue={medianValuesDict["medianValueNederland"]}
@@ -395,7 +394,6 @@
       {indicatorValueColorscale}
       {indicator}
       medianValueOtherYear={medianValuesDictOtherYear["medianValueGemeente"]}
-      graphWidth={statsWidth}
       indicatorHeight={bodyHeight * 0.2 * 0.25}
       regio="Gemeente"
       medianValue={medianValuesDict["medianValueGemeente"]}
@@ -410,7 +408,6 @@
       {indicatorValueColorscale}
       {indicator}
       medianValueOtherYear={medianValuesDictOtherYear["medianValueBuurt"]}
-      graphWidth={statsWidth}
       indicatorHeight={bodyHeight * 0.2 * 0.25}
       regio="Buurt"
       medianValue={medianValuesDict["medianValueBuurt"]}
@@ -426,7 +423,6 @@
       {indicatorValueColorscale}
       {indicator}
       medianValueOtherYear={medianValuesDictOtherYear["medianValueWijktype"]}
-      graphWidth={statsWidth}
       indicatorHeight={bodyHeight * 0.2 * 0.25}
       regio="Wijktype"
       medianValue={medianValuesDict["medianValueWijktype"]}

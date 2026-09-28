@@ -391,10 +391,6 @@
   }
   
   /* Use CSS custom properties for highlighting instead of reactive DOM attributes */
-  .inner-chart circle[data-neighbourhood] {
-    stroke: none;
-    stroke-width: 3;
-  }
   
   /* This selector won't work as intended - need a different approach */
 </style>
