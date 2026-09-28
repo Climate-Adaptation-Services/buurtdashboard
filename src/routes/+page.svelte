@@ -240,6 +240,10 @@
     flex: 1;
     display: flex;
     flex-direction: column;
+    /* position: fixed maakt hier een eigen stapelcontext. Zonder z-index valt die
+       terug op de DOM-volgorde en komen de indicatoren erbovenop - waardoor het
+       keuzemenu van het indicatorfilter erachter verdween. */
+    z-index: 10;
     /* min() zodat de sidebar nooit breder wordt dan het scherm: een vaste 400px
        liep op iPhones van 375 en 390px buiten beeld */
     min-width: min(400px, 100%);
