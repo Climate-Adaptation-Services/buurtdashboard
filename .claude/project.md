@@ -240,6 +240,35 @@ function isValidValue(value) {
 }
 ```
 
+### Lege cel = 0% bij Maximale overstromingsdiepte
+
+**Probleem**: de Nederland-balkjes van "Maximale overstromingsdiepte" telden op tot
+92,9%, alsof vrijwel heel Nederland kan overstromen.
+
+**Oorzaak**: `calcAverage` in `precalculate-nederland.js` deelt door het aantal
+*gevulde* rijen. In deze vier kolommen (`P_tot20cm`, `P_20tot50cm`, `P_50tot200cm`,
+`P_200pluscm`) staat geen enkele 0 - een diepteklasse die niet voorkomt is een lege
+cel. Elke klasse kreeg daardoor zijn eigen noemer (8.080 / 8.113 / 9.497 / 6.812 van
+de 14.574 buurten) en 4.263 buurten (29%) die helemaal niet kunnen overstromen vielen
+volledig uit de berekening. De gemeentebalk deelde al wel door alle buurten
+(`calcPercentagesForEveryClass.js`), dus NL en gemeente stonden met twee verschillende
+definities in dezelfde grafiek.
+
+**Oplossing**: `EMPTY_MEANS_ZERO` in `scripts/precalculate-nederland.js` - voor die
+indicatoren deelt `calcAverageOverAll` door *alle* features. Som werd 51,8%, gelijk
+aan de methode van de gemeentebalk.
+
+**Let op**: zet een indicator hier alleen in als leeg aantoonbaar 0 betekent. Bij
+"Waterdiepte bij korte extreme regen" tellen de klassen binnen de gevulde buurten al
+precies op tot 100 - daar is leeg wel degelijk 'onbekend' en zou deze behandeling het
+cijfer onterecht omlaag trekken.
+
+**Nog open**: de resterende 48,2% ("niet overstroombaar") heeft geen eigen klasse en
+is in de grafiek een naamloos gat. Dat zou een `_REST_`-klasse kunnen worden, maar dat
+vraagt een wijziging in het Config Portal en aanpassing van de uitzondering voor
+'Maximale overstromingsdiepte' in `calcPercentagesForEveryClass.js` en van de
+`hasAnyValidData`-guard in `getMostCommonClass.js`.
+
 ### _REST_ Class Calculation for Aggregated Indicators
 
 **Problem**: "10% en 30% regel" indicator showed "Voldoet niet" as null because `_REST_` is a special marker, not a CSV column.

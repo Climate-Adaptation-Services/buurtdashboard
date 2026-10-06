@@ -23,6 +23,17 @@ import { feature } from 'topojson-client';
 // Houd in sync met NO_DATA_CODES in src/lib/utils/valueRetrieval.js
 const NO_DATA_VALUES = [-9999, -9995, -9991, -99997];
 
+// Geaggregeerde indicatoren waarbij een lege cel '0%' betekent en niet 'onbekend'.
+// Bij 'Maximale overstromingsdiepte' heeft een buurt die niet kan overstromen lege
+// cellen in alle vier de dieptekolommen - in de hele dataset staat geen enkele 0.
+// Zonder deze lijst krijgt elke klasse zijn eigen noemer (alleen de buurten waar die
+// diepte voorkomt: 8.080 / 8.113 / 9.497 / 6.812 van de 14.574) en telden de
+// Nederland-balkjes op tot 92,9% terwijl 29% van de buurten helemaal niet kan
+// overstromen. Met alle buurten als noemer wordt dat 51,8%.
+// Zet een indicator hier alleen in als leeg aantoonbaar 0 betekent; bij de meeste
+// indicatoren is leeg wel degelijk 'onbekend' en zou dit het cijfer omlaag trekken.
+const EMPTY_MEANS_ZERO = ['Maximale overstromingsdiepte'];
+
 // Helper to check if a value is valid (not null, undefined, NaN, or a "no data" marker)
 function isValidValue(value) {
   if (value === null || value === undefined || value === '' || isNaN(value)) {
@@ -91,6 +102,20 @@ function calcAverage(array) {
 
   const sum = OnlyNumbers.reduce((acc, val) => acc + val, 0);
   return sum / OnlyNumbers.length;
+}
+
+// Gemiddelde met een vaste noemer: lege cellen tellen als 0 in plaats van dat ze
+// uit de berekening vallen. Zie EMPTY_MEANS_ZERO.
+function calcAverageOverAll(array, totalCount) {
+  if (!totalCount || totalCount <= 0) {
+    return null;
+  }
+
+  const sum = (array || [])
+    .filter(d => d !== null && d !== undefined && !isNaN(+d) && isFinite(+d))
+    .reduce((acc, val) => acc + (+val), 0);
+
+  return sum / totalCount;
 }
 
 // Setup indicators (simplified from setupIndicators.js)
@@ -310,6 +335,8 @@ function calculateNederlandAggregate(indicator, jsonData, year = null, bebOption
     // For aggregated indicators, calculate average for each class
     const result = {};
     let restClassName = null; // Track if there's a _REST_ class to calculate
+    // Lege cel = 0%: deel door alle buurten, niet alleen door de gevulde rijen
+    const emptyMeansZero = EMPTY_MEANS_ZERO.includes(indicator.title);
 
     Object.keys(indicator.classes).forEach(className => {
       const classColumnName = indicator.classes[className];
@@ -334,7 +361,9 @@ function calculateNederlandAggregate(indicator, jsonData, year = null, bebOption
         })
         .filter(v => v !== null);
 
-      result[className] = calcAverage(values);
+      result[className] = emptyMeansZero
+        ? calcAverageOverAll(values, features.length)
+        : calcAverage(values);
     });
 
     // Calculate _REST_ class as 100 - sum of other classes
