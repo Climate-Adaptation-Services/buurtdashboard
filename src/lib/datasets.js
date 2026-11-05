@@ -5,8 +5,10 @@
 // Current dataset version
 export const DATASET_VERSION = '20260922';
 
-// Config Portal base URL (always uses Vercel production)
-export const CONFIG_PORTAL_URL = "https://buurtdashboard-config-portal.vercel.app";
+// Config Portal base URL. Eigen domein i.p.v. *.vercel.app: overheidsnetwerken
+// (o.a. het ministerie van I&W) blokkeren vercel.app, waardoor de config-fetch
+// daar faalde en het dashboard een "500 Internal Error" toonde.
+export const CONFIG_PORTAL_URL = "https://buurtdashboard-config.cas-platform.nl";
 
 // S3 base URL for preconnect
 export const S3_BASE_URL = "https://buurtdashboard-data.fsn1.your-objectstorage.com";
